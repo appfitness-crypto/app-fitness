@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.appfitness.app",
+      "sha256_cert_fingerprints": [
+        "85:CB:0F:69:A9:FA:78:DB:85:1C:36:F7:86:29:D4:1D:E2:55:62:50:4C:A3:0C:C5:7C:08:C0:DB:7F:87:2D:16"
+      ]
+    }
+  }
+]
