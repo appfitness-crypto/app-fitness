@@ -17,7 +17,7 @@ Los archivos de `js/` son scripts normales y comparten el mismo ámbito global; 
 
 | Archivo | Qué contiene |
 |---|---|
-| `js/config.js` | **Datos de cada gimnasio** (nombre, color, siglas, ubicación, Firebase, IA). Se carga primero. |
+| `js/config.js` | **Datos de la app** (nombre, color, siglas, Firebase, IA). Se carga primero. |
 | `js/00-conocimiento.js` | Catálogo: ejercicios, clases grupales, enfoques musculares (KB_*). |
 | `js/01-datos-firebase.js` | Datos, autenticación (staff y socios), bandeja de cambios sin conexión y fusión de datos. |
 | `js/02-mensualidad.js` | Fecha de renovación, tolerancia de 3 días y estado activo/inactivo. |
@@ -45,8 +45,9 @@ Los archivos de `js/` son scripts normales y comparten el mismo ámbito global; 
 | `js/24-filosofia-entrenador.js` | Huella visual y quiz de filosofía del entrenador. |
 | `js/25-entrenadores-admin.js` | Alta, edición y baja de entrenadores (con Firebase Authentication). |
 | `js/26-nutricion-staff.js` | Nutriólogo asignado y menús. |
-| `js/27-seleccion-entrenador.js` | Elegir entrenador al registrarse; avisos (toast). |
+| `js/27-seleccion-entrenador.js` | Último paso de la evaluación: código de entrenador (opcional); avisos (toast). |
 | `js/28-pwa.js` | Service worker y auto-actualización. |
+| `js/36-cuentas.js` | Cuentas con correo (cliente y entrenador), código del entrenador y entrada a la app. Ver `docs/CLIENTE-ENTRENADOR.md`. |
 | `js/99-arranque.js` | Ajustes finales que dependen de funciones de varios módulos (siempre al final). |
 
 ## Agregar o cambiar algo

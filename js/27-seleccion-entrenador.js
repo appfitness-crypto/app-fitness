@@ -13,30 +13,39 @@ function qNextToTrainer(returnFn, prevScreenId){
   mostrarSub('qqT');
 }
 function qTrainerBack(){ mostrarSub(window._trainerPrevScreen); }
+// Último paso: código del entrenador (opcional). Sin código, la app arma el plan con la filosofía del sistema.
+let qtModo='', qtValidado=null;
+function qtReiniciar(){ qtModo=''; qtValidado=null; const c=document.getElementById('qt-codigo'); if(c) c.value=''; const r=document.getElementById('qt-codigo-res'); if(r) r.textContent=''; }
 function renderTrainerPicker(){
-  const cont=document.getElementById('trainer-picker-list'); if(!cont) return;
-  let list = listaEntrenadoresParaElegir();
-  cont.innerHTML='';
-  if(!list.length){
-    cont.innerHTML='<div style="padding:20px;text-align:center;color:var(--mu);font-size:var(--fs-xs);font-family:var(--fb)">Por ahora el sistema asignará tu entrenador automáticamente.</div>';
-    document.getElementById('qbT').disabled=false;
-    return;
-  }
-  list.forEach(t=>{
-    const sel = qAnswers.entrenadorId===t.id;
-    const tieneFilo = t.filosofia && t.filosofia.tagline;
-    const div=document.createElement('div');
-    div.style.cssText='display:flex;gap:12px;align-items:center;padding:14px;border:1px solid '+(sel?'var(--v)':'var(--b)')+';border-radius:12px;margin-bottom:10px;cursor:pointer;background:'+(sel?'var(--gl2)':'var(--gl)');
-    div.innerHTML=`
-      <div style="flex:1;min-width:0">
-        <div style="font-family:var(--fd);font-size:var(--fs-xl)">${esc(t.nombre)}</div>
-        <div style="font-size:var(--fs-xs);${tieneFilo?'color:var(--v);font-style:italic':'color:var(--mu)'};margin:2px 0 6px;line-height:1.35">${tieneFilo?'"'+esc(t.filosofia.tagline)+'"':'Aún sin filosofía propia — seguirá el enfoque general del club'}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px">${(t.especialidades||[]).map(s=>`<span style="font-size:var(--fs-2xs);text-transform:uppercase;letter-spacing:.03em;background:var(--in-bg2);border:1px solid var(--b);color:var(--mu);padding:2px 7px;border-radius:20px">${esc(s)}</span>`).join('')}</div>
-      </div>
-      <div style="flex:0 0 auto;${tieneFilo?'':'opacity:.3'}">${svgRadarFilosofia(t.filosofia,58)}</div>`;
-    div.onclick=()=>{ qAnswers.entrenadorId=t.id; qAnswers.entrenadorNombre=t.nombre; renderTrainerPicker(); document.getElementById('qbT').disabled=false; };
-    cont.appendChild(div);
-  });
+  ['qt-sin','qt-con'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.toggle('sel', id==='qt-'+qtModo); });
+  const w=document.getElementById('qt-codigo-wrap'); if(w) w.style.display = qtModo==='con' ? 'block' : 'none';
+  const b=document.getElementById('qbT'); if(b) b.disabled = !(qtModo==='sin' || (qtModo==='con' && qtValidado));
+}
+function qtElegir(modo){
+  qtModo=modo;
+  if(modo==='sin'){ qAnswers.entrenadorId=''; qAnswers.entrenadorNombre=''; }
+  else if(qtValidado){ qAnswers.entrenadorId=qtValidado.id; qAnswers.entrenadorNombre=qtValidado.nombre; }
+  renderTrainerPicker();
+  if(modo==='con') setTimeout(()=>document.getElementById('qt-codigo')?.focus(),100);
+}
+function qtCodigoCambio(){
+  qtValidado=null; qAnswers.entrenadorId=''; qAnswers.entrenadorNombre='';
+  document.getElementById('qt-codigo-res').textContent='';
+  renderTrainerPicker();
+}
+async function qtValidarCodigo(){
+  const res=document.getElementById('qt-codigo-res');
+  const v=document.getElementById('qt-codigo').value;
+  if(!navigator.onLine || !fbListo){ res.style.color='var(--r)'; res.textContent='Necesitas internet para validar el código.'; return; }
+  res.style.color='var(--mu)'; res.textContent='Buscando…';
+  try{
+    const ent=await entPorCodigo(v);
+    if(!ent){ res.style.color='var(--r)'; res.textContent='No encontramos ese código. Revísalo con tu entrenador.'; return; }
+    qtValidado=ent; qAnswers.entrenadorId=ent.id; qAnswers.entrenadorNombre=ent.nombre;
+    res.style.color='var(--v)';
+    res.textContent='✓ Entrenarás con '+ent.nombre+(ent.filosofia&&ent.filosofia.tagline?' — "'+ent.filosofia.tagline+'"':'');
+    renderTrainerPicker();
+  }catch(e){ res.style.color='var(--r)'; res.textContent=cuentaMsgError(e); }
 }
 function qConfirmTrainerAndGenerate(){
   if(window._trainerReturnFn) window._trainerReturnFn();

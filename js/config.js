@@ -1,25 +1,27 @@
-/* ═══ CONFIGURACIÓN DEL GIMNASIO ═══
-   Este es el ÚNICO archivo que cambia de un gimnasio a otro (junto con manifest.json, icons/, video/ y img/hero).
+/* ═══ CONFIGURACIÓN DE LA APP ═══
+   Nombre, marca, Firebase e IA de la app pública (clientes directos y entrenadores).
+   Para cambiar el nombre: edita "Identidad" aquí y name/short_name en manifest.json.
    Se carga primero, antes que cualquier otro módulo.
    Guía paso a paso: docs/ALTA-GIMNASIO.md */
 const GYM = {
   // ── Identidad ──
-  nombre:      'Club Campestre Aguascalientes',   // nombre completo (inicio, PDF, avisos, IA)
-  nombreCorto: 'Gimnasio CC',                      // nombre al instalar la app y textos cortos
-  titulo:      'FITNESS SYSTEM PRO — Club Campestre', // título de la pestaña del navegador
-  descripcion: 'Rutinas personalizadas, evolución y nutrición — Club Campestre Aguascalientes',
-  siglas:      'CC',      // insignia del PDF
-  siglasCiudad:'AGS.',    // texto pequeño bajo las siglas del PDF
-  prefijoId:   'CC',      // los socios nuevos salen como #CC-1234
-  pdf: { linea1:'CLUB CAMPESTRE', linea2:'AGUASCALIENTES' },   // encabezado del PDF de la rutina
+  nombre:      'Fitness System Pro',               // nombre completo (inicio, PDF, avisos, IA)
+  nombreCorto: 'Fitness Pro',                      // nombre al instalar la app y textos cortos
+  titulo:      'Fitness System Pro',               // título de la pestaña del navegador
+  descripcion: 'Tu plan de entrenamiento personalizado, con o sin entrenador',
+  siglas:      'FS',      // insignia del PDF
+  siglasCiudad:'PRO',     // texto pequeño bajo las siglas del PDF
+  prefijoId:   'FS',      // los clientes nuevos salen como #FS-AB12C
+  pdf: { linea1:'FITNESS SYSTEM', linea2:'PRO' },   // encabezado del PDF de la rutina
 
   // ── Color principal (opcional) ──
   // null = colores originales. Ejemplo: '#1E90FF'. Cambia botones, acentos y gráficas de los temas Día y Noche.
   colorPrincipal: null,
   colorBarra: null,     // opcional: color de la barra del navegador del celular (ej. '#0A0E13')
 
-  // ── Ubicación del gimnasio (solo para clasificar check-ins en el resumen del director) ──
-  geofence: { lat: 21.8818, lng: -102.2871, radioM: 200 },
+  // ── Ubicación de un gimnasio (opcional). null = la app no pide la ubicación ──
+  // Ejemplo: { lat: 21.8818, lng: -102.2871, radioM: 200 }
+  geofence: null,
 
   // ── Firebase de ESTE gimnasio (Configuración del proyecto → Tus apps → Configuración) ──
   firebase: {
@@ -35,9 +37,9 @@ const GYM = {
   // ── IA de rutinas (Cloudflare Worker). Vacío = plantillas locales ──
   aiEndpoint: '',
 
-  // ── Aviso de privacidad (lo revisa el gimnasio con su asesor legal) ──
+  // ── Aviso de privacidad (revísalo con tu asesor legal antes de publicar) ──
   privacidad: {
-    responsable: 'Club Campestre Aguascalientes',  // razón social o nombre de quien trata los datos
+    responsable: '',    // tu nombre o razón social (vacío = el nombre de la app)
     domicilio: '',      // domicilio completo del responsable (recomendado)
     correo: '',         // correo para derechos ARCO (recomendado)
     telefono: '',

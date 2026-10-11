@@ -8,37 +8,7 @@ const STAFF_USERS={};   // v8.2: el acceso del staff vive en Firebase Authentica
 let staffRol='entrenador', staffActivoId=null, staffFilterVal='todos', staffSearchVal='';
 let staffActivoEntId=null; // id del entrenador logueado (para su propia filosofía)
 
-function staffSelRol(el,rol){
-  document.querySelectorAll('#staff-roles .opt').forEach(o=>o.classList.remove('sel'));
-  el.classList.add('sel'); staffRol=rol;
-  // ya no se autocompletan usuarios demo
-}
-async function doStaffLogin(){
-  const u=document.getElementById('staff-user').value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
-  const pw=document.getElementById('staff-pass').value;
-  const err=document.getElementById('staff-err');
-  const fallo=(t)=>{ err.textContent=t||'Usuario o contraseña incorrectos.'; err.style.display='block'; };
-  if(!u||!pw){ fallo(); return; }
-  if(!fbListo||!fbAuth){ fallo('Necesitas conexión a internet para entrar al panel.'); return; }
-  const btn=document.querySelector('#s-staff .btn-main, .btn-main[onclick="doStaffLogin()"]');
-  if(btn) btn.disabled=true;
-  try{
-    const cred=await fbAuth.signInWithEmailAndPassword(u+STAFF_DOM, pw);
-    const rol=await fbCargarRol(cred.user);
-    if(!rol){ await fbAuth.signOut(); fallo('Esta cuenta no tiene permiso para el panel. Habla con el director.'); return; }
-    err.style.display='none';
-    guardarSesion({tipo:'staff', user:u});
-    if(rol==='coordinador'){ fbEscuchar(); }
-    fbEscucharStaff();
-    entrarComoStaff(u, rol);
-    document.getElementById('staff-pass').value='';
-  }catch(e){
-    const c=String(e&&e.code||'');
-    if(c.includes('network')) fallo('Sin conexión con Firebase. Revisa tu internet.');
-    else if(c.includes('too-many')) fallo('Demasiados intentos. Espera unos minutos e inténtalo de nuevo.');
-    else fallo();
-  }finally{ if(btn) btn.disabled=false; }
-}
+// El acceso al panel es con correo y contraseña desde "Ya tengo cuenta" (js/36-cuentas.js → doEntrar)
 
 let STAFF_CONTENT_VACIO=null;
 function staffLimpiarPanel(){
@@ -90,7 +60,7 @@ function actualizarFbBadge(){
 // ── Menú del staff (celular): agrupa las acciones que antes ocupaban toda la barra ──
 function staffMenu(){
   const grupos=[
-    ['Personas',['btn-mi-filosofia','btn-ver-ent','btn-nuevo-ent','btn-conocimiento']],
+    ['Personas',['btn-mi-codigo','btn-mi-filosofia','btn-ver-ent','btn-nuevo-ent','btn-conocimiento']],
     ['Datos y sistema',['btn-resumen','btn-apariencia','btn-lugares','btn-respaldo','btn-firebase','btn-reset']],
     ['Cuenta',['btn-logout']]
   ];
@@ -105,6 +75,7 @@ function staffMenu(){
       return `<button type="button" class="sm-row${cls}" onclick="staffMenuIr('${b.id}')"><span class="sm-ic">${ic}</span><span>${esc(lb)}</span></button>`;
     }).join('');
   });
+  document.getElementById('staff-menu-title').textContent='Menú';
   document.getElementById('staff-menu-body').innerHTML=html;
   document.getElementById('modal-staff-menu').classList.add('open');
 }

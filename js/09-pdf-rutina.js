@@ -116,7 +116,7 @@ async function generarPDFRutina(){
     const items=[
       {icon:iconTarget, label:'OBJETIVO', val:s.objetivo||'—'},
       {icon:iconPerson, label:'SOCIO', val:s.nombre||'—'},
-      {icon:iconCoach, label:'ENTRENADOR', val:(s.asignado&&s.asignado!=='—')?s.asignado:'Club Campestre'},
+      {icon:iconCoach, label:'ENTRENADOR', val:(s.asignado&&s.asignado!=='—')?s.asignado:'Plan de la app'},
       {icon:iconCalendar, label:'DESDE', val:fmtFecha(s.fechaRegistro)},
     ];
     items.forEach((it,i)=>{
@@ -146,7 +146,7 @@ async function generarPDFRutina(){
   function drawPageFooter(){
     doc.setDrawColor(...GRAY_LINE); doc.setLineWidth(0.2); doc.line(marginX,284,pageW-marginX,284);
     doc.setFont('helvetica','normal'); doc.setFontSize(6.7); doc.setTextColor(...MUTED);
-    doc.text('Club Campestre Aguascalientes · Fitness System Pro', marginX, 289);
+    doc.text(GYM.nombre, marginX, 289);
     doc.text('Pág. '+doc.internal.getCurrentPageInfo().pageNumber, pageW-marginX, 289, {align:'right'});
   }
 
@@ -415,7 +415,7 @@ function renderCuerpo(){
 
   function av3dHTML(conMedidas){
     return `
-    <div class="logo-progreso"><video src="video/logo-progreso.mp4" autoplay muted loop playsinline disablepictureinpicture aria-label="Gimnasio CC"></video></div>`;
+    <div class="logo-progreso"><video src="video/logo-progreso.mp4" autoplay muted loop playsinline disablepictureinpicture aria-label="${esc(GYM.nombreCorto)}"></video></div>`;
   }
 
   if(!ultima){

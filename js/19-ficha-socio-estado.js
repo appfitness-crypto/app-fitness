@@ -228,7 +228,7 @@ function membBloqueoSocio(s){
   if(e.estado!=='inactivo') return false;
   return true;
 }
-const MEMB_MSG_INACTIVO='Usuario inactivo. Tu mensualidad no está vigente; acércate a recepción o con tu entrenador para renovarla y volver a entrar a tu plan.';
+const MEMB_MSG_INACTIVO='Usuario inactivo. Tu mensualidad no está vigente; habla con tu entrenador para renovarla y volver a entrar a tu plan.';
 function membAvisoSocioHTML(s){
   const e=membEstado(s);
   if(e.estado==='tolerancia') return `<div class="memb-aviso-socio"><b>⏳ Tu mensualidad venció el ${esc(fmtFC(e.vence))}</b>Tienes ${e.restan} día${e.restan===1?'':'s'} (hasta el ${esc(fmtFC(e.limite))}) para renovar y continuar con tu programa. Después tu acceso quedará inactivo.</div>`;

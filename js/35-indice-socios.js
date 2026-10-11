@@ -11,7 +11,7 @@
    - Si el índice aún no existe (primera vez), el director lo construye una sola vez. ═══ */
 
 const LS_IDX='fitkiosk_indice_v1';
-let IDX=(()=>{ try{ return JSON.parse(localStorage.getItem(LS_IDX))||{}; }catch(e){ return {}; } })();
+let IDX={};   // se llena con lo que Firebase permite ver a la cuenta actual (no se reutiliza el de otra cuenta)
 let IDX_LITE={};                  // fichas ligeras ya armadas (se rehacen cuando cambia el índice)
 let idxFallo=false;               // sin permiso para /indice (reglas sin publicar): el panel vuelve al modo anterior
 let idxEscuchando=false, idxConstruyendo=false, idxTodosCargados=false, idxAvisoReglas=false;
@@ -94,12 +94,16 @@ function idxEscucharStaff(){
   if(idxFallo){ return; }
   if(idxEscuchando || !fbListo || !fbEsStaff) return;
   idxEscuchando=true;
-  fbDB.ref('/indice').on('value', snap=>{
-    const raw=snap.val();
-    if(!raw){ idxConstruir(); return; }
+  idxRef=idxRefStaff();
+  idxRef.on('value', snap=>{
+    let raw=snap.val();
+    if(!raw){
+      if(fbRolDB==='coordinador'){ idxConstruir(); return; }
+      raw={};                                   // entrenador sin clientes todavía
+    }
     IDX=raw; IDX_LITE={}; idxGuardarLocal();
     const n=Object.keys(raw).length;
-    if(DB.config && DB.config.totalSocios!==n){ DB.config.totalSocios=n; fbDB.ref('/config/totalSocios').set(n).catch(()=>{}); }
+    if(fbRolDB==='coordinador' && DB.config && DB.config.totalSocios!==n){ DB.config.totalSocios=n; fbDB.ref('/config/totalSocios').set(n).catch(()=>{}); }
     if(document.getElementById('s-panel')?.classList.contains('on')) staffRenderList();
   }, e=>{
     idxEscuchando=false; console.warn('indice',e);
@@ -109,8 +113,13 @@ function idxEscucharStaff(){
     }
   });
 }
+// El director ve todo; cada entrenador solo lo de sus clientes (las reglas de Firebase solo permiten esa consulta)
+let idxRef=null;
+function idxRefStaff(){ return fbRolDB==='coordinador' ? fbDB.ref('/indice') : fbDB.ref('/indice').orderByChild('e').equalTo(fbUid); }
+function sociosRefStaff(){ return fbRolDB==='coordinador' ? fbDB.ref('/socios') : fbDB.ref('/socios').orderByChild('entrenadorId').equalTo(fbUid); }
 function idxDetener(){
-  try{ if(idxEscuchando) fbDB.ref('/indice').off('value'); }catch(e){}
+  try{ if(idxEscuchando && idxRef) idxRef.off('value'); }catch(e){}
+  idxRef=null;
   idxEscuchando=false;
   idxEscuchas.splice(0).forEach(c=>{ try{ fbDB.ref('/socios/'+c).off('value'); }catch(e){} });
   idxCargando.clear(); idxTodosCargados=false;
@@ -171,7 +180,7 @@ function idxCargarSocio(code){
 function idxCargarTodos(){
   if(idxTodosCargados || !fbListo || !fbDB) return Promise.resolve();
   showToast('Cargando todos los expedientes…');
-  return fbDB.ref('/socios').once('value').then(sn=>{
+  return sociosRefStaff().once('value').then(sn=>{
     const todos=sn.val()||{};
     Object.keys(todos).forEach(c=>{ if(!idxCompleto(DB.socios[c]) || !tienePendiente(c)) idxAplicarSocio(c, todos[c]); });
     idxTodosCargados=true;

@@ -42,6 +42,13 @@ async function fbCrearAccesoStaff(usuario, pass, rol){
   await fbDB.ref('/roles/'+uid).set(rol||'entrenador');
   return uid;
 }
+async function entRegistrarPerfilPorDirector(uid, nombre, extra){
+  const codigo=await entReservarCodigo(uid);
+  const ent=Object.assign({ id:uid, uid, rol:'entrenador', nombre, especialidades:[], funciones:['entrenamiento'], filosofia:null, codigo, creado:fechaISO(new Date()) }, extra||{});
+  DB.entrenadores[uid]=ent;
+  dbSaveEntrenador(uid);
+  return ent;
+}
 function msgErrorAcceso(e){
   const c=String(e&&e.code||e&&e.message||'');
   if(c.includes('email-already-in-use')) return 'Ese usuario ya tiene cuenta en Firebase. Elige otro usuario o bórrala en Authentication.';
@@ -55,10 +62,12 @@ async function crearNuevoEntrenadorFinal(usuario,pass,nombre,funciones){
   let uid;
   try{ uid=await fbCrearAccesoStaff(usuario,pass,'entrenador'); }
   catch(e){ const er=document.getElementById('ne-err'); er.textContent='❌ '+msgErrorAcceso(e); er.style.display='block'; return; }
-  DB.entrenadores[usuario]={ id:usuario, uid, rol:'entrenador', nombre, especialidades, funciones, filosofia:null };
-  dbSaveEntrenador(usuario);
+  // Misma forma que un entrenador que se registra solo: llave = uid y código para sus clientes
+  let ent;
+  try{ ent=await entRegistrarPerfilPorDirector(uid, nombre, {especialidades, funciones}); }
+  catch(e){ const er=document.getElementById('ne-err'); er.textContent='❌ '+msgErrorAcceso(e); er.style.display='block'; return; }
   cerrarModalNuevoEnt();
-  showToast('✓ '+(entTipoLabel(DB.entrenadores[usuario]))+' creado: usuario "'+usuario+'"'+(funciones.includes('entrenamiento')?' — al iniciar sesión le pedirá su filosofía':''));
+  showToast('✓ '+entTipoLabel(ent)+' creado: entra con el usuario "'+usuario+'" · código para clientes '+ent.codigo);
   // Refrescar la vista si estamos parados en la lista de Entrenadores, para ver la tarjeta nueva de inmediato
   if(staffRol==='coordinador' && document.getElementById('staff-content')?.innerHTML.includes('Entrenadores')) abrirEntrenadores();
 }

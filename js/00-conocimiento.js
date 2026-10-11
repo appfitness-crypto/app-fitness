@@ -2,7 +2,7 @@
    Fitness System Pro · módulo cargado por index.html en orden (script clásico: comparte el ámbito global).
    No cambia la lógica: es el mismo código que antes vivía dentro de index.html. ═══ */
 /* ════════════════════════════════════════════════════════════════════
-   BASE DE CONOCIMIENTO — Fitness System Pro · Club Campestre Aguascalientes
+   BASE DE CONOCIMIENTO — Fitness System Pro
    ────────────────────────────────────────────────────────────────────
    Es la "biblioteca" que consulta el sistema al crear rutinas:
    · PRINCIPIOS  → la metodología del club (va en cada prompt de IA)

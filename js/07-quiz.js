@@ -9,6 +9,7 @@ const Q_TOTAL = 11;
 const qAnswers = {nombre:'',objetivo:'',nivel:'',dias:4,edad:35,genero:'',peso:75,estatura:170,zonas:[],limitaciones:[],cardio:'',disciplina:'',lesionRehab:'',entrenadorId:'',entrenadorNombre:'',diasSemana:[],tomaClases:'',clasesSel:[],clasesGrupales:[]};
 
 function startQuiz(){
+  if(typeof qtReiniciar==='function') qtReiniciar();
   qStep=1; showQStep(1); go('s-quiz');
 }
 function showQStep(n){
