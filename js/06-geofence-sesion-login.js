@@ -95,18 +95,11 @@ window.addEventListener('load', ()=>{
   Object.values(DB.socios||{}).forEach(asegurarLogs);
   kbAplicarExtra();
 
-  // ── Config real del proyecto gym-campestre ──
-  const FIREBASE_CONFIG = {
-  "apiKey": "AIzaSyADuYE2LQ_XxmjoapBAmtQ0U3IDgVjABZA",
-  "authDomain": "gym-campestre.firebaseapp.com",
-  "databaseURL": "https://gym-campestre-default-rtdb.firebaseio.com",
-  "projectId": "gym-campestre",
-  "storageBucket": "gym-campestre.firebasestorage.app",
-  "messagingSenderId": "355837299373",
-  "appId": "1:355837299373:web:8f117a8a4d850ab9081424",
-  "measurementId": "G-Z0PPSRKV1L"
-};
-  const cfg = leerFbConfig() || FIREBASE_CONFIG;
+  // ── Config de Firebase: la de js/config.js manda ──
+  // Si el dispositivo tenía guardada la de otro proyecto (p. ej. el anterior), se reemplaza.
+  const FIREBASE_CONFIG = GYM.firebase;
+  const guardada = leerFbConfig();
+  const cfg = (guardada && guardada.projectId === FIREBASE_CONFIG.projectId) ? guardada : FIREBASE_CONFIG;
   guardarFbConfig(cfg); // Guardar para siguientes cargas
   const ok = initFirebase(cfg);
   if(!ok){
