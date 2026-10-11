@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Fitness System Pro</title>
+<meta name="theme-color" content="#EEF1F4">
+<meta name="color-scheme" content="light dark">
+<script>(function(){var t="light";try{t=localStorage.getItem("fitkiosk_theme");if(t!=="light"&&t!=="dark"&&t!=="light2"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}}catch(e){t="light";}document.documentElement.setAttribute("data-theme",t);})();</script>
+<meta name="description" content="Rutinas personalizadas, evolución y nutrición">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<!-- iOS: instalable desde Safari → Compartir → Agregar a inicio -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gimnasio">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" crossorigin="anonymous"></script>
+<script src="js/config.js"></script>
+<script src="js/00-conocimiento.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet" crossorigin="anonymous">
+<link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="gRing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--ring1,var(--v))"/><stop offset="1" style="stop-color:var(--ring2,var(--v2))"/></linearGradient>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5a1 1 0 0 0 1 1H10v-5.5h4v5.5h3.5a1 1 0 0 0 1-1V10"/></symbol>
+    <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 1.5M9.5 3h5"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.2 2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.6 6.8 19.4l1-5.9L3.5 9.4l5.9-.8z"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".8"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 8 2.3c0 5.9-8 10.6-8 10.6z"/></symbol>
+    <symbol id="i-stretch" viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="1.8"/><path d="M12 7.5v5.5M6 9.5l6 1.5 6-1.5M12 13l-3.5 7M12 13l3.5 7"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 21h4"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1-4 4-6 7.5-6s6.5 2 7.5 6"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4.5a3 3 0 0 0 3.5 4M16 6h3.5a3 3 0 0 1-3.5 4M12 13v4M8.5 20.5h7M10 17h4"/></symbol>
+    <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3.5s6 6.3 6 10.5a6 6 0 0 1-12 0c0-4.2 6-10.5 6-10.5z"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3.5 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8"/></symbol>
+    <symbol id="i-ruler" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="8" rx="2"/><path d="M7 8v3M11 8v4M15 8v3M19 8v4"/></symbol>
+    <symbol id="i-scale" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 9.5a4.5 4.5 0 0 1 7 0M12 9.8l1.5-1.5"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 5 6v5.5c0 4.3 2.9 7.6 7 9 4.1-1.4 7-4.7 7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></symbol>
+    <symbol id="i-chevl" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
+    <symbol id="i-dumbbell" viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol>
+    <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.8-9.8M17 6l3 3M14 9l2 2"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></symbol>
+    <symbol id="i-moonz" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M2.5 12h4l2-6 3 12 2-9 1.5 3h6.5"/></symbol>
+    <symbol id="i-medical" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3.5 21 19.5H3z"/><path d="M12 9.5v4.5M12 16.8h.01"/></symbol>
+    <symbol id="i-mars" viewBox="0 0 24 24"><circle cx="10" cy="14" r="6"/><path d="M14.2 9.8 20 4M14 4h6v6"/></symbol>
+    <symbol id="i-venus" viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="M12 15v6M9 19h6"/></symbol>
+    <symbol id="i-leg" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><path d="M12 7.5v9"/><circle cx="12" cy="19" r="2.5"/></symbol>
+    <symbol id="i-racquet" viewBox="0 0 24 24"><ellipse cx="9.5" cy="8.5" rx="5.5" ry="6.5"/><path d="M9.5 15v6M6.5 21h6"/></symbol>
+    <symbol id="i-golf" viewBox="0 0 24 24"><path d="M6 3v18"/><path d="M6 4l9 3-9 3z"/><circle cx="17" cy="19.5" r="1.8"/></symbol>
+    <symbol id="i-swim" viewBox="0 0 24 24"><path d="M2 15c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0"/><path d="M2 19c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0"/><circle cx="14" cy="6" r="1.8"/><path d="M9 10l4-2 3 2 3-1"/></symbol>
+    <symbol id="i-ball" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5 15.5 10l-1.3 4H9.8L8.5 10zM12 7.5V4M15.5 10l3-1M8.5 10l-3-1M10.2 14l-2 3.3M13.8 14l2 3.3"/></symbol>
+    <symbol id="i-basketball" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17M5.5 6c3 2 3 10 0 12M18.5 6c-3 2-3 10 0 12"/></symbol>
+    <symbol id="i-belt" viewBox="0 0 24 24"><path d="M2 12h6M16 12h6"/><rect x="8" y="9" width="8" height="6" rx="1.5"/><path d="M11 9v6M13 9v6"/></symbol>
+  </defs>
+</svg>
+
+
+<!-- ═══ S-FBSETUP: Configurar Firebase ═══ -->
+<div class="sc" id="s-fbsetup">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:20px;">
+    <div class="login-card" style="max-width:460px;border-color:color-mix(in srgb,var(--g) 35%,transparent);">
+      <div class="lc-tag" style="color:var(--g)">Configuración inicial</div>
+      <div class="lc-title">Conectar<br>Firebase</div>
+      <div class="lc-sub" style="margin-bottom:14px">Pega aquí el objeto firebaseConfig de tu proyecto.<br>Solo se hace una vez — queda guardado en el dispositivo.</div>
+      <div style="margin-bottom:10px;padding:11px 14px;background:var(--in-bg);border:1px solid var(--b);border-radius:10px;">
+        <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:6px">CÓMO OBTENERLO:</div>
+        <div style="font-size:var(--fs-xs);color:var(--mu);font-family:var(--fb);line-height:1.8">
+          1. console.firebase.google.com<br>
+          2. Tu proyecto → Configuración del proyecto<br>
+          3. Agrega una app web → copia el firebaseConfig<br>
+          4. Pégalo completo abajo (con llaves { })
+        </div>
+      </div>
+      <textarea id="fb-config-input" rows="9" value='' placeholder='{\n  "apiKey": "...",
+  "authDomain": "...",
+  "databaseURL": "https://TU-PROYECTO-rtdb.firebaseio.com",
+  "projectId": "...",
+  "storageBucket": "...",
+  "messagingSenderId": "...",
+  "appId": "..."
+}' style="width:100%;padding:11px 13px;background:var(--in-bg);border:1px solid var(--b);border-radius:10px;font-family:var(--fb);font-size:var(--fs-xs);color:var(--tx);outline:none;resize:vertical;caret-color:var(--v);line-height:1.5;margin-bottom:10px;"></textarea>
+      <div class="login-err" id="fb-err">Configuración inválida. Verifica que incluya apiKey y databaseURL.</div>
+      <button class="btn-main" onclick="fbConectar()">Conectar</button>
+      <div style="margin-top:12px;text-align:center;font-size:var(--fs-xs);color:var(--mu);font-family:var(--fb);line-height:1.7">
+        <svg class="ico" aria-hidden="true" style="width:14px;height:14px;vertical-align:-2px"><use href="#i-shield"/></svg> Tu config se guarda solo en este dispositivo.<br>
+        No contiene contraseñas — solo identifica tu proyecto.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOPBAR GLOBAL ═══ -->
+<div class="tb" id="global-tb">
+  <div class="tb-logo">
+    <div class="lm"><video autoplay muted loop playsinline disablepictureinpicture poster="icons/icon-192.png" data-gym-label aria-label="Gimnasio"><source src="video/logo-animado.mp4" type="video/mp4"><source src="video/logo-animado.webm" type="video/webm"></video></div>
+    <div style="display:flex;flex-direction:column;gap:1px;min-width:0">
+      <div class="ln">Fitness <span class="ln-x">System </span>Pro</div>
+      <div class="tb-stat"><span id="inicio-socios">—</span> socios activos</div>
+    </div>
+  </div>
+  <div class="tb-r">
+    <div id="tb-actions" class="tb-actions"></div>
+    <span class="theme-slot"></span>
+  </div>
+</div>
+
+<!-- ═══ S0: INICIO ═══ -->
+<div class="sc on" id="s-inicio">
+  <div class="wc-hero">
+    <div class="wc-pic" id="wc-hero-pic"></div>
+    <div class="wc-ov"></div>
+    <div class="wc-top">
+      <div class="ib-tag on-photo wc-gym"><span class="dot-pulse"></span><span data-gym="nombre"></span></div>
+      <div class="ib-tag on-photo wc-fecha"><span id="inicio-fecha">—</span></div>
+    </div>
+    <div class="wc-tx">
+      <h1 id="wc-titular">Entrena con un plan<br>hecho para ti.</h1>
+      <p id="wc-sub">Tu rutina, tu evolución y tu nutrición en un solo lugar.</p>
+    </div>
+  </div>
+  <div class="inicio-wrap">
+    <div class="inicio-cards">
+      <button type="button" class="ic ic-ya" onclick="go('s-login')">
+        <div class="ic-icon"><svg class="ico" aria-hidden="true"><use href="#i-key"/></svg></div>
+        <span class="ic-txt"><span class="ic-label">Ya soy socio</span><span class="ic-sub">Entra con tu código de 4 dígitos.</span></span>
+        <span class="ic-arrow"><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+      </button>
+      <button type="button" class="ic ic-nuevo" onclick="startQuiz()">
+        <div class="ic-icon"><svg class="ico" aria-hidden="true"><use href="#i-spark"/></svg></div>
+        <span class="ic-txt"><span class="ic-label">Soy nuevo</span><span class="ic-sub">Responde la evaluación y genera tu plan.</span></span>
+        <span class="ic-arrow"><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+      </button>
+    </div>
+    <div>
+      <button type="button" class="staff-link" onclick="go('s-staff-login')">Acceso entrenador / director <svg class="ico" aria-hidden="true" style="width:14px;height:14px"><use href="#i-arrow"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S1: LOGIN SOCIO ═══ -->
+<div class="sc" id="s-login">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px;">
+    <div class="login-card">
+      <div class="lc-tag">Acceso socio</div>
+      <div class="lc-title">Ingresa<br>tu código</div>
+      <div class="lc-sub">4 dígitos, entregados al activar tu plan.</div>
+      <div class="code-row">
+        <input type="text" maxlength="1" class="cd" id="cd1" inputmode="numeric" aria-label="Dígito 1 de 4">
+        <input type="text" maxlength="1" class="cd" id="cd2" inputmode="numeric" aria-label="Dígito 2 de 4">
+        <input type="text" maxlength="1" class="cd" id="cd3" inputmode="numeric" aria-label="Dígito 3 de 4">
+        <input type="text" maxlength="1" class="cd" id="cd4" inputmode="numeric" aria-label="Dígito 4 de 4">
+      </div>
+      <div class="code-hint">Te lo asigna tu entrenador.</div>
+      <button class="btn-main" onclick="doLogin()">Entrar</button>
+      <div class="login-err" id="login-err">No encontramos ese código. Revisa tus 4 dígitos.</div>
+      <button type="button" class="btn-back-link" onclick="go('s-inicio')">← <span>Volver al inicio</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S2: QUIZ (11 pasos) ═══ -->
+<div class="sc" id="s-quiz">
+  <div class="quiz-top">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="btn-bk" onclick="quizBack()">←</div>
+      <div class="quiz-step">Paso <span id="qstep">1</span> de 11</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px"><span class="theme-slot"></span><div class="tb-btn danger" onclick="go('s-inicio')">Cancelar</div></div>
+  </div>
+  <div class="prog-track"><div class="prog-fill" id="qprog" style="width:9%"></div></div>
+
+  <div class="quiz-body">
+
+    <!-- Q1 nombre -->
+    <div class="q-sc on" id="qq1">
+      <div class="q-tag">Paso 01 / 11</div>
+      <div class="q-title">¿Cuál es<br>tu nombre?</div>
+      <div class="q-sub">Así personalizamos tu experiencia.</div>
+      <input type="text" class="ti" id="qi-nom" placeholder="Nombre completo..." maxlength="60">
+      <div class="nav-row"><button class="btn-next" onclick="qNext(1)">Continuar</button></div>
+    </div>
+
+    <!-- Q2 objetivo -->
+    <div class="q-sc" id="qq2">
+      <div class="q-tag">Paso 02 / 11</div>
+      <div class="q-title">¿Cuál es<br>tu objetivo?</div>
+      <div class="q-sub">Define la estructura de tu rutina y tu plan de nutrición.</div>
+      <div class="opts">
+        <div class="opt" onclick="qSelObjetivo(this,'GANAR MÚSCULO')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-dumbbell"/></svg></div><div class="ol">Ganar músculo</div><div class="os">Hipertrofia y fuerza</div></div>
+        <div class="opt" onclick="qSelObjetivo(this,'PERDER PESO')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-flame"/></svg></div><div class="ol">Perder peso</div><div class="os">Recomposición corporal</div></div>
+        <div class="opt" onclick="qSelObjetivo(this,'FUERZA PURA')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-bolt"/></svg></div><div class="ol">Fuerza pura</div><div class="os">Fuerza máxima</div></div>
+        <div class="opt" onclick="qSelObjetivo(this,'RESISTENCIA')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-pulse"/></svg></div><div class="ol">Resistencia</div><div class="os">Cardio y aguante</div></div>
+        <div class="opt" onclick="qSelObjetivo(this,'FLEXIBILIDAD')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-stretch"/></svg></div><div class="ol">Flexibilidad</div><div class="os">Movilidad y elasticidad</div></div>
+        <div class="opt" onclick="qSelObjetivo(this,'RENDIMIENTO DEPORTIVO')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></div><div class="ol">Rendimiento deportivo</div><div class="os">Para tu disciplina del club</div></div>
+        <div class="opt" onclick="qSelObjetivo(this,'REHABILITACIÓN')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-medical"/></svg></div><div class="ol">Rehabilitación</div><div class="os">Recuperar una lesión</div></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="qPrev(2)">←</div><button class="btn-next" disabled id="qb2" onclick="qNext(2)">Continuar</button></div>
+    </div>
+
+    <!-- Q2b DISCIPLINA (solo rendimiento deportivo) -->
+    <div class="q-sc" id="qq2b">
+      <div class="q-tag">Disciplina</div>
+      <div class="q-title">¿Qué deporte<br>practicas?</div>
+      <div class="q-sub">Tu plan se adaptará a las demandas de tu disciplina en el club.</div>
+      <div class="opts" id="disc-opts" style="grid-template-columns:1fr 1fr;max-height:none"></div>
+      <div class="nav-row"><div class="btn-prev" onclick="qPrev2b()">←</div><button class="btn-next" disabled id="qb2b" onclick="qNext2b()">Continuar</button></div>
+    </div>
+
+    <!-- Q2b2 ENTORNO (dónde entrena para el deporte) -->
+    <div class="q-sc" id="qq2b2">
+      <div class="q-tag">Disciplina · entorno</div>
+      <div class="q-title">¿Dónde vas<br>a entrenar?</div>
+      <div class="q-sub">Adaptamos los ejercicios al equipo que tengas disponible.</div>
+      <div class="opts" style="grid-template-columns:1fr">
+        <div class="opt" onclick="qSelEntorno(this,'gimnasio')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-dumbbell"/></svg></div><div class="ol">Gimnasio</div><div class="os">Con aparatos, pesas y máquinas</div></div>
+        <div class="opt" onclick="qSelEntorno(this,'funcional')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-stretch"/></svg></div><div class="ol">Funcional / salón</div><div class="os">Sin equipo — peso corporal y bandas</div></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="mostrarSub('qq2b')">←</div><button class="btn-next" disabled id="qb2b2" onclick="qNext2b2()">Continuar</button></div>
+    </div>
+
+    <!-- Q2c LESIÓN (rehabilitación) -->
+    <div class="q-sc" id="qq2c">
+      <div class="q-tag">Rehabilitación</div>
+      <div class="q-title">¿Qué zona<br>vas a recuperar?</div>
+      <div class="q-sub">Protocolo por fases. Guía de apoyo, no sustituye la valoración médica.</div>
+      <div class="opts" id="lesion-opts" style="grid-template-columns:1fr 1fr;max-height:none"></div>
+      <div class="nav-row"><div class="btn-prev" onclick="qPrev2c()">←</div><button class="btn-next" disabled id="qb2c" onclick="qNext2c()">Continuar</button></div>
+    </div>
+
+    <!-- G1 edad -->
+    <div class="q-sc" id="qqg1">
+      <div class="q-tag">Rehabilitación · edad</div>
+      <div class="q-title">¿Qué edad<br>tienes?</div>
+      <div class="q-sub">El protocolo se adapta a tu etapa. En crecimiento (8-14 años) hay cuidados extra en las placas de crecimiento.</div>
+      <div class="slider-wrap">
+        <div class="s-val"><span id="gedad-v">30</span><span class="s-unit">años</span></div>
+        <input type="range" id="qr-gedad" min="6" max="80" value="30" oninput="document.getElementById('gedad-v').textContent=this.value">
+        <div class="s-labels"><span>6</span><span>20</span><span>40</span><span>60</span><span>80</span></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="mostrarSub('qq2c')">←</div><button class="btn-next" onclick="gNext(1)">Continuar</button></div>
+    </div>
+
+    <!-- G1b datos para el cálculo de nutrición -->
+    <div class="q-sc" id="qqg1b">
+      <div class="q-tag">Rehabilitación · datos</div>
+      <div class="q-title">Un par de datos<br>más</div>
+      <div class="q-sub">Para calcular tu plan de nutrición junto con la rehabilitación (Mifflin-St Jeor).</div>
+      <div class="opts s3" style="margin-bottom:14px">
+        <div class="opt" onclick="gSel(this,'genero','Masculino')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-mars"/></svg></div><div class="ol" style="font-size:var(--fs-md)">Masculino</div></div>
+        <div class="opt" onclick="gSel(this,'genero','Femenino')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-venus"/></svg></div><div class="ol" style="font-size:var(--fs-md)">Femenino</div></div>
+      </div>
+      <div class="slider-wrap">
+        <div class="s-val"><span id="gpeso-v">75</span><span class="s-unit">kg</span></div>
+        <input type="range" id="qr-gpeso" min="30" max="180" value="75" oninput="document.getElementById('gpeso-v').textContent=this.value">
+        <div class="s-labels"><span>30</span><span>65</span><span>100</span><span>140</span><span>180</span></div>
+      </div>
+      <div class="slider-wrap">
+        <div class="s-val"><span id="gest-v">170</span><span class="s-unit">cm</span></div>
+        <input type="range" id="qr-gest" min="100" max="210" value="170" oninput="document.getElementById('gest-v').textContent=this.value">
+        <div class="s-labels"><span>100</span><span>135</span><span>170</span><span>190</span><span>210</span></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="mostrarSub('qqg1')">←</div><button class="btn-next" disabled id="gb1b" onclick="gNext1b()">Continuar</button></div>
+    </div>
+
+    <!-- G2 ¿desde cuándo? -->
+    <div class="q-sc" id="qqg2">
+      <div class="q-tag">Rehabilitación · inicio</div>
+      <div class="q-title">¿Desde cuándo<br>te duele?</div>
+      <div class="q-sub">El tiempo de evolución ayuda a definir la intensidad del protocolo.</div>
+      <div class="opts s3">
+        <div class="opt" onclick="gSel(this,'inicioDolor','Reciente (menos de 1 semana)')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-spark"/></svg></div><div class="ol" style="font-size:var(--fs-base)">Reciente</div><div class="os">Menos de 1 semana</div></div>
+        <div class="opt" onclick="gSel(this,'inicioDolor','Algunas semanas')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-calendar"/></svg></div><div class="ol" style="font-size:var(--fs-base)">Semanas</div><div class="os">2 a 6 semanas</div></div>
+        <div class="opt" onclick="gSel(this,'inicioDolor','Desde hace meses')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-clock"/></svg></div><div class="ol" style="font-size:var(--fs-base)">Meses</div><div class="os">Dolor persistente</div></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="mostrarSub('qqg1b')">←</div><button class="btn-next" disabled id="gb2" onclick="gNext(2)">Continuar</button></div>
+    </div>
+
+    <!-- G3 ¿cuándo aparece el dolor? -->
+    <div class="q-sc" id="qqg3">
+      <div class="q-tag">Rehabilitación · cuándo duele</div>
+      <div class="q-title">¿Cuándo<br>aparece el dolor?</div>
+      <div class="q-sub">Marca todas las que apliquen. Nos dice qué movimientos evitar en las primeras fases.</div>
+      <div id="gcuando-opts" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div>
+      <div class="nav-row"><div class="btn-prev" onclick="mostrarSub('qqg2')">←</div><button class="btn-next" onclick="gNext(3)">Continuar</button></div>
+    </div>
+
+    <!-- G4 intensidad del dolor -->
+    <div class="q-sc" id="qqg4">
+      <div class="q-tag">Rehabilitación · intensidad</div>
+      <div class="q-title">¿Qué tan fuerte<br>es el dolor hoy?</div>
+      <div class="q-sub">Del 1 (molestia leve) al 10 (muy intenso). Define en qué fase empezar.</div>
+      <div class="slider-wrap">
+        <div class="s-val"><span id="gdolor-v">3</span><span class="s-unit">/ 10</span></div>
+        <input type="range" id="qr-gdolor" min="1" max="10" value="3" oninput="document.getElementById('gdolor-v').textContent=this.value">
+        <div class="s-labels"><span>1</span><span>3</span><span>5</span><span>7</span><span>10</span></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="mostrarSub('qqg3')">←</div><button class="btn-next" onclick="gNext(4)">Continuar</button></div>
+    </div>
+
+    <!-- G5 días de entrenamiento -->
+    <div class="q-sc" id="qqg5">
+      <div class="q-tag">Rehabilitación · entrenamiento</div>
+      <div class="q-title">¿Qué días<br>entrenas tu disciplina?</div>
+      <div class="q-sub">Marca tus días de entrenamiento. El plan te dirá qué trabajar los OTROS días sin afectar la zona.</div>
+      <div id="gclases-opts" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px"></div>
+      <div class="q-sub" style="margin-top:6px">¿Sigues entrenando con la molestia?</div>
+      <div class="opts" style="grid-template-columns:1fr 1fr">
+        <div class="opt" onclick="gSel(this,'sigueEntrenando','Sí, con adaptaciones')"><div class="ol" style="font-size:var(--fs-md)">Sí, adapta</div><div class="os">Entrena con cuidado</div></div>
+        <div class="opt" onclick="gSel(this,'sigueEntrenando','No, está en pausa')"><div class="ol" style="font-size:var(--fs-md)">En pausa</div><div class="os">Descansa por ahora</div></div>
+      </div>
+      <div class="q-sub" style="margin-top:14px">En los días que no son de rehabilitación directa, ¿qué prefieres?</div>
+      <div class="opts" style="grid-template-columns:1fr 1fr">
+        <div class="opt" onclick="gSel(this,'soloTerapia','no')"><div class="ol" style="font-size:var(--fs-sm)">Fortalecer también</div><div class="os">Zonas que no cargan la lesión (recomendado)</div></div>
+        <div class="opt" onclick="gSel(this,'soloTerapia','si')"><div class="ol" style="font-size:var(--fs-sm)">Solo terapia</div><div class="os">Movilidad enfocada en la zona lesionada</div></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="mostrarSub('qqg4')">←</div><button class="btn-next" onclick="gNext(5)">Continuar</button></div>
+    </div>
+
+    <!-- G6 ¿tiene diagnóstico médico? -->
+    <div class="q-sc" id="qqg6">
+      <div class="q-tag">Rehabilitación · diagnóstico</div>
+      <div class="q-title">¿Ya tienes un<br>diagnóstico médico?</div>
+      <div class="q-sub">Esto es clave para tu seguridad. Define si puedes entrenar o si conviene enfocarte solo en recuperar.</div>
+      <div class="opts" style="grid-template-columns:1fr">
+        <div class="opt" onclick="gSelDiag(this,'si')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg></div><div class="ol">Sí, ya me valoró un doctor</div><div class="os">Trabajamos sobre el diagnóstico</div></div>
+        <div class="opt" onclick="gSelDiag(this,'no')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-warn"/></svg></div><div class="ol">No, aún no me ve un doctor</div><div class="os">Priorizamos recuperar con seguridad</div></div>
+      </div>
+      <div id="gdiag-detalle" style="display:none;margin-top:12px">
+        <div class="q-sub" style="margin-bottom:8px">¿Qué indicó el médico? (opcional, ayuda a personalizar)</div>
+        <textarea id="qi-gdiag" rows="3" placeholder="Ej: tendinitis rotuliana, reposo 2 semanas, puede fortalecer sin impacto..." style="width:100%;padding:12px;background:var(--in-bg);border:1px solid var(--b);border-radius:12px;font-family:var(--fb);font-size:var(--fs-sm);color:var(--tx);outline:none;resize:vertical"></textarea>
+        <div class="q-sub" style="margin:10px 0 8px">¿El médico autorizó que sigas entrenando?</div>
+        <div class="opts" style="grid-template-columns:1fr 1fr">
+          <div class="opt" onclick="gSel(this,'medicoAutoriza','Sí, autorizó clases')"><div class="ol" style="font-size:var(--fs-sm)">Sí autorizó</div></div>
+          <div class="opt" onclick="gSel(this,'medicoAutoriza','No, indicó pausa')"><div class="ol" style="font-size:var(--fs-sm)">Indicó pausa</div></div>
+        </div>
+      </div>
+      <div id="gdiag-aviso" style="display:none;margin-top:12px;padding:12px 14px;background:color-mix(in srgb,var(--r) 6%,transparent);border:1px solid color-mix(in srgb,var(--r) 25%,transparent);border-radius:12px">
+        <div style="font-size:var(--fs-2xs);color:var(--r);font-family:var(--fb);line-height:1.7">
+          ⚠️ <b>Sin diagnóstico y con dolor, la recomendación es enfocarse SOLO en rehabilitación</b> y pausar el entrenamiento hasta que un médico o fisioterapeuta te valore. Seguir entrenando con dolor sin saber la causa puede empeorar la lesión. El plan se generará en modo <b>rehabilitación total</b>.
+        </div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="mostrarSub('qqg5')">←</div><button class="btn-next" disabled id="gb6" onclick="gNext(6)">Generar plan</button></div>
+    </div>
+
+    <!-- Q3 nivel -->
+    <div class="q-sc" id="qq3">
+      <div class="q-tag">Paso 03 / 11</div>
+      <div class="q-title">¿Cuál es<br>tu nivel?</div>
+      <div class="q-sub">Sé honesto — una rutina mal calibrada puede causar lesiones.</div>
+      <div class="opts s3">
+        <div class="opt" onclick="qSel(this,'nivel')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-leaf"/></svg></div><div class="ol">Principiante</div><div class="os">Menos de 6 meses</div></div>
+        <div class="opt" onclick="qSel(this,'nivel')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg></div><div class="ol">Intermedio</div><div class="os">6 meses – 2 años</div></div>
+        <div class="opt" onclick="qSel(this,'nivel')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></div><div class="ol">Avanzado</div><div class="os">Más de 2 años</div></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="qPrev(3)">←</div><button class="btn-next" disabled id="qb3" onclick="qNext(3)">Continuar</button></div>
+    </div>
+
+    <!-- Q4 días -->
+    <div class="q-sc" id="qq4">
+      <div class="q-tag">Paso 04 / 11</div>
+      <div class="q-title">¿Cuántos días<br>puedes entrenar?</div>
+      <div class="q-sub">Por semana. Determina el split de tu rutina y tu gasto calórico.</div>
+      <div class="slider-wrap">
+        <div class="s-val"><span id="dias-v">4</span><span class="s-unit">días / semana</span></div>
+        <input type="range" id="qr-dias" min="2" max="6" value="4" oninput="document.getElementById('dias-v').textContent=this.value">
+        <div class="s-labels"><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="qPrev(4)">←</div><button class="btn-next" onclick="qNext(4)">Continuar</button></div>
+    </div>
+
+    <!-- Q4b ¿qué días específicos de la semana? -->
+    <div class="q-sc" id="qq4b">
+      <div class="q-tag">Horario</div>
+      <div class="q-title">¿Qué días<br>específicos?</div>
+      <div class="q-sub">Elige tus <b id="q4b-need">4</b> días. Si un día no puedes (ej. domingo), no lo marques — el plan respeta tu horario real.</div>
+      <div id="dias-sem-opts" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px"></div>
+      <div class="q-sub" id="q4b-count" style="margin-top:2px;font-size:var(--fs-xs)"></div>
+      <div class="nav-row"><div class="btn-prev" onclick="mostrarSub('qq4')">←</div><button class="btn-next" disabled id="qb4b" onclick="qNext4b()">Continuar</button></div>
+    </div>
+
+    <!-- Q4c ¿toma clases grupales? -->
+    <div class="q-sc" id="qq4c">
+      <div class="q-tag">Clases grupales</div>
+      <div class="q-title">¿Tomas alguna<br>clase grupal?</div>
+      <div class="q-sub">Funcional, Body Pump, spinning, yoga... Así tu plan de gym no repite el mismo músculo que ya trabajaste en clase.</div>
+      <div class="opts" style="grid-template-columns:1fr 1fr">
+        <div class="opt" onclick="qSelTomaClases(this,'si')"><div class="ol" style="font-size:var(--fs-md)">Sí</div></div>
+        <div class="opt" onclick="qSelTomaClases(this,'no')"><div class="ol" style="font-size:var(--fs-md)">No</div></div>
+      </div>
+      <div id="clases-bloque" style="display:none;margin-top:14px">
+        <div class="q-sub" style="margin-bottom:8px">Marca las que tomas</div>
+        <div id="clases-check-opts" class="chk-grid"></div>
+        <div id="clases-detalle" style="margin-top:10px"></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="mostrarSub('qq4b')">←</div><button class="btn-next" disabled id="qb4c" onclick="qNext4c()">Continuar</button></div>
+    </div>
+
+    <!-- Q5 edad -->
+    <div class="q-sc" id="qq5">
+      <div class="q-tag">Paso 05 / 11</div>
+      <div class="q-title">¿Cuántos<br>años tienes?</div>
+      <div class="q-sub">Ajusta recuperación, volumen y tipo de ejercicios.</div>
+      <div class="slider-wrap">
+        <div class="s-val"><span id="edad-v">35</span><span class="s-unit">años</span></div>
+        <input type="range" id="qr-edad" min="16" max="75" value="35" oninput="document.getElementById('edad-v').textContent=this.value">
+        <div class="s-labels"><span>16</span><span>25</span><span>35</span><span>50</span><span>75</span></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="qPrev(5)">←</div><button class="btn-next" onclick="qNext(5)">Continuar</button></div>
+    </div>
+
+    <!-- Q6 género -->
+    <div class="q-sc" id="qq6">
+      <div class="q-tag">Paso 06 / 11</div>
+      <div class="q-title">¿Con qué género<br>te identificas?</div>
+      <div class="q-sub">Necesario para calcular tu metabolismo basal con precisión.</div>
+      <div class="opts s3">
+        <div class="opt" onclick="qSel(this,'genero')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-mars"/></svg></div><div class="ol">Masculino</div></div>
+        <div class="opt" onclick="qSel(this,'genero')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-venus"/></svg></div><div class="ol">Femenino</div></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="qPrev(6)">←</div><button class="btn-next" disabled id="qb6" onclick="qNext(6)">Continuar</button></div>
+    </div>
+
+    <!-- Q7 peso -->
+    <div class="q-sc" id="qq7">
+      <div class="q-tag">Paso 07 / 11</div>
+      <div class="q-title">¿Cuánto<br>pesas hoy?</div>
+      <div class="q-sub">Base de tu plan de nutrición y punto de partida de tu evolución.</div>
+      <div class="slider-wrap">
+        <div class="s-val"><span id="peso-v">75</span><span class="s-unit">kg</span></div>
+        <input type="range" id="qr-peso" min="40" max="160" value="75" oninput="document.getElementById('peso-v').textContent=this.value">
+        <div class="s-labels"><span>40</span><span>70</span><span>100</span><span>130</span><span>160</span></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="qPrev(7)">←</div><button class="btn-next" onclick="qNext(7)">Continuar</button></div>
+    </div>
+
+    <!-- Q8 estatura -->
+    <div class="q-sc" id="qq8">
+      <div class="q-tag">Paso 08 / 11</div>
+      <div class="q-title">¿Cuánto<br>mides?</div>
+      <div class="q-sub">Completa el cálculo de tu metabolismo basal (Mifflin-St Jeor).</div>
+      <div class="slider-wrap">
+        <div class="s-val"><span id="est-v">170</span><span class="s-unit">cm</span></div>
+        <input type="range" id="qr-est" min="140" max="210" value="170" oninput="document.getElementById('est-v').textContent=this.value">
+        <div class="s-labels"><span>140</span><span>155</span><span>170</span><span>190</span><span>210</span></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="qPrev(8)">←</div><button class="btn-next" onclick="qNext(8)">Continuar</button></div>
+    </div>
+
+    <!-- Q9 zonas -->
+    <div class="q-sc" id="qq9">
+      <div class="q-tag">Paso 09 / 11</div>
+      <div class="q-title">¿Qué zonas<br>quieres priorizar?</div>
+      <div class="mh">Puedes seleccionar más de una</div>
+      <div class="opts">
+        <div class="opt" onclick="qMulti(this)"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-leg"/></svg></div><div class="ol">Piernas</div><div class="os">Cuáds, femorales, glúteo</div></div>
+        <div class="opt" onclick="qMulti(this)"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg></div><div class="ol">Pecho / espalda</div><div class="os">Tren superior</div></div>
+        <div class="opt" onclick="qMulti(this)"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-dumbbell"/></svg></div><div class="ol">Hombros / brazos</div><div class="os">Deltoides, bíceps, tríceps</div></div>
+        <div class="opt" onclick="qMulti(this)"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-target"/></svg></div><div class="ol">Core / abdomen</div><div class="os">Estabilidad central</div></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="qPrev(9)">←</div><button class="btn-next" onclick="qNext(9)">Continuar</button></div>
+    </div>
+
+    <!-- Q10 limitaciones -->
+    <div class="q-sc" id="qq10">
+      <div class="q-tag">Paso 10 / 11</div>
+      <div class="q-title">¿Tienes alguna<br>limitación física?</div>
+      <div class="q-sub">Información confidencial, solo la ve tu entrenador.</div>
+      <div class="chk-grid">
+        <div class="chk" onclick="qChk(this)"><div class="chk-box">✓</div>Rodilla / menisco</div>
+        <div class="chk" onclick="qChk(this)"><div class="chk-box">✓</div>Espalda / lumbar</div>
+        <div class="chk" onclick="qChk(this)"><div class="chk-box">✓</div>Hombro / manguito</div>
+        <div class="chk" onclick="qChk(this)"><div class="chk-box">✓</div>Cadera</div>
+        <div class="chk" onclick="qChk(this)"><div class="chk-box">✓</div>Cuello / cervical</div>
+        <div class="chk" onclick="qChk(this)"><div class="chk-box">✓</div>Condición cardíaca</div>
+        <div class="chk chk-none" onclick="qNone(this)"><div class="chk-box">✓</div>✅ Sin limitaciones</div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="qPrev(10)">←</div><button class="btn-next" onclick="qNext(10)">Continuar</button></div>
+    </div>
+
+    <!-- Q11 cardio -->
+    <div class="q-sc" id="qq11">
+      <div class="q-tag">Paso 11 / 11</div>
+      <div class="q-title">¿Qué tan seguido<br>haces cardio?</div>
+      <div class="q-sub">Para balancear cardio con fuerza en tu plan.</div>
+      <div class="opts s1">
+        <div class="opt" onclick="qSel(this,'cardio')"><div class="ol">Nunca o casi nunca</div><div class="os">Prefiero el puro gimnasio</div></div>
+        <div class="opt" onclick="qSel(this,'cardio')"><div class="ol">1 – 2 Veces por semana</div><div class="os">Cardio ocasional</div></div>
+        <div class="opt" onclick="qSel(this,'cardio')"><div class="ol">3 O más veces</div><div class="os">Parte importante de mi rutina</div></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="qPrev(11)">←</div><button class="btn-next" disabled id="qb11" onclick="qNextToTrainer(generarRutina,'qq11')">Continuar</button></div>
+    </div>
+
+    <!-- QT: elegir entrenador -->
+    <div class="q-sc" id="qqT">
+      <div class="q-tag">Último paso</div>
+      <div class="q-title">¿Con quién<br>quieres entrenar?</div>
+      <div class="q-sub">Cada entrenador construye sus rutinas con su propio método. Elige por estilo, no solo por nombre.</div>
+      <div id="trainer-picker-list" style="margin-top:6px"></div>
+      <div class="nav-row"><div class="btn-prev" onclick="qTrainerBack()">←</div><button class="btn-next" disabled id="qbT" onclick="qConfirmTrainerAndGenerate()">Generar mi plan ⚡</button></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ S3: LOADING ═══ -->
+<div class="sc" id="s-loading">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:40px;">
+    <div class="lr"></div>
+    <div class="ll">Generando tu plan</div>
+    <div class="ls" id="loading-txt">ANALIZANDO PERFIL <span class="ld"><span>.</span><span>.</span><span>.</span></span></div>
+  </div>
+</div>
+
+<!-- ═══ S4: PREVIEW RUTINA ═══ -->
+<div class="sc" id="s-preview">
+  <div class="tb" style="position:sticky;top:0;z-index:100;">
+    <div class="tb-logo"><div class="lm"><img src="icons/icon-192.png" data-gym-alt alt="Gimnasio"></div><div class="ln">Tu plan</div></div>
+    <div class="tb-r">
+      <div class="tb-btn" style="color:var(--v);border-color:color-mix(in srgb, var(--v) 30%, transparent);background:var(--gl2)" onclick="if(privCasilleroOk())confirmarRutina()" class="tb-btn priv-btn">Confirmar y guardar ✓</div>
+    </div>
+  </div>
+  <div style="max-width:680px;margin:0 auto;padding:24px 20px 80px;width:100%;">
+    <div style="background:var(--gl2);border:1px solid var(--b);border-radius:14px;padding:20px;margin-bottom:14px;display:flex;gap:16px;align-items:flex-start;">
+      <div style="font-size:var(--fs-6xl)" id="pv-icon">💪</div>
+      <div>
+        <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--v);margin-bottom:3px">PLAN GENERADO</div>
+        <div style="font-family:var(--fd);font-size:var(--fs-5xl);line-height:1" id="pv-nombre">—</div>
+        <div style="font-size:var(--fs-xs);color:var(--mu);font-family:var(--fb);margin-top:3px" id="pv-meta">—</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px" id="pv-badges"></div>
+      </div>
+    </div>
+    <div style="padding:12px 16px;background:color-mix(in srgb,var(--n) 4%,transparent);border:1px solid color-mix(in srgb,var(--n) 15%,transparent);border-radius:10px;margin-bottom:14px;font-size:var(--fs-2xs);color:var(--n);font-family:var(--fb);line-height:1.6" id="pv-nota"></div>
+    <div style="padding:12px 16px;background:color-mix(in srgb,var(--g) 6%,transparent);border:1px solid color-mix(in srgb,var(--g) 20%,transparent);border-radius:10px;margin-bottom:14px;font-size:var(--fs-xs);color:var(--tx);font-family:var(--fb);line-height:1.7;display:none" id="pv-consejos"></div>
+    <div id="pv-nutri" style="margin-bottom:20px;"></div>
+    <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:0;color:var(--mu);margin-bottom:10px;display:flex;align-items:center;gap:10px;">
+      PLAN SEMANAL
+      <div style="flex:1;height:1px;background:var(--b)"></div>
+    </div>
+    <div id="pv-semana" style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px;"></div>
+    <div style="padding:14px 16px;background:color-mix(in srgb,var(--g) 5%,transparent);border:1px solid color-mix(in srgb,var(--g) 20%,transparent);border-radius:10px;display:flex;gap:12px;margin-bottom:20px;">
+      <div style="font-size:var(--fs-2xl)">👨‍💼</div>
+      <div style="font-size:var(--fs-2xs);color:var(--mu);font-family:var(--fb);line-height:1.6">
+        <span style="color:var(--g)">PENDIENTE DE REVISIÓN</span><br>
+        Tu entrenador revisará este plan y hará ajustes personalizados antes de activarlo.
+      </div>
+    </div>
+    <div id="priv-box" style="margin:0 0 14px;padding:14px 16px;border:1px solid var(--b2);border-radius:14px;background:var(--gl)">
+      <label style="display:flex;gap:12px;align-items:flex-start;cursor:pointer;font-family:var(--fb);font-size:var(--fs-sm);line-height:1.55;color:var(--tx)">
+        <input type="checkbox" id="priv-chk" onchange="privCasilleroCambio()" style="width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--v)">
+        <span>He leído el <a href="#" onclick="abrirAvisoPrivacidad('lectura');return false" style="color:var(--v);font-weight:700;text-decoration:underline">Aviso de Privacidad</a> y doy mi <b>consentimiento expreso</b> para el tratamiento de mis datos personales, incluidos mis datos de salud. Si soy menor de edad, lo acepta mi madre, padre o tutor.</span>
+      </label>
+    </div>
+    <button class="priv-btn" onclick="if(privCasilleroOk())confirmarRutina()" style="width:100%;height:50px;background:var(--v);border:none;border-radius:11px;font-family:var(--fd);font-size:var(--fs-2xl);letter-spacing:.02em;color:var(--btn-tx);cursor:pointer;">CONFIRMAR MI PLAN →</button>
+  </div>
+</div>
+
+<!-- ═══ S4b: CÓDIGO ASIGNADO ═══ -->
+<div class="sc" id="s-pending">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:40px 24px;">
+    <div class="pend-card">
+      <div class="pend-icon">✅</div>
+      <div class="pend-title">¡Plan guardado!</div>
+      <div class="pend-sub">Tu plan quedó registrado en el sistema.<br>Un entrenador lo revisará y personalizará.<br><br>Tu código de acceso es:</div>
+      <div class="pend-code" id="pend-code">——</div>
+      <div class="pend-codelabel">Guárdalo. Lo usarás cada vez que entres al kiosco.</div>
+      <button class="btn-home" onclick="go('s-inicio')">← Volver al inicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S5: DASHBOARD SOCIO ═══ -->
+<div class="sc" id="s-dash">
+  <div id="memb-aviso-socio"></div>
+  <div class="dash-section on" id="dsec-inicio"></div>
+  <div class="dash-section" id="dsec-rutina"></div>
+  <div class="dash-section" id="dsec-progreso"></div>
+  <div class="dash-section" id="dsec-nutricion"></div>
+  <div class="dash-section" id="dsec-perfil"></div>
+
+  <nav class="bnav" role="tablist" aria-label="Secciones">
+    <button type="button" class="bn-i ac" id="dtab-inicio" role="tab" onclick="dashTab('inicio')"><i><svg class="ico " aria-hidden="true"><use href="#i-home"/></svg></i><span>Inicio</span></button>
+    <button type="button" class="bn-i" id="dtab-rutina" role="tab" onclick="dashTab('rutina')"><i><svg class="ico " aria-hidden="true"><use href="#i-dumbbell"/></svg></i><span>Rutina</span></button>
+    <button type="button" class="bn-i" id="dtab-progreso" role="tab" onclick="dashTab('progreso')"><i><svg class="ico " aria-hidden="true"><use href="#i-chart"/></svg></i><span>Progreso</span></button>
+    <button type="button" class="bn-i" id="dtab-nutricion" role="tab" onclick="dashTab('nutricion')"><i><svg class="ico " aria-hidden="true"><use href="#i-leaf"/></svg></i><span>Nutrición</span></button>
+    <button type="button" class="bn-i" id="dtab-perfil" role="tab" onclick="dashTab('perfil')"><i><svg class="ico " aria-hidden="true"><use href="#i-user"/></svg></i><span>Perfil</span></button>
+  </nav>
+</div>
+
+<!-- ═══ S6: DETALLE DÍA ═══ -->
+<div class="sc" id="s-det">
+  <button type="button" class="btn-bk fl" onclick="go('s-dash');refreshDash();" aria-label="Volver"><svg class="ico " aria-hidden="true"><use href="#i-chevl"/></svg></button>
+  <button type="button" class="btn-bk fr" id="btn-rest-timer" onclick="toggleBurbujaVisible()" aria-label="Cronómetro de descanso"><svg class="ico" aria-hidden="true"><use href="#i-timer"/></svg></button>
+  <div class="det-hero" id="det-hero"></div>
+  <div class="det-stats" id="det-stats"></div>
+  <div class="det-prog-w"><div class="det-prog-t"><b>Tu avance</b><span id="det-prog-n">0 de 0</span></div><div class="det-prog"><i id="det-prog-i"></i></div></div>
+  <div class="ej-list" id="ej-list"></div>
+  <div class="det-foot">
+    <div class="btn-sec" onclick="go('s-dash');refreshDash();">Volver</div>
+    <div class="btn-full" id="btn-finalizar" onclick="finalizarSesion()">Finalizar sesión</div>
+  </div>
+</div>
+
+<!-- MODAL EJERCICIO -->
+<div class="modal" id="modal-ej">
+  <div class="mbox">
+    <div class="mx" onclick="closeModal()">✕</div>
+    <div class="m-tag" id="m-tag">Ejercicio</div>
+    <div class="m-title" id="m-title">—</div>
+    <div class="m-sub" id="m-sub">—</div>
+    <div id="m-mov" class="m-mov" style="display:none"></div>
+    <div id="m-sets-head">
+      <div style="display:flex;justify-content:flex-end;padding:2px 11px 6px">
+        <div class="unit-toggle" id="unit-toggle" onclick="toggleUnidadPeso()">
+          <span class="unit-opt" data-u="kg">KG</span><span class="unit-opt" data-u="lb">LB</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:24px 1fr 76px 24px;gap:9px;padding:0 11px 5px;font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu)">
+        <span>#</span><span>OBJETIVO</span><span style="text-align:center" id="m-kg-label">KG USADOS</span><span>✓</span>
+      </div>
+    </div>
+    <div class="m-sets" id="m-sets"></div>
+    <div id="m-musculo"></div>
+    <div id="m-metodo" class="m-metodo" style="display:none"></div>
+    <div id="m-alts" class="m-alts" style="display:none"></div>
+    <div class="m-pr" id="m-pr" style="display:none"></div>
+    <div class="m-rm" id="m-rm" style="display:none">
+      <div id="m-rm-txt"></div>
+    </div>
+  </div>
+</div>
+
+<!-- BURBUJA DE DESCANSO — cronómetro flotante y movible, solo visual (cuenta hacia arriba) -->
+<div class="rest-bubble" id="rest-bubble">
+  <span class="rb-x" onclick="event.stopPropagation();toggleBurbujaVisible()" aria-label="Ocultar cronómetro">✕</span>
+  <div class="rb-t" id="rest-bubble-t">00:00</div>
+  <div class="rb-lbl" id="rest-bubble-lbl">TOCA</div>
+</div>
+
+<!-- ═══ STAFF LOGIN ═══ -->
+<div class="sc" id="s-staff-login">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px;">
+    <div class="login-card" style="max-width:400px;border-color:color-mix(in srgb,var(--n) 20%,transparent);">
+      <div class="lc-tag" style="color:var(--n)">Acceso staff</div>
+      <div class="lc-title">Panel del<br>entrenador</div>
+      <div class="lc-sub">Solo para entrenadores y directores.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px" id="staff-roles">
+        <div onclick="staffSelRol(this,'entrenador')" class="opt sel" style="padding:10px;text-align:center;border-radius:9px;">
+          <div class="ol" style="font-size:var(--fs-md);">Entrenador</div>
+          <div class="os">Mis socios</div>
+        </div>
+        <div onclick="staffSelRol(this,'coordinador')" class="opt" style="padding:10px;text-align:center;border-radius:9px;">
+          <div class="ol" style="font-size:var(--fs-md);">Director</div>
+          <div class="os">Todos los socios</div>
+        </div>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">USUARIO</div>
+        <input type="text" class="ti" id="staff-user" value="" placeholder="usuario" autocomplete="username">
+      </div>
+      <div style="margin-bottom:16px;">
+        <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">CONTRASEÑA</div>
+        <input type="password" class="ti" id="staff-pass" value="" placeholder="••••••" autocomplete="current-password">
+      </div>
+      <button class="btn-main" style="background:var(--grad)" onclick="doStaffLogin()">Entrar al panel</button>
+      <div class="login-err" id="staff-err">Usuario o contraseña incorrectos.</div>
+      <button type="button" class="btn-back-link" onclick="go('s-inicio')">← <span>Volver al inicio</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PANEL STAFF ═══ -->
+<div class="sc" id="s-panel" style="flex-direction:column;">
+  <div class="tb staff-topbar" style="position:sticky;top:0;z-index:100;">
+    <div class="tb-logo">
+      <div class="lm"><img src="icons/icon-192.png" data-gym-alt alt="Gimnasio"></div>
+      <div class="ln">Fitness <span class="ln-x">System </span>Pro</div>
+    </div>
+    <div class="staff-tb-actions">
+      <span class="theme-slot"></span>
+      <button type="button" class="tb-btn" id="btn-staff-menu" onclick="staffMenu()" aria-label="Abrir menú"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg>Menú</button>
+      <div class="tb-btn" id="btn-mi-filosofia" onclick="abrirMiFilosofia()" style="display:none;color:var(--p);border-color:color-mix(in srgb,var(--p) 25%,transparent)">🧬 Mi filosofía</div>
+      <div class="tb-btn" id="btn-ver-ent" onclick="abrirEntrenadores()" style="display:none;color:var(--n);border-color:color-mix(in srgb,var(--n) 20%,transparent)">👥 Entrenadores</div>
+      <div class="tb-btn" id="btn-nuevo-ent" onclick="abrirNuevoEntrenador()" style="display:none;color:var(--v);border-color:color-mix(in srgb, var(--v) 30%, transparent)">➕ Nuevo entrenador</div>
+      <div class="tb-btn" id="btn-conocimiento" onclick="abrirConocimiento()" style="color:var(--p);border-color:color-mix(in srgb,var(--p) 25%,transparent)">📚 Conocimiento</div>
+      <div class="tb-btn" id="btn-resumen" onclick="abrirResumen()" style="display:none;color:var(--v);border-color:color-mix(in srgb, var(--v) 30%, transparent)">📊 Resumen</div>
+      <div class="tb-btn" id="btn-apariencia" onclick="abrirApariencia()" style="display:none;color:var(--v);border-color:color-mix(in srgb, var(--v) 30%, transparent)">🎨 Apariencia</div>
+      <div class="tb-btn" id="btn-lugares" onclick="abrirLugares()" style="display:none;color:var(--p);border-color:color-mix(in srgb, var(--p) 30%, transparent)">📍 Lugares</div>
+      <div class="tb-btn" id="btn-respaldo" onclick="descargarRespaldo()" style="display:none;color:var(--n);border-color:color-mix(in srgb,var(--n) 20%,transparent)">💾 Respaldo</div>
+      <div class="tb-btn" id="btn-reset" onclick="resetDemo()" style="display:none;color:var(--g);border-color:color-mix(in srgb,var(--g) 20%,transparent)">⟲ Reset datos</div>
+      <div class="tb-btn" id="btn-firebase" onclick="go('s-fbsetup');fbAbrirSetup();" style="display:none;color:var(--n);border-color:color-mix(in srgb,var(--n) 20%,transparent)">🔥 Firebase</div>
+      <div class="tb-btn" id="btn-logout" onclick="staffLogout()" style="color:var(--r);border-color:color-mix(in srgb,var(--r) 20%,transparent)">Cerrar sesión</div>
+    </div>
+    <div class="staff-meta">
+      <span id="staff-role-badge" class="stf-chip" style="display:none"></span>
+      <span id="staff-nombre" class="stf-name"></span>
+    </div>
+    <div class="staff-back" id="staff-back" onclick="staffVolverLista()" role="button" tabindex="0"><svg class="ico" style="transform:scaleX(-1)" aria-hidden="true"><use href="#i-arrow"/></svg>Volver a socios</div>
+  </div>
+  <div class="staff-grid" style="display:grid;grid-template-columns:270px 1fr;flex:1;overflow:hidden;min-height:calc(100vh - 57px);">
+    <div class="staff-side">
+      <div class="sl-head">
+        <div class="sl-title">Socios <span id="sl-count"></span></div>
+        <label class="sl-search"><span aria-hidden="true">&#128269;</span>
+          <input type="search" id="staff-search" placeholder="Buscar por nombre o código" oninput="staffFilterSocios(this.value)" autocomplete="off">
+        </label>
+        <div class="sl-filters" id="staff-filters">
+          <button type="button" class="sl-f ac" onclick="staffFilterStatus(this,'todos')">Todos <i id="slc-todos"></i></button>
+          <button type="button" class="sl-f" onclick="staffFilterStatus(this,'pendiente')">Pendientes <i id="slc-pendiente"></i></button>
+          <button type="button" class="sl-f" onclick="staffFilterStatus(this,'activo')">Activos <i id="slc-activo"></i></button>
+          <button type="button" class="sl-f" onclick="staffFilterStatus(this,'tolerancia')">⏳ Tolerancia <i id="slc-tolerancia"></i></button>
+          <button type="button" class="sl-f" onclick="staffFilterStatus(this,'inactivo')">Inactivos <i id="slc-inactivo"></i></button>
+          <button type="button" class="sl-f" onclick="staffFilterStatus(this,'progresion')">📈 Progresión <i id="slc-progresion"></i></button>
+        </div>
+      </div>
+      <div id="staff-memb-aviso"></div>
+      <div id="staff-socio-list"></div>
+    </div>
+    <div id="staff-content" style="overflow-y:auto;display:flex;flex-direction:column;">
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--mu);padding:40px;text-align:center;">
+        <div style="font-size:40px;opacity:.3;">👈</div>
+        <div style="font-family:var(--fd);font-size:var(--fs-4xl);">SELECCIONA UN SOCIO</div>
+        <div style="font-size:var(--fs-2xs);font-family:var(--fb);line-height:1.6;">Elige un socio para editar su rutina,<br>ver su evolución y su plan de nutrición.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast" role="status"></div>
+<div id="sync-pill" class="sync-pill" role="status" aria-live="polite"></div>
+
+<script src="js/01-datos-firebase.js"></script>
+<script src="js/02-mensualidad.js"></script>
+<script src="js/03-nutricion-motor.js"></script>
+<script src="js/04-estadisticas.js"></script>
+<script src="js/05-seed-demo.js"></script>
+<script src="js/06-geofence-sesion-login.js"></script>
+<script src="js/07-quiz.js"></script>
+<script src="js/08-rutinas-ia-fallback.js"></script>
+<script src="js/09-pdf-rutina.js"></script>
+<script src="js/10-tema-fondo.js"></script>
+<script src="js/11-composicion-rehab.js"></script>
+<script src="js/12-deportes-club.js"></script>
+<script src="js/13-avatar-3d.js"></script>
+<script src="js/14-motor-rutinas.js"></script>
+<script src="js/15-registro-sesion.js"></script>
+<script src="js/16-socios-admin.js"></script>
+<script src="js/17-panel-staff.js"></script>
+<script src="js/18-editor-ejercicios.js"></script>
+<script src="js/19-ficha-socio-estado.js"></script>
+<script src="js/20-dialogos.js"></script>
+<script src="js/21-progresion.js"></script>
+<script src="js/22-resumen-coordinacion.js"></script>
+<script src="js/23-conocimiento-staff.js"></script>
+<script src="js/24-filosofia-entrenador.js"></script>
+<script src="js/25-entrenadores-admin.js"></script>
+<script src="js/26-nutricion-staff.js"></script>
+<script src="js/27-seleccion-entrenador.js"></script>
+<script src="js/28-pwa.js"></script>
+<script src="js/29-privacidad.js"></script>
+<script src="js/30-casa-catalogo.js"></script>
+<script src="js/31-casa-motor.js"></script>
+<script src="js/32-filosofia-modelos.js"></script>
+<script src="js/33-teclado-botones.js"></script>
+<script src="js/34-apariencia.js"></script>
+<script src="js/35-indice-socios.js"></script>
+<script src="js/99-arranque.js"></script>
+
+<!-- ═══ MODAL AVISO DE PRIVACIDAD ═══ -->
+<div class="modal" id="modal-aviso" onclick="if(event.target===this&&!PRIV_CB)cerrarAvisoPrivacidad()">
+  <div class="mbox" style="max-width:560px;display:flex;flex-direction:column;max-height:88vh">
+    <div id="aviso-cuerpo" style="overflow-y:auto;font-size:var(--fs-md);line-height:1.65;color:var(--tx);padding-right:4px;-webkit-overflow-scrolling:touch"></div>
+    <div id="aviso-consent-txt" style="display:none;font-size:var(--fs-sm);color:var(--mu);margin:12px 0 0;line-height:1.5">Al tocar «Acepto» otorgas tu consentimiento expreso para el tratamiento de tus datos personales, incluidos los datos de salud.</div>
+    <div id="aviso-btns-lectura" style="display:flex;gap:10px;margin-top:14px"><button type="button" class="sd-pri" style="flex:1" onclick="cerrarAvisoPrivacidad()">Cerrar</button></div>
+    <div id="aviso-btns-consent" style="display:none;gap:10px;margin-top:14px">
+      <button type="button" class="sd-b" style="flex:1" onclick="avisoRechazar()">No acepto</button>
+      <button type="button" class="sd-pri" style="flex:1" onclick="avisoAceptar()">Acepto</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL CONFIRMACIÓN (reemplaza confirm/prompt nativos) ═══ -->
+<div class="modal" id="modal-uic" onclick="if(event.target===this)uiNo()">
+  <div class="mbox" style="max-width:420px">
+    <div id="uic-msg" style="font-size:var(--fs-base);line-height:1.6;color:var(--tx);margin-bottom:16px;white-space:pre-line"></div>
+    <div id="uic-input-wrap" style="display:none;margin-bottom:16px">
+      <input id="uic-input" class="sf-in" style="width:100%;box-sizing:border-box" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div style="display:flex;gap:10px">
+      <button type="button" class="sd-b" style="flex:1" onclick="uiNo()">Cancelar</button>
+      <button type="button" class="sd-pri" id="uic-yes" style="flex:1" onclick="uiYes()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL PROGRESIÓN (evaluación y mi progresión) ═══ -->
+<div class="modal" id="modal-pg" onclick="if(event.target===this)pqCerrar()">
+  <div class="mbox"><div id="pg-body"></div></div>
+</div>
+
+<!-- ═══ MODAL MI FILOSOFÍA (entrenador) ═══ -->
+<div class="modal" id="modal-filosofia" onclick="if(event.target===this)cerrarModalFilosofia()">
+  <div class="mbox" style="max-width:480px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div id="filo-modal-tag" style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--p)">TU FILOSOFÍA DE ENTRENAMIENTO</div>
+      <div class="av3d-cerrar" style="border-color:var(--b);color:var(--mu)" onclick="cerrarModalFilosofia()">✕</div>
+    </div>
+    <div class="prog-track" style="margin-bottom:16px"><div class="prog-fill" id="filo-prog" style="width:25%;background:var(--p)"></div></div>
+    <div id="filo-body"></div>
+    <div class="nav-row" id="filo-nav" style="margin-top:14px"><div class="btn-prev" onclick="filoPrev()">←</div><button class="btn-next" onclick="filoNext()" id="filo-next-btn">Continuar</button></div>
+  </div>
+</div>
+
+<!-- ═══ MODAL EDITAR ENTRENADOR (coordinador) ═══ -->
+<div class="modal" id="modal-editar-ent" onclick="if(event.target===this)cerrarModalEditarEnt()">
+  <div class="mbox" style="max-width:420px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--n)" id="ee-titulo">EDITAR ENTRENADOR</div>
+      <div class="av3d-cerrar" style="border-color:var(--b);color:var(--mu)" onclick="cerrarModalEditarEnt()">✕</div>
+    </div>
+    <input type="hidden" id="ee-id">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <input type="text" class="ti" id="ee-nombre" placeholder="Nombre completo">
+      <input type="text" class="ti" id="ee-pass" placeholder="Contraseña de acceso (mín. 6) — vacío = sin cambios">
+      <div class="q-sub" style="margin:2px 0 4px">¿Qué da? (elige al menos una)</div>
+      <div class="chk-grid" style="grid-template-columns:1fr 1fr">
+        <div class="chk" id="ee-func-ent" onclick="this.classList.toggle('ck')">🏋️ Entrenamiento</div>
+        <div class="chk" id="ee-func-nut" onclick="this.classList.toggle('ck')">🥗 Nutrición</div>
+      </div>
+      <div class="q-sub" style="margin:8px 0 4px">Especialidades</div>
+      <div class="chk-grid" id="ee-especialidades" style="max-height:160px;overflow-y:auto"></div>
+      <input type="text" class="ti" id="ee-otras" placeholder="Otras especialidades, separadas por coma">
+    </div>
+    <div style="font-size:var(--fs-xs);color:var(--mu);margin-top:10px;line-height:1.5">El usuario (para iniciar sesión) no se puede cambiar aquí. Su filosofía se edita desde su propia sesión, en 🧬 MI FILOSOFÍA.</div>
+    <button class="btn-main" style="margin-top:14px" onclick="guardarEdicionEntrenador()">Guardar cambios</button>
+  </div>
+</div>
+
+<!-- ═══ MODAL NUEVO ENTRENADOR (coordinador) ═══ -->
+<div class="modal" id="modal-nuevo-ent" onclick="if(event.target===this)cerrarModalNuevoEnt()">
+  <div class="mbox" style="max-width:420px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--v)">DAR DE ALTA ENTRENADOR</div>
+      <div class="av3d-cerrar" style="border-color:var(--b);color:var(--mu)" onclick="cerrarModalNuevoEnt()">✕</div>
+    </div>
+    <div class="q-sub" style="margin-bottom:14px">Crea su acceso. Al iniciar sesión por primera vez, le pediremos su propia filosofía de entrenamiento — así sus rutinas no se sentirán genéricas.</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <input type="text" class="ti" id="ne-nombre" placeholder="Nombre completo (ej. Ana López)">
+      <input type="text" class="ti" id="ne-usuario" placeholder="Usuario (ej. entrenador4)">
+      <input type="text" class="ti" id="ne-pass" placeholder="Contraseña">
+      <div class="q-sub" style="margin:2px 0 4px">¿Qué va a dar de alta? (elige al menos una)</div>
+      <div class="chk-grid" style="grid-template-columns:1fr 1fr">
+        <div class="chk ck" id="ne-func-ent" onclick="this.classList.toggle('ck')">🏋️ Entrenamiento</div>
+        <div class="chk" id="ne-func-nut" onclick="this.classList.toggle('ck')">🥗 Nutrición</div>
+      </div>
+      <div class="q-sub" style="margin:8px 0 4px">Especialidades (opcional, elige las que apliquen)</div>
+      <div class="chk-grid" id="ne-especialidades" style="max-height:160px;overflow-y:auto"></div>
+    </div>
+    <div class="login-err" id="ne-err" style="display:none">❌ Completa nombre, usuario, contraseña y elige al menos una función. El usuario ya podría estar en uso.</div>
+    <button class="btn-main" style="margin-top:16px" onclick="crearNuevoEntrenador()">Crear acceso ✓</button>
+  </div>
+</div>
+
+
+<!-- ═══ MODAL TUS RM (perfil del socio) ═══ -->
+<div class="modal" id="modal-rm-perfil" onclick="if(event.target===this)cerrarModalRM()">
+  <div class="mbox" style="max-width:480px">
+    <div class="mx" onclick="cerrarModalRM()">✕</div>
+    <div class="m-tag">Rendimiento</div>
+    <div class="m-title" style="font-size:var(--fs-3xl)">Tus RM (opcional)</div>
+    <div class="pf-rm-info" style="border-bottom:none;padding-top:2px">Si ya conoces tu peso máximo en alguno de estos ejercicios, anótalo aquí y tu peso de entrenamiento se calcula desde hoy. Si no lo sabes, no hay problema — se va calculando solo conforme entrenas.</div>
+    <div id="rm-perfil-body"></div>
+    <button class="btn-main" style="margin-top:16px" onclick="cerrarModalRM()">Guardar y cerrar</button>
+  </div>
+</div>
+
+<!-- ═══ MODAL NUTRICIÓN (nutriólogo/entrenador/coordinador) ═══ -->
+<div class="modal" id="modal-nutricion" onclick="if(event.target===this)nutCerrar()">
+  <div class="mbox" style="max-width:520px">
+    <div class="mx" onclick="nutCerrar()">✕</div>
+    <div class="m-tag" id="nut-titulo">Nutrición</div>
+    <div class="m-title" style="font-size:var(--fs-3xl)">Requerimientos y menú</div>
+    <input type="hidden" id="nut-code">
+    <div class="f-row3">
+      <div class="f-grp"><label class="f-lbl" for="nut-kcal">Kcal / día</label><input type="number" class="ti" id="nut-kcal" inputmode="numeric"></div>
+      <div class="f-grp"><label class="f-lbl" for="nut-prot">Proteína (g)</label><input type="number" class="ti" id="nut-prot" inputmode="numeric"></div>
+      <div class="f-grp"><label class="f-lbl" for="nut-carbs">Carbos (g)</label><input type="number" class="ti" id="nut-carbs" inputmode="numeric"></div>
+    </div>
+    <div class="f-row">
+      <div class="f-grp"><label class="f-lbl" for="nut-grasas">Grasas (g)</label><input type="number" class="ti" id="nut-grasas" inputmode="numeric"></div>
+      <div class="f-grp"><label class="f-lbl" for="nut-agua">Agua (L)</label><input type="number" class="ti" id="nut-agua" step="0.1" inputmode="decimal"></div>
+    </div>
+    <div class="f-grp"><label class="f-lbl" for="nut-nota">Indicaciones para el socio</label><textarea class="ti" id="nut-nota" rows="3" placeholder="Ej. Evita azúcares simples, toma agua antes de cada comida…"></textarea></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 8px">
+      <div class="q-sub" style="margin:0">Menú sugerido (opcional)</div>
+      <button type="button" class="sd-b" style="padding:6px 12px" onclick="nutAgregarComida()">+ Agregar comida</button>
+    </div>
+    <div id="nut-menu-list"></div>
+    <div class="f-nota">Esto reemplaza lo que ve el socio en su pestaña de Nutrición. Puedes restablecer el cálculo automático cuando quieras.</div>
+    <button class="btn-main" style="margin-top:14px" onclick="nutGuardar()">Guardar nutrición</button>
+  </div>
+</div>
+
+<!-- ═══ MODAL EDITAR SOCIO (coordinador) ═══ -->
+<div class="modal" id="modal-staff-menu" onclick="if(event.target===this)staffMenuCerrar()">
+  <div class="mbox">
+    <div class="mx" onclick="staffMenuCerrar()" aria-label="Cerrar">✕</div>
+    <div class="m-title" style="font-size:var(--fs-4xl)">Menú</div>
+    <div id="staff-menu-body"></div>
+  </div>
+</div>
+<div class="modal" id="modal-editar-socio" onclick="if(event.target===this)cerrarModalEditarSocio()">
+  <div class="mbox" style="max-width:520px">
+    <div class="mx" onclick="cerrarModalEditarSocio()">✕</div>
+    <div class="m-tag">Editar datos del socio</div>
+    <div class="m-title" id="es-titulo">—</div>
+    <input type="hidden" id="es-code">
+    <div class="f-grp"><label class="f-lbl" for="es-nombre">Nombre</label><input type="text" class="ti" id="es-nombre" maxlength="60"></div>
+    <div class="f-row3">
+      <div class="f-grp"><label class="f-lbl" for="es-edad">Edad</label><input type="number" class="ti" id="es-edad" inputmode="numeric"></div>
+      <div class="f-grp"><label class="f-lbl" for="es-estatura">Estatura (cm)</label><input type="number" class="ti" id="es-estatura" inputmode="decimal"></div>
+      <div class="f-grp"><label class="f-lbl" for="es-peso">Peso (kg)</label><input type="number" class="ti" id="es-peso" step="0.1" inputmode="decimal"></div>
+    </div>
+    <div class="f-row">
+      <div class="f-grp"><label class="f-lbl" for="es-genero">Género</label><select class="ti" id="es-genero"></select></div>
+      <div class="f-grp"><label class="f-lbl" for="es-nivel">Nivel</label><select class="ti" id="es-nivel"></select></div>
+    </div>
+    <div class="f-grp"><label class="f-lbl" for="es-objetivo">Objetivo</label><select class="ti" id="es-objetivo"></select></div>
+    <div class="f-row">
+      <div class="f-grp"><label class="f-lbl" for="es-dias">Frecuencia</label><select class="ti" id="es-dias"></select></div>
+      <div class="f-grp"><label class="f-lbl" for="es-status">Estado</label><select class="ti" id="es-status"></select></div>
+    </div>
+    <div class="f-row">
+      <div class="f-grp"><label class="f-lbl" for="es-ent">Entrenador asignado</label><select class="ti" id="es-ent"></select></div>
+      <div class="f-grp"><label class="f-lbl" for="es-nut">Nutriólogo asignado</label><select class="ti" id="es-nut"></select></div>
+    </div>
+    <div class="f-grp"><label class="f-lbl" for="es-limit">Limitaciones (separadas por coma)</label><input type="text" class="ti" id="es-limit" placeholder="Ej. Rodilla / menisco, Hombro"></div>
+    <div class="f-grp"><label class="f-lbl" for="es-nuevocode">Cambiar código de acceso (opcional)</label><input type="text" class="ti" id="es-nuevocode" maxlength="4" inputmode="numeric" placeholder="4 dígitos"></div>
+    <div class="f-nota">Cambiar objetivo, nivel o frecuencia no reescribe la rutina: ajústala aparte en el panel si hace falta. El peso nuevo se guarda como pesaje de hoy.</div>
+    <button class="btn-main" style="margin-top:14px" onclick="guardarEdicionSocio()">Guardar cambios</button>
+  </div>
+</div>
+
+
+<!-- ═══ MODAL CONOCIMIENTO (agregar / editar) ═══ -->
+<!-- ═══ MODAL MENSUALIDAD / ESTADO DEL SOCIO (director) ═══ -->
+<div class="modal" id="modal-memb" onclick="if(event.target===this)membCerrar()">
+  <div class="mbox">
+    <div class="mx" onclick="membCerrar()">✕</div>
+    <div id="memb-body"></div>
+  </div>
+</div>
+
+<!-- ═══ MODAL SELECTOR DE EJERCICIOS (staff) ═══ -->
+<div class="modal" id="modal-ejpick" onclick="if(event.target===this)epCerrar()">
+  <div class="mbox">
+    <div class="mx" onclick="epCerrar()">✕</div>
+    <div class="m-title" id="ep-titulo" style="margin-bottom:14px">Agregar ejercicio</div>
+    <div class="ep-ctx" id="ep-ctx"></div>
+    <input class="sf-in" id="ep-q" style="width:100%;box-sizing:border-box;min-height:46px;padding:0 14px;border-radius:14px;border:1.5px solid var(--b);background:var(--in-bg);color:var(--tx);font-size:var(--fs-base)" placeholder="🔎 Buscar ejercicio…" oninput="epBuscar(this.value)" autocomplete="off">
+    <div id="ep-filtros"></div>
+    <div id="ep-lista"></div>
+  </div>
+</div>
+
+<div class="modal" id="modal-kb" onclick="if(event.target===this)kbCerrar()">
+  <div class="mbox" style="max-width:560px">
+    <div class="mx" onclick="kbCerrar()">✕</div>
+    <div class="m-title" id="kb-m-titulo" style="margin-bottom:14px">—</div>
+    <div id="kb-m-cuerpo"></div>
+    <button class="btn-main" id="kb-m-guardar" style="margin-top:14px" onclick="">Guardar</button>
+  </div>
+</div>
+
+<!-- ═══ MODAL REHAB ═══ -->
+<div class="modal" id="rehab-modal" onclick="if(event.target===this)cerrarRehabModal()">
+  <div class="mbox" style="max-width:520px">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:-8px">
+      <div class="av3d-cerrar" style="border-color:var(--b);color:var(--mu)" onclick="cerrarRehabModal()">✕</div>
+    </div>
+    <div id="rehab-modal-body"></div>
+  </div>
+</div>
+
+</body>
+</html>

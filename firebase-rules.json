@@ -1,0 +1,62 @@
+{
+  "rules": {
+    "roles": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('roles').child(auth.uid).val() === 'coordinador')",
+        ".write": "auth != null && root.child('roles').child(auth.uid).val() === 'coordinador'",
+        ".validate": "newData.val() === 'coordinador' || newData.val() === 'entrenador'"
+      }
+    },
+    "socios": {
+      ".read": "auth != null && root.child('roles').child(auth.uid).exists()",
+      "$code": {
+        ".read": "auth != null",
+        ".write": "auth != null && (root.child('roles').child(auth.uid).exists() || newData.exists())",
+        ".validate": "newData.hasChildren(['nombre','objetivo']) && (root.child('roles').child(auth.uid).exists() || (data.exists() ? (newData.child('status').val() === data.child('status').val() && newData.child('membresia/vence').val() === data.child('membresia/vence').val() && newData.child('membresia/ancla').val() === data.child('membresia/ancla').val() && newData.child('membresia/suspendido').val() === data.child('membresia/suspendido').val() && newData.child('asignado').val() === data.child('asignado').val() && newData.child('entrenadorId').val() === data.child('entrenadorId').val() && newData.child('nutriologoId').val() === data.child('nutriologoId').val() && newData.child('nutriologo').val() === data.child('nutriologo').val()) : ($code.matches(/^[0-9]{4}$/) && newData.child('code').val() === $code && newData.child('status').val() === 'pendiente' && !newData.child('membresia').exists() && !newData.child('nutriologoId').exists() && !newData.child('nutriologo').exists())))"
+      }
+    },
+    "entrenadores": {
+      ".read": "auth != null",
+      "$id": {
+        ".write": "auth != null && (root.child('roles').child(auth.uid).val() === 'coordinador' || (root.child('roles').child(auth.uid).exists() && data.child('uid').val() === auth.uid && newData.exists()))",
+        "uid": {
+          ".validate": "root.child('roles').child(auth.uid).val() === 'coordinador' || newData.val() === data.val()"
+        },
+        "rol": {
+          ".validate": "root.child('roles').child(auth.uid).val() === 'coordinador' || newData.val() === data.val()"
+        },
+        "pass": {
+          ".validate": false
+        }
+      }
+    },
+    "config": {
+      ".read": "auth != null",
+      "$k": {
+        ".write": "auth != null && root.child('roles').child(auth.uid).exists()"
+      }
+    },
+    "apariencia": {
+      ".read": true,
+      ".write": "auth != null && root.child('roles').child(auth.uid).val() === 'coordinador'"
+    },
+    "apariencia_img": {
+      ".read": true,
+      ".write": "auth != null && root.child('roles').child(auth.uid).val() === 'coordinador'",
+      "$k": {
+        ".validate": "newData.isString() && newData.val().length < 400000 && newData.val().beginsWith('data:image/')"
+      }
+    },
+    "apariencia_prev": {
+      ".read": "auth != null && root.child('roles').child(auth.uid).val() === 'coordinador'",
+      ".write": "auth != null && root.child('roles').child(auth.uid).val() === 'coordinador'"
+    },
+    "indice": {
+      ".read": "auth != null && root.child('roles').child(auth.uid).exists()",
+      "$code": {
+        ".write": "auth != null && (root.child('roles').child(auth.uid).exists() || (root.child('socios').child($code).exists() && newData.exists()))",
+        ".validate": "root.child('roles').child(auth.uid).exists() || (newData.child('st').val() === root.child('socios').child($code).child('status').val() && newData.child('m/v').val() === root.child('socios').child($code).child('membresia/vence').val())"
+      }
+    }
+  }
+}
