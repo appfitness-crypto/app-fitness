@@ -399,7 +399,9 @@ function enviar(en){
     enVuelo.delete(id);
     console.warn('Firebase write error',en.path,e);
     const txt=String(e&&(e.code||e.message)||'').toLowerCase();
-    if(txt.includes('permission')) quitarEntrada(id);   // reglas de Firebase: reintentar no sirve
+    // Reglas de Firebase: reintentar no sirve… salvo el expediente de un cliente, que NO se tira:
+    // se queda en el celular y se vuelve a subir al reconectar (p. ej. cuando se publiquen las reglas correctas)
+    if(txt.includes('permission') && en.tipo!=='socio') quitarEntrada(id);
     const cb=OUT_CB[id]; delete OUT_CB[id];
     if(cb && cb.err) cb.err(e); else showToast(fbErrorMsg(e));
     actualizarPillSync();

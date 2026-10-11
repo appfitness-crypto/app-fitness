@@ -22,8 +22,8 @@ Todo se puede hacer desde el celular o la tablet.
 5. Si la publicación falla por permisos: Google Cloud Console → **IAM** → cuenta `firebase-adminsdk-…` → Editar →
    agrega los roles **Administrador de Firebase Hosting**, **Visualizador de claves de API** y **Visualizador de Cloud Run**.
 
-> Las reglas de la base de datos no se publican solas: cada vez que cambie `firebase-rules.json`, pégalo en
-> Realtime Database → Reglas.
+> Las reglas de la base de datos (`firebase-rules.json`) también se publican solas al unir a `main`
+> (paso "Publicar reglas de la base de datos" en Actions). Ya no hay que pegarlas a mano.
 
 ## Parte B · Crear el paquete de Android (PWABuilder)
 

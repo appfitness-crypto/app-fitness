@@ -1,5 +1,6 @@
-# Publica la web en Firebase Hosting.
+# Publica la web en Firebase Hosting y las reglas de la base de datos.
 #  · Al unir cambios a main  → https://app-fitness-7cf1c.web.app (la que abre la app de Play Store)
+#                              + firebase-rules.json en Realtime Database (ya no hay que pegarlas a mano)
 #  · En cada pull request    → una vista previa temporal; el enlace aparece como comentario en el PR
 # Necesita el secreto FIREBASE_SERVICE_ACCOUNT (ver docs/PLAY-STORE.md). Sin él, el trabajo se salta sin fallar.
 name: Publicar en Firebase Hosting
@@ -34,3 +35,10 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           projectId: app-fitness-7cf1c
           channelId: ${{ github.event_name == 'push' && 'live' || '' }}
+      - name: Publicar reglas de la base de datos
+        if: env.FB_SA != '' && github.event_name == 'push'
+        run: |
+          printf '%s' "$FB_SA" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          npx --yes firebase-tools@13 deploy --only database --project app-fitness-7cf1c --non-interactive
+          rm -f "$RUNNER_TEMP/sa.json"
