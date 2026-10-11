@@ -39,6 +39,9 @@ Todo se puede hacer desde el celular o la tablet.
 4. **assetlinks.json** es lo que quita la barra del navegador dentro de la app. Debe tener dos huellas:
    la de tu llave (viene en el archivo) y la de **Play App Signing** (Play Console → tu app → Configuración →
    **Integridad de la app → Firma de apps → Huella digital del certificado SHA-256**). Pásame ambas y armo el archivo.
+   - Ya publicado: `.well-known/assetlinks.json` con la huella de la llave de PWABuilder (paquete `com.appfitness.app`).
+   - Falta: agregar la huella de **Play App Signing** cuando subas el primer `.aab` a Play Console
+     (se agrega como segundo elemento de `sha256_cert_fingerprints`).
 
 ## Parte C · Play Console
 
