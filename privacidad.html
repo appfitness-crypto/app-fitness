@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aviso de privacidad</title>
+<meta name="robots" content="index,follow">
+<style>
+:root{--bg:#F4F6F8;--tx:#141A20;--mu:#5B6672;--card:#FFFFFF;--b:#DDE3E9;--v:#3F6B00}
+@media (prefers-color-scheme:dark){:root{--bg:#0E1318;--tx:#E8EDF2;--mu:#9AA5B1;--card:#161D24;--b:#26303A;--v:#C6F432}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:28px 16px 48px}
+.card{background:var(--card);border:1px solid var(--b);border-radius:16px;padding:22px 20px}
+h1{font-size:1.6rem;margin:0 0 4px}
+h3{display:none}
+a{color:var(--v)}
+.app{color:var(--mu);margin:0 0 18px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Aviso de privacidad</h1>
+  <p class="app" id="app-nombre"></p>
+  <div class="card" id="aviso"><p>Cargando…</p></div>
+  <p class="app" style="margin-top:18px">¿Quieres borrar tu cuenta? <a href="eliminar-cuenta.html">Cómo eliminar tu cuenta y tus datos</a></p>
+</main>
+<script src="js/config.js"></script>
+<script src="js/02-mensualidad.js"></script>
+<script src="js/29-privacidad.js"></script>
+<script>
+  document.getElementById('app-nombre').textContent=GYM.nombre;
+  document.title='Aviso de privacidad · '+GYM.nombre;
+  document.getElementById('aviso').innerHTML=avisoPrivacidadHTML();
+</script>
+</body>
+</html>

@@ -62,7 +62,7 @@ function staffMenu(){
   const grupos=[
     ['Personas',['btn-mi-codigo','btn-mi-filosofia','btn-ver-ent','btn-nuevo-ent','btn-conocimiento']],
     ['Datos y sistema',['btn-resumen','btn-apariencia','btn-lugares','btn-respaldo','btn-firebase','btn-reset']],
-    ['Cuenta',['btn-logout']]
+    ['Cuenta',['btn-eliminar-cuenta','btn-logout']]
   ];
   let html='';
   grupos.forEach(([t,ids])=>{
@@ -71,7 +71,7 @@ function staffMenu(){
     html+=`<div class="sm-g">${t}</div>`+items.map(b=>{
       const raw=b.textContent.trim(); const m=raw.match(/^([^\p{L}\p{N}]+)\s*(.*)$/u);
       const ic=b.id==='btn-logout'?'🚪':(m?m[1].trim():'•'), lb=m?m[2]:raw;
-      const cls=b.id==='btn-logout'?' danger':(b.id==='btn-reset'?' warn':'');
+      const cls=(b.id==='btn-logout'||b.id==='btn-eliminar-cuenta')?' danger':(b.id==='btn-reset'?' warn':'');
       return `<button type="button" class="sm-row${cls}" onclick="staffMenuIr('${b.id}')"><span class="sm-ic">${ic}</span><span>${esc(lb)}</span></button>`;
     }).join('');
   });

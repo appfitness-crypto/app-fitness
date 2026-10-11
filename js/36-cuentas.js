@@ -247,16 +247,74 @@ async function vincularEntrenador(){
     }catch(e){ showToast(cuentaMsgError(e)); }
   });
 }
-// Diálogo con un campo de texto libre (usa el mismo modal de confirmar)
-function uiEntrada(msg,placeholder,label,onOk){
+// Diálogo con un campo de texto libre (usa el mismo modal de confirmar). opts: {tipo:'password', danger:true}
+function uiEntrada(msg,placeholder,label,onOk,opts){
+  opts=opts||{};
   document.getElementById('uic-msg').textContent=msg;
   const yes=document.getElementById('uic-yes');
-  yes.textContent=label||'Aceptar'; yes.className='sd-pri';
+  yes.textContent=label||'Aceptar'; yes.className='sd-pri'+(opts.danger?' danger':'');
   document.getElementById('uic-input-wrap').style.display='block';
   const inp=document.getElementById('uic-input'); inp.value=''; inp.placeholder=placeholder||'';
+  inp.type=opts.tipo==='password'?'password':'text';
   yes.disabled=true; yes.style.opacity=.45;
   inp.oninput=()=>{ const ok=!!inp.value.trim(); yes.disabled=!ok; yes.style.opacity=ok?1:.45; };
-  UIC_CB=()=>onOk(inp.value.trim());
+  UIC_CB=()=>{ const v=inp.type==='password'?inp.value:inp.value.trim(); inp.value=''; inp.type='text'; onOk(v); };
   document.getElementById('modal-uic').classList.add('open');
   setTimeout(()=>inp.focus(),250);
+}
+
+// ═════════════════════════════════════════
+// ELIMINAR MI CUENTA (Google Play exige poder hacerlo desde la app)
+// Cliente: borra su expediente, su índice y su cuenta.
+// Entrenador: borra su perfil, su código, su rol y su cuenta. Sus clientes conservan su plan
+// y pasan a seguir la filosofía del plan de la app.
+// ═════════════════════════════════════════
+function eliminarMiCuenta(){
+  const u=fbAuth&&fbAuth.currentUser;
+  if(!u || u.isAnonymous){ showToast('Entra a tu cuenta para eliminarla.'); return; }
+  if(fbRolDB==='coordinador'){ showToast('La cuenta del director no se elimina desde la app. Quítale el rol en la consola de Firebase primero.'); return; }
+  if(!navigator.onLine || !fbListo){ showToast('Necesitas conexión a internet para eliminar tu cuenta.'); return; }
+  const ent=fbRolDB==='entrenador';
+  const msg=ent
+    ? 'Se borrarán tu cuenta de entrenador, tu filosofía y tu código. Tus clientes conservan su plan, pero ya no los verás. No se puede deshacer. Escribe ELIMINAR para continuar.'
+    : 'Se borrarán tu cuenta, tu plan y todo tu historial de entrenamientos. No se puede deshacer. Escribe ELIMINAR para continuar.';
+  uiPrompt(msg,'ELIMINAR',()=>{
+    setTimeout(()=>uiEntrada('Por seguridad, escribe tu contraseña','Contraseña','Eliminar mi cuenta',pw=>cuentaBorrar(pw),{tipo:'password',danger:true}),300);
+  },{label:'Continuar'});
+}
+async function cuentaBorrar(pw){
+  const u=fbAuth.currentUser; if(!u || u.isAnonymous) return;
+  try{ await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email, pw)); }
+  catch(e){ showToast(cuentaMsgError(e)); return; }
+  showToast('Eliminando tu cuenta…');
+  const uid=u.uid;
+  try{
+    if(fbRolDB==='entrenador'){
+      const cod=(DB.entrenadores[uid]&&DB.entrenadores[uid].codigo) || (await fbDB.ref('/entrenadores/'+uid+'/codigo').once('value')).val();
+      fbDetenerStaff();
+      OUTBOX=OUTBOX.filter(x=>x.path.indexOf('/entrenadores/'+uid)!==0); outGuardar();
+      await fbDB.ref('/entrenadores/'+uid).remove();     // con el rol todavía vigente
+      if(cod) await fbDB.ref('/codigos/'+cod).remove();
+      await fbDB.ref('/roles/'+uid).remove();            // al final: sin rol ya no podría borrar lo demás
+      delete DB.entrenadores[uid];
+    } else {
+      fbDetenerSocio();
+      const p='/socios/'+uid;
+      OUTBOX=OUTBOX.filter(x=>!(x.path===p || x.path.indexOf(p+'/')===0)); outGuardar();   // que nada pendiente lo vuelva a crear
+      delete DB.socios[uid]; delete BASE[uid]; baseGuardar();
+      await fbDB.ref('/indice/'+uid).remove();
+      await fbDB.ref(p).remove();
+    }
+    guardarLocal();
+    await u.delete();
+  }catch(e){
+    console.warn('cuentaBorrar',e);
+    showToast('No se pudo terminar de eliminar tu cuenta: '+cuentaMsgError(e)+' Inténtalo de nuevo.');
+    return;
+  }
+  activeSocio=null; staffActivoId=null; staffActivoEntId=null; staffRol='entrenador';
+  try{ staffLimpiarPanel(); }catch(e){}
+  borrarSesion();
+  go('s-inicio');
+  showToast('Tu cuenta fue eliminada.');
 }

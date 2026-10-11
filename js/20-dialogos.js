@@ -23,7 +23,7 @@ function uiPrompt(msg,expected,onYes,opts){
   const yes=document.getElementById('uic-yes');
   yes.textContent=opts.label||'Confirmar'; yes.className='sd-pri danger';
   document.getElementById('uic-input-wrap').style.display='block';
-  const inp=document.getElementById('uic-input'); inp.value=''; inp.placeholder=expected;
+  const inp=document.getElementById('uic-input'); inp.value=''; inp.placeholder=expected; inp.type='text';
   yes.disabled=true; yes.style.opacity=.45;
   inp.oninput=()=>{ const ok=inp.value.trim()===expected; yes.disabled=!ok; yes.style.opacity=ok?1:.45; };
   UIC_CB=onYes;

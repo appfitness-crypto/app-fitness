@@ -25,6 +25,7 @@ function avisoPrivacidadHTML(){
 ${ia}
 <p><b>Quién puede verlos.</b> Si entraste con el código de un entrenador, ese entrenador; y el equipo de ${esc(R)}. Tus datos se almacenan en servidores de proveedores tecnológicos (Google Firebase) que los resguardan por cuenta de ${esc(R)}. No los vendemos ni los compartimos con terceros para fines comerciales.</p>
 <p><b>Tus derechos.</b> Puedes <b>acceder, rectificar, cancelar u oponerte</b> (derechos ARCO) al tratamiento de tus datos, y revocar tu consentimiento, en cualquier momento: ${contacto}. Indica tu nombre y el correo de tu cuenta. Si revocas tu consentimiento, ya no podrás usar la app.</p>
+<p><b>Eliminar tu cuenta.</b> Puedes borrar tu cuenta y todos tus datos cuando quieras desde la app: <b>Perfil → Eliminar mi cuenta</b> (entrenadores: Menú → Eliminar mi cuenta). Se borran de inmediato tu cuenta, tu plan y tu historial; si existen copias de seguridad, tus datos salen de ellas en un máximo de 30 días. Si ya no tienes acceso a la app, ${contacto}.</p>
 <p><b>Menores de edad.</b> Si eres menor de edad, tu madre, padre o tutor debe leer y aceptar este aviso por ti.</p>
 <p><b>Cambios.</b> Si este aviso cambia, te lo mostraremos de nuevo en la app para que lo aceptes.</p>`;
 }

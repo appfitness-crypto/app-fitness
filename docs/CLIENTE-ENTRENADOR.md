@@ -36,7 +36,12 @@ La app ya no pertenece a un gimnasio. Tiene dos formas de uso:
 Las reglas se probaron con el emulador de Firebase (53 casos: un cliente no ve a otro, un entrenador
 no ve a los clientes de otro ni a los del plan de la app, nadie se puede dar rol de director, etc.).
 
-## Pendiente (siguientes etapas)
-- Borrar la cuenta desde la app (Google Play lo exige).
-- Empaquetar para Play Store y publicar la web (Firebase Hosting o GitHub Pages).
+## Eliminar cuenta
+- Cliente: Perfil → **Eliminar mi cuenta**. Borra su expediente, su índice y su cuenta.
+- Entrenador: Menú → **Eliminar mi cuenta**. Borra su perfil, su código y su rol; sus clientes conservan su plan
+  y pasan a seguir la filosofía del plan de la app.
+- El director no se puede borrar desde la app (primero se le quita el rol en la consola).
+
+## Pendiente
+- Publicar y empaquetar para Play Store: ver `docs/PLAY-STORE.md`.
 - Cobros: suscripción del cliente directo y reparto de porcentaje con el entrenador.

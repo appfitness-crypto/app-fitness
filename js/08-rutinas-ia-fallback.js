@@ -1405,6 +1405,7 @@ function renderPerfilTab(){
       ${s.status==='activo'?`<button type="button" class="pf-row" onclick="generarPDFRutina()">${it('file','sm')}<span id="btn-pdf-rutina">Descargar mi rutina en PDF</span>${ico('chev')}</button>`:''}
       ${s.entrenadorId?'':`<button type="button" class="pf-row" onclick="vincularEntrenador()">${it('key','sm')}<span>Tengo código de entrenador</span>${ico('chev')}</button>`}
       <button type="button" class="pf-row danger" onclick="logoutSocio()">${it('logout','sm')}<span>Cerrar sesión</span>${ico('chev')}</button>
-    </div>`;
+    </div>
+    <button type="button" class="btn-back-link" style="margin:18px auto 8px;display:block;color:var(--mu)" onclick="eliminarMiCuenta()">Eliminar mi cuenta</button>`;
   pintarSelectorTema();
 }
