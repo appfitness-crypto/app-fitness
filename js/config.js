@@ -23,14 +23,13 @@ const GYM = {
 
   // ── Firebase de ESTE gimnasio (Configuración del proyecto → Tus apps → Configuración) ──
   firebase: {
-    apiKey: "AIzaSyADuYE2LQ_XxmjoapBAmtQ0U3IDgVjABZA",
-    authDomain: "gym-campestre.firebaseapp.com",
-    databaseURL: "https://gym-campestre-default-rtdb.firebaseio.com",
-    projectId: "gym-campestre",
-    storageBucket: "gym-campestre.firebasestorage.app",
-    messagingSenderId: "355837299373",
-    appId: "1:355837299373:web:8f117a8a4d850ab9081424",
-    measurementId: "G-Z0PPSRKV1L"
+    apiKey: "AIzaSyBxzcbK37hWFzXHuotDz_oRU9BxVfE_QMQ",
+    authDomain: "app-fitness-7cf1c.firebaseapp.com",
+    databaseURL: "https://app-fitness-7cf1c-default-rtdb.firebaseio.com",
+    projectId: "app-fitness-7cf1c",
+    storageBucket: "app-fitness-7cf1c.firebasestorage.app",
+    messagingSenderId: "192344736973",
+    appId: "1:192344736973:web:cc74dc6de40d634576d584"
   },
 
   // ── IA de rutinas (Cloudflare Worker). Vacío = plantillas locales ──
