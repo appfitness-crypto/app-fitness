@@ -140,7 +140,7 @@ function casaAlternativas(x,disp,enDia){
 function casaGenerar(s,opts){
   opts=opts||{};
   const avisos=[];
-  const ent=s.entrenadorId?getEntrenador(s.entrenadorId):null;
+  const ent=entRutina(s.entrenadorId);
   const ctx=ctxDesdePerfil({nivel:s.nivel,objetivo:s.objetivo,limitaciones:s.limitaciones}, ent&&ent.filosofia);
   const edad=parseInt(s.edad)||35;
   const equipo=(opts.equipo||[]).filter(q=>CASA_EQUIPO[q]);
@@ -387,7 +387,7 @@ function casaVolverGym(code){
 
 // ── Métodos y opciones para una rutina en casa (solo agrega tempo/pausa a lo que no tenga; sin ejercicios de gimnasio) ──
 function casaEnriquecer(s){
-  const ent=s.entrenadorId?getEntrenador(s.entrenadorId):null;
+  const ent=entRutina(s.entrenadorId);
   const ctx=ctxDesdePerfil({nivel:s.nivel,objetivo:s.objetivo,limitaciones:s.limitaciones}, ent&&ent.filosofia);
   const perm=metodosPermitidos(ctx).filter(id=>['tempo','pausa','una_y_media'].includes(id));
   const rnd=prng((s.code||'')+'|casa-met|'+Date.now());

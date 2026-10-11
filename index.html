@@ -146,39 +146,41 @@
   </div>
   <div class="inicio-wrap">
     <div class="inicio-cards">
-      <button type="button" class="ic ic-ya" onclick="go('s-login')">
-        <div class="ic-icon"><svg class="ico" aria-hidden="true"><use href="#i-key"/></svg></div>
-        <span class="ic-txt"><span class="ic-label">Ya soy socio</span><span class="ic-sub">Entra con tu código de 4 dígitos.</span></span>
+      <button type="button" class="ic ic-nuevo" onclick="abrirRegistro('cliente')">
+        <div class="ic-icon"><svg class="ico" aria-hidden="true"><use href="#i-spark"/></svg></div>
+        <span class="ic-txt"><span class="ic-label">Soy nuevo</span><span class="ic-sub">Crea tu cuenta, responde la evaluación y la app arma tu plan.</span></span>
         <span class="ic-arrow"><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></span>
       </button>
-      <button type="button" class="ic ic-nuevo" onclick="startQuiz()">
-        <div class="ic-icon"><svg class="ico" aria-hidden="true"><use href="#i-spark"/></svg></div>
-        <span class="ic-txt"><span class="ic-label">Soy nuevo</span><span class="ic-sub">Responde la evaluación y genera tu plan.</span></span>
+      <button type="button" class="ic ic-ya" onclick="go('s-login')">
+        <div class="ic-icon"><svg class="ico" aria-hidden="true"><use href="#i-key"/></svg></div>
+        <span class="ic-txt"><span class="ic-label">Ya tengo cuenta</span><span class="ic-sub">Entra con tu correo y contraseña.</span></span>
         <span class="ic-arrow"><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></span>
       </button>
     </div>
     <div>
-      <button type="button" class="staff-link" onclick="go('s-staff-login')">Acceso entrenador / director <svg class="ico" aria-hidden="true" style="width:14px;height:14px"><use href="#i-arrow"/></svg></button>
+      <button type="button" class="staff-link" onclick="abrirRegistro('entrenador')">Soy entrenador: crear mi cuenta <svg class="ico" aria-hidden="true" style="width:14px;height:14px"><use href="#i-arrow"/></svg></button>
     </div>
   </div>
 </div>
 
-<!-- ═══ S1: LOGIN SOCIO ═══ -->
+<!-- ═══ S1: ENTRAR (cliente o entrenador) ═══ -->
 <div class="sc" id="s-login">
   <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px;">
     <div class="login-card">
-      <div class="lc-tag">Acceso socio</div>
-      <div class="lc-title">Ingresa<br>tu código</div>
-      <div class="lc-sub">4 dígitos, entregados al activar tu plan.</div>
-      <div class="code-row">
-        <input type="text" maxlength="1" class="cd" id="cd1" inputmode="numeric" aria-label="Dígito 1 de 4">
-        <input type="text" maxlength="1" class="cd" id="cd2" inputmode="numeric" aria-label="Dígito 2 de 4">
-        <input type="text" maxlength="1" class="cd" id="cd3" inputmode="numeric" aria-label="Dígito 3 de 4">
-        <input type="text" maxlength="1" class="cd" id="cd4" inputmode="numeric" aria-label="Dígito 4 de 4">
+      <div class="lc-tag">Ya tengo cuenta</div>
+      <div class="lc-title">Entra a<br>tu cuenta</div>
+      <div class="lc-sub">Clientes y entrenadores entran aquí.</div>
+      <div style="margin-bottom:10px;">
+        <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">CORREO</div>
+        <input type="email" class="ti" id="in-correo" placeholder="tu@correo.com" autocomplete="email" inputmode="email">
       </div>
-      <div class="code-hint">Te lo asigna tu entrenador.</div>
-      <button class="btn-main" onclick="doLogin()">Entrar</button>
-      <div class="login-err" id="login-err">No encontramos ese código. Revisa tus 4 dígitos.</div>
+      <div style="margin-bottom:16px;">
+        <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">CONTRASEÑA</div>
+        <input type="password" class="ti" id="in-pass" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doEntrar()">
+      </div>
+      <button class="btn-main" id="in-btn" onclick="doEntrar()">Entrar</button>
+      <div class="login-err" id="in-err"></div>
+      <button type="button" class="btn-back-link" onclick="recuperarPass()"><span>Olvidé mi contraseña</span></button>
       <button type="button" class="btn-back-link" onclick="go('s-inicio')">← <span>Volver al inicio</span></button>
     </div>
   </div>
@@ -519,9 +521,23 @@
     <!-- QT: elegir entrenador -->
     <div class="q-sc" id="qqT">
       <div class="q-tag">Último paso</div>
-      <div class="q-title">¿Con quién<br>quieres entrenar?</div>
-      <div class="q-sub">Cada entrenador construye sus rutinas con su propio método. Elige por estilo, no solo por nombre.</div>
-      <div id="trainer-picker-list" style="margin-top:6px"></div>
+      <div class="q-title">¿Tienes<br>entrenador?</div>
+      <div class="q-sub">Si un entrenador te dio su código, escríbelo: tu plan saldrá con su método y él lo podrá ajustar. Si no, la app arma y lleva tu plan.</div>
+      <div id="trainer-picker-list" style="margin-top:6px">
+        <div class="opt" id="qt-sin" onclick="qtElegir('sin')" style="padding:14px;border-radius:12px;margin-bottom:10px">
+          <div class="ol">No, que la app arme mi plan</div>
+          <div class="os">El sistema planifica y da seguimiento a tu entrenamiento.</div>
+        </div>
+        <div class="opt" id="qt-con" onclick="qtElegir('con')" style="padding:14px;border-radius:12px;margin-bottom:10px">
+          <div class="ol">Sí, tengo código de entrenador</div>
+          <div class="os">Ejemplo: ENT-4K7Q</div>
+        </div>
+        <div id="qt-codigo-wrap" style="display:none;margin-bottom:10px">
+          <input type="text" class="ti" id="qt-codigo" placeholder="ENT-XXXX" maxlength="12" autocapitalize="characters" autocomplete="off" oninput="qtCodigoCambio()">
+          <button type="button" class="tb-btn" style="margin-top:8px" onclick="qtValidarCodigo()">Validar código</button>
+          <div id="qt-codigo-res" style="margin-top:8px;font-size:var(--fs-xs)"></div>
+        </div>
+      </div>
       <div class="nav-row"><div class="btn-prev" onclick="qTrainerBack()">←</div><button class="btn-next" disabled id="qbT" onclick="qConfirmTrainerAndGenerate()">Generar mi plan ⚡</button></div>
     </div>
 
@@ -585,11 +601,9 @@
   <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:40px 24px;">
     <div class="pend-card">
       <div class="pend-icon">✅</div>
-      <div class="pend-title">¡Plan guardado!</div>
-      <div class="pend-sub">Tu plan quedó registrado en el sistema.<br>Un entrenador lo revisará y personalizará.<br><br>Tu código de acceso es:</div>
-      <div class="pend-code" id="pend-code">——</div>
-      <div class="pend-codelabel">Guárdalo. Lo usarás cada vez que entres al kiosco.</div>
-      <button class="btn-home" onclick="go('s-inicio')">← Volver al inicio</button>
+      <div class="pend-title">¡Tu plan está listo!</div>
+      <div class="pend-sub" id="pend-sub">Quedó guardado en tu cuenta. Entra con tu correo desde cualquier celular.</div>
+      <button class="btn-home" onclick="abrirPlanRecienCreado()">Ver mi plan →</button>
     </div>
   </div>
 </div>
@@ -662,33 +676,29 @@
   <div class="rb-lbl" id="rest-bubble-lbl">TOCA</div>
 </div>
 
-<!-- ═══ STAFF LOGIN ═══ -->
-<div class="sc" id="s-staff-login">
+<!-- ═══ REGISTRO (cliente o entrenador) ═══ -->
+<div class="sc" id="s-registro">
   <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px;">
-    <div class="login-card" style="max-width:400px;border-color:color-mix(in srgb,var(--n) 20%,transparent);">
-      <div class="lc-tag" style="color:var(--n)">Acceso staff</div>
-      <div class="lc-title">Panel del<br>entrenador</div>
-      <div class="lc-sub">Solo para entrenadores y directores.</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px" id="staff-roles">
-        <div onclick="staffSelRol(this,'entrenador')" class="opt sel" style="padding:10px;text-align:center;border-radius:9px;">
-          <div class="ol" style="font-size:var(--fs-md);">Entrenador</div>
-          <div class="os">Mis socios</div>
-        </div>
-        <div onclick="staffSelRol(this,'coordinador')" class="opt" style="padding:10px;text-align:center;border-radius:9px;">
-          <div class="ol" style="font-size:var(--fs-md);">Director</div>
-          <div class="os">Todos los socios</div>
-        </div>
+    <div class="login-card" style="max-width:400px;">
+      <div class="lc-tag" id="reg-tag">Soy nuevo</div>
+      <div class="lc-title" id="reg-title">Crea tu<br>cuenta</div>
+      <div class="lc-sub" id="reg-sub"></div>
+      <div style="margin-bottom:10px;">
+        <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">NOMBRE</div>
+        <input type="text" class="ti" id="reg-nombre" placeholder="Nombre y apellido" maxlength="60" autocomplete="name">
       </div>
       <div style="margin-bottom:10px;">
-        <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">USUARIO</div>
-        <input type="text" class="ti" id="staff-user" value="" placeholder="usuario" autocomplete="username">
+        <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">CORREO</div>
+        <input type="email" class="ti" id="reg-correo" placeholder="tu@correo.com" autocomplete="email" inputmode="email">
       </div>
       <div style="margin-bottom:16px;">
-        <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">CONTRASEÑA</div>
-        <input type="password" class="ti" id="staff-pass" value="" placeholder="••••••" autocomplete="current-password">
+        <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">CONTRASEÑA (MÍN. 6)</div>
+        <input type="password" class="ti" id="reg-pass" placeholder="••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter')crearCuenta()">
       </div>
-      <button class="btn-main" style="background:var(--grad)" onclick="doStaffLogin()">Entrar al panel</button>
-      <div class="login-err" id="staff-err">Usuario o contraseña incorrectos.</div>
+      <button class="btn-main" id="reg-btn" style="background:var(--grad)" onclick="crearCuenta()">Crear cuenta</button>
+      <div class="login-err" id="reg-err"></div>
+      <button type="button" class="btn-back-link" id="reg-cambiar" onclick="registroCambiarTipo()"></button>
+      <button type="button" class="btn-back-link" onclick="go('s-login')"><span>Ya tengo cuenta</span></button>
       <button type="button" class="btn-back-link" onclick="go('s-inicio')">← <span>Volver al inicio</span></button>
     </div>
   </div>
@@ -704,6 +714,7 @@
     <div class="staff-tb-actions">
       <span class="theme-slot"></span>
       <button type="button" class="tb-btn" id="btn-staff-menu" onclick="staffMenu()" aria-label="Abrir menú"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg>Menú</button>
+      <div class="tb-btn" id="btn-mi-codigo" onclick="mostrarMiCodigo()" style="display:none;color:var(--v);border-color:color-mix(in srgb, var(--v) 30%, transparent)">🔑 Mi código</div>
       <div class="tb-btn" id="btn-mi-filosofia" onclick="abrirMiFilosofia()" style="display:none;color:var(--p);border-color:color-mix(in srgb,var(--p) 25%,transparent)">🧬 Mi filosofía</div>
       <div class="tb-btn" id="btn-ver-ent" onclick="abrirEntrenadores()" style="display:none;color:var(--n);border-color:color-mix(in srgb,var(--n) 20%,transparent)">👥 Entrenadores</div>
       <div class="tb-btn" id="btn-nuevo-ent" onclick="abrirNuevoEntrenador()" style="display:none;color:var(--v);border-color:color-mix(in srgb, var(--v) 30%, transparent)">➕ Nuevo entrenador</div>
@@ -714,6 +725,7 @@
       <div class="tb-btn" id="btn-respaldo" onclick="descargarRespaldo()" style="display:none;color:var(--n);border-color:color-mix(in srgb,var(--n) 20%,transparent)">💾 Respaldo</div>
       <div class="tb-btn" id="btn-reset" onclick="resetDemo()" style="display:none;color:var(--g);border-color:color-mix(in srgb,var(--g) 20%,transparent)">⟲ Reset datos</div>
       <div class="tb-btn" id="btn-firebase" onclick="go('s-fbsetup');fbAbrirSetup();" style="display:none;color:var(--n);border-color:color-mix(in srgb,var(--n) 20%,transparent)">🔥 Firebase</div>
+      <div class="tb-btn" id="btn-eliminar-cuenta" onclick="eliminarMiCuenta()" style="display:none">🗑 Eliminar mi cuenta</div>
       <div class="tb-btn" id="btn-logout" onclick="staffLogout()" style="color:var(--r);border-color:color-mix(in srgb,var(--r) 20%,transparent)">Cerrar sesión</div>
     </div>
     <div class="staff-meta">
@@ -790,6 +802,7 @@
 <script src="js/33-teclado-botones.js"></script>
 <script src="js/34-apariencia.js"></script>
 <script src="js/35-indice-socios.js"></script>
+<script src="js/36-cuentas.js"></script>
 <script src="js/99-arranque.js"></script>
 
 <!-- ═══ MODAL AVISO DE PRIVACIDAD ═══ -->
@@ -931,7 +944,7 @@
 <div class="modal" id="modal-staff-menu" onclick="if(event.target===this)staffMenuCerrar()">
   <div class="mbox">
     <div class="mx" onclick="staffMenuCerrar()" aria-label="Cerrar">✕</div>
-    <div class="m-title" style="font-size:var(--fs-4xl)">Menú</div>
+    <div class="m-title" id="staff-menu-title" style="font-size:var(--fs-4xl)">Menú</div>
     <div id="staff-menu-body"></div>
   </div>
 </div>

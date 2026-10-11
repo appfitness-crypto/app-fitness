@@ -2,10 +2,10 @@
    Fitness System Pro · módulo cargado por index.html en orden (script clásico: comparte el ámbito global).
    No cambia la lógica: es el mismo código que antes vivía dentro de index.html. ═══ */
 // ═════════════════════════════════════════
-// GEOFENCE — Club Campestre Aguascalientes
+// GEOFENCE — solo si js/config.js define GYM.geofence (apagada en la app pública)
 // ═════════════════════════════════════════
-const GEO_CENTER = { lat: 21.8818, lng: -102.2871 }; // ← ajusta al GPS real del club
-const GEO_RADIO_M = 200;
+const GEO_CENTER = GYM.geofence ? {lat:GYM.geofence.lat, lng:GYM.geofence.lng} : {lat:0,lng:0};
+const GEO_RADIO_M = (GYM.geofence && GYM.geofence.radioM) || 200;
 let geoStatus = 'unknown';
 let geoCoords = null;
 
@@ -13,7 +13,7 @@ let geoCoords = null;
 // socio lo permite) para clasificar el check-in en el Resumen y para armar "Lugares
 // visitados" en el menú del coordinador, sin mostrarle nada de esto al socio.
 function initGeofence(){
-  if(!navigator.geolocation) return;
+  if(!GYM.geofence || !navigator.geolocation) return;   // sin gimnasio fijo: no se pide la ubicación
   navigator.geolocation.getCurrentPosition(
     pos => {
       geoCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
@@ -67,7 +67,7 @@ function registrarAsistencia(s){
     s.logs.asistencia.unshift(registro);
     if(s.logs.asistencia.length>90) s.logs.asistencia = s.logs.asistencia.slice(0,90);
     dbSave(s.code);
-    registrarLugarVisitado(geoCoords);
+    if(GYM.geofence) registrarLugarVisitado(geoCoords);
   }
   return { registro, yaRegistrado };
 }
@@ -77,8 +77,7 @@ window.addEventListener('load', ()=>{
   // ── Cargar caché local de inmediato (offline-first) ──
   const localInicial = lsLoad();
   if(localInicial && localInicial.socios && Object.keys(localInicial.socios).length){ DB = localInicial; }
-  else { DB = seedDB(); }
-  if(!DB.entrenadores || !Object.keys(DB.entrenadores).length){ DB.entrenadores = seedEntrenadores(); }
+  else { DB = { socios:{}, entrenadores:(localInicial&&localInicial.entrenadores)||{}, config:(localInicial&&localInicial.config)||{}, version:1 }; }   // sin datos demo
   DB.config = DB.config || {};
   // v8.2: este dispositivo ya no guarda la lista completa de socios salvo que sea del staff
   { const ses0=leerSesion();
@@ -130,7 +129,7 @@ function restaurarSesion(){
   const ses=leerSesion(); if(!ses) return;
   if(ses.tipo==='socio'){
     const socio=getSocio(ses.code);
-    if(!socio){ borrarSesion(); return; }
+    if(!socio){ borrarSesion(); restaurarCuenta(ses.code); return; }
     if(membBloqueoSocio(socio)){ borrarSesion(); return; }
     activeSocio=socio;
     fbEscucharSocio(ses.code);
@@ -142,21 +141,46 @@ function restaurarSesion(){
     refreshDash();
     dashTab('inicio');
     go('s-dash');
+    verificarCuentaSocio(ses.code);
+  } else if(ses.tipo==='cuenta'){
+    restaurarCuenta(ses.uid);
   } else if(ses.tipo==='staff'){
     restaurarStaff(ses);
   }
+}
+// El plan se abre al instante con lo guardado en el celular; si la cuenta de Firebase ya no es la misma, se cierra
+async function verificarCuentaSocio(code){
+  if(!fbListo || !fbAuth) return;
+  const est=await Promise.race([fbPrimerEstado,new Promise(r=>setTimeout(()=>r(null),8000))]);
+  if(!est) return;   // sin respuesta (sin conexión): se sigue con lo local
+  const u=fbAuth.currentUser;
+  if(!u || u.isAnonymous || u.uid!==code){ if(activeSocio && activeSocio.code===code){ logoutSocio(); showToast('Tu sesión terminó. Vuelve a entrar con tu correo.'); } }
+}
+// Cuenta de cliente sin plan en este celular: se busca su expediente o se retoma la evaluación
+async function restaurarCuenta(uid){
+  if(!fbListo || !fbAuth) return;
+  const est=await Promise.race([fbPrimerEstado,new Promise(r=>setTimeout(()=>r(null),8000))]);
+  const u=fbAuth.currentUser;
+  if(!est || !u || u.isAnonymous || (uid && u.uid!==uid)){ borrarSesion(); return; }
+  entrarConCuenta(u);
 }
 async function restaurarStaff(ses){
   if(!fbListo || !fbAuth){ return; }     // sin Firebase no se puede verificar al staff: se queda en el inicio
   const est=await Promise.race([fbPrimerEstado,new Promise(r=>setTimeout(()=>r(null),6000))]);
   if(!est || !est.user || est.user.isAnonymous || !est.rol){ borrarSesion(); return; }
-  entrarComoStaff(ses.user, est.rol);
+  entrarComoStaff(est.user.uid, est.rol);
 }
 function entrarComoStaff(usuario, rolDB){
   const esCoord = rolDB==='coordinador';
+  // La llave del entrenador es su uid; las cuentas antiguas (creadas por el director) se buscan por su campo uid
+  if(DB.entrenadores && !DB.entrenadores[usuario]){
+    const viejo=Object.values(DB.entrenadores).find(e=>e && e.uid===usuario);
+    if(viejo && viejo.id) usuario=viejo.id;
+  }
+  if(esCoord) dirAsegurarPerfil(usuario);
   const entObj = DB.entrenadores && DB.entrenadores[usuario];
   staffRol = esCoord ? 'coordinador' : ((entObj&&entObj.rol&&entObj.rol!=='coordinador')?entObj.rol:'entrenador');
-  staffActivoEntId = esCoord ? null : (entObj?usuario:null);
+  staffActivoEntId = entObj ? usuario : null;   // el director también tiene perfil: su filosofía es la del plan de la app
   const badge=document.getElementById('staff-role-badge');
   badge.style.display='inline-block';
   badge.textContent=sc((entObj&&!esCoord?entTipoLabel(entObj):(esCoord?'director':staffRol)).toUpperCase());
@@ -176,6 +200,18 @@ function entrarComoStaff(usuario, rolDB){
     guardarLocal();
     avisarEntrenadoresSinAcceso();
   }
+}
+// El director necesita un perfil en /entrenadores para guardar su filosofía (la que usan los clientes sin entrenador)
+function dirAsegurarPerfil(id){
+  DB.entrenadores=DB.entrenadores||{};
+  const e=DB.entrenadores[id];
+  if(e && e.rol==='coordinador') return;
+  if(e) e.rol='coordinador';
+  else {
+    const u=fbAuth&&fbAuth.currentUser;
+    DB.entrenadores[id]={ id, uid:(u&&u.uid)||id, rol:'coordinador', nombre:(u&&u.displayName)||'Director', especialidades:[], funciones:['entrenamiento'], filosofia:null };
+  }
+  dbSaveEntrenador(id);
 }
 function avisarEntrenadoresSinAcceso(){
   const n=Object.values(DB.entrenadores||{}).filter(e=>e && e.rol!=='coordinador' && !e.uid).length;
@@ -201,54 +237,10 @@ function updateTb(id){
   if(id==='s-dash'){
     tba.innerHTML = `<div class="tb-btn" onclick="logoutSocio()"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg>Salir</div>`;
   } else if(id==='s-inicio'||id==='s-login'){
-    tba.innerHTML = `<div class="live-tag"><span class="dot-pulse"></span>Kiosco activo</div>`;
+    tba.innerHTML = '';
     if(id==='s-inicio') actualizarContadorSocios();
   } else { tba.innerHTML=''; }
 }
-function logoutSocio(){ av3dDestruir(); fbDetenerSocio(); activeSocio=null; borrarSesion(); ['cd1','cd2','cd3','cd4'].forEach(i=>document.getElementById(i).value=''); go('s-inicio'); }
+function logoutSocio(){ av3dDestruir(); fbDetenerSocio(); activeSocio=null; borrarSesion(); cuentaSalir(); go('s-inicio'); }
 
-// ═════════════════════════════════════════
-// LOGIN SOCIO
-// ═════════════════════════════════════════
-const cds = document.querySelectorAll('.cd');
-cds.forEach((d,i)=>{
-  d.addEventListener('input',()=>{ if(d.value && i<cds.length-1) cds[i+1].focus(); });
-  d.addEventListener('keydown',e=>{ if(e.key==='Backspace'&&!d.value&&i>0) cds[i-1].focus(); });
-});
-
-async function doLogin(){
-  const code = ['cd1','cd2','cd3','cd4'].map(id=>document.getElementById(id).value).join('');
-  const errEl=document.getElementById('login-err');
-  let socio = getSocio(code);
-  if(/^\d{4}$/.test(code) && fbListo && fbAuth && navigator.onLine){
-    try{
-      if(await fbConUsuario()){
-        const snap=await fbDB.ref('/socios/'+code).once('value');
-        const v=snap.val();
-        if(v){
-          asegurarLogs(v);
-          const previo=DB.socios[code];
-          DB.socios[code]=(previo && tienePendiente(code)) ? fusionarSocio(code,previo,v) : v;
-          if(!tienePendiente(code)){ BASE[code]=baseDeSocio(v); baseGuardar(); }
-          guardarLocal();
-          socio=DB.socios[code];
-        } else {
-          if(DB.socios[code] && !tienePendiente(code)){ delete DB.socios[code]; guardarLocal(); }
-          socio=tienePendiente(code)?DB.socios[code]:null;
-        }
-      }
-    }catch(e){ console.warn('Consulta de socio sin conexión',e); }
-  }
-  if(!socio){ errEl.textContent='No encontramos ese código. Revisa tus 4 dígitos.'; errEl.classList.remove('inact'); errEl.style.display='block'; return; }
-  if(membBloqueoSocio(socio)){ errEl.textContent=MEMB_MSG_INACTIVO; errEl.classList.add('inact'); errEl.style.display='block'; return; }
-  errEl.style.display='none';
-  activeSocio = socio;
-  guardarSesion({tipo:'socio', code});
-  fbEscucharSocio(code);
-  const { registro, yaRegistrado } = registrarAsistencia(socio);
-  socio._asistHoy = registro;
-  socio._yaRegistrado = yaRegistrado;
-  refreshDash();
-  dashTab('inicio');
-  go('s-dash');
-}
+// El acceso del cliente ahora es con correo y contraseña: ver js/36-cuentas.js

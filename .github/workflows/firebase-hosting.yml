@@ -1,0 +1,36 @@
+# Publica la web en Firebase Hosting.
+#  · Al unir cambios a main  → https://app-fitness-7cf1c.web.app (la que abre la app de Play Store)
+#  · En cada pull request    → una vista previa temporal; el enlace aparece como comentario en el PR
+# Necesita el secreto FIREBASE_SERVICE_ACCOUNT (ver docs/PLAY-STORE.md). Sin él, el trabajo se salta sin fallar.
+name: Publicar en Firebase Hosting
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    env:
+      FB_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+    steps:
+      - name: Falta el secreto FIREBASE_SERVICE_ACCOUNT
+        if: env.FB_SA == ''
+        run: echo "::notice::No se publicó. Agrega el secreto FIREBASE_SERVICE_ACCOUNT (docs/PLAY-STORE.md)."
+      - uses: actions/checkout@v4
+        if: env.FB_SA != ''
+      - name: Publicar
+        if: env.FB_SA != ''
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: app-fitness-7cf1c
+          channelId: ${{ github.event_name == 'push' && 'live' || '' }}

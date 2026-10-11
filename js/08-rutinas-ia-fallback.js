@@ -38,7 +38,7 @@ function detalleFilosofiaAvanzada(ph,objetivo){
   return L.map(x=>'   - '+x).join('\n');
 }
 function construirFilosofiaEntrenador(){
-  const ent = qAnswers.entrenadorId ? getEntrenador(qAnswers.entrenadorId) : null;
+  const ent = entRutina(qAnswers.entrenadorId);
   const ph = ent && ent.filosofia;
   const BASE = `1. DIAGNÓSTICO ANTES QUE RUTINA
    Leer el perfil completo antes de prescribir cualquier ejercicio. Las limitaciones físicas no son obstáculos, son variables de diseño.
@@ -176,7 +176,7 @@ async function generarRutina(){
     const mapaDiasBlock = bloqueMapaDias();
     const clasesBlock = bloqueClasesGrupales();
 
-    const prompt = `Eres el sistema de generación de rutinas del Director de Fitness del Club Campestre Aguascalientes. Tu trabajo es generar rutinas que reflejen EXACTAMENTE la filosofía y metodología del entrenador a cargo — NO una plantilla genérica.
+    const prompt = `Eres el sistema de generación de rutinas de ${GYM.nombre}. Tu trabajo es generar rutinas que reflejen EXACTAMENTE la filosofía y metodología del entrenador a cargo — NO una plantilla genérica.
 
 ═══════════════════════════════════════════
 FILOSOFÍA DEL ENTRENADOR (SEGUIR AL PIE DE LA LETRA)
@@ -319,13 +319,13 @@ ${filas}
 }
 
 function ctxQuiz(){
-  const ent=qAnswers.entrenadorId?getEntrenador(qAnswers.entrenadorId):null;
+  const ent=entRutina(qAnswers.entrenadorId);
   return ctxDesdePerfil({nivel:qAnswers.nivel,objetivo:qAnswers.objetivo,limitaciones:qAnswers.limitaciones}, ent&&ent.filosofia);
 }
 function mostrarPreview(data){
   try{
     normalizarRutinaIA(data);
-    const ctxP=ctxQuiz(), entP=qAnswers.entrenadorId?getEntrenador(qAnswers.entrenadorId):null;
+    const ctxP=ctxQuiz(), entP=entRutina(qAnswers.entrenadorId);
     const semillaP=(qAnswers.nombre||'')+Date.now();
     if(data.origen==='plantilla') diversificarSemana(data.semana, ctxP, entP&&entP.filosofia, semillaP);
     ajustarIsometricos(data.semana, ctxP);
@@ -425,24 +425,18 @@ function renderPreview(rutina){
   });
 }
 
-// ── Confirmar: crea socio persistente con código único ──
-async function fbCodigoLibre(){
-  for(let i=0;i<15;i++){
-    const c=String(Math.floor(1000+Math.random()*9000));
-    if(DB.socios[c]) continue;
-    if(fbListo && fbAuth && navigator.onLine){
-      try{ if(await fbConUsuario(4000)){ const sn=await fbDB.ref('/socios/'+c).once('value'); if(sn.exists()) continue; } }catch(e){}
-    }
-    return c;
-  }
-  return String(Math.floor(1000+Math.random()*9000));
+// ── Confirmar: el plan se guarda en la cuenta del cliente (/socios/<uid>) ──
+let planRecienCreado=null;
+function abrirPlanRecienCreado(){
+  const s=planRecienCreado && getSocio(planRecienCreado);
+  if(s) abrirPlanSocio(s); else go('s-inicio');
 }
 async function confirmarRutina(){
   const rutina=window._rutinaTemp;
   if(!rutina){ go('s-inicio'); return; }
 
-  const code=await fbCodigoLibre();
-  document.getElementById('pend-code').textContent=code;
+  const code=cuentaUid();
+  if(!code){ showToast('Tu sesión se cerró. Entra con tu correo para guardar tu plan.'); go('s-login'); return; }
 
   const keys=['lun','mar','mie','jue','vie','sab','dom'];
   const rutinaConvertida={};
@@ -463,7 +457,7 @@ async function confirmarRutina(){
   });
 
   const nuevo={
-    code, nombre:limpiarTexto(qAnswers.nombre).toUpperCase(), id:'#CC-'+code,
+    code, nombre:limpiarTexto(qAnswers.nombre).toUpperCase(), id:'#'+(GYM.prefijoId||'FS')+'-'+code.slice(0,5).toUpperCase(),
     objetivo:qAnswers.objetivo, nivel:qAnswers.nivel,
     edad:qAnswers.edad, genero:qAnswers.genero,
     peso:qAnswers.peso, estatura:qAnswers.estatura, dias:qAnswers.dias,
@@ -474,7 +468,8 @@ async function confirmarRutina(){
     cardio:qAnswers.cardio,
     disciplina:qAnswers.disciplina||'', lesionRehab:qAnswers.lesionRehab||'', entorno:qAnswers.entorno||'',
     origenRutina:(rutina.origen||'plantilla'),
-    status:'pendiente', asignado:qAnswers.entrenadorNombre||'—', entrenadorId:qAnswers.entrenadorId||'', fechaRegistro:fechaISO(new Date()),
+    status:'activo', asignado:qAnswers.entrenadorNombre||'Plan de la app', entrenadorId:qAnswers.entrenadorId||'', fechaRegistro:fechaISO(new Date()),
+    consentimiento:consentimientoNuevo('registro'),
     rutina:rutinaConvertida,
     logs:{ sesiones:[], pesoCorporal:[{fecha:fechaISO(new Date()),kg:qAnswers.peso}], prs:{}, asistencia:[], medidas:[], lesiones:[] }
   };
@@ -497,6 +492,10 @@ async function confirmarRutina(){
   }
   DB.socios[code]=nuevo;
   dbSave(code);
+  planRecienCreado=code;
+  document.getElementById('pend-sub').textContent = nuevo.entrenadorId
+    ? 'Quedó guardado en tu cuenta y '+nuevo.asignado+' ya lo puede ver para ajustarlo. Entra con tu correo desde cualquier celular.'
+    : 'Quedó guardado en tu cuenta. La app llevará tu planificación y tu progreso. Entra con tu correo desde cualquier celular.';
 
   window._rutinaTemp=null;
   // limpiar quiz
@@ -1383,7 +1382,7 @@ function renderPerfilTab(){
     </div>
     <div class="memb-c">
       ${it('shield')}
-      <div class="memb-tx"><div class="memb-k">Membresía · ${esc(s.id)}${(s.membresia&&s.membresia.vence)?' · renueva '+esc(fmtFC(s.membresia.vence)):''}</div><div class="memb-t">Socio Club Campestre</div></div>
+      <div class="memb-tx"><div class="memb-k">Mi plan · ${esc(s.id)}${(s.membresia&&s.membresia.vence)?' · renueva '+esc(fmtFC(s.membresia.vence)):''}</div><div class="memb-t">${s.entrenadorId&&getEntrenador(s.entrenadorId)?'Con '+esc(getEntrenador(s.entrenadorId).nombre):'Plan de la app'}</div></div>
       <span class="sl-st ${pend?'pend':(membEstado(s).estado==='tolerancia'?'tol':'ok')}">${pend?'En revisión':(membEstado(s).estado==='tolerancia'?'Por renovar':'Activa')}</span>
     </div>
     <div class="stats3 flat">
@@ -1404,7 +1403,9 @@ function renderPerfilTab(){
     <div class="sec-row"><div class="sec-t">Cuenta</div></div>
     <div class="card pf-card">
       ${s.status==='activo'?`<button type="button" class="pf-row" onclick="generarPDFRutina()">${it('file','sm')}<span id="btn-pdf-rutina">Descargar mi rutina en PDF</span>${ico('chev')}</button>`:''}
+      ${s.entrenadorId?'':`<button type="button" class="pf-row" onclick="vincularEntrenador()">${it('key','sm')}<span>Tengo código de entrenador</span>${ico('chev')}</button>`}
       <button type="button" class="pf-row danger" onclick="logoutSocio()">${it('logout','sm')}<span>Cerrar sesión</span>${ico('chev')}</button>
-    </div>`;
+    </div>
+    <button type="button" class="btn-back-link" style="margin:18px auto 8px;display:block;color:var(--mu)" onclick="eliminarMiCuenta()">Eliminar mi cuenta</button>`;
   pintarSelectorTema();
 }

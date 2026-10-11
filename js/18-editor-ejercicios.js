@@ -202,7 +202,7 @@ function staffAplicarEj(code,k,ei,kb){
   const d=s.rutina[k]; if(!Array.isArray(d.ejercicios)) d.ejercicios=[];
   const def=ejDefaults(kb,s);
   if(!esEjMovilidad(def)){
-    try{ const ent=s.entrenadorId?getEntrenador(s.entrenadorId):null;
+    try{ const ent=entRutina(s.entrenadorId);
       const ctx=ctxDesdePerfil({nivel:s.nivel,objetivo:s.objetivo,limitaciones:s.limitaciones}, ent&&ent.filosofia);
       def.alternativas=alternativasPara(def,ctx,datosEj(def)); }catch(err){ console.warn('alternativas',err); }
   }

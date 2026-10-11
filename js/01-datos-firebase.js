@@ -119,25 +119,21 @@ function fbEscuchar(){
   fbDB.ref('/entrenadores').on('value', snap=>{
     const raw=snap.val();
     const data=aplicarPendientes('/entrenadores', raw||{});
-    if(Object.keys(data).length){
-      DB.entrenadores=data;
-      guardarLocal();
-    } else if(!raw) {
-      seedEntrenadores(); // solo local: nunca escribe contraseñas en Firebase
-    }
-    if(document.getElementById('s-quiz')?.classList.contains('on')) renderTrainerPicker();
+    DB.entrenadores=data;
+    guardarLocal();
   }, ()=>{});
   vaciarBandeja();   // subir lo que quedó pendiente de antes (aunque se haya cerrado la app)
 }
 
 // ── Staff: escucha TODA la lista de socios ──
-let fbStaffEscuchando=false;
+let fbStaffEscuchando=false, fbStaffRef=null;
 function fbEscucharStaff(){
   // v9: el panel usa el índice ligero (/indice) y carga cada expediente al abrirlo (js/35-indice-socios.js)
   if(typeof idxEscucharStaff==='function' && !idxFallo){ idxEscucharStaff(); return; }
   if(fbStaffEscuchando || !fbListo || !fbEsStaff) return;
   fbStaffEscuchando=true;
-  fbDB.ref('/socios').on('value', snap=>{
+  fbStaffRef=sociosRefStaff();
+  fbStaffRef.on('value', snap=>{
     const raw=snap.val();
     // Huella de lo confirmado por Firebase (solo socios sin cambios pendientes en este dispositivo)
     const srv=raw||{};
@@ -157,13 +153,14 @@ function fbEscucharStaff(){
     }
     // Contador público (lo leen los socios sin descargar la lista)
     const n=Object.keys(srv).length;
-    if(fbEsStaff && DB.config && DB.config.totalSocios!==n){ DB.config.totalSocios=n; fbDB.ref('/config/totalSocios').set(n).catch(()=>{}); }
+    if(fbRolDB==='coordinador' && DB.config && DB.config.totalSocios!==n){ DB.config.totalSocios=n; fbDB.ref('/config/totalSocios').set(n).catch(()=>{}); }
   }, ()=>{ fbStaffEscuchando=false; const l=lsLoad(); if(l) DB=l; });
 }
 function fbDetenerStaff(){
   if(typeof idxDetener==='function') idxDetener();
   if(!fbStaffEscuchando) return;
-  try{ fbDB.ref('/socios').off('value'); }catch(e){}
+  try{ if(fbStaffRef) fbStaffRef.off('value'); }catch(e){}
+  fbStaffRef=null;
   fbStaffEscuchando=false;
 }
 
@@ -183,7 +180,7 @@ function fbEscucharSocio(code){
         delete BASE[code]; baseGuardar();
         if(DB.socios[code]){
           delete DB.socios[code]; guardarLocal();
-          if(activeSocio && activeSocio.code===code){ logoutSocio(); showToast('Tu acceso fue dado de baja. Habla con recepción.'); }
+          if(activeSocio && activeSocio.code===code){ logoutSocio(); showToast('Tu plan fue dado de baja. Escríbenos si crees que es un error.'); }
         }
         return;
       }
@@ -221,7 +218,7 @@ function aplicarSnapshotSocios(data){
   if(activeSocio){
     const n=data[activeSocio.code];
     if(n){ n._asistHoy=activeSocio._asistHoy; n._yaRegistrado=activeSocio._yaRegistrado; activeSocio=n; }
-    else if(teniaActivo){ logoutSocio(); showToast('Tu acceso fue dado de baja. Habla con recepción.'); }
+    else if(teniaActivo && !fbEsStaff){ logoutSocio(); showToast('Tu plan fue dado de baja. Escríbenos si crees que es un error.'); }
   }
 }
 
@@ -483,6 +480,9 @@ function dbSaveEntrenador(entId){
 }
 
 function getEntrenador(id){ return DB.entrenadores[id]||null; }
+// Filosofía con la que se arma una rutina: la del entrenador del cliente o, si no tiene, la del director (plan de la app)
+function entSistema(){ return Object.values(DB.entrenadores||{}).find(e=>e && e.rol==='coordinador' && e.filosofia && e.filosofia.tagline)||null; }
+function entRutina(id){ return (id && getEntrenador(id)) || entSistema(); }
 function listaEntrenadoresConFilosofia(){
   return Object.values(DB.entrenadores||{}).filter(e=>e && e.filosofia && e.filosofia.tagline);
 }

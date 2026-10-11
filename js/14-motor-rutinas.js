@@ -453,7 +453,7 @@ function enriquecerSemana(semana, ctx, semilla){
 }
 // Para socios que ya existen (botón del panel staff). Solo agrega lo que falta.
 function enriquecerSocio(s){
-  const ent=s.entrenadorId?getEntrenador(s.entrenadorId):null;
+  const ent=entRutina(s.entrenadorId);
   const ctx=ctxDesdePerfil({nivel:s.nivel,objetivo:s.objetivo,limitaciones:s.limitaciones}, ent&&ent.filosofia);
   const dias=DIAS_ORDER.map(k=>s.rutina&&s.rutina[k]).filter(Boolean);
   enriquecerSemana(dias, ctx, s.code);
