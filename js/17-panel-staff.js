@@ -70,7 +70,7 @@ function staffMenu(){
     if(!items.length) return;
     html+=`<div class="sm-g">${t}</div>`+items.map(b=>{
       const raw=b.textContent.trim(); const m=raw.match(/^([^\p{L}\p{N}]+)\s*(.*)$/u);
-      const ic=b.id==='btn-logout'?'🚪':(m?m[1].trim():'•'), lb=m?m[2]:raw;
+      const svg=b.querySelector('svg'); const ic=b.id==='btn-logout'?ico('logout'):(svg?svg.outerHTML:ico('chev')), lb=m?m[2]:raw;
       const cls=(b.id==='btn-logout'||b.id==='btn-eliminar-cuenta')?' danger':(b.id==='btn-reset'?' warn':'');
       return `<button type="button" class="sm-row${cls}" onclick="staffMenuIr('${b.id}')"><span class="sm-ic">${ic}</span><span>${esc(lb)}</span></button>`;
     }).join('');

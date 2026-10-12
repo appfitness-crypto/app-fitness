@@ -565,7 +565,7 @@ function renderNutricionTab(){
       <div class="comida-list">
         ${reparto.map(m=>`<div class="comida-it">
           <div class="comida-it-h"><span class="comida-tag ${m.tag}">${esc(m.tag==='ligera'?'Colación':m.tag==='fuerte'?'Fuerte':'Media')}</span><b>${esc(m.nombre)}</b><span class="comida-kcal">~${m.kcal} kcal</span></div>
-          ${m.plato?`<div class="comida-plato">🥦 ${m.plato.verduras}% verduras · 🍗 ${m.plato.prot}% proteína · 🍚 ${m.plato.carb}% carbohidratos${m.plato.grasa?` · 🥑 ${m.plato.grasa}% grasas`:''}</div>`
+          ${m.plato?`<div class="comida-plato">${m.plato.verduras}% verduras · ${m.plato.prot}% proteína · ${m.plato.carb}% carbohidratos${m.plato.grasa?` · ${m.plato.grasa}% grasas`:''}</div>`
             :`<div class="comida-plato ligera">🥜 Snack: proteína + grasa saludable — evita cargarlo de carbohidratos simples</div>`}
         </div>`).join('')}
       </div>
