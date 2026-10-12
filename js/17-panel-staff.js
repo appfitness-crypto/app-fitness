@@ -89,6 +89,8 @@ function staffGetSocios(){
   // Los socios sin asignar solo los ve el coordinador.
   return todos.filter(s=>s.entrenadorId===staffActivoEntId || s.nutriologoId===staffActivoEntId);
 }
+// Cliente sin entrenador: nunca eligió uno, o el suyo ya no existe (borró su cuenta). Su plan lo lleva el director.
+function socioSinEntrenador(s){ const e=s && s.entrenadorId && getEntrenador(s.entrenadorId); return !e || e.rol==='coordinador'; }
 function membBadgeCls(e){ return e.estado==='pendiente'?'pend':e.estado==='tolerancia'?'tol':e.estado==='inactivo'?'off':'ok'; }
 function membBadgeTxt(e){ return e.estado==='pendiente'?'Pendiente':e.estado==='tolerancia'?'Tolerancia · '+e.restan+' d':e.estado==='inactivo'?'Inactivo':'Activo'; }
 function staffRenderList(){
@@ -97,8 +99,8 @@ function staffRenderList(){
   const todos=staffGetSocios();
   const est=s=>membEstado(s).estado;
   const cnt={todos:todos.length,pendiente:todos.filter(s=>s.status==='pendiente').length,activo:todos.filter(s=>{const e=est(s);return e==='activo'||e==='tolerancia';}).length,
-    tolerancia:todos.filter(s=>est(s)==='tolerancia').length,inactivo:todos.filter(s=>est(s)==='inactivo').length,progresion:todos.filter(pqNecesitaAccion).length};
-  ['todos','pendiente','activo','tolerancia','inactivo','progresion'].forEach(k=>{ const e=document.getElementById('slc-'+k); if(e) e.textContent=cnt[k]; });
+    tolerancia:todos.filter(s=>est(s)==='tolerancia').length,inactivo:todos.filter(s=>est(s)==='inactivo').length,progresion:todos.filter(pqNecesitaAccion).length,sinent:todos.filter(socioSinEntrenador).length};
+  ['todos','sinent','pendiente','activo','tolerancia','inactivo','progresion'].forEach(k=>{ const e=document.getElementById('slc-'+k); if(e) e.textContent=cnt[k]; });
   const tt=document.getElementById('sl-count'); if(tt) tt.textContent='('+todos.length+')';
   const av=document.getElementById('staff-memb-aviso');
   if(av){
@@ -106,7 +108,8 @@ function staffRenderList(){
     av.innerHTML=(cnt.tolerancia||cnt.inactivo||porV)?`<div class="mb-aviso" onclick="staffFiltroDirecto('${cnt.tolerancia?'tolerancia':cnt.inactivo?'inactivo':'activo'}')"><b>🔔 Mensualidades</b>${cnt.tolerancia?cnt.tolerancia+' en tolerancia (tienen '+MEMB_TOL+' días para pagar). ':''}${cnt.inactivo?cnt.inactivo+' inactivo'+(cnt.inactivo>1?'s':'')+'. ':''}${porV?porV+(porV===1?' renueva':' renuevan')+' en 3 días o menos.':''}</div>`:'';
   }
   let list=todos.slice();
-  if(staffFilterVal==='progresion') list=list.filter(pqNecesitaAccion);
+  if(staffFilterVal==='sinent') list=list.filter(socioSinEntrenador);
+  else if(staffFilterVal==='progresion') list=list.filter(pqNecesitaAccion);
   else if(staffFilterVal==='activo') list=list.filter(s=>{const e=est(s);return e==='activo'||e==='tolerancia';});
   else if(staffFilterVal==='tolerancia'||staffFilterVal==='inactivo'||staffFilterVal==='pendiente') list=list.filter(s=>est(s)===staffFilterVal);
   const q=(staffSearchVal||'').trim().toLowerCase();
