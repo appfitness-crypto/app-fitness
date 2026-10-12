@@ -51,9 +51,9 @@ def enmarcar(im):
 
 def miniatura(enmarcada):
     # cuadro centrado en el tercio alto (donde están el torso y el músculo resaltado)
-    lado = round(ANCHO * 0.78)
+    lado = round(ANCHO * 0.86)
     x = (ANCHO - lado) // 2
-    y = round(ALTO * 0.22)
+    y = round(ALTO * 0.12)
     return enmarcada.crop((x, y, x + lado, y + lado)).resize((MINI, MINI), Image.LANCZOS)
 
 
