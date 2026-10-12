@@ -1,6 +1,6 @@
 # Fotos de ejercicios — nombres exactos de archivo
 
-> **Estilo:** todas las fotos deben seguir un solo modelo (el de la sentadilla goblet). El estándar, el prompt para generarlas, el estado de cada ejercicio y el script que las pone en el mismo marco están en [`docs/IMAGENES-EJERCICIOS.md`](../../docs/IMAGENES-EJERCICIOS.md).
+> **Estilo:** todas las fotos siguen el estilo nuevo (figura grafito, músculo en lima, fondo #0A0E13; el modelo es la sentadilla goblet). El estándar, los prompts de imagen y video, el estado de cada ejercicio y el script que las pone en el mismo marco están en [`docs/IMAGENES-EJERCICIOS.md`](../../docs/IMAGENES-EJERCICIOS.md).
 
 Sube aquí (`img/ejercicios/`) una foto por ejercicio, en `.webp` o `.jpg`, con el nombre EXACTO de la columna "Archivo" (sin mayúsculas ni acentos). En cuanto subes el archivo al repo de GitHub con ese nombre, aparece solo en la ficha del ejercicio — no hay que tocar código ni avisar.
 
