@@ -115,8 +115,8 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 9 | En el estilo nuevo: sentadilla goblet (imagen y video) y 8 ejercicios con imagen. |
-| **Rehacer** | 16 | Tienen imagen, pero en el estilo anterior. |
+| **Listo** | 11 | En el estilo nuevo: sentadilla goblet (imagen y video) y 10 ejercicios con imagen. |
+| **Rehacer** | 14 | Tienen imagen, pero en el estilo anterior. |
 | **Falta** | 201 | No tienen imagen. |
 
 Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y luego los ejercicios compuestos de cada zona.
@@ -142,7 +142,7 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 |---|---|---|---|
 | Sentadilla goblet | `sentadilla-goblet` | Cuádriceps · Glúteo | **Listo** (imagen + video) |
 | Desplante | `desplante` | Cuádriceps · Glúteo | Rehacer (estilo anterior) |
-| Sentadilla búlgara | `sentadilla-bulgara` | Cuádriceps · Glúteo | Rehacer (estilo anterior) |
+| Sentadilla búlgara | `sentadilla-bulgara` | Cuádriceps · Glúteo | **Listo** (imagen) |
 | Peso muerto rumano con mancuernas | `peso-muerto-rumano-con-mancuernas` | Femorales · Glúteo | Falta |
 | Press inclinado con mancuernas | `press-inclinado-con-mancuernas` | Pecho superior | Falta |
 | Press plano con mancuernas | `press-plano-con-mancuernas` | Pecho mayor | Falta |
@@ -290,7 +290,7 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 |---|---|---|---|
 | Hip thrust | `hip-thrust` | Glúteo mayor | Falta |
 | Hiperextensión 45° | `hiperextension-45` | Erectores · Glúteo | Falta |
-| Press banca plano | `press-banca-plano` | Pecho mayor · Tríceps | Rehacer (estilo anterior) |
+| Press banca plano | `press-banca-plano` | Pecho mayor · Tríceps | **Listo** (imagen) |
 | Press inclinado con barra | `press-inclinado-con-barra` | Pecho superior | Falta |
 | Press francés con barra Z | `press-frances-con-barra-z` | Tríceps (porción larga) | Falta |
 | Press banca agarre cerrado | `press-banca-agarre-cerrado` | Tríceps · Pecho | Falta |
