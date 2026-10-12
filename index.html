@@ -666,6 +666,13 @@
   </div>
 </div>
 
+<!-- SESIÓN EN CURSO (js/38-entreno.js) -->
+<div class="sc" id="s-ses"><main class="en-ses" id="en-ses" aria-label="Sesión en curso"></main></div>
+<!-- RESUMEN AL TERMINAR -->
+<div class="sc" id="s-fin"><main class="en-fin" id="en-fin" aria-label="Resumen de la sesión"></main></div>
+<div class="en-desc" id="en-desc" aria-live="polite" aria-hidden="true" inert></div>
+<dialog class="en-ficha" id="en-ficha" onclick="if(event.target===this)cerrarFicha()" oncancel="event.preventDefault();cerrarFicha()"></dialog>
+
 <!-- MODAL EJERCICIO -->
 <div class="modal" id="modal-ej">
   <div class="mbox">
@@ -830,6 +837,7 @@
 <script src="js/35-indice-socios.js"></script>
 <script src="js/36-cuentas.js"></script>
 <script src="js/37-iconos.js"></script>
+<script src="js/38-entreno.js"></script>
 <script src="js/99-arranque.js"></script>
 
 <!-- ═══ MODAL AVISO DE PRIVACIDAD ═══ -->

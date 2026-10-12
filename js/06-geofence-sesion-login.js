@@ -233,7 +233,7 @@ function go(id){
 function updateTb(id){
   const tba=document.getElementById('tb-actions');
   const g=document.getElementById('global-tb');
-  if(g) g.style.display=(['s-panel','s-quiz','s-det','s-preview','s-dash'].includes(id))?'none':'';
+  if(g) g.style.display=(['s-panel','s-quiz','s-det','s-preview','s-dash','s-ses','s-fin'].includes(id))?'none':'';
   if(id==='s-dash'){
     tba.innerHTML = `<div class="tb-btn" onclick="logoutSocio()"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg>Salir</div>`;
   } else if(id==='s-inicio'||id==='s-login'){

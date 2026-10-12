@@ -406,7 +406,7 @@ function setOk(idx,i,el){
   sesionTemp.ej[idx].sets[i].ok=on;
   if(on) vibrarToque();
 }
-function closeModal(){ document.getElementById('modal-ej').classList.remove('open'); }
+function closeModal(){ document.getElementById('modal-ej').classList.remove('open'); if(typeof sesRefrescar==='function') sesRefrescar(); }
 document.getElementById('modal-ej').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeModal(); });
 
 // ── Finalizar sesión: registra evolución y PRs ──
@@ -438,7 +438,11 @@ function finalizarSesionConfirmada(reemplazar){
     if(previa) s.logs.sesiones=s.logs.sesiones.filter(x=>x.fecha!==hoy);
 
     // Volumen y PRs
-    let volumen=0, tutSes=0, cardioMinSes=0; const cambios=[], detalle=[];
+    let volumen=0, tutSes=0, cardioMinSes=0; const cambios=[], detalle=[], nuevosPR={};
+    // Sesión anterior del mismo día del plan: para comparar el volumen en el resumen
+    const anterior=s.logs.sesiones.filter(x=>x&&x.diaKey===sesionTemp.diaKey&&x.volumen>0).pop();
+    const t0=sesionTemp.t0;
+    const marcaPR=(k,nm,kg)=>{ const pr=s.logs.prs[k]; if(pr && kg>pr.kg && (!nuevosPR[k]||kg>nuevosPR[k].kg)) nuevosPR[k]={n:nm,kg,antes:(nuevosPR[k]||pr).antes!=null?(nuevosPR[k]||pr).antes:pr.kg}; };
     idxs.forEach(i=>{
       const ej=d.ejercicios[i]; if(!ej) return;
       const alt=ejEjecutado(ej,i);
@@ -459,7 +463,7 @@ function finalizarSesionConfirmada(reemplazar){
         // con carga extra: 3 s de tensión ≈ 1 repetición → kg × segundos ÷ 3 entra al volumen
         sets.forEach(x=>{ const sg=x.seg>0?x.seg:(x.ok?metaI:0);
           if(x.kg>0 && sg>0){ volumen += x.kg*sg*multI/3;
-            const k=prKey(nmHecho), pr=s.logs.prs[k]; if(!pr || x.kg>pr.kg) s.logs.prs[k]={kg:x.kg,fecha:hoy}; } });
+            const k=prKey(nmHecho), pr=s.logs.prs[k]; marcaPR(k,nmHecho,x.kg); if(!pr || x.kg>pr.kg) s.logs.prs[k]={kg:x.kg,fecha:hoy}; } });
       }
       // Cardio: FC promedio vs zona objetivo (para proponer más o menos volumen la próxima vez)
       let fcInfo=null;
@@ -470,13 +474,14 @@ function finalizarSesionConfirmada(reemplazar){
         if(fcs.length){ const prom=Math.round(fcs.reduce((a,b)=>a+b,0)/fcs.length);
           fcInfo={fc:prom, fcMeta:[rxC.lo,rxC.hi], fcEval:prom<rxC.lo?'bajo':prom>rxC.hi?'alto':'ok'}; }
       }
-      if(hechas||kgs.length||segsEj.length||fcInfo){ const reg={n:ej.nm, s:hechas, p:parseInt(ej.series)||hechas}; if(kgs.length) reg.kg=Math.max(...kgs); if(segsEj.length) reg.seg=Math.max(...segsEj); if(fcInfo) Object.assign(reg,fcInfo); if(alt) reg.alt=alt.nm; detalle.push(reg); }
+      if(hechas||kgs.length||segsEj.length||fcInfo){ const reg={n:ej.nm, s:hechas, p:parseInt(ej.series)||hechas}; if(kgs.length) reg.kg=Math.max(...kgs); if(segsEj.length) reg.seg=Math.max(...segsEj); if(fcInfo) Object.assign(reg,fcInfo); { const sr=sets.filter(x=>x&&x.ok&&+x.kg>0).map(x=>[+x.kg,+x.r||0]); if(sr.length && sr.some(x=>x[1])) reg.sr=sr; } if(alt) reg.alt=alt.nm; detalle.push(reg); }
       if(esIsoEj) return;
       (sesionTemp.ej[i].sets||[]).forEach((set,si)=>{
         if(set&&set.kg>0){
-          const repsTxt=repsDeSerie(ej,si), repsObj=parseInt(repsTxt)||0;
+          const repsTxt=repsDeSerie(ej,si), repsObj=(+set.r>0?+set.r:parseInt(repsTxt))||0;
           volumen += set.kg*(repsObj||10);
           const k=prKey(nmHecho), pr=s.logs.prs[k];
+          marcaPR(k,nmHecho,set.kg);
           if(!pr || set.kg>pr.kg) s.logs.prs[k]={kg:set.kg,fecha:hoy};
           // 1RM estimado (fórmula de Epley) a partir de esta serie — solo con reps de fuerza normales,
           // nunca con series de tiempo (seg/min) donde el número no son repeticiones.
@@ -489,13 +494,18 @@ function finalizarSesionConfirmada(reemplazar){
       });
     });
 
-    s.logs.sesiones.push({
+    const reg={
       fecha:hoy, ts:Date.now(), diaKey:sesionTemp.diaKey,
       tipo:d.tipo, ejercicios:hechos||d.ejercicios.length, volumen:Math.round(volumen), tut:Math.round(tutSes), cardioMin:Math.round(cardioMinSes),
       hora:new Date().toTimeString().substring(0,5), cambios, detalle
-    });
+    };
+    s.logs.sesiones.push(reg);
     dbSave(s.code);
     sesionTemp=null;
+    if(typeof mostrarResumenSesion==='function'){
+      mostrarResumenSesion({reg, t0, prs:Object.values(nuevosPR), prevVol:anterior?anterior.volumen:0, prevFecha:anterior?anterior.fecha:null});
+      return;
+    }
     showToast('✓ Sesión guardada'+(volumen>0?' · '+Math.round(volumen).toLocaleString()+' kg de volumen':'')+(tutSes>=20?' · '+fmtTut(tutSes)+' de isométricos':'')+(cardioMinSes>0?' · '+cardioMinSes+' min de cardio':''));
     go('s-dash'); refreshDash(); dashTab('progreso');
   }catch(e){
