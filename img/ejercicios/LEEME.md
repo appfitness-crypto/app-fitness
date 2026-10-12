@@ -1,5 +1,7 @@
 # Fotos de ejercicios — nombres exactos de archivo
 
+> **Estilo:** todas las fotos deben seguir un solo modelo (el de la sentadilla goblet). El estándar, el prompt para generarlas, el estado de cada ejercicio y el script que las pone en el mismo marco están en [`docs/IMAGENES-EJERCICIOS.md`](../../docs/IMAGENES-EJERCICIOS.md).
+
 Sube aquí (`img/ejercicios/`) una foto por ejercicio, en `.webp` o `.jpg`, con el nombre EXACTO de la columna "Archivo" (sin mayúsculas ni acentos). En cuanto subes el archivo al repo de GitHub con ese nombre, aparece solo en la ficha del ejercicio — no hay que tocar código ni avisar.
 
 Esa misma foto se usa también como miniatura en la lista del día. **Si quieres una foto distinta solo para la miniatura** (por ejemplo un encuadre más cuadrado, o un acercamiento), sube otra con el mismo nombre pero con el prefijo `mini-` — por ejemplo `img/ejercicios/mini-sentadilla-libre.webp`. Si no subes esa versión, la miniatura usa automáticamente la foto grande.

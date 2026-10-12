@@ -1211,7 +1211,7 @@ function refreshDash(){
     cta=`<button type="button" class="btn-go soft" onclick="dashTab('progreso')">Ver resumen</button>`;
   } else {
     titulo=esc(sc(hoy.tipo)); detalle=hoy.ejercicios.length+' ejercicios · '+esc(sc(s.nivel)); icoT=iconoTipo(hoy.tipo);
-    cta=`<button type="button" class="btn-go" onclick="openDay('${HOY_KEY}')">${ico('play')}Iniciar entrenamiento</button>`;
+    cta=`<button type="button" class="btn-go" onclick="iniciarSesion('${HOY_KEY}')">${ico('play')}Iniciar entrenamiento</button>`;
   }
   const semana=DIAS_ORDER.map((k,i)=>{
     const d=s.rutina[k]; const rest=!d||!d.ejercicios||!d.ejercicios.length;
@@ -1273,45 +1273,7 @@ function refreshDash(){
 }
 
 // ── RUTINA (Mi plan) ──
-function renderRutinaTab(){
-  const s=activeSocio; if(!s) return;
-  const cont=document.getElementById('dsec-rutina');
-  const fechas=fechasSemana(), sem=sesionesSemana(s);
-  const pendBanner = s.status==='pendiente'
-    ? `<div class="pend-banner">${ico('clock')}<div>Tu plan está pendiente de revisión por tu entrenador. Puedes consultarlo, pero podría tener ajustes.</div></div>` : '';
-  const filas=DIAS_ORDER.map((k,i)=>{
-    const d=s.rutina[k]; if(!d) return '';
-    const rest=!d.ejercicios||!d.ejercicios.length;
-    const esHoy=k===HOY_KEY;
-    const grupos=[...new Set((d.ejercicios||[]).map(e=>sc(String(e.ms||'').split(' ')[0])).filter(Boolean))].slice(0,3).join(' · ');
-    return `<div class="plan-r${esHoy?' hoy':''}${rest?' rest':''}" ${rest?'':`onclick="openDay('${k}')" role="button" tabindex="0"`}>
-      ${pic(basesSesion(d.tipo),iconoTipo(d.tipo),'thumb')}
-      <div class="plan-tx">
-        <div class="plan-d">${esc(sc(d.label))} · ${fechas[i]}${esHoy?' <em>Hoy</em>':''}${sem[i]?` <i class="plan-ok">${ico('check')}</i>`:''}</div>
-        <div class="plan-n">${esc(sc(d.tipo))}</div>
-        <div class="plan-s">${rest?'Recuperación':d.ejercicios.length+' ejercicios'+(grupos?' · '+esc(grupos):'')}</div>
-      </div>
-      ${rest?'':`<span class="plan-c">${ico('chev')}</span>`}
-    </div>`;
-  }).join('');
-  cont.innerHTML=`
-    ${appHead('Mi plan','Tu semana de entrenamiento.')}
-    ${pendBanner}
-    <div class="goal-c">
-      ${it('target')}
-      <div><div class="goal-k">Objetivo principal</div><div class="goal-t">${esc(sc(s.objetivo||'Entrenar'))}</div></div>
-    </div>
-    ${pqPlanChip(s)}
-    ${casaChipSocio(s)}
-    <div class="chips3">
-      <div class="ch3">${ico('calendar')}<b>${s.dias}</b><span>días por semana</span></div>
-      <div class="ch3">${ico('layers')}<b>${esc(sc(s.nivel))}</b><span>nivel</span></div>
-      <div class="ch3">${ico('user')}<b>${esc(String(s.asignado||'—').split(' ')[0])}</b><span>entrenador</span></div>
-    </div>
-    <div class="sec-row"><div class="sec-t">Plan semanal</div></div>
-    <div class="plan-l">${filas}</div>
-    <div class="note-card card">${ico('info')}<div><b style="color:var(--tx)">Notas de tu entrenador.</b> Cada ejercicio incluye su nota propioceptiva: dónde sentir el estímulo, en qué ángulo y hacia qué músculo dirigirlo. Tócalo para abrir el detalle, registrar tus kg y marcar series.</div></div>`;
-}
+// renderRutinaTab() vive en js/38-entreno.js (semana, sesión del día y peso sugerido).
 
 // ── PERFIL ──
 function temaSegHTML(){
