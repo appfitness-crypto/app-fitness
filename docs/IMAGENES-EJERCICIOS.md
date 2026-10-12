@@ -115,8 +115,8 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 21 | En el estilo nuevo: sentadilla goblet (imagen y video) y 20 ejercicios con imagen. |
-| **Rehacer** | 4 | Tienen imagen, pero en el estilo anterior. |
+| **Listo** | 24 | En el estilo nuevo: sentadilla goblet (imagen y video) y 23 ejercicios con imagen. |
+| **Rehacer** | 1 | Tienen imagen, pero en el estilo anterior. |
 | **Falta** | 201 | No tienen imagen. |
 
 Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y luego los ejercicios compuestos de cada zona.
@@ -257,7 +257,7 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 | Plancha lateral | `plancha-lateral` | Oblicuos | Rehacer (estilo anterior) |
 | Dead bug | `dead-bug` | Core profundo | Falta |
 | Bird-dog | `bird-dog` | Core · Erectores | Falta |
-| Rueda abdominal | `rueda-abdominal` | Core anterior | Rehacer (estilo anterior) |
+| Rueda abdominal | `rueda-abdominal` | Core anterior | **Listo** (imagen) |
 | Sentadilla con salto | `sentadilla-con-salto` | Cuádriceps · Glúteo | Falta |
 | Aguante de zancada (split squat isométrico) | `aguante-de-zancada-split-squat-isometrico` | Cuádriceps · Glúteo | Falta |
 | Puente de glúteo isométrico | `puente-de-gluteo-isometrico` | Glúteo | Falta |
@@ -277,7 +277,7 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 | Plancha con toque de hombro | `plancha-con-toque-de-hombro` | Core · Hombro | Falta |
 | Crunch abdominal | `crunch-abdominal` | Recto abdominal | Falta |
 | Elevación de rodillas en banco | `elevacion-de-rodillas-en-banco` | Abdomen bajo | Falta |
-| Escaladores | `escaladores` | Core · Hombro | Rehacer (estilo anterior) |
+| Escaladores | `escaladores` | Core · Hombro | **Listo** (imagen) |
 | Crunch bicicleta | `crunch-bicicleta` | Oblicuos · Abdomen | Falta |
 | Tijeras (flutter kicks) | `tijeras-flutter-kicks` | Abdomen bajo | Falta |
 | Salto de cuerda | `salto-de-cuerda` | Sistema cardiovascular | Falta |
@@ -305,7 +305,7 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 | Patada de glúteo en polea | `patada-de-gluteo-en-polea` | Glúteo mayor | Falta |
 | Cruce de poleas | `cruce-de-poleas` | Pecho (porción media) | **Listo** (imagen) |
 | Cruce de poleas de abajo hacia arriba | `cruce-de-poleas-de-abajo-hacia-arriba` | Pecho superior | Falta |
-| Cruce de poleas de arriba hacia abajo | `cruce-de-poleas-de-arriba-hacia-abajo` | Pecho inferior | Rehacer (estilo anterior) |
+| Cruce de poleas de arriba hacia abajo | `cruce-de-poleas-de-arriba-hacia-abajo` | Pecho inferior | **Listo** (imagen) |
 | Jalón al pecho | `jalon-al-pecho` | Dorsal ancho | **Listo** (imagen) |
 | Jalón unilateral en polea | `jalon-unilateral-en-polea` | Dorsal ancho | Falta |
 | Pullover en polea alta | `pullover-en-polea-alta` | Dorsal ancho | **Listo** (imagen) |
