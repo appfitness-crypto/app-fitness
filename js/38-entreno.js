@@ -23,6 +23,17 @@ const EJ_PASOS = {
   'curl-femoral-acostado':{e:'Máquina de curl femoral',p:['Acuéstate con el rodillo justo arriba del talón.','Lleva los talones hacia el glúteo.','Baja lento sin soltar la tensión.'],x:'Levantar la cadera del banco.'},
   'elevacion-de-talones-de-pie':{e:'Máquina de pantorrilla de pie',p:['Apoya la punta de los pies en el borde.','Baja el talón hasta sentir el estiramiento.','Sube lo más alto que puedas y aguanta 1 segundo.'],x:'Rebotar abajo y hacer el movimiento corto.'}
 };
+// ── Videos en bucle del estilo nuevo (img/ejercicios/<nombre>.webm y .mp4, 4:5, sin audio).
+//    Solo se piden los que están en esta lista; los demás ejercicios usan su imagen fija.
+const EJ_VIDEOS = new Set(['sentadilla-goblet']);
+function videoEjHTML(ej){
+  const n=slugImg(ej&&ej.nm); if(!EJ_VIDEOS.has(n)) return '';
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return '';
+  // Va encima de la imagen fija: aparece al empezar a reproducirse y, si falla, se quita y queda la imagen.
+  return `<video class="en-vid" muted loop playsinline autoplay preload="auto" aria-hidden="true" disablepictureinpicture onplaying="this.classList.add('on')">
+    <source src="${IMG_BASE}ejercicios/${n}.webm" type="video/webm">
+    <source src="${IMG_BASE}ejercicios/${n}.mp4" type="video/mp4" onerror="this.parentNode.remove()"></video>`;
+}
 const EN_DIAS_CORTO=['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
 const EN_DIAS=['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
 const EN_MESES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -143,7 +154,7 @@ function abrirFicha(ej){
   const f=fichaEj(ej);
   dlg.innerHTML=`<div class="en-f-in">
     <div class="en-f-top"><span class="en-grab" aria-hidden="true"></span><button type="button" class="en-btn-sm" onclick="cerrarFicha()">Cerrar</button></div>
-    <div class="en-f-fig">${pic(basesEjercicio(ej),'dumbbell','thumb')}</div>
+    <div class="en-f-fig">${pic(basesEjercicio(ej),'dumbbell','thumb')}${videoEjHTML(ej)}</div>
     <h3 id="en-f-t">${esc(ej.nm)}</h3>
     ${f.eq?`<div class="en-f-eq">${ico('dumbbell')}<span>${esc(f.eq)}</span></div>`:''}
     ${f.ms.length?`<div class="en-f-sec"><b>Músculos que trabaja</b><div class="en-musc">${f.ms.map((m,i)=>`<span class="${i?'':'p'}"><i></i>${esc(m)}${i?'':' · principal'}</span>`).join('')}</div></div>`:''}
@@ -158,6 +169,7 @@ function abrirFicha(ej){
 }
 function cerrarFicha(){
   const d=document.getElementById('en-ficha'); if(!d||!d.open) return;
+  d.querySelectorAll('video').forEach(v=>v.pause());
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){ d.close(); return; }
   d.classList.add('cerrando');
   setTimeout(()=>{ d.close(); d.classList.remove('cerrando'); },200);
@@ -232,7 +244,7 @@ function renderSes(){
     <div class="en-prog" aria-hidden="true">${prog}</div>
     <div class="en-ex">
       <button type="button" class="en-media" onclick="abrirFicha(sesEjActual())" aria-label="Ver cómo se hace ${esc(e.nm)}">
-        ${pic(basesEjercicio(e),'dumbbell','thumb')}
+        ${pic(basesEjercicio(e),'dumbbell','thumb')}${videoEjHTML(e)}
         ${!especial&&!histEj(s,e0.nm).length?'<span class="en-new">Primera vez</span>':''}
         <span class="en-media-cta">${ico('play')}Cómo se hace</span>
       </button>

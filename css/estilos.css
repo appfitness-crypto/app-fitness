@@ -1464,6 +1464,7 @@ html[data-theme="light2"] .ic-ya .ic-label,html[data-theme="light2"] .ic-ya .ic-
 :root,html[data-theme="light"]{--acc:var(--v2);--acc-tx:var(--v);--acc-ink:#0E1318;--acc-soft:color-mix(in srgb,var(--v2) 16%,transparent);}
 html[data-theme="dark"]{--acc:var(--lime);--acc-tx:var(--lime);--acc-ink:#0A0E13;--acc-soft:color-mix(in srgb,var(--lime) 12%,transparent);}
 html[data-theme="light2"]{--acc:var(--lime);--acc-tx:#5444DC;--acc-ink:#FFFFFF;--acc-soft:color-mix(in srgb,var(--lime) 14%,transparent);}
+:root{--en-foto:#0A0E13;}   /* fondo de las fotos de ejercicios (estilo nuevo): igual en los 3 temas */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
 .num{font-variant-numeric:tabular-nums;}
 .en-btn{flex:1;min-height:52px;border:0;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--fd);font-weight:800;font-size:var(--fs-lg);cursor:pointer;padding:0 20px;transition:transform .16s var(--ease-out),background-color .2s ease;}
@@ -1543,8 +1544,8 @@ html[data-theme="light2"]{--acc:var(--lime);--acc-tx:#5444DC;--acc-ink:#FFFFFF;-
 .en-ex{display:grid;gap:10px;}
 .en-ex h3{font-family:var(--fd);font-weight:800;font-style:italic;font-size:32px;line-height:.95;letter-spacing:-.015em;text-transform:uppercase;margin:0;text-wrap:balance;}
 .en-swap{color:var(--g);font-size:var(--fs-sm);font-weight:600;}
-.en-media{position:relative;display:block;width:100%;height:280px;padding:0;border:0;border-radius:var(--r-lg);overflow:hidden;background:#05070A;cursor:pointer;}
-.en-media .pic{border-radius:0;background:#05070A;}
+.en-media{position:relative;display:block;width:100%;height:280px;padding:0;border:0;border-radius:var(--r-lg);overflow:hidden;background:var(--en-foto);cursor:pointer;}
+.en-media .pic{border-radius:0;background:var(--en-foto);}
 .en-media .pic img,.en-f-fig .pic img{object-fit:contain;transition:transform .3s var(--ease-out);}
 .en-media:active .pic img{transform:scale(.98);}
 .en-media-cta{position:absolute;left:12px;bottom:12px;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:999px;background:rgba(10,14,19,.78);color:#F1F5F7;font-weight:700;font-size:var(--fs-sm);}
@@ -1553,8 +1554,8 @@ html[data-theme="light2"]{--acc:var(--lime);--acc-tx:#5444DC;--acc-ink:#FFFFFF;-
 .en-musc{display:flex;flex-wrap:wrap;gap:6px;}
 .en-musc span{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:0 10px;border-radius:999px;background:var(--gl);font-size:12.5px;font-weight:600;color:var(--mu);}
 .en-musc span i{width:7px;height:7px;border-radius:50%;background:var(--mu);}
-.en-musc span.p{color:var(--tx);background:color-mix(in srgb,var(--heat) 16%,transparent);}
-.en-musc span.p i{background:var(--heat);}
+.en-musc span.p{color:var(--tx);background:var(--acc-soft);}
+.en-musc span.p i{background:var(--acc);}
 .en-pills{display:flex;flex-wrap:wrap;gap:6px;}
 .en-pill{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 12px;border-radius:999px;background:var(--gl);font-size:var(--fs-sm);font-weight:600;color:var(--mu);}
 .en-pill b{color:var(--tx);}
@@ -1629,8 +1630,11 @@ html[data-theme="light2"]{--acc:var(--lime);--acc-tx:#5444DC;--acc-ink:#FFFFFF;-
 .en-f-in{display:grid;gap:14px;padding:10px 16px calc(18px + env(safe-area-inset-bottom,0px));}
 .en-f-top{display:flex;justify-content:flex-end;align-items:center;position:relative;min-height:44px;}
 .en-grab{position:absolute;left:50%;top:4px;width:40px;height:5px;border-radius:3px;background:var(--b2);transform:translateX(-50%);}
-.en-f-fig{position:relative;height:min(56dvh,420px);border-radius:var(--r-md);overflow:hidden;background:#05070A;}
-.en-f-fig .pic{border-radius:0;background:#05070A;}
+.en-f-fig{position:relative;height:min(56dvh,420px);border-radius:var(--r-md);overflow:hidden;background:var(--en-foto);}
+.en-f-fig .pic{border-radius:0;background:var(--en-foto);}
+/* Video en bucle encima de la imagen fija: entra con un fundido cuando ya se está reproduciendo */
+.en-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:var(--en-foto);opacity:0;transition:opacity .25s var(--ease-out);pointer-events:none;}
+.en-vid.on{opacity:1;}
 .en-ficha h3{font-family:var(--fd);font-weight:800;font-style:italic;font-size:30px;line-height:.95;text-transform:uppercase;letter-spacing:-.015em;margin:0;text-wrap:balance;}
 .en-f-eq{display:flex;align-items:center;gap:8px;color:var(--mu);font-size:var(--fs-md);}
 .en-f-sec{display:grid;gap:8px;}

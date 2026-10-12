@@ -1,64 +1,113 @@
-# Imágenes de ejercicios: un solo estilo
+# Imágenes y videos de ejercicios: estilo nuevo
 
-La app muestra una imagen por ejercicio en tres lugares:
-- La miniatura de la lista en **Rutina**.
-- La foto grande de la **sesión en curso**.
-- La ficha **"Cómo se hace"**.
+Cada ejercicio se ve en tres lugares de la app:
 
-Para que todo combine, todas deben seguir **un mismo modelo**: el de la sentadilla goblet.
+| Lugar | Qué se muestra |
+|---|---|
+| Lista de **Rutina** | Miniatura de 48 px, siempre con la imagen fija. |
+| **Sesión en curso** | La foto grande. Si el ejercicio tiene video, se reproduce en bucle encima de la imagen fija. |
+| Ficha **"Cómo se hace"** | Igual que en la sesión: el video si hay, y si no, la imagen fija. |
+
+Todas siguen **un solo estilo**, hecho con la paleta de la app. El modelo es la sentadilla goblet (`img/ejercicios/sentadilla-goblet.webp`).
 
 ![Modelo](../img/ejercicios/sentadilla-goblet.webp)
 
-## El modelo
+## El estilo
 
 | Elemento | Cómo debe verse |
 |---|---|
-| Figura | Maniquí 3D gris claro, sin cara ni cabello, complexión atlética, short negro. |
-| Fondo | Negro con un halo blanco suave detrás de la figura. Sin piso de colores ni reflejos naranja o morado. |
-| Encuadre | Vertical 2:3, cuerpo completo de pies a cabeza, centrado, vista de tres cuartos. |
-| Músculo principal | Rojo-naranja con contorno fino azul neón. |
-| Ángulo clave | Líneas verde neón en la articulación que importa (rodilla, cadera, codo). |
-| Barra anatómica | Arriba, una barra oscura redondeada con 3 vistas pequeñas en gris (torso de frente, piernas, espalda); la vista del grupo trabajado va **resaltada en verde neón**. |
-| Equipo | Real, negro mate (mancuernas, barra, máquina, polea). |
-| Prohibido | Texto, letras, logos, marcas de agua, rayas o cortes en las orillas. |
+| Fondo | Liso **#0A0E13** (el de la app), sin piso, horizonte ni degradado. Así la imagen se funde con la tarjeta. |
+| Figura | Cuerpo atlético **grafito mate** (#2B333C), liso como arcilla, sin rostro ni cabello, short negro sin logos. |
+| Músculo que trabaja | El principal brilla en **lima #C8F23A**; los secundarios en lima tenue (35 %). Lo demás queda grafito. |
+| Luz | Una luz suave desde arriba a la izquierda y un borde frío por detrás. Sin luces de colores. |
+| Encuadre | Vertical **4:5**, cuerpo completo, vista 3/4 de frente a la altura de los ojos. La figura ocupa cerca del 80 % del alto. |
+| Equipo | Real, negro mate, con un borde de luz fría. |
+| Prohibido | Texto, letras, números, logos, marcas de agua, flechas, esquemas anatómicos o elementos de interfaz. |
 
-## Prompt para generarlas
+Ya no se usan la barra anatómica ni el piso naranja y morado. La app muestra los músculos en chips, con el principal en lima.
 
-Usa la imagen de la sentadilla goblet como **imagen de referencia de estilo** y cambia solo lo que está entre llaves. En inglés suele salir mejor:
+## 1. Imagen fija (ChatGPT)
 
 ```
-3D render in the exact style of the reference image: a featureless light-gray
-mannequin athlete (no face, no hair, athletic build, black shorts) performing
-{EJERCICIO EN INGLÉS, p. ej. "a seated cable row"} with {EQUIPO, p. ej. "a
-cable machine and V-handle"}. Full body visible, three-quarter view, centered,
-vertical 2:3 frame. Pure black background with a soft white glow behind the
-figure. Main worked muscle ({MÚSCULO EN INGLÉS}) highlighted in a red-orange
-gradient with a thin neon-blue outline; thin neon-green lines marking the
-{ARTICULACIÓN} angle. At the top, a dark rounded horizontal bar with three
-small grayscale anatomy thumbnails (front torso, legs, back); the
-{VISTA: front torso / legs / back} thumbnail is highlighted with a glowing
-neon-green frame and green muscles. Matte black equipment. No text, no letters,
-no logos, no watermark, clean edges.
+Create a single vertical 4:5 image (1080×1350) for a fitness app exercise library.
+
+Subject: an athletic adult performing a goblet squat, at the bottom of the movement: thighs parallel to the floor, chest up, holding one dumbbell vertically against the chest with both hands, feet shoulder-width, heels down, knees tracking over the toes.
+
+Style: premium 3D render. The figure is a smooth matte graphite-gray sculpted body (like dark clay, #2B333C), no face details, no hair, no clothing logos, plain black shorts. Anatomically accurate proportions, realistic weight and balance.
+
+Muscle highlight: the main working muscles (quadriceps and glutes) glow from within in electric lime #C8F23A, softly emissive with a gentle bloom; secondary muscles (adductors and core) in a faint, 35% lime. Everything else stays graphite.
+
+Equipment: one hexagonal dumbbell, matte black with a thin cool rim light.
+
+Background: perfectly flat, solid #0A0E13 (very dark blue-black) filling the whole frame, seamless, no floor line, no horizon, no gradient, no studio props. Only a very soft contact shadow under the feet.
+
+Lighting: one soft key light from upper left, a subtle cool rim light from behind to separate the figure from the background. Low contrast, calm, high-end.
+
+Camera: eye level, three-quarter front view, full body visible from head to feet, centered, figure fills about 80% of the frame height with even margins.
+
+Do not include: any text, letters, numbers, labels, logos, watermarks, arrows, diagrams, anatomy charts, UI elements, colored studio lights, reflections on the floor, or extra people.
 ```
 
-Revisa cada resultado contra la tabla del modelo antes de subirlo; lo que más falla es que agregue texto o cambie el color del recuadro.
+Si sale con texto o con otro fondo, pídele: *"Same image, but remove all text and make the background exactly flat #0A0E13."*
+
+## 2. Video en bucle (Gemini / Veo)
+
+Adjunta la imagen fija aprobada como primer cuadro:
+
+```
+Use the attached image as the first frame and the exact visual style reference.
+
+Create a 5-second seamless looping video, vertical 9:16, of the same graphite figure performing one slow, controlled goblet squat:
+- 0.0–0.5 s: standing tall, holding the dumbbell at the chest.
+- 0.5–2.5 s: lowers smoothly to the bottom position (thighs parallel), chest up, heels down.
+- 2.5–3.0 s: brief pause at the bottom.
+- 3.0–4.5 s: drives back up to standing.
+- 4.5–5.0 s: settles into exactly the same standing pose as the first frame, so the video loops without a jump.
+
+The lime #C8F23A glow on the quadriceps and glutes gets brighter while lowering and during the pause, and dims slightly when standing.
+
+Camera completely locked: no zoom, no pan, no shake. Same three-quarter front view, the whole body always in frame, centered, with space above the head and below the feet.
+
+Keep the background perfectly flat #0A0E13 the entire time, same lighting, no flicker, no morphing of the body or the dumbbell, realistic tempo and balance.
+
+No text, no logos, no music, no extra people, no camera cuts.
+```
+
+## 3. Siguientes ejercicios (mismo estilo)
+
+Adjunta siempre la imagen de la sentadilla goblet como referencia:
+
+```
+Use the attached image as a strict style reference: same graphite matte figure, same flat #0A0E13 background, same lighting, same camera distance and three-quarter view, same lime #C8F23A glow treatment. Keep everything identical except the exercise.
+
+New exercise: [EJERCICIO EN INGLÉS, p. ej. seated cable row], shown at [POSICIÓN CLAVE, p. ej. the end of the pull, elbows behind the torso].
+Main working muscles glowing lime: [MÚSCULO PRINCIPAL, p. ej. mid back and lats]. Secondary at 35%: [SECUNDARIOS, p. ej. biceps and rear delts].
+Equipment: [EQUIPO, p. ej. low cable machine with a V-handle], matte black with a thin cool rim light.
+
+Vertical 4:5, 1080×1350, full body, centered. No text, letters, logos, watermarks, arrows, diagrams or UI.
+```
+
+Para probar cada resultado dentro de las pantallas de la app antes de elegirlo, usa el **probador de imágenes**: https://claude.ai/artifact/BJekk73jMKUVPbDJx5yiRD
 
 ## Cómo subirlas
 
-1. Nombra cada archivo con el nombre del ejercicio tal como aparece en el plan (por ejemplo `Remo en polea baja.png`). Los acentos y mayúsculas no importan.
-2. Pásamelas aquí en el chat y yo las preparo y las subo en un PR. También puedes hacerlo tú:
+1. **Imagen fija.** Nombra el archivo con el nombre del ejercicio tal como aparece en el plan (por ejemplo `Remo en polea baja.png`) y ejecuta:
    ```
    pip install pillow
    python3 herramientas/preparar-imagenes.py CARPETA_CON_TUS_IMÁGENES
    ```
-   El script las pone en el **mismo marco** y deja todo listo en `img/ejercicios/`:
-   - Lienzo vertical 1080 × 1350 sobre el fondo oscuro de la app.
-   - Bordes fundidos con el fondo.
-   - Formato webp, de 40 a 70 KB cada una.
-   - Su miniatura `mini-…`.
-3. Si un ejercicio no tiene imagen, la app usa la del grupo muscular (`img/grupos/`) y, si tampoco hay, un ícono. Nada se rompe mientras se completan.
+   El script deja en `img/ejercicios/` la imagen en el marco de la app (1080 × 1350, de 30 a 60 KB) y su miniatura `mini-…`.
+2. **Video.** De lo que entrega Gemini (16:9, unos 10 s, con audio) se sacan tres cosas:
+   - Una sola repetición que cierre en bucle limpio.
+   - Un recorte a 4:5 centrado en la figura, con el fondo extendido arriba y abajo.
+   - Dos archivos sin audio en `img/ejercicios/`: `<nombre>.webm` (unos 100 KB) y `<nombre>.mp4` (unos 140 KB).
 
-Para la ficha "Cómo se hace", los **pasos** y el **error común** de cada ejercicio están en `EJ_PASOS`, dentro de `js/38-entreno.js`. Si un ejercicio no tiene esos datos, la ficha muestra la nota del entrenador.
+   Después se agrega el nombre a `EJ_VIDEOS`, en `js/38-entreno.js`. Mándamelo y yo lo preparo; así se hizo la goblet.
+3. **Sin imagen.** Si un ejercicio no tiene imagen, la app usa la de su grupo muscular y, si tampoco hay, un ícono. Si tiene imagen pero no video, se queda con la imagen fija. Nada se rompe mientras se completan.
+
+El video no se muestra cuando el celular tiene activado "reducir movimiento", y sin conexión se ve la imagen fija.
+
+Para la ficha "Cómo se hace", los **pasos** y el **error común** de cada ejercicio están en `EJ_PASOS`, en `js/38-entreno.js`.
 
 ## Estado actual
 
@@ -66,20 +115,19 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 3 | Ya siguen el modelo. |
-| **Ajustar** | 7 | Mismo estilo, pero con un detalle que corregir: color del recuadro, texto o fondo gris. |
-| **Rehacer** | 15 | Están en el estilo de estudio, con piso naranja y morado y sin barra anatómica. |
+| **Listo** | 1 | Imagen y video en el estilo nuevo: sentadilla goblet. |
+| **Rehacer** | 24 | Tienen imagen, pero en el estilo anterior. |
 | **Falta** | 201 | No tienen imagen. |
 
-Sugerencia de orden: primero los **Rehacer**, porque ya aparecen en los planes, y luego los ejercicios compuestos de cada zona.
+Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y luego los ejercicios compuestos de cada zona.
 
 ### Rack / barra libre
 
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
-| Sentadilla libre | `sentadilla-libre` | Cuádriceps · Glúteo | Ajustar: quitar texto y segunda barra |
-| Sentadilla frontal | `sentadilla-frontal` | Cuádriceps · Core | Rehacer (estilo estudio) |
-| Peso muerto convencional | `peso-muerto-convencional` | Glúteo · Femorales · Espalda | Rehacer (estilo estudio) |
+| Sentadilla libre | `sentadilla-libre` | Cuádriceps · Glúteo | Rehacer (estilo anterior) |
+| Sentadilla frontal | `sentadilla-frontal` | Cuádriceps · Core | Rehacer (estilo anterior) |
+| Peso muerto convencional | `peso-muerto-convencional` | Glúteo · Femorales · Espalda | Rehacer (estilo anterior) |
 | Peso muerto rumano | `peso-muerto-rumano` | Femorales · Glúteo | Falta |
 | Remo con barra | `remo-con-barra` | Dorsal · Romboides | Falta |
 | Press militar con barra | `press-militar-con-barra` | Deltoides anterior | Falta |
@@ -92,22 +140,22 @@ Sugerencia de orden: primero los **Rehacer**, porque ya aparecen en los planes, 
 
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
-| Sentadilla goblet | `sentadilla-goblet` | Cuádriceps · Glúteo | Listo |
-| Desplante | `desplante` | Cuádriceps · Glúteo | Rehacer (estilo estudio) |
-| Sentadilla búlgara | `sentadilla-bulgara` | Cuádriceps · Glúteo | Rehacer (estilo estudio) |
+| Sentadilla goblet | `sentadilla-goblet` | Cuádriceps · Glúteo | **Listo** (imagen + video) |
+| Desplante | `desplante` | Cuádriceps · Glúteo | Rehacer (estilo anterior) |
+| Sentadilla búlgara | `sentadilla-bulgara` | Cuádriceps · Glúteo | Rehacer (estilo anterior) |
 | Peso muerto rumano con mancuernas | `peso-muerto-rumano-con-mancuernas` | Femorales · Glúteo | Falta |
 | Press inclinado con mancuernas | `press-inclinado-con-mancuernas` | Pecho superior | Falta |
 | Press plano con mancuernas | `press-plano-con-mancuernas` | Pecho mayor | Falta |
 | Aperturas con mancuernas | `aperturas-con-mancuernas` | Pecho | Falta |
 | Pullover con mancuerna | `pullover-con-mancuerna` | Dorsal · Pecho | Falta |
 | Remo con mancuerna | `remo-con-mancuerna` | Dorsal · Romboides | Falta |
-| Press de hombro con mancuernas | `press-de-hombro-con-mancuernas` | Deltoides | Rehacer (estilo estudio) |
-| Elevaciones laterales | `elevaciones-laterales` | Deltoides lateral | Rehacer (estilo estudio) |
+| Press de hombro con mancuernas | `press-de-hombro-con-mancuernas` | Deltoides | Rehacer (estilo anterior) |
+| Elevaciones laterales | `elevaciones-laterales` | Deltoides lateral | Rehacer (estilo anterior) |
 | Elevación frontal ligera | `elevacion-frontal-ligera` | Deltoides anterior | Falta |
 | Pájaros con mancuerna | `pajaros-con-mancuerna` | Deltoides posterior | Falta |
 | Encogimientos con mancuerna | `encogimientos-con-mancuerna` | Trapecio | Falta |
 | Curl con barra Z | `curl-con-barra-z` | Bíceps | Falta |
-| Curl alterno con mancuernas | `curl-alterno-con-mancuernas` | Bíceps | Ajustar: selector naranja con 5 vistas → 3 vistas en verde |
+| Curl alterno con mancuernas | `curl-alterno-con-mancuernas` | Bíceps | Rehacer (estilo anterior) |
 | Curl martillo | `curl-martillo` | Braquial · Braquiorradial | Falta |
 | Extensión de tríceps sobre la cabeza | `extension-de-triceps-sobre-la-cabeza` | Tríceps (porción larga) | Falta |
 | Farmer walk | `farmer-walk` | Core · Agarre · Trapecio | Falta |
@@ -137,13 +185,13 @@ Sugerencia de orden: primero los **Rehacer**, porque ya aparecen en los planes, 
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
 | Sentadilla hack | `sentadilla-hack` | Cuádriceps | Falta |
-| Prensa de piernas | `prensa-de-piernas` | Cuádriceps · Glúteo | Ajustar: quitar texto y segunda barra |
+| Prensa de piernas | `prensa-de-piernas` | Cuádriceps · Glúteo | Rehacer (estilo anterior) |
 | Prensa con pies bajos | `prensa-con-pies-bajos` | Cuádriceps | Falta |
-| Extensión de cuádriceps | `extension-de-cuadriceps` | Cuádriceps | Rehacer (estilo estudio) |
+| Extensión de cuádriceps | `extension-de-cuadriceps` | Cuádriceps | Rehacer (estilo anterior) |
 | Abducción de cadera en máquina | `abduccion-de-cadera-en-maquina` | Glúteo medio | Falta |
-| Curl femoral acostado | `curl-femoral-acostado` | Femorales | Ajustar: quitar texto "ENTIRE" |
+| Curl femoral acostado | `curl-femoral-acostado` | Femorales | Rehacer (estilo anterior) |
 | Curl femoral sentado | `curl-femoral-sentado` | Femorales | Falta |
-| Elevación de talones de pie | `elevacion-de-talones-de-pie` | Gemelos | Rehacer (estilo estudio) |
+| Elevación de talones de pie | `elevacion-de-talones-de-pie` | Gemelos | Rehacer (estilo anterior) |
 | Pantorrilla en prensa | `pantorrilla-en-prensa` | Gemelos | Falta |
 | Press de pecho en máquina | `press-de-pecho-en-maquina` | Pecho mayor | Falta |
 | Press inclinado en máquina | `press-inclinado-en-maquina` | Pecho superior | Falta |
@@ -179,7 +227,7 @@ Sugerencia de orden: primero los **Rehacer**, porque ya aparecen en los planes, 
 |---|---|---|---|
 | Step-up al cajón | `step-up-al-cajon` | Glúteo · Cuádriceps | Falta |
 | Fondos en paralelas | `fondos-en-paralelas` | Pecho inferior · Tríceps | Falta |
-| Dominadas | `dominadas` | Dorsal ancho · Bíceps | Rehacer (estilo estudio) |
+| Dominadas | `dominadas` | Dorsal ancho · Bíceps | Rehacer (estilo anterior) |
 | Remo invertido en TRX | `remo-invertido-en-trx` | Espalda media · Core | Falta |
 | Elevación de piernas colgado | `elevacion-de-piernas-colgado` | Abdomen inferior | Falta |
 | Swing con kettlebell | `swing-con-kettlebell` | Glúteo · Cadena posterior | Falta |
@@ -197,7 +245,7 @@ Sugerencia de orden: primero los **Rehacer**, porque ya aparecen en los planes, 
 | Sentadilla sissy asistida | `sentadilla-sissy-asistida` | Cuádriceps | Falta |
 | Isométrico de cuádriceps | `isometrico-de-cuadriceps` | Cuádriceps | Falta |
 | Sentadilla isométrica en pared | `sentadilla-isometrica-en-pared` | Cuádriceps | Falta |
-| Puente de glúteo | `puente-de-gluteo` | Glúteo | Rehacer (estilo estudio) |
+| Puente de glúteo | `puente-de-gluteo` | Glúteo | Rehacer (estilo anterior) |
 | Caminata lateral con banda | `caminata-lateral-con-banda` | Glúteo medio | Falta |
 | Curl femoral en fitball | `curl-femoral-en-fitball` | Femorales | Falta |
 | Curl nórdico asistido | `curl-nordico-asistido` | Femorales | Falta |
@@ -205,11 +253,11 @@ Sugerencia de orden: primero los **Rehacer**, porque ya aparecen en los planes, 
 | Lagartijas | `lagartijas` | Pecho · Tríceps · Core | Falta |
 | Rotación externa con banda | `rotacion-externa-con-banda` | Manguito rotador | Falta |
 | Fondos en banco | `fondos-en-banco` | Tríceps | Falta |
-| Plancha frontal | `plancha-frontal` | Core | Rehacer (estilo estudio) |
-| Plancha lateral | `plancha-lateral` | Oblicuos | Rehacer (estilo estudio) |
+| Plancha frontal | `plancha-frontal` | Core | Rehacer (estilo anterior) |
+| Plancha lateral | `plancha-lateral` | Oblicuos | Rehacer (estilo anterior) |
 | Dead bug | `dead-bug` | Core profundo | Falta |
 | Bird-dog | `bird-dog` | Core · Erectores | Falta |
-| Rueda abdominal | `rueda-abdominal` | Core anterior | Rehacer (estilo estudio) |
+| Rueda abdominal | `rueda-abdominal` | Core anterior | Rehacer (estilo anterior) |
 | Sentadilla con salto | `sentadilla-con-salto` | Cuádriceps · Glúteo | Falta |
 | Aguante de zancada (split squat isométrico) | `aguante-de-zancada-split-squat-isometrico` | Cuádriceps · Glúteo | Falta |
 | Puente de glúteo isométrico | `puente-de-gluteo-isometrico` | Glúteo | Falta |
@@ -229,7 +277,7 @@ Sugerencia de orden: primero los **Rehacer**, porque ya aparecen en los planes, 
 | Plancha con toque de hombro | `plancha-con-toque-de-hombro` | Core · Hombro | Falta |
 | Crunch abdominal | `crunch-abdominal` | Recto abdominal | Falta |
 | Elevación de rodillas en banco | `elevacion-de-rodillas-en-banco` | Abdomen bajo | Falta |
-| Escaladores | `escaladores` | Core · Hombro | Rehacer (estilo estudio) |
+| Escaladores | `escaladores` | Core · Hombro | Rehacer (estilo anterior) |
 | Crunch bicicleta | `crunch-bicicleta` | Oblicuos · Abdomen | Falta |
 | Tijeras (flutter kicks) | `tijeras-flutter-kicks` | Abdomen bajo | Falta |
 | Salto de cuerda | `salto-de-cuerda` | Sistema cardiovascular | Falta |
@@ -242,7 +290,7 @@ Sugerencia de orden: primero los **Rehacer**, porque ya aparecen en los planes, 
 |---|---|---|---|
 | Hip thrust | `hip-thrust` | Glúteo mayor | Falta |
 | Hiperextensión 45° | `hiperextension-45` | Erectores · Glúteo | Falta |
-| Press banca plano | `press-banca-plano` | Pecho mayor · Tríceps | Rehacer (estilo estudio) |
+| Press banca plano | `press-banca-plano` | Pecho mayor · Tríceps | Rehacer (estilo anterior) |
 | Press inclinado con barra | `press-inclinado-con-barra` | Pecho superior | Falta |
 | Press francés con barra Z | `press-frances-con-barra-z` | Tríceps (porción larga) | Falta |
 | Press banca agarre cerrado | `press-banca-agarre-cerrado` | Tríceps · Pecho | Falta |
@@ -255,13 +303,13 @@ Sugerencia de orden: primero los **Rehacer**, porque ya aparecen en los planes, 
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
 | Patada de glúteo en polea | `patada-de-gluteo-en-polea` | Glúteo mayor | Falta |
-| Cruce de poleas | `cruce-de-poleas` | Pecho (porción media) | Ajustar: fondo gris → negro; selector cian → verde |
+| Cruce de poleas | `cruce-de-poleas` | Pecho (porción media) | Rehacer (estilo anterior) |
 | Cruce de poleas de abajo hacia arriba | `cruce-de-poleas-de-abajo-hacia-arriba` | Pecho superior | Falta |
-| Cruce de poleas de arriba hacia abajo | `cruce-de-poleas-de-arriba-hacia-abajo` | Pecho inferior | Ajustar: fondo gris → negro; selector morado → verde |
-| Jalón al pecho | `jalon-al-pecho` | Dorsal ancho | Listo |
+| Cruce de poleas de arriba hacia abajo | `cruce-de-poleas-de-arriba-hacia-abajo` | Pecho inferior | Rehacer (estilo anterior) |
+| Jalón al pecho | `jalon-al-pecho` | Dorsal ancho | Rehacer (estilo anterior) |
 | Jalón unilateral en polea | `jalon-unilateral-en-polea` | Dorsal ancho | Falta |
-| Pullover en polea alta | `pullover-en-polea-alta` | Dorsal ancho | Ajustar: selector naranja → verde |
-| Remo en polea baja | `remo-en-polea-baja` | Dorsal · Romboides | Listo |
+| Pullover en polea alta | `pullover-en-polea-alta` | Dorsal ancho | Rehacer (estilo anterior) |
+| Remo en polea baja | `remo-en-polea-baja` | Dorsal · Romboides | Rehacer (estilo anterior) |
 | Face pull | `face-pull` | Deltoides posterior · Manguito | Falta |
 | Elevación lateral en polea | `elevacion-lateral-en-polea` | Deltoides lateral | Falta |
 | Elevación frontal en polea | `elevacion-frontal-en-polea` | Deltoides anterior | Falta |

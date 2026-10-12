@@ -8,7 +8,7 @@
    → Los datos de Firebase NUNCA pasan por aquí (van directo).
    → Al desplegar cambios, sube CACHE_VERSION.
    ════════════════════════════════════════════════════════ */
-const CACHE_VERSION = 'fitnesspro-v51';
+const CACHE_VERSION = 'fitnesspro-v52';
 const PRECACHE_LOCAL = [
   './',
   './index.html',
@@ -136,6 +136,7 @@ self.addEventListener('fetch', (e) => {
   const propio = url.origin === self.location.origin;
   const cdn = CDN_HOSTS.includes(url.hostname);
   if (!propio && !cdn) return;             // Firebase Database, IA, etc.: directo a la red
+  if (/\.(mp4|webm)$/i.test(url.pathname)) return;   // videos: piden por partes (206), van directo a la red
 
   // 1) La app: red primero (máx. 4 s), si no, la copia guardada
   if (req.mode === 'navigate') {
