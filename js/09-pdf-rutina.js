@@ -337,9 +337,13 @@ function renderCuerpo(){
       </div>
     </div>`;
 
+  // La intro del logo (5 s) termina y sigue con el bucle de 4 s, sin volver a negro
+  window.logoABucle=v=>{ v.onended=null; v.loop=true; v.innerHTML='<source src="video/logo-bucle.webm" type="video/webm"><source src="video/logo-bucle.mp4" type="video/mp4">'; v.load(); v.play().catch(()=>{}); };
   function av3dHTML(conMedidas){
     return `
-    <div class="logo-progreso"><video src="video/logo-progreso.mp4" autoplay muted loop playsinline disablepictureinpicture aria-label="${esc(GYM.nombreCorto)}"></video></div>`;
+    <div class="logo-progreso">${matchMedia('(prefers-reduced-motion: reduce)').matches
+      ? `<img src="icons/icon-512.png" alt="${esc(GYM.nombreCorto)}">`
+      : `<video autoplay muted playsinline disablepictureinpicture poster="icons/icon-512.png" aria-label="${esc(GYM.nombreCorto)}" onended="logoABucle(this)"><source src="video/logo-progreso.webm" type="video/webm"><source src="video/logo-progreso.mp4" type="video/mp4"></video>`}</div>`;
   }
 
   if(!ultima){

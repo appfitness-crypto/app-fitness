@@ -1,0 +1,97 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}canvas{display:block}</style></head><body>
+<canvas id="c" width="1080" height="1080"></canvas>
+<script>
+/* Marca animada: hexágono de puntos con tres chevrones que suben. Colores de la app. */
+const W=1080,H=1080, cv=document.getElementById('c'), x=cv.getContext('2d',{willReadFrequently:true});
+const COL={bg:'#0A0E13',base:'#36414D',c1:'#4F6418',c2:'#8DB02A',c3:'#C8F23A',cima:'#F1F5F7',lime:'#C8F23A'};
+const RAD={base:0.15,c1:0.36,c2:0.38,c3:0.40,cima:0.47};
+const ORDEN={c1:0,c2:1,c3:2,cima:3};
+let P=[]; const ESC=70;              // px por unidad de retícula
+const cl=(v,a=0,b=1)=>Math.min(b,Math.max(a,v)), p=(t,t0,d)=>cl((t-t0)/d);
+const eOut=v=>v>=1?1:1-Math.pow(2,-10*v), eIO=v=>v<.5?4*v*v*v:1-Math.pow(-2*v+2,3)/2;
+const eBack=v=>{const s=2.2;return 1+(s+1)*Math.pow(v-1,3)+s*Math.pow(v-1,2);};
+function hex(c){return [parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16)];}
+function mezcla(a,b,v){const A=hex(a),B=hex(b);return A.map((q,i)=>Math.round(q+(B[i]-q)*v));}
+const rgb=(c,a=1)=>`rgba(${c[0]},${c[1]},${c[2]},${a})`;
+/* Proyección 3D: la marca vive en el plano z=0 y la cámara la inclina */
+function proyecta(px,py,rx,ry){
+  let X=px, Y=py*Math.cos(rx), Z=py*Math.sin(rx);
+  const X2=X*Math.cos(ry)+Z*Math.sin(ry), Z2=-X*Math.sin(ry)+Z*Math.cos(ry);
+  const f=14/(14+Z2); return [W/2+X2*ESC*f, H/2+Y*ESC*f, f];
+}
+/* Esfera: degradado con luz arriba a la izquierda; las lima brillan */
+function esfera(sx,sy,r,c,brillo=0,glow=0){
+  if(r<=0.3) return;
+  if(glow>0){ x.save(); x.shadowColor=c[0]>230&&c[2]>230?`rgba(241,245,247,${.6*glow})`:rgb(hex(COL.lime),.55*glow); x.shadowBlur=r*2.2; x.fillStyle=rgb(c); x.beginPath(); x.arc(sx,sy,r,0,7); x.fill(); x.restore(); }
+  const g=x.createRadialGradient(sx-r*.35,sy-r*.4,r*.05,sx,sy,r);
+  const cl2=c.map(v=>Math.min(255,v+(255-v)*(.42+brillo*.4))), osc=c.map(v=>v*.55);
+  g.addColorStop(0,rgb(cl2)); g.addColorStop(.55,rgb(c.map(v=>Math.min(255,v+(255-v)*brillo*.5)))); g.addColorStop(1,rgb(osc));
+  x.fillStyle=g; x.beginPath(); x.arc(sx,sy,r,0,7); x.fill();
+}
+function fondo(int=1){
+  x.fillStyle=COL.bg; x.fillRect(0,0,W,H);
+  const g=x.createRadialGradient(W/2,H*.46,0,W/2,H*.46,W*.62); g.addColorStop(0,`rgba(200,242,58,${.07*int})`); g.addColorStop(1,'rgba(200,242,58,0)');
+  x.fillStyle=g; x.fillRect(0,0,W,H);
+}
+const MAXD=()=>Math.max(...P.map(q=>Math.hypot(q.x,q.y)));
+/* ── INTRO (5 s) ── */
+function intro(t){
+  fondo(eOut(p(t,2.7,.6)));
+  const inc=1-eIO(p(t,1.8,1.8));                       // inclinación 3D que se endereza
+  const rx=.42*inc, ry=-.30*inc;
+  const md=MAXD(), ola=lerp(-8,9,p(t,.85,.75));        // onda lima que sube (y de abajo a arriba)
+  const orden=[];
+  for(const q of P){
+    const [sx,sy,f]=proyecta(q.x,q.y,rx,ry);
+    const d=Math.hypot(q.x,q.y)/md, ap=eOut(p(t,d*.6,.35));          // aparición desde el centro
+    let tipo=q.t, r=RAD.base, c=hex(COL.base), br=0, gl=0;
+    // la onda: brillo pasajero según la distancia a la línea que sube
+    const w=Math.exp(-Math.pow((-q.y)-ola,2)/1.2)*(t>.85&&t<1.75?1:0);
+    c=mezcla(COL.base,COL.lime,w*.8); r=RAD.base*(1+w*.8);
+    if(tipo!=='base'){
+      const t0=1.2+ORDEN[tipo]*.5+Math.abs(q.x)*.035;                // cada chevrón en su tiempo, del centro hacia afuera
+      const v=p(t,t0,.38), e=v>0?eBack(v):0;
+      r=lerp(r,RAD[tipo],e); c=mezcla(COL.base,COL[tipo],cl(v*1.6)); gl=tipo==='base'?0:cl(v)*(tipo==='c1'?.3:tipo==='c2'?.6:1); if(tipo==='cima') gl=cl(v);
+      if(tipo==='cima'){ br=Math.exp(-Math.max(0,t-2.7)/.35)*cl(v); }
+      if(t>3.6){ const resp=.5+.5*Math.sin((t-3.6)*Math.PI*1.4); if(tipo==='cima'||tipo==='c3') gl*= .85+.15*resp; }
+    }
+    orden.push([f,sx,sy,r*ESC*f*ap,c,br,gl]);
+  }
+  orden.sort((a,b)=>a[0]-b[0]).forEach(o=>esfera(o[1],o[2],o[3],o[4],o[5],o[6]));
+  // onda expansiva de la cima
+  const u=t-2.7; if(u>0&&u<.8){ const cima=P.find(q=>q.t==='cima'); const [sx,sy,f]=proyecta(cima.x,cima.y,rx,ry);
+    x.strokeStyle=`rgba(200,242,58,${.7*(1-u/.8)})`; x.lineWidth=6*(1-u/.8)+1; x.beginPath(); x.arc(sx,sy,RAD.cima*ESC*f+eOut(u/.8)*230,0,7); x.stroke(); }
+  // entrada desde negro y destello en la cima
+  if(t<.25){ x.fillStyle=`rgba(0,0,0,${1-t/.25})`; x.fillRect(0,0,W,H); }
+  if(u>0&&u<.4){ x.fillStyle=`rgba(255,255,255,${.05*(1-u/.4)})`; x.fillRect(0,0,W,H); }
+}
+const lerp=(a,b,v)=>a+(b-a)*v;
+/* ── BUCLE (4 s, sin costura) ── */
+function bucle(t){
+  const T=4, fase=(t%T)/T;
+  fondo(1);
+  const ola=lerp(-12.5,12.5,fase);                           // la onda sube por la marca y vuelve a empezar abajo
+  for(const q of P){
+    const [sx,sy,f]=proyecta(q.x,q.y,0,0);
+    const dy=(-q.y)-ola, w=Math.exp(-dy*dy/2.2);
+    let r=RAD[q.t]*ESC, c=hex(COL[q.t]), br=0, gl=q.t==='base'?0:(q.t==='c1'?.3:q.t==='c2'?.6:1);
+    if(q.t==='base'){ c=mezcla(COL.base,COL.lime,w*.35); r*=1+w*.25; }
+    else { br=w*.45; gl=Math.min(1,gl+w*.6); r*=1+w*.05; }
+    if(q.t==='cima'){ br+=.25+.25*Math.sin(fase*Math.PI*2); }
+    esfera(sx,sy,r,c,br,gl);
+  }
+}
+let MODO='intro';
+function dibujar(t){ x.setTransform(1,0,0,1,0,0); (MODO==='intro'?intro:bucle)(t); }
+const ACC=new Uint32Array(W*H*4);
+async function cuadro(f,{N=8,fps=60}={}){
+  const t=f/fps; ACC.fill(0);
+  for(let i=0;i<N;i++){ const ts=MODO==='bucle'?((t-(.5/fps)*(i/N))+4)%4:Math.max(0,t-(.5/fps)*(i/N)); dibujar(ts); const d=x.getImageData(0,0,W,H).data; for(let j=0;j<d.length;j++) ACC[j]+=d[j]; }
+  const img=x.createImageData(W,H), o=img.data; let s=((f+1)*2654435761)>>>0;
+  for(let j=0;j<o.length;j+=4){ s^=s<<13; s^=s>>>17; s^=s<<5; const r=((s>>>0)/4294967296-.5)*3; o[j]=ACC[j]/N+r; o[j+1]=ACC[j+1]/N+r; o[j+2]=ACC[j+2]/N+r; o[j+3]=255; }
+  x.putImageData(img,0,0);
+  const blob=await new Promise(r=>cv.toBlob(r,'image/png')); const buf=new Uint8Array(await blob.arrayBuffer()); let str=''; for(let i=0;i<buf.length;i+=32768) str+=String.fromCharCode.apply(null,buf.subarray(i,i+32768)); return btoa(str);
+}
+window.listo=fetch('marca.json').then(r=>r.json()).then(j=>{P=j;return true;});
+window.cuadro=cuadro; window.dibujar=dibujar; window.setModo=m=>MODO=m;
+</script></body></html>
