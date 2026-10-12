@@ -1,15 +1,12 @@
-/* ═══ avatar 3d ═══
+/* ═══ avatar 3d · Mi cuerpo ═══
    Fitness System Pro · módulo cargado por index.html en orden (script clásico: comparte el ámbito global).
-   No cambia la lógica: es el mismo código que antes vivía dentro de index.html. ═══ */
-// ═════════════════════════════════════════
-// AVATAR 3D — Three.js paramétrico
-// Adaptado de los prototipos React de Fer:
-// mismo estilo anatómico, ahora conectado
-// a las medidas reales del socio + morph
-// INICIO ⇄ HOY
-// ═════════════════════════════════════════
-let av3d = null;          // {renderer,scene,camera,partes,raf,destruir}
+   Vista 3D de cuerpo completo (maniquí gris con la definición muscular) que se gira con el dedo.
+   La PRIMERA medición del cliente es su punto de partida: ese día el avatar queda tal cual y, conforme
+   registra medidas nuevas, sus músculos crecen en proporción. Al tocar un músculo se ve cómo ha cambiado su medida.
+   Motor: js/cuerpo3d/motor.js · modelo: modelos/cuerpo.glb (Z-Anatomy, CC BY-SA 4.0). Se cargan solo al abrir la vista. ═══ */
+let av3d = null;          // vista abierta: {V, onKey}
 let av3dThreePromise = null;
+let c3dPromesa = null;
 
 function cargarThree(){
   if(window.THREE) return Promise.resolve();
@@ -23,262 +20,188 @@ function cargarThree(){
   });
   return av3dThreePromise;
 }
-
-// Escalas de cada parte según medidas (reusa medEscala de la versión SVG)
-function av3dEscalas(med){
-  return {
-    pecho:   medEscala(med,'pecho'),
-    cintura: medEscala(med,'cintura'),
-    cadera:  medEscala(med,'cadera'),
-    brazo:   medEscala(med,'brazo'),
-    muslo:   medEscala(med,'muslo'),
-  };
+const C3D_DIR='js/cuerpo3d/';
+const C3D_JS=['vendor/GLTFLoader.js','vendor/OrbitControls.js','vendor/meshopt_decoder.js','motor.js'];
+function cargarCuerpo3D(){
+  if(window.Cuerpo3D) return Promise.resolve();
+  if(!c3dPromesa) c3dPromesa = cargarThree()
+    .then(()=>C3D_JS.reduce((p,f)=>p.then(()=>cargarScript(C3D_DIR+f)), Promise.resolve()))
+    .catch(e=>{ c3dPromesa=null; throw e; });
+  return c3dPromesa;
 }
+
+// Campos que mueven el avatar, en el orden de las tarjetas
+const C3D_CAMPOS=['hombros','pecho','brazo','antebrazo','muslo','pantorrilla','cadera','cuello','cintura'];
+function c3dNombre(id){ const c=MED_CAMPOS.find(x=>x.id===id); return c?sc(c.nm):id; }
+// Punto de partida: para cada medida, el primer valor que registró (la medida 1)
+function c3dReferencia(todas){
+  const r={}; todas.forEach(m=>MED_CAMPOS.forEach(c=>{ if(r[c.id]==null && +m[c.id]) r[c.id]=+m[c.id]; })); return r;
+}
+// Hoy: el último valor de cada medida
+function c3dActual(todas){
+  const r={}; todas.forEach(m=>MED_CAMPOS.forEach(c=>{ if(+m[c.id]) r[c.id]=+m[c.id]; })); return r;
+}
+function c3dSerie(todas,id){ return todas.filter(m=>+m[id]).map(m=>({fecha:m.fecha,v:+m[id]})); }
+function c3dFmt(v){ return (Math.round(v*10)/10).toString(); }
 
 function av3dDestruir(){
   if(!av3d) return;
-  cancelAnimationFrame(av3d.raf);
-  try{
-    av3d.renderer.domElement.remove();
-    av3d.renderer.dispose();
-    av3d.scene.traverse(o=>{ if(o.geometry) o.geometry.dispose(); if(o.material) o.material.dispose(); });
-  }catch(e){}
-  window.removeEventListener('resize', av3d.onResize);
+  try{ av3d.V && av3d.V.destruir(); }catch(e){}
+  document.removeEventListener('keydown', av3d.onKey);
   av3d=null;
 }
 
-async function abrirAvatar3D(){
+function abrirMiCuerpo(){
   const s=activeSocio; if(!s) return;
-  const wrap=document.getElementById('av3d-wrap'); if(!wrap) return;
-  wrap.classList.add('on');
-  wrap.querySelector('.av3d-cargando').style.display='flex';
-  try{ await cargarThree(); }
-  catch(e){ showToast('⚠ No se pudo cargar el visor 3D — revisa tu conexión'); wrap.classList.remove('on'); return; }
-  wrap.querySelector('.av3d-cargando').style.display='none';
-  const {primera,ultima}=getMedidas(s);
-  av3dCrear(document.getElementById('av3d-canvas-zone'), ultima||null, primera||null);
-  // marcar HOY activo
-  document.getElementById('av3d-btn-hoy')?.classList.add('ac');
-  document.getElementById('av3d-btn-inicio')?.classList.remove('ac');
-}
-function cerrarAvatar3D(){
   av3dDestruir();
-  document.getElementById('av3d-wrap')?.classList.remove('on');
+  const {todas}=getMedidas(s);
+  const ref=c3dReferencia(todas), hoy=c3dActual(todas);
+  const nMed=todas.filter(m=>MED_CAMPOS.some(c=>+m[c.id])).length;
+  let ov=document.getElementById('c3d');
+  if(!ov){ ov=document.createElement('div'); ov.id='c3d'; document.body.appendChild(ov); }
+  ov.className='c3d';
+  ov.setAttribute('role','dialog'); ov.setAttribute('aria-modal','true'); ov.setAttribute('aria-labelledby','c3d-t');
+  const desde=todas.find(m=>MED_CAMPOS.some(c=>+m[c.id]));
+  ov.innerHTML=`
+    <div class="c3d-lienzo" id="c3d-lienzo"></div>
+    <div class="c3d-arriba">
+      <div>
+        <div class="c3d-kick">Mi cuerpo</div>
+        <h2 class="c3d-t" id="c3d-t">Tus músculos,<br><em>a tu medida</em></h2>
+        <p class="c3d-pista">Desliza para girar · pellizca para acercar · toca un músculo</p>
+      </div>
+      <button type="button" class="c3d-x" onclick="cerrarMiCuerpo()" aria-label="Cerrar Mi cuerpo">✕</button>
+    </div>
+    <div class="c3d-cargando" id="c3d-cargando" role="status">Cargando tu cuerpo 3D…</div>
+    <div class="c3d-abajo">
+      <div class="c3d-fila">
+        <span class="c3d-cuando" id="c3d-cuando"></span>
+        <div class="c3d-sw" role="group" aria-label="Comparar tu cuerpo">
+          <button type="button" id="c3d-b-ini" onclick="c3dVer('inicio')">Inicio</button>
+          <button type="button" id="c3d-b-hoy" onclick="c3dVer('hoy')">Hoy</button>
+        </div>
+      </div>
+      <div class="c3d-ficha" id="c3d-ficha" hidden aria-live="polite"></div>
+      <div class="c3d-chips" id="c3d-chips" tabindex="0" role="region" aria-label="Tus medidas"></div>
+      <p class="c3d-pie">Estimación visual con tus medidas · no es un diagnóstico.<br>Modelo anatómico: Z-Anatomy (CC BY-SA 4.0), derivado de BodyParts3D.</p>
+    </div>`;
+  document.documentElement.classList.add('c3d-abierto');
+  requestAnimationFrame(()=>ov.classList.add('on'));
+  const onKey=e=>{ if(e.key==='Escape') cerrarMiCuerpo(); };
+  document.addEventListener('keydown',onKey);
+  av3d={V:null,onKey,ref,hoy,todas,nMed,modo:'hoy',desde};
+  ov.querySelector('.c3d-x').focus();
+  c3dPintarChips();
+  cargarCuerpo3D().then(()=>{
+    if(!av3d || av3d.onKey!==onKey) return;
+    const V=Cuerpo3D.montar(document.getElementById('c3d-lienzo'),{base:'modelos/',referencia:ref,onToque:c3dToque});
+    av3d.V=V;
+    // encuadre: cuerpo completo, un poco de frente-lado
+    V.camera.position.set(Math.sin(.35)*6.2,.82,Math.cos(.35)*6.2); V.controls.target.set(0,.75,0);
+    V.controls.minDistance=1.3; V.controls.maxDistance=8; V.controls.update();
+    return V.promesa.then(()=>{
+      if(!av3d || av3d.V!==V) return;
+      document.getElementById('c3d-cargando')?.remove();
+      // arranca en tu punto de partida y, si ya hay avance, crece hasta hoy
+      c3dVer('inicio',true);
+      if(nMed>=2) setTimeout(()=>{ if(av3d && av3d.V===V && av3d.modo==='inicio') c3dVer('hoy'); },650);
+    });
+  }).catch(()=>{
+    const c=document.getElementById('c3d-cargando');
+    if(c) c.innerHTML='No se pudo cargar el cuerpo 3D. Revisa tu conexión e inténtalo de nuevo.';
+  });
 }
-
-// ── Textura procedural "tejido muscular" (fibras + variación de tono) para el avatar 3D ──
-function crearTexturaMuscular(){
-  const c=document.createElement('canvas'); c.width=256; c.height=256;
-  const ctx=c.getContext('2d');
-  const grad=ctx.createLinearGradient(0,0,0,256);
-  grad.addColorStop(0,'#f2a394'); grad.addColorStop(0.5,'#e8786c'); grad.addColorStop(1,'#c2584b');
-  ctx.fillStyle=grad; ctx.fillRect(0,0,256,256);
-  // fibras claras (highlights de tendón/fascia)
-  ctx.strokeStyle='rgba(255,240,230,.22)'; ctx.lineWidth=1.1;
-  for(let i=0;i<90;i++){
-    const x=Math.random()*256, y=Math.random()*256, len=12+Math.random()*34, ang=Math.PI/2+(Math.random()-0.5)*0.5;
-    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+Math.cos(ang)*len,y+Math.sin(ang)*len); ctx.stroke();
-  }
-  // fibras oscuras (sombra entre haces musculares)
-  ctx.strokeStyle='rgba(80,20,14,.16)'; ctx.lineWidth=1.4;
-  for(let i=0;i<55;i++){
-    const x=Math.random()*256, y=Math.random()*256, len=10+Math.random()*26, ang=Math.PI/2+(Math.random()-0.5)*0.5;
-    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+Math.cos(ang)*len,y+Math.sin(ang)*len); ctx.stroke();
-  }
-  const tex=new THREE.CanvasTexture(c);
-  tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
-  return tex;
-}
-
-function av3dCrear(zone, medHoy, medInicio){
+function cerrarMiCuerpo(){
   av3dDestruir();
-  zone.innerHTML='';
-  const W=zone.clientWidth||340, H=340;
+  const ov=document.getElementById('c3d'); if(!ov) return;
+  ov.classList.remove('on'); document.documentElement.classList.remove('c3d-abierto');
+  setTimeout(()=>{ if(!av3d) ov.remove(); },220);
+  document.getElementById('c3d-abrir')?.focus();
+}
 
-  const scene=new THREE.Scene();
-  scene.background=new THREE.Color(0x0a0e1a);
+// INICIO (tu primera medición) ⇄ HOY (tu última medición)
+function c3dVer(modo,inmediato){
+  if(!av3d) return;
+  av3d.modo=modo;
+  const {V,ref,hoy,nMed}=av3d;
+  document.getElementById('c3d-b-ini')?.setAttribute('aria-pressed',String(modo==='inicio'));
+  document.getElementById('c3d-b-hoy')?.setAttribute('aria-pressed',String(modo==='hoy'));
+  const cu=document.getElementById('c3d-cuando');
+  if(cu) cu.textContent = !nMed ? 'Registra tus primeras medidas para empezar'
+    : modo==='inicio' ? 'Tu punto de partida · '+fmtFecha(av3d.desde.fecha)
+    : nMed<2 ? 'Primera medición: aquí empieza tu evolución'
+    : 'Hoy · '+fmtFecha(av3d.todas[av3d.todas.length-1].fecha);
+  if(V){ V.resaltar(null); V.ponerMedidas(modo==='hoy'?hoy:ref, inmediato?0:900); V.verCrecimiento(modo==='hoy' && nMed>=2); }
+  const f=document.getElementById('c3d-ficha'); if(f) f.hidden=true;
+  c3dPintarChips();
+}
 
-  const camera=new THREE.PerspectiveCamera(60,W/H,0.1,100);
-  camera.position.set(0,0.25,5.6);
+function c3dPintarChips(){
+  const el=document.getElementById('c3d-chips'); if(!el||!av3d) return;
+  const {ref,hoy,modo,nMed}=av3d;
+  const ids=C3D_CAMPOS.filter(id=>hoy[id]!=null);
+  if(!ids.length){ el.innerHTML=`<button type="button" class="c3d-vacio" onclick="cerrarMiCuerpo();document.getElementById('med-pecho')?.focus()">Registra tus medidas en Progreso y tu avatar empezará a evolucionar contigo</button>`; return; }
+  el.innerHTML=ids.map(id=>{
+    const v=modo==='hoy'?hoy[id]:ref[id], d=+(hoy[id]-ref[id]).toFixed(1);
+    const dTx = modo==='hoy' && nMed>=2 ? `<small class="${d>0?'mas':''}">${d>0?'+':''}${c3dFmt(d)} cm</small>` : '<small>&nbsp;</small>';
+    return `<div class="c3d-chip${modo==='hoy'&&d>0?' sube':''}"><span>${c3dNombre(id)}</span><b class="num">${c3dFmt(v)}<i>cm</i></b>${dTx}</div>`;
+  }).join('');
+}
 
-  const renderer=new THREE.WebGLRenderer({antialias:true});
-  renderer.setSize(W,H);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  renderer.domElement.className='av3d-canvas';
-  zone.appendChild(renderer.domElement);
-
-  // Iluminación estilo estudio (de tu prototipo)
-  scene.add(new THREE.AmbientLight(0xffffff,0.55));
-  const key=new THREE.DirectionalLight(0x4aff8c,0.85); key.position.set(5,5,5); scene.add(key);
-  const fill=new THREE.DirectionalLight(0x00e5ff,0.35); fill.position.set(-5,3,5); scene.add(fill);
-  const back=new THREE.DirectionalLight(0x4aff8c,0.25); back.position.set(0,-2,-5); scene.add(back);
-
-  // Materiales anatómicos — textura procedural tipo tejido muscular (fibras + brillo húmedo)
-  const muscTex=crearTexturaMuscular();
-  const mMusc=new THREE.MeshPhongMaterial({map:muscTex, shininess:70, specular:0x5a2018});
-  const mHueso=new THREE.MeshPhongMaterial({color:0xd3d3d3,shininess:50});
-  const mPiel=new THREE.MeshPhongMaterial({color:0xd9a584,shininess:20});
-
-  // ── Cuerpo paramétrico — guardamos referencias para morph ──
-  const g=new THREE.Group();
-  const partes={};
-
-  // Cabeza + cuello
-  const cabeza=new THREE.Mesh(new THREE.SphereGeometry(0.34,18,18),mPiel);
-  cabeza.position.y=2.85; g.add(cabeza);
-  const cuello=new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.15,0.3,10),mPiel);
-  cuello.position.y=2.5; g.add(cuello);
-
-  // Torso: cilindro con radio superior=pecho, inferior=cintura
-  const torso=new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.36,1.5,18),mMusc);
-  torso.position.y=1.55; torso.scale.z=0.72; g.add(torso);
-  partes.torso=torso;
-
-  // Pectorales
-  const pecho=new THREE.Mesh(new THREE.SphereGeometry(0.5,18,18,0,Math.PI*2,0,Math.PI/2),mMusc);
-  pecho.position.y=2.05; pecho.scale.set(1.05,0.55,0.7); g.add(pecho);
-  partes.pecho=pecho;
-
-  // Abdomen segmentado (six-pack) — pequeños relieves sobre el torso para dar textura anatómica
-  partes.abs=[];
-  for(let row=0;row<3;row++){
-    [-1,1].forEach(s=>{
-      const ab=new THREE.Mesh(new THREE.SphereGeometry(0.115,10,10),mMusc);
-      ab.position.set(s*0.135,1.78-row*0.24,0.40-row*0.02);
-      ab.scale.set(1,0.8,0.5);
-      g.add(ab); partes.abs.push(ab);
-    });
+// Tocar un músculo: su nombre y cómo ha cambiado la medida que lo mueve
+function c3dToque(r){
+  const f=document.getElementById('c3d-ficha'); if(!f||!av3d) return;
+  if(!r || !r.grupo){ f.hidden=true; av3d.V?.resaltar(null); return; }
+  const {todas,ref,hoy}=av3d, id=r.medida;
+  const lado=r.lado?(' '+r.lado):'';
+  const zona={hombros:'Hombro',brazo:'Brazo',antebrazo:'Antebrazo',pecho:'Pecho',cadera:'Cadera',muslo:'Muslo',pantorrilla:'Pierna',cuello:'Cuello'}[id]||'';
+  let cuerpo='';
+  if(!id){
+    cuerpo=`<p class="c3d-f-nota">Este músculo no tiene una medida con cinta asociada.</p>`;
+  } else if(hoy[id]==null){
+    cuerpo=`<p class="c3d-f-nota">Aún no registras tu medida de ${c3dNombre(id).toLowerCase()}. Agrégala en tus medidas para ver cómo evoluciona.</p>`;
+  } else {
+    const d=+(hoy[id]-ref[id]).toFixed(1), pct=ref[id]?Math.round((hoy[id]/ref[id]-1)*1000)/10:0;
+    const serie=c3dSerie(todas,id);
+    cuerpo=`<div class="c3d-f-num">
+        <b class="c3d-f-d${d>0?' mas':''}">${d>0?'+':''}${c3dFmt(d)} cm</b>
+        <span>${c3dNombre(id)} ${c3dFmt(ref[id])} → ${c3dFmt(hoy[id])} cm<br>${serie.length>1?(pct>0?'+':'')+pct+' % desde tu primera medición':'Tu primera medición'}</span>
+      </div>
+      ${serie.length>1?`<canvas class="c3d-f-graf" id="c3d-graf" role="img" aria-label="Evolución de ${c3dNombre(id)}: ${serie.map(p=>c3dFmt(p.v)).join(', ')} cm"></canvas>`:''}`;
   }
+  f.innerHTML=`<div class="c3d-f-h"><div><div class="c3d-kick">Tocaste</div><b class="c3d-f-n">${esc(r.grupo)}</b>
+      <span class="c3d-f-s">${esc((zona||'')+lado)}${zona?' · ':''}${esc(r.nombre)}</span></div>
+      <button type="button" class="c3d-f-x" onclick="c3dToque(null)" aria-label="Cerrar ficha">✕</button></div>${cuerpo}`;
+  f.hidden=false;
+  if(id && hoy[id]!=null) c3dGrafica(document.getElementById('c3d-graf'), c3dSerie(todas,id));
+}
+function c3dGrafica(cv,serie){
+  if(!cv||serie.length<2) return;
+  const dpr=window.devicePixelRatio||1, W=cv.clientWidth||300, H=cv.clientHeight||84;
+  cv.width=W*dpr; cv.height=H*dpr; const x=cv.getContext('2d'); x.scale(dpr,dpr);
+  const L='#C8F23A', vals=serie.map(p=>p.v); let mn=Math.min(...vals), mx=Math.max(...vals); const rg=Math.max(1,mx-mn); mn-=rg*.2; mx+=rg*.25;
+  const pad={l:10,r:14,t:20,b:18}, X=i=>pad.l+(W-pad.l-pad.r)*(i/(serie.length-1)), Y=v=>pad.t+(H-pad.t-pad.b)*(1-(v-mn)/(mx-mn));
+  const g=x.createLinearGradient(0,pad.t,0,H-pad.b); g.addColorStop(0,'rgba(200,242,58,.28)'); g.addColorStop(1,'rgba(200,242,58,0)');
+  x.beginPath(); x.moveTo(X(0),H-pad.b); serie.forEach((p,i)=>x.lineTo(X(i),Y(p.v))); x.lineTo(X(serie.length-1),H-pad.b); x.closePath(); x.fillStyle=g; x.fill();
+  x.beginPath(); serie.forEach((p,i)=>i?x.lineTo(X(i),Y(p.v)):x.moveTo(X(i),Y(p.v))); x.strokeStyle=L; x.lineWidth=2.5; x.lineJoin='round'; x.stroke();
+  const n=serie.length-1;
+  serie.forEach((p,i)=>{ x.beginPath(); x.arc(X(i),Y(p.v),i===n?4.5:3,0,7); x.fillStyle=i===n?L:'#10151C'; x.fill(); x.strokeStyle=L; x.lineWidth=1.6; x.stroke(); });
+  x.font='600 10px Figtree, sans-serif'; x.fillStyle='rgba(241,245,247,.55)';
+  x.textAlign='left'; x.fillText(fmtFecha(serie[0].fecha),pad.l,H-4); x.textAlign='right'; x.fillText(fmtFecha(serie[n].fecha),W-pad.r+4,H-4);
+  x.fillStyle=L; x.font='700 11px Figtree, sans-serif'; x.fillText(c3dFmt(serie[n].v),X(n)+4,Y(serie[n].v)-9);
+}
 
-  // Hombros (deltoides)
-  partes.hombros=[];
-  [-1,1].forEach(s=>{
-    const sh=new THREE.Mesh(new THREE.SphereGeometry(0.26,14,14),mMusc);
-    sh.position.set(s*0.72,2.18,0); g.add(sh); partes.hombros.push(sh);
-  });
-
-  // Brazos: cono superior (bíceps) + antebrazo + mano
-  partes.brazosSup=[]; partes.brazosInf=[];
-  [-1,1].forEach(s=>{
-    const sup=new THREE.Mesh(new THREE.CylinderGeometry(0.17,0.13,0.85,12),mMusc);
-    sup.position.set(s*0.86,1.65,0); sup.rotation.z=s*-0.18; g.add(sup); partes.brazosSup.push(sup);
-    const bicep=new THREE.Mesh(new THREE.SphereGeometry(0.1,10,10),mMusc);
-    bicep.position.set(s*0.88,1.7,0.13); bicep.scale.set(1,1.3,0.6); g.add(bicep);
-    const inf=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.08,0.8,12),mMusc);
-    inf.position.set(s*1.02,0.92,0); inf.rotation.z=s*-0.22; g.add(inf); partes.brazosInf.push(inf);
-    const mano=new THREE.Mesh(new THREE.SphereGeometry(0.11,10,10),mPiel);
-    mano.position.set(s*1.13,0.48,0); g.add(mano);
-  });
-
-  // Cadera / pelvis
-  const pelvis=new THREE.Mesh(new THREE.SphereGeometry(0.42,16,16),mMusc);
-  pelvis.position.y=0.68; pelvis.scale.set(1.15,0.62,0.8); g.add(pelvis);
-  partes.pelvis=pelvis;
-
-  // Piernas: muslo + pantorrilla + pie
-  partes.muslos=[]; partes.pantorrillas=[];
-  [-1,1].forEach(s=>{
-    const mus=new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.17,1.25,14),mMusc);
-    mus.position.set(s*0.30,-0.18,0); g.add(mus); partes.muslos.push(mus);
-    const pan=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.10,1.15,12),mMusc);
-    pan.position.set(s*0.32,-1.35,0); g.add(pan); partes.pantorrillas.push(pan);
-    const pie=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.14,0.42),mPiel);
-    pie.position.set(s*0.32,-2.0,0.08); g.add(pie);
-  });
-
-  // Columna (vértebras, guiño anatómico de tu prototipo)
-  for(let i=0;i<6;i++){
-    const v=new THREE.Mesh(new THREE.SphereGeometry(0.07,8,8),mHueso);
-    v.position.set(0,2.25-i*0.3,-0.30); g.add(v);
-  }
-
-  g.position.y=-0.5;
-  scene.add(g);
-
-  // ── Aplicar medidas (escala objetivo por parte) ──
-  function objetivos(med){
-    const e=av3dEscalas(med);
-    return {
-      torsoX: (e.pecho+e.cintura)/2, torsoZ: 0.72*((e.pecho+e.cintura)/2),
-      pechoS: e.pecho,
-      hombroS: 0.7+0.3*e.pecho,
-      brazoS: e.brazo,
-      pelvisS: e.cadera,
-      musloS: e.muslo,
-    };
-  }
-  let actual=objetivos(medHoy);
-  let target=actual;
-
-  function aplicar(o){
-    partes.torso.scale.x=o.torsoX; partes.torso.scale.z=o.torsoZ;
-    partes.pecho.scale.set(1.05*o.pechoS,0.55,0.7*o.pechoS);
-    partes.hombros.forEach((sh,i)=>{ sh.scale.setScalar(o.hombroS); sh.position.x=(i===0?-1:1)*0.72*(0.85+0.15*o.pechoS); });
-    partes.brazosSup.forEach(b=>{ b.scale.x=o.brazoS; b.scale.z=o.brazoS; });
-    partes.brazosInf.forEach(b=>{ b.scale.x=0.8+0.2*o.brazoS; b.scale.z=0.8+0.2*o.brazoS; });
-    partes.pelvis.scale.set(1.15*o.pelvisS,0.62,0.8*o.pelvisS);
-    partes.muslos.forEach(m=>{ m.scale.x=o.musloS; m.scale.z=o.musloS; });
-    partes.pantorrillas.forEach(m=>{ m.scale.x=0.85+0.15*o.musloS; m.scale.z=0.85+0.15*o.musloS; });
-  }
-  aplicar(actual);
-
-  // ── Morph INICIO ⇄ HOY ──
-  window.av3dMorph=function(cual){
-    const med = cual==='inicio' ? medInicio : medHoy;
-    if(!med){ showToast('Aún no hay medidas de '+(cual==='inicio'?'inicio':'hoy')); return; }
-    target=objetivos(med);
-    document.getElementById('av3d-btn-hoy')?.classList.toggle('ac',cual==='hoy');
-    document.getElementById('av3d-btn-inicio')?.classList.toggle('ac',cual==='inicio');
-  };
-
-  // ── Rotación con arrastre + auto-rotación (de tu prototipo) ──
-  let rot={x:0,y:0}, tRot={x:0,y:0}, arrastrando=false;
-  function puntero(e,rect){
-    const p=e.touches?e.touches[0]:e;
-    return { x:((p.clientX-rect.left)/rect.width)*2-1, y:-((p.clientY-rect.top)/rect.height)*2+1 };
-  }
-  const el=renderer.domElement;
-  const onDown=()=>{arrastrando=true;};
-  const onUp=()=>{arrastrando=false;};
-  const onMove=e=>{
-    if(!arrastrando) return;
-    if(e.touches) e.preventDefault();
-    const m=puntero(e,el.getBoundingClientRect());
-    tRot.y=m.x*Math.PI; tRot.x=m.y*Math.PI*0.25;
-  };
-  el.addEventListener('mousedown',onDown); el.addEventListener('mouseup',onUp); el.addEventListener('mouseleave',onUp);
-  el.addEventListener('mousemove',onMove);
-  el.addEventListener('touchstart',onDown,{passive:true}); el.addEventListener('touchend',onUp);
-  el.addEventListener('touchmove',onMove,{passive:false});
-
-  const onResize=()=>{
-    const w=zone.clientWidth||W;
-    camera.aspect=w/H; camera.updateProjectionMatrix(); renderer.setSize(w,H);
-  };
-  window.addEventListener('resize',onResize);
-
-  // ── Loop ──
-  function lerp(a,b,t){return a+(b-a)*t;}
-  let raf;
-  function animate(){
-    raf=requestAnimationFrame(animate);
-    av3d.raf=raf;
-    // morph suave entre medidas
-    let cambio=false;
-    Object.keys(actual).forEach(k=>{
-      const nv=lerp(actual[k],target[k],0.08);
-      if(Math.abs(nv-actual[k])>0.0005){actual[k]=nv;cambio=true;}
-    });
-    if(cambio) aplicar(actual);
-    // rotación suave
-    rot.y+=(tRot.y-rot.y)*0.08;
-    rot.x+=(tRot.x-rot.x)*0.08;
-    if(!arrastrando) tRot.y+=0.0035;
-    g.rotation.y=rot.y; g.rotation.x=rot.x*0.4;
-    renderer.render(scene,camera);
-  }
-  av3d={renderer,scene,camera,partes,raf:0,onResize};
-  animate();
+// Tarjeta de entrada en Progreso
+function c3dTarjetaHTML(){
+  const s=activeSocio, {todas}=getMedidas(s||{});
+  const n=todas.filter(m=>MED_CAMPOS.some(c=>+m[c.id])).length;
+  const sub = !n ? 'Registra tus primeras medidas: ese día empieza tu evolución.'
+    : n<2 ? 'Tu punto de partida ya está guardado. Con tu próxima medición verás qué creció.'
+    : 'Gíralo con el dedo y toca un músculo para ver cuánto ha crecido.';
+  return `<button type="button" class="c3d-card" id="c3d-abrir" onclick="abrirMiCuerpo()">
+    <img src="img/mi-cuerpo.webp" alt="" width="132" height="176" loading="lazy">
+    <span class="c3d-card-tx"><span class="c3d-kick">Nuevo · 3D</span><b>Mi cuerpo</b><span>${sub}</span><span class="c3d-card-cta">Ver mi cuerpo →</span></span>
+  </button>`;
 }
 
 // Guardar medidas del día

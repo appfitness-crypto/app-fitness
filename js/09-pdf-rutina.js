@@ -347,7 +347,7 @@ function renderCuerpo(){
   }
 
   if(!ultima){
-    cont.innerHTML=`${dosGraficasHTML}${av3dHTML(false)}${inputsHTML}`;
+    cont.innerHTML=`${dosGraficasHTML}${c3dTarjetaHTML()}${av3dHTML(false)}${inputsHTML}`;
     return;
   }
 
@@ -356,7 +356,7 @@ function renderCuerpo(){
     <div class="deltas-grid">
       ${MED_CAMPOS.filter(c=>primera[c.id]!=null&&ultima[c.id]!=null).map(c=>{
         const d=+(ultima[c.id]-primera[c.id]).toFixed(1);
-        const crece=['pecho','brazo','muslo'].includes(c.id);
+        const crece=['pecho','brazo','muslo','hombros','antebrazo','pantorrilla','cuello'].includes(c.id);
         const bueno=(crece&&d>0)||(!crece&&d<0);
         const cls=d===0?'delta-neutral':bueno?'delta-up':'delta-neutral';
         return `<div class="delta-c"><div class="delta-v ${cls}">${d>0?'+':''}${d} cm</div><div class="delta-l">${c.nm}</div></div>`;
@@ -366,6 +366,7 @@ function renderCuerpo(){
   cont.innerHTML=`
     ${dosGraficasHTML}
     ${deltasHTML}
+    ${c3dTarjetaHTML()}
     ${av3dHTML(true)}
     <div class="esp-lbl" style="margin:14px 0 8px">EVOLUCIÓN POR ZONA</div>
     <div class="chips-row">
