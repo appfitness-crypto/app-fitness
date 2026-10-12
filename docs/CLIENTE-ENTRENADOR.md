@@ -13,7 +13,7 @@ La app ya no pertenece a un gimnasio. Tiene dos formas de uso:
 
 1. **Authentication → Método de acceso:** activa **Correo electrónico/contraseña** y **Anónimo**
    (la sesión anónima sirve para validar el código del entrenador antes de tener cuenta).
-2. **Realtime Database → Reglas:** pega el contenido de `firebase-rules.json` y publica.
+2. **Reglas:** se publican solas desde GitHub al unir cambios a `main`. Si quieres hacerlo a mano: Realtime Database → Reglas → pega `firebase-rules.json` → Publicar.
 3. **Hazte director:**
    1. En la app, crea tu cuenta con "Soy entrenador: crear mi cuenta".
    2. En Firebase → Authentication, copia el **UID** de tu cuenta.

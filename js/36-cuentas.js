@@ -173,6 +173,7 @@ async function entrarConCuenta(user){
       guardarLocal();
       socio=DB.socios[code];
     } else if(tienePendiente(user.uid)) socio=DB.socios[user.uid];
+    else if(DB.socios[user.uid] && !BASE[user.uid]){ socio=DB.socios[user.uid]; dbSave(user.uid); }   // plan creado aquí que Firebase aún no aceptó: se reintenta
   }catch(e){ console.warn('Sin expediente',e); socio=getSocio(user.uid); }
   if(socio){ abrirPlanSocio(socio); return; }
   guardarSesion({tipo:'cuenta', uid:user.uid});

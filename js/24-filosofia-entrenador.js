@@ -39,6 +39,8 @@ function actualizarBotonMiFilosofia(){
   const bN=document.getElementById('btn-nuevo-ent');
   if(bF) bF.style.display = (staffActivoEntId && entHace(DB.entrenadores[staffActivoEntId],'entrenamiento')) ? 'inline-block' : 'none';
   if(bN) bN.style.display = staffRol==='coordinador' ? 'inline-block' : 'none';
+  const fS=document.getElementById('slf-sinent'); if(fS) fS.style.display = staffRol==='coordinador' ? '' : 'none';   // solo el director ve a todos
+  if(staffRol!=='coordinador' && staffFilterVal==='sinent') staffFilterVal='todos';
   const bE=document.getElementById('btn-eliminar-cuenta'); if(bE) bE.style.display = staffRol!=='coordinador' ? 'inline-block' : 'none';
   const bC=document.getElementById('btn-mi-codigo'); if(bC) bC.style.display = (staffRol!=='coordinador' && miCodigoEntrenador()) ? 'inline-block' : 'none';
   const bV=document.getElementById('btn-ver-ent'); if(bV) bV.style.display = staffRol==='coordinador' ? 'inline-block' : 'none';
