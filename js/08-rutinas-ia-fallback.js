@@ -406,19 +406,19 @@ function renderPreview(rutina){
               <div style="font-size:var(--fs-xs);color:var(--v);margin-top:2px">${e.ms||e.musculo||''}${e.descanso?' · descanso '+esc(e.descanso):''}</div>
               ${e.metodo?`<div style="font-size:var(--fs-xs);margin-top:3px;color:var(--p)">${e.grupo?'<b>'+esc(e.grupo)+'</b> · ':''}⚡ ${esc(e.metodo.nm)}${e.metodo.detalle?' — '+esc(e.metodo.detalle):''}</div>`:''}
               ${(e.alternativas||[]).length?`<div style="font-size:var(--fs-xs);margin-top:3px;color:var(--mu)">⇄ Si está ocupado: ${e.alternativas.map(a=>esc(a.nm)).join(' · ')}</div>`:''}
-              ${e.tip?`<div style="font-size:var(--fs-xs);color:var(--n);margin-top:4px;font-family:var(--fb);line-height:1.5;padding:6px 8px;background:color-mix(in srgb,var(--n) 4%,transparent);border-radius:5px;border-left:2px solid color-mix(in srgb,var(--n) 30%,transparent)">💡 ${e.tip}</div>`:''}
+              ${e.tip?`<div style="font-size:var(--fs-xs);color:var(--n);margin-top:4px;font-family:var(--fb);line-height:1.5;padding:6px 8px;background:color-mix(in srgb,var(--n) 4%,transparent);border-radius:5px;border:1px solid color-mix(in srgb,var(--n) 18%,transparent)">💡 ${e.tip}</div>`:''}
             </div>
           </div>`).join('');
     cont.innerHTML+=`
       <div style="background:var(--gl);border:1px solid var(--b);border-radius:11px;overflow:hidden;">
-        <div style="display:grid;grid-template-columns:32px 1fr auto;align-items:center;gap:9px;padding:11px 14px;cursor:pointer;"
+        <div style="display:grid;grid-template-columns:46px 1fr auto;align-items:center;gap:9px;padding:11px 14px;min-height:48px;cursor:pointer;"
              onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
           <div style="font-family:var(--fd);font-size:var(--fs-xl);color:var(--mu)">${dia.dia.substring(0,3)}</div>
           <div>
             <div style="font-size:var(--fs-xs);font-weight:600">${dia.tipo}</div>
             <div style="font-size:var(--fs-xs);color:var(--mu);font-family:var(--fb)">${isRest?'Descanso':dia.ejercicios.length+' ejercicios'}</div>
           </div>
-          <div class="chip" style="${cc}">${dia.color.toUpperCase()}</div>
+          ${isRest?'':`<div class="chip" style="${cc}">Ver</div>`}
         </div>
         <div style="display:none;padding:0 10px 8px;">${ejHTML}</div>
       </div>`;
@@ -1199,7 +1199,7 @@ function refreshDash(){
   const geoMsg = reg?.ubicacion==='gym' ? `Check-in en el gimnasio · ${reg.hora}`
     : reg?.ubicacion==='outside' ? `Acceso fuera del gimnasio · ${reg.hora}`
     : `Ubicación no registrada · ${reg?.hora||''}`;
-  const asist = reg ? `<div class="asist-badge ${geoClase}"><span class="ab-dot"></span>${geoMsg}</div>` : '';
+  const asist = (reg && GYM.geofence) ? `<div class="asist-badge ${geoClase}"><span class="ab-dot"></span>${geoMsg}</div>` : '';   // solo con gimnasio fijo
 
   const diaTxt=sc(DIAS_NAMES[HOY_KEY]).toLowerCase();
   let titulo,detalle,cta,icoT='dumbbell';

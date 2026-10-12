@@ -543,7 +543,7 @@ function renderRehabTab(){
             <div style="flex:1">
               <div style="font-size:var(--fs-sm);font-weight:600;color:var(--tx)">${e.nm}</div>
               <div style="font-size:var(--fs-xs);color:var(--mu);font-family:var(--fb);margin-top:1px">${e.series} series · ${e.reps}</div>
-              <div style="font-size:var(--fs-xs);color:var(--n);margin-top:4px;font-family:var(--fb);line-height:1.5;padding:6px 8px;background:color-mix(in srgb, var(--n) 5%, transparent);border-radius:5px;border-left:2px solid color-mix(in srgb, var(--n) 30%, transparent)">💡 ${e.tip}</div>
+              <div style="font-size:var(--fs-xs);color:var(--n);margin-top:4px;font-family:var(--fb);line-height:1.5;padding:6px 8px;background:color-mix(in srgb, var(--n) 5%, transparent);border-radius:5px;border:1px solid color-mix(in srgb, var(--n) 18%, transparent)">💡 ${e.tip}</div>
             </div>
           </div>
         </div>`).join('');

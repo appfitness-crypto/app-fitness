@@ -4,7 +4,7 @@
 // ═════════════════════════════════════════
 // TEMA — claro / oscuro (se recuerda en el dispositivo)
 // ═════════════════════════════════════════
-const LS_TEMA='fitkiosk_theme';
+const LS_TEMA='fitkiosk_tema_v2';   // v2: el oscuro pasó a ser el tema principal (se ignora la elección anterior)
 function temaActual(){ const t=document.documentElement.getAttribute('data-theme'); return (t==='dark'||t==='light2')?t:'light'; }
 function pintarSelectorTema(){
   const t=temaActual();
@@ -152,4 +152,12 @@ function temaToque(){
   if(reduce) estatico();
   else { for(let i=0;i<(W<600?170:300);i++) rayos.push(crear(Math.random()*3,false)); requestAnimationFrame(frame); }
   const _rd=window.florRedibujar; window.florRedibujar=()=>{ if(_rd) _rd(); if(reduce) estatico(); };
+})();
+
+// Movimiento reducido: los videos del logo se quedan quietos en su primer cuadro (no desaparecen)
+(function(){
+  const mq=window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)');
+  if(!mq || !mq.matches) return;
+  const quietos=()=>document.querySelectorAll('video[autoplay]').forEach(v=>{ v.removeAttribute('autoplay'); v.autoplay=false; try{ v.pause(); }catch(e){} });
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',quietos); else quietos();
 })();

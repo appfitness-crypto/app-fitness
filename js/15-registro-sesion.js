@@ -36,16 +36,16 @@ function openDay(key){
   } else {
     ejs.forEach((ej,idx)=>{
       list.innerHTML+=`
-        <div class="ej-card" id="ejc-${idx}" onclick="openModal(${idx})">
+        <div class="ej-card" id="ejc-${idx}" onclick="openModal(${idx})" data-sin-rol="1">
           <div class="ej-pic">${pic(basesEjercicioMini(ej),'dumbbell','thumb')}<span class="ej-n">${ej.grupo?esc(ej.grupo):String(idx+1)}</span></div>
           <div class="ej-i">
-            <div class="ej-nm" id="ejnm-${idx}">${esc(ej.nm)}</div>
+            <div class="ej-nm" id="ejnm-${idx}" role="button" tabindex="0" onclick="event.stopPropagation();openModal(${idx})">${esc(ej.nm)}</div>
             <div class="ej-dt">${esc(rxTexto(ej).sr)} · ${esc(rxTexto(ej).carga)}${ej.descanso?' · '+esc(ej.descanso):''}</div>
             <div class="ej-ms">${esc(ej.ms)}</div>
             ${((ej.metodo&&!esEjCardio(ej)&&!esEjRondas(ej)&&!esEjMovilidad(ej))||(ej.alternativas||[]).length)?`<div class="ej-extra">${(ej.metodo&&!esEjCardio(ej)&&!esEjRondas(ej)&&!esEjMovilidad(ej))?`<span class="ej-met">${ico('bolt')}${esc(ej.metodo.nm)}</span>`:''}${(ej.alternativas||[]).length?`<span class="ej-alt">${ej.alternativas.length} ${ej.alternativas.length>1?'opciones':'opción'} por área ocupada</span>`:''}</div>`:''}
           </div>
           <div class="ej-r">
-            <div class="ck" id="ejk-${idx}" onclick="event.stopPropagation();toggleEjDone(${idx})" role="checkbox" aria-label="Marcar como hecho">${ico('check')}</div>
+            <button type="button" class="ck" id="ejk-${idx}" onclick="event.stopPropagation();toggleEjDone(${idx})" aria-pressed="false" aria-label="Marcar ${esc(ej.nm)} como hecho">${ico('check')}</button>
           </div>
         </div>`;
     });
@@ -67,6 +67,7 @@ function toggleEjDone(idx){
   const ck=document.getElementById('ejk-'+idx);
   const on=!ck.classList.contains('yes');
   ck.classList.toggle('yes',on);
+  ck.setAttribute('aria-pressed',String(on));
   card.classList.toggle('done',on);
   if(!sesionTemp.ej[idx]) sesionTemp.ej[idx]={done:false,sets:[]};
   sesionTemp.ej[idx].done=on;

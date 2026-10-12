@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Fitness System Pro</title>
-<meta name="theme-color" content="#EEF1F4">
+<meta name="theme-color" content="#0A0E13">
 <meta name="color-scheme" content="light dark">
-<script>(function(){var t="light";try{t=localStorage.getItem("fitkiosk_theme");if(t!=="light"&&t!=="dark"&&t!=="light2"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}}catch(e){t="light";}document.documentElement.setAttribute("data-theme",t);})();</script>
+<script>(function(){var t="dark";try{t=localStorage.getItem("fitkiosk_tema_v2");if(t!=="light"&&t!=="dark"&&t!=="light2")t="dark";}catch(e){t="dark";}document.documentElement.setAttribute("data-theme",t);})();</script>
 <meta name="description" content="Rutinas personalizadas, evolución y nutrición">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
@@ -16,9 +16,9 @@
 <meta name="apple-mobile-web-app-title" content="Gimnasio">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" crossorigin="anonymous"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js" crossorigin="anonymous"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" crossorigin="anonymous"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" crossorigin="anonymous"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js" crossorigin="anonymous"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" crossorigin="anonymous"></script>
 <script src="js/config.js"></script>
 <script src="js/00-conocimiento.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -97,7 +97,7 @@
           4. Pégalo completo abajo (con llaves { })
         </div>
       </div>
-      <textarea id="fb-config-input" rows="9" value='' placeholder='{\n  "apiKey": "...",
+      <textarea id="fb-config-input" aria-label="Configuración de Firebase (JSON)" rows="9" value='' placeholder='{\n  "apiKey": "...",
   "authDomain": "...",
   "databaseURL": "https://TU-PROYECTO-rtdb.firebaseio.com",
   "projectId": "...",
@@ -121,7 +121,6 @@
     <div class="lm"><video autoplay muted loop playsinline disablepictureinpicture poster="icons/icon-192.png" data-gym-label aria-label="Gimnasio"><source src="video/logo-animado.mp4" type="video/mp4"><source src="video/logo-animado.webm" type="video/webm"></video></div>
     <div style="display:flex;flex-direction:column;gap:1px;min-width:0">
       <div class="ln">Fitness <span class="ln-x">System </span>Pro</div>
-      <div class="tb-stat"><span id="inicio-socios">—</span> socios activos</div>
     </div>
   </div>
   <div class="tb-r">
@@ -171,12 +170,12 @@
       <div class="lc-title">Entra a<br>tu cuenta</div>
       <div class="lc-sub">Clientes y entrenadores entran aquí.</div>
       <div style="margin-bottom:10px;">
-        <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">CORREO</div>
-        <input type="email" class="ti" id="in-correo" placeholder="tu@correo.com" autocomplete="email" inputmode="email">
+        <label for="in-correo" style="display:block;font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">CORREO</label>
+        <input type="email" class="ti" id="in-correo" aria-label="Correo" placeholder="tu@correo.com" autocomplete="email" inputmode="email">
       </div>
       <div style="margin-bottom:16px;">
-        <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">CONTRASEÑA</div>
-        <input type="password" class="ti" id="in-pass" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doEntrar()">
+        <label for="in-pass" style="display:block;font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">CONTRASEÑA</label>
+        <input type="password" class="ti" id="in-pass" aria-label="Contraseña" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doEntrar()">
       </div>
       <button class="btn-main" id="in-btn" onclick="doEntrar()">Entrar</button>
       <div class="login-err" id="in-err"></div>
@@ -204,7 +203,7 @@
       <div class="q-tag">Paso 01 / 11</div>
       <div class="q-title">¿Cuál es<br>tu nombre?</div>
       <div class="q-sub">Así personalizamos tu experiencia.</div>
-      <input type="text" class="ti" id="qi-nom" placeholder="Nombre completo..." maxlength="60">
+      <input type="text" class="ti" id="qi-nom" aria-label="Tu nombre completo" placeholder="Nombre completo..." maxlength="60">
       <div class="nav-row"><button class="btn-next" onclick="qNext(1)">Continuar</button></div>
     </div>
 
@@ -262,7 +261,7 @@
       <div class="q-sub">El protocolo se adapta a tu etapa. En crecimiento (8-14 años) hay cuidados extra en las placas de crecimiento.</div>
       <div class="slider-wrap">
         <div class="s-val"><span id="gedad-v">30</span><span class="s-unit">años</span></div>
-        <input type="range" id="qr-gedad" min="6" max="80" value="30" oninput="document.getElementById('gedad-v').textContent=this.value">
+        <input type="range" id="qr-gedad" aria-label="Edad" min="6" max="80" value="30" oninput="document.getElementById('gedad-v').textContent=this.value">
         <div class="s-labels"><span>6</span><span>20</span><span>40</span><span>60</span><span>80</span></div>
       </div>
       <div class="nav-row"><div class="btn-prev" onclick="mostrarSub('qq2c')">←</div><button class="btn-next" onclick="gNext(1)">Continuar</button></div>
@@ -279,12 +278,12 @@
       </div>
       <div class="slider-wrap">
         <div class="s-val"><span id="gpeso-v">75</span><span class="s-unit">kg</span></div>
-        <input type="range" id="qr-gpeso" min="30" max="180" value="75" oninput="document.getElementById('gpeso-v').textContent=this.value">
+        <input type="range" id="qr-gpeso" aria-label="Peso en kilos" min="30" max="180" value="75" oninput="document.getElementById('gpeso-v').textContent=this.value">
         <div class="s-labels"><span>30</span><span>65</span><span>100</span><span>140</span><span>180</span></div>
       </div>
       <div class="slider-wrap">
         <div class="s-val"><span id="gest-v">170</span><span class="s-unit">cm</span></div>
-        <input type="range" id="qr-gest" min="100" max="210" value="170" oninput="document.getElementById('gest-v').textContent=this.value">
+        <input type="range" id="qr-gest" aria-label="Estatura en centímetros" min="100" max="210" value="170" oninput="document.getElementById('gest-v').textContent=this.value">
         <div class="s-labels"><span>100</span><span>135</span><span>170</span><span>190</span><span>210</span></div>
       </div>
       <div class="nav-row"><div class="btn-prev" onclick="mostrarSub('qqg1')">←</div><button class="btn-next" disabled id="gb1b" onclick="gNext1b()">Continuar</button></div>
@@ -319,7 +318,7 @@
       <div class="q-sub">Del 1 (molestia leve) al 10 (muy intenso). Define en qué fase empezar.</div>
       <div class="slider-wrap">
         <div class="s-val"><span id="gdolor-v">3</span><span class="s-unit">/ 10</span></div>
-        <input type="range" id="qr-gdolor" min="1" max="10" value="3" oninput="document.getElementById('gdolor-v').textContent=this.value">
+        <input type="range" id="qr-gdolor" aria-label="Nivel de dolor del 1 al 10" min="1" max="10" value="3" oninput="document.getElementById('gdolor-v').textContent=this.value">
         <div class="s-labels"><span>1</span><span>3</span><span>5</span><span>7</span><span>10</span></div>
       </div>
       <div class="nav-row"><div class="btn-prev" onclick="mostrarSub('qqg3')">←</div><button class="btn-next" onclick="gNext(4)">Continuar</button></div>
@@ -355,7 +354,7 @@
       </div>
       <div id="gdiag-detalle" style="display:none;margin-top:12px">
         <div class="q-sub" style="margin-bottom:8px">¿Qué indicó el médico? (opcional, ayuda a personalizar)</div>
-        <textarea id="qi-gdiag" rows="3" placeholder="Ej: tendinitis rotuliana, reposo 2 semanas, puede fortalecer sin impacto..." style="width:100%;padding:12px;background:var(--in-bg);border:1px solid var(--b);border-radius:12px;font-family:var(--fb);font-size:var(--fs-sm);color:var(--tx);outline:none;resize:vertical"></textarea>
+        <textarea id="qi-gdiag" aria-label="Diagnóstico médico (opcional)" rows="3" placeholder="Ej: tendinitis rotuliana, reposo 2 semanas, puede fortalecer sin impacto..." style="width:100%;padding:12px;background:var(--in-bg);border:1px solid var(--b);border-radius:12px;font-family:var(--fb);font-size:var(--fs-sm);color:var(--tx);outline:none;resize:vertical"></textarea>
         <div class="q-sub" style="margin:10px 0 8px">¿El médico autorizó que sigas entrenando?</div>
         <div class="opts" style="grid-template-columns:1fr 1fr">
           <div class="opt" onclick="gSel(this,'medicoAutoriza','Sí, autorizó clases')"><div class="ol" style="font-size:var(--fs-sm)">Sí autorizó</div></div>
@@ -390,7 +389,7 @@
       <div class="q-sub">Por semana. Determina el split de tu rutina y tu gasto calórico.</div>
       <div class="slider-wrap">
         <div class="s-val"><span id="dias-v">4</span><span class="s-unit">días / semana</span></div>
-        <input type="range" id="qr-dias" min="2" max="6" value="4" oninput="document.getElementById('dias-v').textContent=this.value">
+        <input type="range" id="qr-dias" aria-label="Días de entrenamiento por semana" min="2" max="6" value="4" oninput="document.getElementById('dias-v').textContent=this.value">
         <div class="s-labels"><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span></div>
       </div>
       <div class="nav-row"><div class="btn-prev" onclick="qPrev(4)">←</div><button class="btn-next" onclick="qNext(4)">Continuar</button></div>
@@ -430,7 +429,7 @@
       <div class="q-sub">Ajusta recuperación, volumen y tipo de ejercicios.</div>
       <div class="slider-wrap">
         <div class="s-val"><span id="edad-v">35</span><span class="s-unit">años</span></div>
-        <input type="range" id="qr-edad" min="16" max="75" value="35" oninput="document.getElementById('edad-v').textContent=this.value">
+        <input type="range" id="qr-edad" aria-label="Edad" min="16" max="75" value="35" oninput="document.getElementById('edad-v').textContent=this.value">
         <div class="s-labels"><span>16</span><span>25</span><span>35</span><span>50</span><span>75</span></div>
       </div>
       <div class="nav-row"><div class="btn-prev" onclick="qPrev(5)">←</div><button class="btn-next" onclick="qNext(5)">Continuar</button></div>
@@ -455,7 +454,7 @@
       <div class="q-sub">Base de tu plan de nutrición y punto de partida de tu evolución.</div>
       <div class="slider-wrap">
         <div class="s-val"><span id="peso-v">75</span><span class="s-unit">kg</span></div>
-        <input type="range" id="qr-peso" min="40" max="160" value="75" oninput="document.getElementById('peso-v').textContent=this.value">
+        <input type="range" id="qr-peso" aria-label="Peso en kilos" min="40" max="160" value="75" oninput="document.getElementById('peso-v').textContent=this.value">
         <div class="s-labels"><span>40</span><span>70</span><span>100</span><span>130</span><span>160</span></div>
       </div>
       <div class="nav-row"><div class="btn-prev" onclick="qPrev(7)">←</div><button class="btn-next" onclick="qNext(7)">Continuar</button></div>
@@ -468,7 +467,7 @@
       <div class="q-sub">Completa el cálculo de tu metabolismo basal (Mifflin-St Jeor).</div>
       <div class="slider-wrap">
         <div class="s-val"><span id="est-v">170</span><span class="s-unit">cm</span></div>
-        <input type="range" id="qr-est" min="140" max="210" value="170" oninput="document.getElementById('est-v').textContent=this.value">
+        <input type="range" id="qr-est" aria-label="Estatura en centímetros" min="140" max="210" value="170" oninput="document.getElementById('est-v').textContent=this.value">
         <div class="s-labels"><span>140</span><span>155</span><span>170</span><span>190</span><span>210</span></div>
       </div>
       <div class="nav-row"><div class="btn-prev" onclick="qPrev(8)">←</div><button class="btn-next" onclick="qNext(8)">Continuar</button></div>
@@ -533,7 +532,7 @@
           <div class="os">Ejemplo: ENT-4K7Q</div>
         </div>
         <div id="qt-codigo-wrap" style="display:none;margin-bottom:10px">
-          <input type="text" class="ti" id="qt-codigo" placeholder="ENT-XXXX" maxlength="12" autocapitalize="characters" autocomplete="off" oninput="qtCodigoCambio()">
+          <input type="text" class="ti" id="qt-codigo" aria-label="Código de entrenador" placeholder="ENT-XXXX" maxlength="12" autocapitalize="characters" autocomplete="off" oninput="qtCodigoCambio()">
           <button type="button" class="tb-btn" style="margin-top:8px" onclick="qtValidarCodigo()">Validar código</button>
           <div id="qt-codigo-res" style="margin-top:8px;font-size:var(--fs-xs)"></div>
         </div>
@@ -588,11 +587,11 @@
     </div>
     <div id="priv-box" style="margin:0 0 14px;padding:14px 16px;border:1px solid var(--b2);border-radius:14px;background:var(--gl)">
       <label style="display:flex;gap:12px;align-items:flex-start;cursor:pointer;font-family:var(--fb);font-size:var(--fs-sm);line-height:1.55;color:var(--tx)">
-        <input type="checkbox" id="priv-chk" onchange="privCasilleroCambio()" style="width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--v)">
+        <input type="checkbox" id="priv-chk" onchange="privCasilleroCambio()" style="width:24px;height:24px;flex:none;margin-top:1px;accent-color:var(--v2)">
         <span>He leído el <a href="#" onclick="abrirAvisoPrivacidad('lectura');return false" style="color:var(--v);font-weight:700;text-decoration:underline">Aviso de Privacidad</a> y doy mi <b>consentimiento expreso</b> para el tratamiento de mis datos personales, incluidos mis datos de salud. Si soy menor de edad, lo acepta mi madre, padre o tutor.</span>
       </label>
     </div>
-    <button class="priv-btn" onclick="if(privCasilleroOk())confirmarRutina()" style="width:100%;height:50px;background:var(--v);border:none;border-radius:11px;font-family:var(--fd);font-size:var(--fs-2xl);letter-spacing:.02em;color:var(--btn-tx);cursor:pointer;">CONFIRMAR MI PLAN →</button>
+    <button class="priv-btn" onclick="if(privCasilleroOk())confirmarRutina()" style="width:100%;height:50px;background:var(--grad);border:none;border-radius:11px;font-family:var(--fd);font-size:var(--fs-2xl);letter-spacing:.02em;color:var(--btn-tx);cursor:pointer;">CONFIRMAR MI PLAN →</button>
   </div>
 </div>
 
@@ -684,16 +683,16 @@
       <div class="lc-title" id="reg-title">Crea tu<br>cuenta</div>
       <div class="lc-sub" id="reg-sub"></div>
       <div style="margin-bottom:10px;">
-        <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">NOMBRE</div>
-        <input type="text" class="ti" id="reg-nombre" placeholder="Nombre y apellido" maxlength="60" autocomplete="name">
+        <label for="reg-nombre" style="display:block;font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">NOMBRE</label>
+        <input type="text" class="ti" id="reg-nombre" aria-label="Nombre" placeholder="Nombre y apellido" maxlength="60" autocomplete="name">
       </div>
       <div style="margin-bottom:10px;">
-        <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">CORREO</div>
-        <input type="email" class="ti" id="reg-correo" placeholder="tu@correo.com" autocomplete="email" inputmode="email">
+        <label for="reg-correo" style="display:block;font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">CORREO</label>
+        <input type="email" class="ti" id="reg-correo" aria-label="Correo" placeholder="tu@correo.com" autocomplete="email" inputmode="email">
       </div>
       <div style="margin-bottom:16px;">
-        <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">CONTRASEÑA (MÍN. 6)</div>
-        <input type="password" class="ti" id="reg-pass" placeholder="••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter')crearCuenta()">
+        <label for="reg-pass" style="display:block;font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">CONTRASEÑA (MÍN. 6)</label>
+        <input type="password" class="ti" id="reg-pass" aria-label="Contraseña, mínimo 6 caracteres" placeholder="••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter')crearCuenta()">
       </div>
       <button class="btn-main" id="reg-btn" style="background:var(--grad)" onclick="crearCuenta()">Crear cuenta</button>
       <div class="login-err" id="reg-err"></div>
@@ -739,14 +738,12 @@
       <div class="sl-head">
         <div class="sl-title">Socios <span id="sl-count"></span></div>
         <label class="sl-search"><span aria-hidden="true">&#128269;</span>
-          <input type="search" id="staff-search" placeholder="Buscar por nombre o código" oninput="staffFilterSocios(this.value)" autocomplete="off">
+          <input type="search" id="staff-search" placeholder="Buscar por nombre" aria-label="Buscar cliente por nombre" oninput="staffFilterSocios(this.value)" autocomplete="off">
         </label>
         <div class="sl-filters" id="staff-filters">
           <button type="button" class="sl-f ac" onclick="staffFilterStatus(this,'todos')">Todos <i id="slc-todos"></i></button>
           <button type="button" class="sl-f" id="slf-sinent" style="display:none" onclick="staffFilterStatus(this,'sinent')">Sin entrenador <i id="slc-sinent"></i></button>
-          <button type="button" class="sl-f" onclick="staffFilterStatus(this,'pendiente')">Pendientes <i id="slc-pendiente"></i></button>
           <button type="button" class="sl-f" onclick="staffFilterStatus(this,'activo')">Activos <i id="slc-activo"></i></button>
-          <button type="button" class="sl-f" onclick="staffFilterStatus(this,'tolerancia')">⏳ Tolerancia <i id="slc-tolerancia"></i></button>
           <button type="button" class="sl-f" onclick="staffFilterStatus(this,'inactivo')">Inactivos <i id="slc-inactivo"></i></button>
           <button type="button" class="sl-f" onclick="staffFilterStatus(this,'progresion')">📈 Progresión <i id="slc-progresion"></i></button>
         </div>
@@ -824,7 +821,7 @@
   <div class="mbox" style="max-width:420px">
     <div id="uic-msg" style="font-size:var(--fs-base);line-height:1.6;color:var(--tx);margin-bottom:16px;white-space:pre-line"></div>
     <div id="uic-input-wrap" style="display:none;margin-bottom:16px">
-      <input id="uic-input" class="sf-in" style="width:100%;box-sizing:border-box" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <input id="uic-input" aria-label="Respuesta" class="sf-in" style="width:100%;box-sizing:border-box" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
     </div>
     <div style="display:flex;gap:10px">
       <button type="button" class="sd-b" style="flex:1" onclick="uiNo()">Cancelar</button>
@@ -860,8 +857,8 @@
     </div>
     <input type="hidden" id="ee-id">
     <div style="display:flex;flex-direction:column;gap:10px">
-      <input type="text" class="ti" id="ee-nombre" placeholder="Nombre completo">
-      <input type="text" class="ti" id="ee-pass" placeholder="Contraseña de acceso (mín. 6) — vacío = sin cambios">
+      <input type="text" class="ti" id="ee-nombre" aria-label="Nombre completo" placeholder="Nombre completo">
+      <input type="text" class="ti" id="ee-pass" aria-label="Nueva contraseña de acceso" placeholder="Contraseña de acceso (mín. 6) — vacío = sin cambios">
       <div class="q-sub" style="margin:2px 0 4px">¿Qué da? (elige al menos una)</div>
       <div class="chk-grid" style="grid-template-columns:1fr 1fr">
         <div class="chk" id="ee-func-ent" onclick="this.classList.toggle('ck')">🏋️ Entrenamiento</div>
@@ -869,7 +866,7 @@
       </div>
       <div class="q-sub" style="margin:8px 0 4px">Especialidades</div>
       <div class="chk-grid" id="ee-especialidades" style="max-height:160px;overflow-y:auto"></div>
-      <input type="text" class="ti" id="ee-otras" placeholder="Otras especialidades, separadas por coma">
+      <input type="text" class="ti" id="ee-otras" aria-label="Otras especialidades" placeholder="Otras especialidades, separadas por coma">
     </div>
     <div style="font-size:var(--fs-xs);color:var(--mu);margin-top:10px;line-height:1.5">El usuario (para iniciar sesión) no se puede cambiar aquí. Su filosofía se edita desde su propia sesión, en 🧬 MI FILOSOFÍA.</div>
     <button class="btn-main" style="margin-top:14px" onclick="guardarEdicionEntrenador()">Guardar cambios</button>
@@ -885,9 +882,9 @@
     </div>
     <div class="q-sub" style="margin-bottom:14px">Crea su acceso. Al iniciar sesión por primera vez, le pediremos su propia filosofía de entrenamiento — así sus rutinas no se sentirán genéricas.</div>
     <div style="display:flex;flex-direction:column;gap:10px">
-      <input type="text" class="ti" id="ne-nombre" placeholder="Nombre completo (ej. Ana López)">
-      <input type="text" class="ti" id="ne-usuario" placeholder="Usuario (ej. entrenador4)">
-      <input type="text" class="ti" id="ne-pass" placeholder="Contraseña">
+      <input type="text" class="ti" id="ne-nombre" aria-label="Nombre completo" placeholder="Nombre completo (ej. Ana López)">
+      <input type="text" class="ti" id="ne-usuario" aria-label="Usuario" placeholder="Usuario (ej. entrenador4)">
+      <input type="text" class="ti" id="ne-pass" aria-label="Contraseña" placeholder="Contraseña">
       <div class="q-sub" style="margin:2px 0 4px">¿Qué va a dar de alta? (elige al menos una)</div>
       <div class="chk-grid" style="grid-template-columns:1fr 1fr">
         <div class="chk ck" id="ne-func-ent" onclick="this.classList.toggle('ck')">🏋️ Entrenamiento</div>
@@ -997,7 +994,7 @@
     <div class="mx" onclick="epCerrar()">✕</div>
     <div class="m-title" id="ep-titulo" style="margin-bottom:14px">Agregar ejercicio</div>
     <div class="ep-ctx" id="ep-ctx"></div>
-    <input class="sf-in" id="ep-q" style="width:100%;box-sizing:border-box;min-height:46px;padding:0 14px;border-radius:14px;border:1.5px solid var(--b);background:var(--in-bg);color:var(--tx);font-size:var(--fs-base)" placeholder="🔎 Buscar ejercicio…" oninput="epBuscar(this.value)" autocomplete="off">
+    <input class="sf-in" id="ep-q" aria-label="Buscar ejercicio" style="width:100%;box-sizing:border-box;min-height:46px;padding:0 14px;border-radius:14px;border:1.5px solid var(--b);background:var(--in-bg);color:var(--tx);font-size:var(--fs-base)" placeholder="🔎 Buscar ejercicio…" oninput="epBuscar(this.value)" autocomplete="off">
     <div id="ep-filtros"></div>
     <div id="ep-lista"></div>
   </div>

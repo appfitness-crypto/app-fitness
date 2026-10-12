@@ -224,7 +224,7 @@ function staffRenderContent(s){
           <div class="sd-ini">${esc(ini)}</div>
           <div class="sd-tit">
             <div class="sd-nom">${esc(tc(s.nombre))}</div>
-            <div class="sd-cod">Código ${esc(s.code)} · ${esc(s.id)}</div>
+            <div class="sd-cod">${esc(s.id)}</div>
           </div>
           ${membBadgeHTML(s,puedeEd)}
         </div>
@@ -232,7 +232,7 @@ function staffRenderContent(s){
           <span>${esc(sc(s.nivel))}</span><span>${esc(s.edad)} años</span><span>${esc(pesoNow)} kg</span><span>${esc(s.estatura)} cm</span><span>${esc(s.dias)} días/sem</span>
         </div>
         ${asigHTML}
-        <div class="sd-memb ${membBadgeCls(membEstado(s))==='tol'?'tol':membBadgeCls(membEstado(s))==='off'?'off':''}">💳 <b>${esc(membTxt(s))}</b></div>
+        ${membEstado(s).sinFecha?'':`<div class="sd-memb ${membBadgeCls(membEstado(s))==='tol'?'tol':membBadgeCls(membEstado(s))==='off'?'off':''}">💳 <b>${esc(membTxt(s))}</b></div>`}
         <div class="sd-lim">${limChips}</div>
         ${(s.clasesGrupales&&s.clasesGrupales.length)?`<div class="sd-lim" style="margin-top:4px">${s.clasesGrupales.map(c=>`<span class="sd-lim-c" style="color:var(--n);border-color:color-mix(in srgb,var(--n) 30%,transparent);background:color-mix(in srgb,var(--n) 6%,transparent)">${esc(c.clase)} · ${c.dias.map(d=>sc(DIAS_NAMES[d])).join('/')}${c.entrenaMismoDia?' +gym':''}</span>`).join('')}</div>`:''}
         ${puedeEd?`<div class="sd-acts"><button type="button" class="sd-b" onclick="abrirEditarSocio('${s.code}')">Editar datos</button></div>`:''}

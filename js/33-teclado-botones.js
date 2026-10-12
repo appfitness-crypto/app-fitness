@@ -5,6 +5,8 @@
    - Enter o Espacio los activa, igual que un clic
    - aria-pressed en opciones seleccionables (.opt / .chk y similares)
    - Escape cierra el modal abierto que se cierra tocando el fondo
+   - Los títulos de pantalla y de sección se anuncian como encabezados (para saltar entre secciones)
+   - data-sin-rol en una tarjeta táctil que ya trae su propio botón (evita botones dentro de botones)
    Funciona también con lo que se dibuja después (MutationObserver). */
 (function(){
   const NATIVOS = 'button,a,input,select,textarea,label,summary';
@@ -16,7 +18,7 @@
     return oc.indexOf('event.target===this') !== -1;
   }
   function preparar(el){
-    if(el.matches(NATIVOS) || esFondoModal(el)) return;
+    if(el.matches(NATIVOS) || esFondoModal(el) || el.hasAttribute('data-sin-rol')) return;   // data-sin-rol: superficie táctil con un botón propio adentro
     if(el.parentElement && el.parentElement.closest(NATIVOS)) return;
     if(!el.hasAttribute('role')) el.setAttribute('role','button');
     if(!el.hasAttribute('tabindex')) el.setAttribute('tabindex','0');
@@ -28,8 +30,17 @@
     const v = ACTIVO.test(c.replace(/(^|\s)(chk|opt)(\s|$)/g,' ')) ? 'true' : 'false';
     if(el.getAttribute('aria-pressed') !== v) el.setAttribute('aria-pressed', v);
   }
+  const TITULOS = {'lc-title':2,'q-title':2,'pend-title':2,'m-title':2,'sec-t':3,'kb-h':3};
+  const SEL_TITULOS = Object.keys(TITULOS).map(c=>'.'+c).join(',');
+  function encabezado(el){
+    if(/^H[1-6]$/.test(el.tagName) || el.hasAttribute('role')) return;
+    const c=Object.keys(TITULOS).find(k=>el.classList.contains(k)); if(!c) return;
+    el.setAttribute('role','heading'); el.setAttribute('aria-level', String(TITULOS[c]));
+  }
   function revisar(raiz){
     if(raiz.nodeType !== 1) return;
+    if(raiz.matches(SEL_TITULOS)) encabezado(raiz);
+    raiz.querySelectorAll(SEL_TITULOS).forEach(encabezado);
     if(raiz.hasAttribute('onclick')) preparar(raiz);
     raiz.querySelectorAll('[onclick]').forEach(preparar);
   }
