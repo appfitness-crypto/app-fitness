@@ -424,6 +424,8 @@ function renderProgresoTab(){
       <div class="en-slots" aria-hidden="true">${Array.from({length:meta},(_,i)=>`<i class="${i<hechas?'ok':''}"></i>`).join('')}</div>
     </div>
 
+    <div id="cuerpo-contenido"></div>
+
     <section class="en-sec"><div class="en-sec-h"><h3>Constancia</h3><span>${ev.total} ${ev.total===1?'sesión':'sesiones'} · ${ev.adherencia}% en 4 semanas</span></div>
       ${enHeatHTML(s,ses)}</section>
 
@@ -451,11 +453,7 @@ function renderProgresoTab(){
         <div class="en-h-t"><b>${esc(sc(x.tipo||'Sesión'))}</b><span>${x.ejercicios||0} ejercicios${x.sensacion?' · '+esc(x.sensacion):''}</span></div>
         <div class="en-h-v num">${x.volumen>0?Math.round(x.volumen).toLocaleString('es-MX'):'—'}${x.volumen>0?'<small>kg</small>':''}</div></div>`; }).join('')}</div>`
       :'<div class="empty-msg">Aún no hay sesiones registradas.<br>Al terminar tu primera sesión aparecerá aquí.</div>'}</section>
-
-    <div class="card" id="card-cuerpo">
-      <div class="card-t">${it('user','sm')}Tu rendimiento y equilibrio corporal</div>
-      <div id="cuerpo-contenido"></div>
-    </div>`;
+`;
   renderCuerpo();
 }
 // Mapa de 12 semanas (filas lunes a domingo): completa si hizo al menos el 80% de las series

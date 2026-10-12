@@ -1760,20 +1760,21 @@ html[data-theme="light2"]{--acc:var(--lime);--acc-tx:#5444DC;--acc-ink:#FFFFFF;-
 }
 
 /* ═══ Mi cuerpo 3D (js/13-avatar-3d.js): siempre en el estudio oscuro de la marca, en los 3 temas ═══ */
-.c3d-card{display:flex;align-items:stretch;gap:14px;width:100%;margin:14px 0 4px;padding:0;border:1px solid #233040;border-radius:var(--r-lg);background:radial-gradient(120% 140% at 0% 0%,#18222d 0%,#0A0E13 60%);color:#F1F5F7;text-align:left;cursor:pointer;overflow:hidden;font-family:var(--fb);transition:transform .16s var(--ease-out),border-color .2s ease;}
-.c3d-card:active{transform:scale(.985);}
-@media(hover:hover) and (pointer:fine){.c3d-card:hover{border-color:#C8F23A;}}
-.c3d-card:focus-visible{outline:3px solid #C8F23A;outline-offset:2px;}
-.c3d-card img{flex:none;width:112px;height:150px;object-fit:cover;object-position:50% 20%;}
-.c3d-card-tx{display:flex;flex-direction:column;justify-content:center;gap:5px;padding:14px 16px 14px 0;min-width:0;}
-.c3d-card-tx b{font-family:var(--fd);font-weight:800;font-style:italic;font-size:var(--fs-4xl);line-height:1;color:#F1F5F7;}
-.c3d-card-tx>span:not(.c3d-kick):not(.c3d-card-cta){font-size:var(--fs-sm);line-height:1.4;color:#B6C0CA;}
-.c3d-card-cta{margin-top:4px;font-weight:700;font-size:var(--fs-sm);color:#C8F23A;}
 .c3d-kick{font-family:var(--fb);font-weight:700;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#C8F23A;}
 
 html.c3d-abierto,html.c3d-abierto body{overflow:hidden;}
-.c3d{position:fixed;inset:0;z-index:9000;background:#0A0E13;color:#F1F5F7;font-family:var(--fb);opacity:0;transition:opacity .2s var(--ease-out);}
-.c3d.on{opacity:1;}
+.c3d{background:#0A0E13;color:#F1F5F7;font-family:var(--fb);}
+.c3d-full{position:fixed;inset:0;z-index:9000;opacity:0;transition:opacity .2s var(--ease-out);}
+.c3d-full.on{opacity:1;}
+/* dentro de Progreso: el escenario oscuro es parte de la página */
+.c3d-in{position:relative;height:min(620px,80vh);min-height:520px;border-radius:var(--r-lg);overflow:hidden;border:1px solid #1F2933;isolation:isolate;}
+.c3d-in .c3d-lienzo canvas{touch-action:pan-y;}
+.c3d-in .c3d-arriba{padding:12px 12px 28px;align-items:center;}
+.c3d-in .c3d-pista{margin:0;}
+.c3d-chips[hidden]{display:none;}
+.c3d-in .c3d-abajo{padding:40px 14px 14px;}
+.c3d-x .ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+.c3d-x{display:flex;align-items:center;justify-content:center;}
 .c3d-lienzo{position:absolute;inset:0;}
 .c3d-lienzo canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab;}
 .c3d-lienzo canvas:active{cursor:grabbing;}
@@ -1834,3 +1835,4 @@ html.c3d-abierto,html.c3d-abierto body{overflow:hidden;}
 @media(max-width:420px){#s-quiz .quiz-top .quiz-step{display:none;}}
 .pf-logo{margin-left:auto;flex:none;}
 .quiz-step{white-space:nowrap;}
+button.chip-sel{font-family:var(--fb);}

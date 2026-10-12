@@ -44,33 +44,27 @@ function c3dActual(todas){
 function c3dSerie(todas,id){ return todas.filter(m=>+m[id]).map(m=>({fecha:m.fecha,v:+m[id]})); }
 function c3dFmt(v){ return (Math.round(v*10)/10).toString(); }
 
+// Vista abierta: inline (dentro de Progreso) o a pantalla completa. Solo una a la vez.
 function av3dDestruir(){
   if(!av3d) return;
   try{ av3d.V && av3d.V.destruir(); }catch(e){}
-  document.removeEventListener('keydown', av3d.onKey);
+  try{ av3d.io && av3d.io.disconnect(); }catch(e){}
+  if(av3d.onKey) document.removeEventListener('keydown', av3d.onKey);
+  if(av3d.root && !av3d.full) av3d.root.innerHTML='';
   av3d=null;
 }
 
-function abrirMiCuerpo(){
-  const s=activeSocio; if(!s) return;
-  av3dDestruir();
-  const {todas}=getMedidas(s);
-  const ref=c3dReferencia(todas), hoy=c3dActual(todas);
-  const nMed=todas.filter(m=>MED_CAMPOS.some(c=>+m[c.id])).length;
-  let ov=document.getElementById('c3d');
-  if(!ov){ ov=document.createElement('div'); ov.id='c3d'; document.body.appendChild(ov); }
-  ov.className='c3d';
-  ov.setAttribute('role','dialog'); ov.setAttribute('aria-modal','true'); ov.setAttribute('aria-labelledby','c3d-t');
-  const desde=todas.find(m=>MED_CAMPOS.some(c=>+m[c.id]));
-  ov.innerHTML=`
+function c3dVistaHTML(full){
+  return `
     <div class="c3d-lienzo" id="c3d-lienzo"></div>
     <div class="c3d-arriba">
       <div>
-        <div class="c3d-kick">Mi cuerpo</div>
-        <h2 class="c3d-t" id="c3d-t">Tus músculos,<br><em>a tu medida</em></h2>
-        <p class="c3d-pista">Desliza para girar · pellizca para acercar · toca un músculo</p>
+        ${full?`<div class="c3d-kick">Mi cuerpo</div><h2 class="c3d-t" id="c3d-t">Tus músculos,<br><em>a tu medida</em></h2>`:''}
+        <p class="c3d-pista">${full?'Desliza para girar · pellizca para acercar · toca un músculo':'Desliza a los lados para girar · toca un músculo'}</p>
       </div>
-      <button type="button" class="c3d-x" onclick="cerrarMiCuerpo()" aria-label="Cerrar Mi cuerpo">✕</button>
+      ${full
+        ?`<button type="button" class="c3d-x" onclick="cerrarMiCuerpo()" aria-label="Cerrar pantalla completa">✕</button>`
+        :`<button type="button" class="c3d-x" id="c3d-abrir" onclick="abrirMiCuerpo()" aria-label="Ver Mi cuerpo en pantalla completa"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>`}
     </div>
     <div class="c3d-cargando" id="c3d-cargando" role="status">Cargando tu cuerpo 3D…</div>
     <div class="c3d-abajo">
@@ -85,37 +79,70 @@ function abrirMiCuerpo(){
       <div class="c3d-chips" id="c3d-chips" tabindex="0" role="region" aria-label="Tus medidas"></div>
       <p class="c3d-pie">Estimación visual con tus medidas · no es un diagnóstico.<br>Modelo anatómico: Z-Anatomy (CC BY-SA 4.0), derivado de BodyParts3D.</p>
     </div>`;
-  document.documentElement.classList.add('c3d-abierto');
-  requestAnimationFrame(()=>ov.classList.add('on'));
-  const onKey=e=>{ if(e.key==='Escape') cerrarMiCuerpo(); };
-  document.addEventListener('keydown',onKey);
-  av3d={V:null,onKey,ref,hoy,todas,nMed,modo:'hoy',desde};
-  ov.querySelector('.c3d-x').focus();
+}
+
+function c3dMontar(root, full){
+  const s=activeSocio; if(!s||!root) return;
+  av3dDestruir();
+  const {todas}=getMedidas(s);
+  const ref=c3dReferencia(todas), hoy=c3dActual(todas);
+  const nMed=todas.filter(m=>MED_CAMPOS.some(c=>+m[c.id])).length;
+  const desde=todas.find(m=>MED_CAMPOS.some(c=>+m[c.id]));
+  root.innerHTML=c3dVistaHTML(full);
+  const yo={V:null,root,full,ref,hoy,todas,nMed,modo:'hoy',desde};
+  av3d=yo;
+  if(full){ yo.onKey=e=>{ if(e.key==='Escape') cerrarMiCuerpo(); }; document.addEventListener('keydown',yo.onKey); }
   c3dPintarChips();
+  c3dVer(nMed>=2?'hoy':'inicio',true);
   cargarCuerpo3D().then(()=>{
-    if(!av3d || av3d.onKey!==onKey) return;
+    if(av3d!==yo) return;
     const V=Cuerpo3D.montar(document.getElementById('c3d-lienzo'),{base:'modelos/',referencia:ref,onToque:c3dToque});
-    av3d.V=V;
+    yo.V=V;
     // encuadre: cuerpo completo, un poco de frente-lado
-    V.camera.position.set(Math.sin(.35)*6.2,.82,Math.cos(.35)*6.2); V.controls.target.set(0,.75,0);
-    V.controls.minDistance=1.3; V.controls.maxDistance=8; V.controls.update();
+    const r=full?6.2:5.6;
+    V.camera.position.set(Math.sin(.35)*r,.84,Math.cos(.35)*r); V.controls.target.set(0,.8,0);
+    V.controls.minDistance=1.3; V.controls.maxDistance=8;
+    if(!full){
+      // dentro de la página: el dedo de arriba a abajo mueve la página; de lado gira el cuerpo
+      V.controls.enableZoom=false;
+      V.controls.update();
+      V.controls.minPolarAngle=V.controls.maxPolarAngle=V.controls.getPolarAngle();
+      if('IntersectionObserver' in window){ yo.io=new IntersectionObserver(es=>es.forEach(e=>V.pausar(!e.isIntersecting))); yo.io.observe(root); }
+    }
+    V.controls.update();
     return V.promesa.then(()=>{
-      if(!av3d || av3d.V!==V) return;
+      if(av3d!==yo) return;
       document.getElementById('c3d-cargando')?.remove();
       // arranca en tu punto de partida y, si ya hay avance, crece hasta hoy
       c3dVer('inicio',true);
-      if(nMed>=2) setTimeout(()=>{ if(av3d && av3d.V===V && av3d.modo==='inicio') c3dVer('hoy'); },650);
+      if(nMed>=2) setTimeout(()=>{ if(av3d===yo && yo.modo==='inicio') c3dVer('hoy'); },650);
     });
   }).catch(()=>{
     const c=document.getElementById('c3d-cargando');
     if(c) c.innerHTML='No se pudo cargar el cuerpo 3D. Revisa tu conexión e inténtalo de nuevo.';
   });
 }
+// Dentro de Progreso (se llama al pintar la sección de cuerpo)
+function c3dMontarInline(){ const el=document.getElementById('c3d-in'); if(el) c3dMontar(el,false); }
+
+function abrirMiCuerpo(){
+  if(!activeSocio) return;
+  av3dDestruir();
+  let ov=document.getElementById('c3d');
+  if(!ov){ ov=document.createElement('div'); ov.id='c3d'; document.body.appendChild(ov); }
+  ov.className='c3d c3d-full';
+  ov.setAttribute('role','dialog'); ov.setAttribute('aria-modal','true'); ov.setAttribute('aria-labelledby','c3d-t');
+  document.documentElement.classList.add('c3d-abierto');
+  c3dMontar(ov,true);
+  requestAnimationFrame(()=>ov.classList.add('on'));
+  ov.querySelector('.c3d-x')?.focus();
+}
 function cerrarMiCuerpo(){
   av3dDestruir();
-  const ov=document.getElementById('c3d'); if(!ov) return;
-  ov.classList.remove('on'); document.documentElement.classList.remove('c3d-abierto');
-  setTimeout(()=>{ if(!av3d) ov.remove(); },220);
+  const ov=document.getElementById('c3d');
+  if(ov){ ov.classList.remove('on'); setTimeout(()=>ov.remove(),220); }
+  document.documentElement.classList.remove('c3d-abierto');
+  c3dMontarInline();
   document.getElementById('c3d-abrir')?.focus();
 }
 
@@ -133,6 +160,7 @@ function c3dVer(modo,inmediato){
     : 'Hoy · '+fmtFecha(av3d.todas[av3d.todas.length-1].fecha);
   if(V){ V.resaltar(null); V.ponerMedidas(modo==='hoy'?hoy:ref, inmediato?0:900); V.verCrecimiento(modo==='hoy' && nMed>=2); }
   const f=document.getElementById('c3d-ficha'); if(f) f.hidden=true;
+  document.getElementById('c3d-chips')?.removeAttribute('hidden');
   c3dPintarChips();
 }
 
@@ -140,7 +168,7 @@ function c3dPintarChips(){
   const el=document.getElementById('c3d-chips'); if(!el||!av3d) return;
   const {ref,hoy,modo,nMed}=av3d;
   const ids=C3D_CAMPOS.filter(id=>hoy[id]!=null);
-  if(!ids.length){ el.innerHTML=`<button type="button" class="c3d-vacio" onclick="cerrarMiCuerpo();document.getElementById('med-pecho')?.focus()">Registra tus medidas en Progreso y tu avatar empezará a evolucionar contigo</button>`; return; }
+  if(!ids.length){ el.innerHTML=`<button type="button" class="c3d-vacio" onclick="${av3d.full?'cerrarMiCuerpo();':''}const i=document.getElementById('med-pecho'); i?.scrollIntoView({block:'center'}); i?.focus()">Registra tus primeras medidas abajo: ese día empieza tu evolución</button>`; return; }
   el.innerHTML=ids.map(id=>{
     const v=modo==='hoy'?hoy[id]:ref[id], d=+(hoy[id]-ref[id]).toFixed(1);
     const dTx = modo==='hoy' && nMed>=2 ? `<small class="${d>0?'mas':''}">${d>0?'+':''}${c3dFmt(d)} cm</small>` : '<small>&nbsp;</small>';
@@ -151,7 +179,7 @@ function c3dPintarChips(){
 // Tocar un músculo: su nombre y cómo ha cambiado la medida que lo mueve
 function c3dToque(r){
   const f=document.getElementById('c3d-ficha'); if(!f||!av3d) return;
-  if(!r || !r.grupo){ f.hidden=true; av3d.V?.resaltar(null); return; }
+  if(!r || !r.grupo){ f.hidden=true; document.getElementById('c3d-chips')?.removeAttribute('hidden'); av3d.V?.resaltar(null); return; }
   const {todas,ref,hoy}=av3d, id=r.medida;
   const lado=r.lado?(' '+r.lado):'';
   const zona={hombros:'Hombro',brazo:'Brazo',antebrazo:'Antebrazo',pecho:'Pecho',cadera:'Cadera',muslo:'Muslo',pantorrilla:'Pierna',cuello:'Cuello'}[id]||'';
@@ -172,7 +200,7 @@ function c3dToque(r){
   f.innerHTML=`<div class="c3d-f-h"><div><div class="c3d-kick">Tocaste</div><b class="c3d-f-n">${esc(r.grupo)}</b>
       <span class="c3d-f-s">${esc((zona||'')+lado)}${zona?' · ':''}${esc(r.nombre)}</span></div>
       <button type="button" class="c3d-f-x" onclick="c3dToque(null)" aria-label="Cerrar ficha">✕</button></div>${cuerpo}`;
-  f.hidden=false;
+  f.hidden=false; document.getElementById('c3d-chips')?.setAttribute('hidden','');
   if(id && hoy[id]!=null) c3dGrafica(document.getElementById('c3d-graf'), c3dSerie(todas,id));
 }
 function c3dGrafica(cv,serie){
@@ -189,19 +217,6 @@ function c3dGrafica(cv,serie){
   x.font='600 10px Figtree, sans-serif'; x.fillStyle='rgba(241,245,247,.55)';
   x.textAlign='left'; x.fillText(fmtFecha(serie[0].fecha),pad.l,H-4); x.textAlign='right'; x.fillText(fmtFecha(serie[n].fecha),W-pad.r+4,H-4);
   x.fillStyle=L; x.font='700 11px Figtree, sans-serif'; x.fillText(c3dFmt(serie[n].v),X(n)+4,Y(serie[n].v)-9);
-}
-
-// Tarjeta de entrada en Progreso
-function c3dTarjetaHTML(){
-  const s=activeSocio, {todas}=getMedidas(s||{});
-  const n=todas.filter(m=>MED_CAMPOS.some(c=>+m[c.id])).length;
-  const sub = !n ? 'Registra tus primeras medidas: ese día empieza tu evolución.'
-    : n<2 ? 'Tu punto de partida ya está guardado. Con tu próxima medición verás qué creció.'
-    : 'Gíralo con el dedo y toca un músculo para ver cuánto ha crecido.';
-  return `<button type="button" class="c3d-card" id="c3d-abrir" onclick="abrirMiCuerpo()">
-    <img src="img/mi-cuerpo.webp" alt="" width="132" height="176" loading="lazy">
-    <span class="c3d-card-tx"><span class="c3d-kick">Nuevo · 3D</span><b>Mi cuerpo</b><span>${sub}</span><span class="c3d-card-cta">Ver mi cuerpo →</span></span>
-  </button>`;
 }
 
 // Guardar medidas del día

@@ -111,11 +111,17 @@
     let REF = op.referencia || C3D_BASE;
     let fAct = factores(null), fIni = fAct, fFin = fAct, t0 = 0, dur = 0;
     let piel = null, short = null, sel = null;     // sel: índice de canal resaltado
-    let MUS, BR, CAV, TMAX, canalG, D = [];   // D: mallas que se deforman (piel y short) con sus datos
+    let MUS, BR, BRS, CUB, CAV, TMAX, canalG, D = [];   // D: mallas que se deforman (piel y short) con sus datos
     let crecimiento = false;
 
     const matPiel = materialConBrillo({color:0x6E747C, roughness:.44, metalness:0, clearcoat:.18, clearcoatRoughness:.55});
     const matShort = new THREE.MeshStandardMaterial({color:0x060708, roughness:.78, metalness:0, side:THREE.DoubleSide});
+    // lo que brilla debajo del short (glúteo, cadera) se ve en la tela, no asomándose por los bordes
+    matShort.onBeforeCompile = sh => {
+      sh.vertexShader = 'attribute float brillo;\nvarying float vBrillo;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvBrillo = brillo;');
+      sh.fragmentShader = 'varying float vBrillo;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>',
+        '#include <emissivemap_fragment>\ndiffuseColor.rgb = mix(diffuseColor.rgb, vec3(' + LIMA.join(',') + ')*.2, clamp(vBrillo,0.,1.)*.5);\ntotalEmissiveRadiance += vec3(' + LIMA.join(',') + ') * vBrillo * .3;');
+    };
 
     const promesa = Promise.all([
       fetch(base + 'cuerpo.json').then(r => r.json()),
@@ -152,15 +158,29 @@
       if(short && short.geometry.attributes._cav){ const c = aFloat(short.geometry, '_cav', 1), col = new Float32Array(c.length * 3); for(let i=0;i<c.length;i++) col[i*3] = col[i*3+1] = col[i*3+2] = c[i]; short.geometry.setAttribute('color', new THREE.BufferAttribute(col, 3)); matShort.vertexColors = true; }
       TMAX = canalG.map(() => .001); { const {GA, T} = D[0]; for(let i=0;i<T.length;i++) if(GA[i] >= 0) TMAX[GA[i]] = Math.max(TMAX[GA[i]], T[i]); }
       BR = new Float32Array(D[0].P0.length / 3); piel.geometry.setAttribute('brillo', new THREE.BufferAttribute(BR, 1));
+      if(short){ BRS = new Float32Array(D[1].P0.length / 3); short.geometry.setAttribute('brillo', new THREE.BufferAttribute(BRS, 1)); }
+      // piel tapada por el short: ahí no brilla la piel (brilla la tela)
+      CUB = new Uint8Array(BR.length);
+      if(short){
+        const S = D[1].P0, C = .02, H = new Map(), k3 = (x, y, z) => x * 73856093 ^ y * 19349663 ^ z * 83492791;
+        for(let i=0;i<S.length;i+=3){ const k = k3(Math.floor(S[i]/C), Math.floor(S[i+1]/C), Math.floor(S[i+2]/C)); let L = H.get(k); if(!L) H.set(k, L = []); L.push(i); }
+        const P = D[0].P0;
+        for(let i=0;i<BR.length;i++){ const x = P[i*3], y = P[i*3+1], z = P[i*3+2], gx = Math.floor(x/C), gy = Math.floor(y/C), gz = Math.floor(z/C);
+          let cerca = false;
+          for(let a=-1;a<=1&&!cerca;a++) for(let b=-1;b<=1&&!cerca;b++) for(let c=-1;c<=1&&!cerca;c++){ const L = H.get(k3(gx+a, gy+b, gz+c)); if(!L) continue;
+            for(const q of L){ const dx = S[q]-x, dy = S[q+1]-y, dz = S[q+2]-z; if(dx*dx + dy*dy + dz*dz < .00016){ cerca = true; break; } } }
+          CUB[i] = cerca ? 1 : 0; }
+      }
       // Halo: capas de la misma malla, infladas y aditivas, que solo se ven alrededor de lo que brilla (resplandor suave)
-      [[.006, .9], [.014, .6], [.024, .38], [.036, .2]].forEach(([d, k], c) => {
-        const h = new THREE.Mesh(piel.geometry, new THREE.ShaderMaterial({
+      const halo = geo => [[.006, .9], [.014, .6], [.024, .38], [.036, .2]].forEach(([d, k], c) => {
+        const h = new THREE.Mesh(geo, new THREE.ShaderMaterial({
           transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, side:THREE.BackSide,
           vertexShader:'attribute float brillo;\nvarying float vB;\nvarying float vF;\nvoid main(){\n  vec3 p = position + normal * ' + d.toFixed(3) + ' * brillo;\n  vec4 mv = modelViewMatrix * vec4(p, 1.);\n  vec3 n = normalize(normalMatrix * normal);\n  vF = 1. - abs(dot(n, normalize(-mv.xyz)));\n  vB = brillo;\n  gl_Position = projectionMatrix * mv;\n}',
           fragmentShader:'varying float vB;\nvarying float vF;\nvoid main(){\n  float a = smoothstep(.15, 1., vB) * pow(vF, .9) * ' + k.toFixed(2) + ';\n  gl_FragColor = vec4(vec3(' + [0.784,0.949,0.227].join(',') + ') * a, a);\n}'
         }));
         h.renderOrder = 2 + c; raiz.add(h);
       });
+      halo(piel.geometry); if(short) halo(short.geometry);
       scene.add(raiz);
       aplicar(fAct);
       listo = true;
@@ -206,8 +226,16 @@
       // se difumina sobre la malla: bordes del brillo suaves, sin puntitos
       const Vd = D[0].V || (D[0].V = vecinos(piel.geometry)), B2 = D[0].B2 || (D[0].B2 = new Float32Array(n));
       for(let r=0;r<4;r++){ for(let i=0;i<n;i++){ let sm = BR[i], c = 1; for(let q=Vd.ini[i];q<Vd.ini[i+1];q++){ sm += BR[Vd.ady[q]]; c++; } B2[i] = sm / c; } BR.set(B2); }
-      for(let i=0;i<n;i++){ const v = BR[i]; BR[i] = v * v * (3 - 2 * v); }
+      for(let i=0;i<n;i++){ const v = BR[i] * (1 - CUB[i]); BR[i] = v * v * (3 - 2 * v); }
       piel.geometry.attributes.brillo.needsUpdate = true;
+      // el short toma el brillo de lo que cubre
+      if(BRS){
+        const d = D[1], m = BRS.length, Vs = d.V || (d.V = vecinos(short.geometry)), S2 = d.B2 || (d.B2 = new Float32Array(m));
+        for(let i=0;i<m;i++){ const a = d.GA[i], b = d.GB[i]; BRS[i] = Math.min(1, (a >= 0 ? d.WA[i] * val[a] : 0) + (b >= 0 ? d.WB[i] * val[b] : 0)); }
+        for(let r=0;r<6;r++){ for(let i=0;i<m;i++){ let sm = BRS[i], c = 1; for(let q=Vs.ini[i];q<Vs.ini[i+1];q++){ sm += BRS[Vs.ady[q]]; c++; } S2[i] = sm / c; } BRS.set(S2); }
+        for(let i=0;i<m;i++){ const v = BRS[i]; BRS[i] = v * v * (3 - 2 * v) * .7; }
+        short.geometry.attributes.brillo.needsUpdate = true;
+      }
     }
 
     function ponerMedidas(med, ms){
@@ -232,7 +260,9 @@
       luces.quaternion.copy(camera.quaternion);
       renderer.render(scene, camera);
     }
-    function bucle(now){ if(destruido) return; cuadro(now); raf = requestAnimationFrame(bucle); }
+    let pausado = false;
+    function bucle(now){ if(destruido || pausado) return; cuadro(now); raf = requestAnimationFrame(bucle); }
+    function pausar(si){ si = !!si; if(si === pausado || op.manual) return; pausado = si; cancelAnimationFrame(raf); if(!si) raf = requestAnimationFrame(bucle); }
     if(!op.manual) raf = requestAnimationFrame(bucle);
 
     // Tocar → nombre del músculo y brillo en su grupo
@@ -269,7 +299,7 @@
       scene.traverse(o => { if(o.isMesh){ o.geometry.dispose(); o.material.dispose(); } });
       renderer.dispose(); renderer.domElement.remove();
     }
-    return {promesa, ponerMedidas, mezclar, verCrecimiento, ponerReferencia, destruir, cuadro, camera, controls, factores,
+    return {promesa, ponerMedidas, mezclar, verCrecimiento, ponerReferencia, pausar, destruir, cuadro, camera, controls, factores,
             resaltar, canal, tocarVertice, info:() => info, piel:() => piel};
   }
   window.Cuerpo3D = {montar, factores, C3D_BASE, MEDIDA_G, NOMBRE_G};
