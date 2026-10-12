@@ -75,7 +75,7 @@ function calcularEquilibrioCorporal(s){
   const crece=['pecho','brazo','muslo']; // estas suman si crecen; cintura/cadera suman si bajan
   const stats={};
   const sinDatos = !primera || !ultima || primera===ultima;
-  MED_CAMPOS.forEach(c=>{
+  MED_CAMPOS.filter(c=>!c.extra).forEach(c=>{
     if(sinDatos){ stats[c.nm]=50; return; }
     const a=primera[c.id], b=ultima[c.id];
     if(a==null||b==null||!a){ stats[c.nm]=50; return; }

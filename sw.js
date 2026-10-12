@@ -8,7 +8,7 @@
    → Los datos de Firebase NUNCA pasan por aquí (van directo).
    → Al desplegar cambios, sube CACHE_VERSION.
    ════════════════════════════════════════════════════════ */
-const CACHE_VERSION = 'fitnesspro-v54';
+const CACHE_VERSION = 'fitnesspro-v57';
 const PRECACHE_LOCAL = [
   './',
   './index.html',
@@ -176,7 +176,14 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // 3) Todo lo demás (fotos, íconos, librerías, tipografías):
+  // 3) El modelo 3D de Mi cuerpo (≈ 1.7 MB): se baja la primera vez que se abre y luego sale del dispositivo.
+  //    No se vuelve a pedir en cada apertura; se renueva al subir CACHE_VERSION.
+  if (propio && url.pathname.includes('/modelos/')) {
+    e.respondWith(caches.match(req).then((r) => r || fetch(req).then((res) => guardar(req, res))));
+    return;
+  }
+
+  // 4) Todo lo demás (fotos, íconos, librerías, tipografías):
   //    desde el dispositivo al instante y se actualiza en segundo plano
   e.respondWith(
     caches.match(req).then((cached) => {

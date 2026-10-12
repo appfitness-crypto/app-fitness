@@ -11,6 +11,11 @@ const MED_CAMPOS=[
   {id:'cadera', nm:'CADERA', base:95, min:60, max:160},
   {id:'brazo',  nm:'BRAZO',  base:32, min:18, max:60},
   {id:'muslo',  nm:'MUSLO',  base:55, min:35, max:90},
+  // extra: mueven el avatar 3D (Mi cuerpo); no entran en el mapa de equilibrio
+  {id:'hombros',    nm:'HOMBROS',    base:112, min:80, max:170, extra:true},
+  {id:'antebrazo',  nm:'ANTEBRAZO',  base:27,  min:18, max:45,  extra:true},
+  {id:'pantorrilla',nm:'PANTORRILLA',base:37,  min:25, max:60,  extra:true},
+  {id:'cuello',     nm:'CUELLO',     base:37,  min:28, max:55,  extra:true},
 ];
 function medEscala(med,campo){
   const c=MED_CAMPOS.find(x=>x.id===campo);

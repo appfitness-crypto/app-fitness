@@ -1,0 +1,8 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Paso 2 de LEEME.md: abre el GLB crudo de piel2.py (cuerpo.glb junto a esta página) y lo pule con pulir-visor.js.
+     Necesita junto a esta página: vendor/three.min.js (r128), vendor/GLTFLoader.js, vendor/OrbitControls.js, vendor/meshopt_decoder.js. -->
+<style>html,body{margin:0;height:100%;background:#0A0E13}#c{position:fixed;inset:0}</style></head><body><div id="c"></div>
+<script src="vendor/three.min.js"></script><script src="vendor/GLTFLoader.js"></script><script src="vendor/OrbitControls.js"></script><script src="vendor/meshopt_decoder.js"></script>
+<script src="pulir-visor.js"></script>
+<script>window.V=Cuerpo3D.montar(document.getElementById('c'),{captura:true,modelo:'cuerpo.glb',onToque:m=>console.log('toque',JSON.stringify(m))});
+V.promesa.then(()=>window.LISTO=1).catch(e=>{console.log('ERR',e&&e.message);window.LISTO=-1});</script></body></html>
