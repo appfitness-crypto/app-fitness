@@ -1149,8 +1149,19 @@ function ejImagenHTML(ejMostrado, tipEsc){
   return `<div class="m-ejimg"><div class="m-ejimg-fig">${pic(basesEjercicio(ejMostrado),'dumbbell')}${tipEsc?`<div class="m-ejimg-tip" id="m-tip">${tipEsc}</div>`:''}</div><div class="m-ejimg-cap">Así se ve este movimiento.</div></div>`;
 }
 
+// Logo animado chico (el de la barra de bienvenida) para el encabezado de cada pantalla
+const sinMovimiento=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+function logoMiniHTML(){
+  return `<div class="lm lm-app">${sinMovimiento()
+    ? `<img src="icons/icon-192.png" alt="${esc(GYM.nombreCorto)}">`
+    : `<video autoplay muted loop playsinline disablepictureinpicture poster="icons/icon-192.png" aria-label="${esc(GYM.nombreCorto)}"><source src="video/logo-animado.mp4" type="video/mp4"><source src="video/logo-animado.webm" type="video/webm"></video>`}</div>`;
+}
+// La intro del logo de bienvenida (5 s) termina y sigue con el bucle de 4 s, sin volver a negro
+// Con "reducir movimiento" los logos animados de index.html quedan como imagen fija
+if(sinMovimiento()) document.querySelectorAll('.lm video, .wc-logo video').forEach(v=>{ const i=new Image(); i.src=v.getAttribute('poster'); i.alt=(window.GYM&&GYM.nombreCorto)||v.getAttribute('aria-label')||''; v.replaceWith(i); });
+window.logoABucle=v=>{ v.onended=null; v.loop=true; v.innerHTML='<source src="video/logo-bucle.webm" type="video/webm"><source src="video/logo-bucle.mp4" type="video/mp4">'; v.load(); v.play().catch(()=>{}); };
 function appHead(titulo,sub){
-  return `<div class="app-h"><div><div class="app-t">${titulo}</div>${sub?`<div class="app-sub">${sub}</div>`:''}</div></div>`;
+  return `<div class="app-h"><div class="app-h-l">${logoMiniHTML()}<div><div class="app-t">${titulo}</div>${sub?`<div class="app-sub">${sub}</div>`:''}</div></div></div>`;
 }
 function iniciales(nombre){ return tc(nombre).split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
 const NAV_TABS=['inicio','rutina','progreso','nutricion','perfil'];
@@ -1222,10 +1233,10 @@ function refreshDash(){
 
   cont.innerHTML=`
     <div class="app-h home">
-      <div>
+      <div class="app-h-l">${logoMiniHTML()}<div>
         <div class="app-t">Hola, ${esc(primer)}</div>
         <div class="app-sub">Tu mejor versión, cada día.</div>
-      </div>
+      </div></div>
       <div class="app-act">
         <button type="button" class="ib" onclick="temaToque()" aria-label="Cambiar tema. Toca para claro u oscuro; doble toque desde oscuro para el tema nuevo en prueba">${ico(temaActual()==='dark'?'sun':'moon')}</button>
         <button type="button" class="av" onclick="dashTab('perfil')" aria-label="Mi perfil">${esc(iniciales(s.nombre))}</button>
@@ -1341,6 +1352,7 @@ function renderPerfilTab(){
     <div class="pf-h">
       <div class="pf-av">${esc(iniciales(s.nombre))}</div>
       <div><div class="app-t">${esc(tc(s.nombre))}</div><div class="app-sub">Tu progreso, nuestra meta.</div></div>
+      <div class="pf-logo">${logoMiniHTML()}</div>
     </div>
     <div class="memb-c">
       ${it('shield')}

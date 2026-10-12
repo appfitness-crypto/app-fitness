@@ -143,7 +143,7 @@
 </div>
 
 <!-- ═══ TOPBAR GLOBAL ═══ -->
-<div class="tb" id="global-tb">
+<div class="tb tb-bienvenida" id="global-tb">
   <div class="tb-logo">
     <div class="lm"><video autoplay muted loop playsinline disablepictureinpicture poster="icons/icon-192.png" data-gym-label aria-label="Gimnasio"><source src="video/logo-animado.mp4" type="video/mp4"><source src="video/logo-animado.webm" type="video/webm"></video></div>
     <div style="display:flex;flex-direction:column;gap:1px;min-width:0">
@@ -171,6 +171,10 @@
     </div>
   </div>
   <div class="inicio-wrap">
+    <div class="wc-marca">
+      <div class="wc-logo"><video id="wc-logo-v" autoplay muted playsinline disablepictureinpicture poster="icons/icon-512.png" data-gym-label aria-label="Gimnasio" onended="logoABucle(this)"><source src="video/logo-progreso.webm" type="video/webm"><source src="video/logo-progreso.mp4" type="video/mp4"></video></div>
+      <div class="wc-nombre">Fitness <span>Pro</span></div>
+    </div>
     <div class="inicio-cards">
       <button type="button" class="ic ic-nuevo" onclick="abrirRegistro('cliente')">
         <div class="ic-icon"><svg class="ico" aria-hidden="true"><use href="#i-spark"/></svg></div>
@@ -217,6 +221,7 @@
   <div class="quiz-top">
     <div style="display:flex;align-items:center;gap:10px;">
       <div class="btn-bk" onclick="quizBack()">←</div>
+      <div class="lm lm-q"><video autoplay muted loop playsinline disablepictureinpicture poster="icons/icon-192.png" data-gym-label aria-label="Gimnasio"><source src="video/logo-animado.mp4" type="video/mp4"><source src="video/logo-animado.webm" type="video/webm"></video></div>
       <div class="quiz-step">Paso <span id="qstep">1</span> de 11</div>
     </div>
     <div style="display:flex;align-items:center;gap:8px"><span class="theme-slot"></span><div class="tb-btn danger" onclick="go('s-inicio')">Cancelar</div></div>
@@ -582,7 +587,7 @@
 <!-- ═══ S4: PREVIEW RUTINA ═══ -->
 <div class="sc" id="s-preview">
   <div class="tb" style="position:sticky;top:0;z-index:100;">
-    <div class="tb-logo"><div class="lm"><img src="icons/icon-192.png" data-gym-alt alt="Gimnasio"></div><div class="ln">Tu plan</div></div>
+    <div class="tb-logo"><div class="lm"><video autoplay muted loop playsinline disablepictureinpicture poster="icons/icon-192.png" data-gym-label aria-label="Gimnasio"><source src="video/logo-animado.mp4" type="video/mp4"><source src="video/logo-animado.webm" type="video/webm"></video></div><div class="ln">Tu plan</div></div>
     <div class="tb-r">
       <div class="tb-btn" style="color:var(--v);border-color:color-mix(in srgb, var(--v) 30%, transparent);background:var(--gl2)" onclick="if(privCasilleroOk())confirmarRutina()" class="tb-btn priv-btn">Confirmar y guardar ✓</div>
     </div>
@@ -742,7 +747,7 @@
 <div class="sc" id="s-panel" style="flex-direction:column;">
   <div class="tb staff-topbar" style="position:sticky;top:0;z-index:100;">
     <div class="tb-logo">
-      <div class="lm"><img src="icons/icon-192.png" data-gym-alt alt="Gimnasio"></div>
+      <div class="lm"><video autoplay muted loop playsinline disablepictureinpicture poster="icons/icon-192.png" data-gym-label aria-label="Gimnasio"><source src="video/logo-animado.mp4" type="video/mp4"><source src="video/logo-animado.webm" type="video/webm"></video></div>
       <div class="ln">Fitness <span class="ln-x">System </span>Pro</div>
     </div>
     <div class="staff-tb-actions">

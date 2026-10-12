@@ -1818,3 +1818,19 @@ html.c3d-abierto,html.c3d-abierto body{overflow:hidden;}
 .c3d-pie{margin:10px 0 0;font-size:11px;line-height:1.5;color:#7D8893;}
 @media(prefers-reduced-motion:reduce){.c3d,.c3d-ficha{transition:none;animation:none;}}
 @media(min-width:720px){.c3d-abajo,.c3d-arriba{padding-left:max(18px,calc(50% - 300px));padding-right:max(18px,calc(50% - 300px));}}
+
+/* ═══ Logos: el grande (intro + bucle) en bienvenida; el chico animado en el encabezado de cada pantalla ═══ */
+.tb.tb-bienvenida .tb-logo{display:none;}
+.tb.tb-bienvenida .tb-r{margin-left:auto;}
+.wc-marca{display:flex;flex-direction:column;align-items:center;gap:8px;margin:-6px auto 0;}
+.wc-logo{width:clamp(108px,30vw,150px);aspect-ratio:1/1;border-radius:30px;overflow:hidden;background:#0A0E13;box-shadow:0 10px 28px rgba(0,0,0,.28);}
+.wc-logo video,.wc-logo img{width:100%;height:100%;object-fit:cover;display:block;background:#0A0E13;}
+.wc-nombre{font-family:var(--fd);font-weight:800;font-style:italic;font-size:var(--fs-3xl);letter-spacing:-.01em;text-transform:uppercase;color:var(--tx);}
+.wc-nombre span{color:var(--v);}
+.app-h-l{display:flex;align-items:center;gap:12px;min-width:0;}
+.lm.lm-app{width:46px;height:46px;border-radius:15px;}
+.lm.lm-q{width:34px;height:34px;border-radius:11px;}
+/* en teléfono el paso ya se lee en la barra de avance y en "Paso 01 / 11": el logo toma su lugar */
+@media(max-width:420px){#s-quiz .quiz-top .quiz-step{display:none;}}
+.pf-logo{margin-left:auto;flex:none;}
+.quiz-step{white-space:nowrap;}
