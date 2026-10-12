@@ -48,6 +48,7 @@ Los archivos de `js/` son scripts normales y comparten el mismo ámbito global; 
 | `js/27-seleccion-entrenador.js` | Último paso de la evaluación: código de entrenador (opcional); avisos (toast). |
 | `js/28-pwa.js` | Service worker y auto-actualización. |
 | `js/36-cuentas.js` | Cuentas con correo (cliente y entrenador), código del entrenador y entrada a la app. Ver `docs/CLIENTE-ENTRENADOR.md`. |
+| `js/37-iconos.js` | Cambia los emojis por los íconos SVG de la app al mostrarse (y los quita de placeholders y listas). Para un emoji nuevo: agrégalo a `EMO_ICONO`. |
 | `js/99-arranque.js` | Ajustes finales que dependen de funciones de varios módulos (siempre al final). |
 
 ## Agregar o cambiar algo

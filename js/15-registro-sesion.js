@@ -69,6 +69,7 @@ function toggleEjDone(idx){
   ck.classList.toggle('yes',on);
   ck.setAttribute('aria-pressed',String(on));
   card.classList.toggle('done',on);
+  if(on) vibrarToque();
   if(!sesionTemp.ej[idx]) sesionTemp.ej[idx]={done:false,sets:[]};
   sesionTemp.ej[idx].done=on;
   actualizarProgresoDia();
@@ -118,12 +119,29 @@ function actualizarUnitToggleUI(){
   const lbl=document.getElementById('m-kg-label'); if(lbl) lbl.textContent = unidadPeso==='lb' ? 'LB USADAS' : 'KG USADOS';
 }
 
-// ── Burbuja de descanso: cronómetro flotante y movible, solo visual (cuenta hacia arriba desde 0) ──
-let burbuja={visible:false, running:false, startTs:0, elapsed:0, interval:null, dragging:false, moved:false};
+// ── Burbuja de descanso: cronómetro flotante y movible (cuenta hacia arriba desde 0) ──
+// El anillo se llena hacia el descanso del ejercicio abierto (o 90 s); al llegar avisa con un pulso y una vibración.
+let burbuja={visible:false, running:false, startTs:0, elapsed:0, interval:null, dragging:false, moved:false, meta:90, avisado:false};
+const RB_CIRC=2*Math.PI*29;   // circunferencia del anillo (r=29 en index.html)
+// Toque háptico corto al confirmar algo (en celulares que lo permiten)
+function vibrarToque(p){ try{ if(navigator.vibrate) navigator.vibrate(p||12); }catch(e){} }
+function segundosDescanso(txt){
+  const t=String(txt||'').toLowerCase(); let m;
+  if((m=t.match(/(\d+(?:[.,]\d+)?)\s*min/))) return Math.round(parseFloat(m[1].replace(',','.'))*60);
+  if((m=t.match(/(\d+)\s*(?:s|seg)/))) return +m[1];
+  return 0;
+}
+function burbujaMeta(){
+  try{
+    const ej=activeSocio.rutina[activeRutinaKey].ejercicios[window._modalIdx];
+    const s=segundosDescanso(ej&&ej.descanso); if(s>=15&&s<=600) return s;
+  }catch(e){}
+  return 90;
+}
 function toggleBurbujaVisible(){
   burbuja.visible=!burbuja.visible;
   const el=document.getElementById('rest-bubble');
-  if(el) el.style.display=burbuja.visible?'flex':'none';
+  if(el) el.classList.toggle('on',burbuja.visible);
   const btn=document.getElementById('btn-rest-timer');
   if(btn) btn.classList.toggle('ac',burbuja.visible);
 }
@@ -132,18 +150,28 @@ function burbujaTap(){
   if(burbuja.running){
     clearInterval(burbuja.interval); burbuja.interval=null; burbuja.running=false;
     document.getElementById('rest-bubble-lbl').textContent='TOCA';
+    el.classList.remove('listo');
   } else {
-    burbuja.startTs=Date.now(); burbuja.running=true;
-    document.getElementById('rest-bubble-lbl').textContent='DESCANSO';
-    burbujaActualizarTexto();
+    burbuja.startTs=Date.now(); burbuja.running=true; burbuja.meta=burbujaMeta(); burbuja.avisado=false;
+    document.getElementById('rest-bubble-lbl').textContent='PAUSA';
     burbuja.interval=setInterval(burbujaActualizarTexto,250);
+    vibrarToque();
   }
   el.classList.toggle('running',burbuja.running);
+  burbujaActualizarTexto();
 }
 function burbujaActualizarTexto(){
-  const seg=burbuja.running?Math.floor((Date.now()-burbuja.startTs)/1000):0;
+  const ms=burbuja.running?(Date.now()-burbuja.startTs):0, seg=Math.floor(ms/1000);
   const mm=String(Math.floor(seg/60)).padStart(2,'0'), ss=String(seg%60).padStart(2,'0');
   const t=document.getElementById('rest-bubble-t'); if(t) t.textContent=mm+':'+ss;
+  const anillo=document.getElementById('rb-anillo');
+  if(anillo) anillo.style.strokeDashoffset=String(RB_CIRC*(1-Math.min(1,ms/1000/burbuja.meta)));
+  if(burbuja.running && !burbuja.avisado && seg>=burbuja.meta){
+    burbuja.avisado=true;
+    const el=document.getElementById('rest-bubble'); el.classList.add('listo');
+    document.getElementById('rest-bubble-lbl').textContent='¡LISTO!';
+    vibrarToque([60,40,60]);
+  }
 }
 function burbujaInitDrag(){
   const el=document.getElementById('rest-bubble'); if(!el||el._dragInit) return;
@@ -277,7 +305,7 @@ function openModal(idx){
       ${msgFc(ultimoFc(s,nmHoy),'cont',r)}
       <label>Tu frecuencia cardíaca promedio (lpm)<input class="set-kg" type="number" inputmode="numeric" placeholder="Opcional"
         value="${s0.fc!=null?s0.fc:''}" onchange="setCardioFc(${idx},this.value)" onclick="event.stopPropagation()"></label>
-      <div class="set-d cardio-ok ${s0.ok?'ok':''}" onclick="setCardioOk(${idx},this)">${s0.ok?'✓ Completado':'Marcar como completado'}</div>
+      <div class="set-d cardio-ok ${s0.ok?'ok':''}" onclick="setCardioOk(${idx},this)">${ico('check')}<span>${s0.ok?'Completado':'Marcar como completado'}</span></div>
     </div>`;
     document.getElementById('modal-ej').classList.add('open');
     return;
@@ -295,7 +323,7 @@ function openModal(idx){
         <div class="set-i">${esc(txtUnidad(obj,r.u))}</div>
         <input class="set-kg" type="number" inputmode="numeric" placeholder="lpm" title="Frecuencia cardíaca al terminar la ronda"
           value="${saved[i]?.fc!=null?saved[i].fc:''}" onchange="setFcRonda(${idx},${i},this.value)" onclick="event.stopPropagation()">
-        <div class="set-d ${saved[i]?.ok?'ok':''}" onclick="setOk(${idx},${i},this)">${saved[i]?.ok?'✓':''}</div>
+        <div class="set-d ${saved[i]?.ok?'ok':''}" onclick="setOk(${idx},${i},this)" aria-label="Serie ${i+1} completada" aria-pressed="${saved[i]?.ok?'true':'false'}">${ico('check')}</div>
       </div>`).join('');
     document.getElementById('modal-ej').classList.add('open');
     return;
@@ -309,7 +337,7 @@ function openModal(idx){
       : (limpiarReps(ej.reps)||'30 seg');
     document.getElementById('m-sets').innerHTML=cap('Sin carga — marca cada '+(mr.forma==='tiempo'?'secuencia':'ronda')+' al terminarla.')+Array.from({length:mr.series},(_,i)=>`
       <div class="set-r mov"><div class="set-n">${i+1}</div><div class="set-i">${esc(lab)}</div>
-      <div class="set-d ${saved[i]?.ok?'ok':''}" onclick="setOk(${idx},${i},this)">${saved[i]?.ok?'✓':''}</div></div>`).join('');
+      <div class="set-d ${saved[i]?.ok?'ok':''}" onclick="setOk(${idx},${i},this)" aria-label="Serie ${i+1} completada" aria-pressed="${saved[i]?.ok?'true':'false'}">${ico('check')}</div></div>`).join('');
     document.getElementById('modal-ej').classList.add('open');
     return;
   }
@@ -326,14 +354,14 @@ function openModal(idx){
         value="${saved[i]?.seg!=null?saved[i].seg:''}" onchange="setSeg(${idx},${i},this.value)" onclick="event.stopPropagation()">
       <input class="set-kg" type="number" inputmode="decimal" step="0.5" placeholder="+${unidadPeso}" title="Carga extra (opcional)"
         value="${saved[i]?.kg!=null?kgToDisplay(saved[i].kg):''}" onchange="setKg(${idx},${i},this.value)" onclick="event.stopPropagation()">
-      <div class="set-d ${saved[i]?.ok?'ok':''}" onclick="setOk(${idx},${i},this)">${saved[i]?.ok?'✓':''}</div>
+      <div class="set-d ${saved[i]?.ok?'ok':''}" onclick="setOk(${idx},${i},this)" aria-label="Serie ${i+1} completada" aria-pressed="${saved[i]?.ok?'true':'false'}">${ico('check')}</div>
     </div>` : `
     <div class="set-r">
       <div class="set-n">${i+1}</div>
       <div class="set-i">${esc(repsDeSerie(ej,i))}</div>
       <input class="set-kg" type="number" inputmode="decimal" step="0.5" placeholder="${unidadPeso}"
         value="${saved[i]?.kg!=null?kgToDisplay(saved[i].kg):''}" onchange="setKg(${idx},${i},this.value)" onclick="event.stopPropagation()">
-      <div class="set-d ${saved[i]?.ok?'ok':''}" onclick="setOk(${idx},${i},this)">${saved[i]?.ok?'✓':''}</div>
+      <div class="set-d ${saved[i]?.ok?'ok':''}" onclick="setOk(${idx},${i},this)" aria-label="Serie ${i+1} completada" aria-pressed="${saved[i]?.ok?'true':'false'}">${ico('check')}</div>
     </div>`).join('');
   document.getElementById('modal-ej').classList.add('open');
 }
@@ -351,7 +379,8 @@ function setCardioOk(idx,el){
   if(!sesionTemp.ej[idx]) sesionTemp.ej[idx]={done:false,sets:[]};
   if(!sesionTemp.ej[idx].sets[0]) sesionTemp.ej[idx].sets[0]={};
   const on=!el.classList.contains('ok');
-  el.classList.toggle('ok',on); el.textContent=on?'✓ Completado':'Marcar como completado';
+  el.classList.toggle('ok',on); el.querySelector('span').textContent=on?'Completado':'Marcar como completado';
+  if(on) vibrarToque();
   sesionTemp.ej[idx].sets[0].ok=on;
 }
 function setFcRonda(idx,i,v){
@@ -373,8 +402,9 @@ function setOk(idx,i,el){
   if(!sesionTemp.ej[idx]) sesionTemp.ej[idx]={done:false,sets:[]};
   if(!sesionTemp.ej[idx].sets[i]) sesionTemp.ej[idx].sets[i]={};
   const on=!el.classList.contains('ok');
-  el.classList.toggle('ok',on); el.textContent=on?'✓':'';
+  el.classList.toggle('ok',on); el.setAttribute('aria-pressed',String(on));
   sesionTemp.ej[idx].sets[i].ok=on;
+  if(on) vibrarToque();
 }
 function closeModal(){ document.getElementById('modal-ej').classList.remove('open'); }
 document.getElementById('modal-ej').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeModal(); });
