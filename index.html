@@ -696,10 +696,11 @@
 </div>
 
 <!-- BURBUJA DE DESCANSO — cronómetro flotante y movible, solo visual (cuenta hacia arriba) -->
-<div class="rest-bubble" id="rest-bubble">
+<div class="rest-bubble" id="rest-bubble" role="timer" aria-label="Cronómetro de descanso">
+  <svg class="rb-ring" viewBox="0 0 66 66" aria-hidden="true"><circle class="rb-track" cx="33" cy="33" r="29"/><circle id="rb-anillo" class="rb-prog" cx="33" cy="33" r="29"/></svg>
   <span class="rb-x" onclick="event.stopPropagation();toggleBurbujaVisible()" aria-label="Ocultar cronómetro">✕</span>
   <div class="rb-t" id="rest-bubble-t">00:00</div>
-  <div class="rb-lbl" id="rest-bubble-lbl">TOCA</div>
+  <div class="rb-lbl" id="rest-bubble-lbl" aria-live="polite">TOCA</div>
 </div>
 
 <!-- ═══ REGISTRO (cliente o entrenador) ═══ -->
