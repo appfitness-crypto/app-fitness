@@ -309,18 +309,20 @@ async function generarPDFRutina(){
 function renderCuerpo(){
   const s=activeSocio; if(!s) return;
   const cont=document.getElementById('cuerpo-contenido'); if(!cont) return;
-  const {primera, ultima, todas}=getMedidas(s);
-  const inputsHTML=`
-    <section class="en-sec"><div class="en-sec-h"><h3>Medidas de hoy</h3><span>En centímetros</span></div>
-    <div class="med-inputs">
-      ${MED_CAMPOS.map(c=>`<div class="med-in"><label>${c.nm}</label><input type="number" id="med-${c.id}" inputmode="decimal" step="0.5" placeholder="${ultima?.[c.id]||c.base}"></div>`).join('')}
-    </div>
-    <button type="button" class="btn-mini" style="width:100%" onclick="guardarMedidas()">Guardar medidas</button></section>`;
-
+  const {todas}=getMedidas(s);
+  // Mi cuerpo 3D (lo monta c3dMontarInline): ahí se ven y se registran las medidas, y al tocar se ve su evolución
+  cont.innerHTML=`<section class="en-sec"><div class="en-sec-h"><h3>Mi cuerpo</h3><span>${todas.length>1?'Desde tu primera medición':'Tu punto de partida'}</span></div>
+    <div class="c3d c3d-in" id="c3d-in"></div></section>
+    <div id="cuerpo-mapas">${mapasHTML(s)}</div>`;
+  c3dMontarInline();
+}
+// Tus mapas: rendimiento y equilibrio corporal (se vuelve a pintar al guardar una medida)
+function mapasHTML(s){
+  const {primera, ultima}=getMedidas(s);
   const rend = calcularRendimiento(s);
   const equilibrio = calcularEquilibrioCorporal(s);
   const hayProgresion = primera && ultima && primera!==ultima;
-  const dosGraficasHTML = `
+  return `
     <section class="en-sec"><div class="en-sec-h"><h3>Tus mapas</h3><span>Rendimiento y equilibrio</span></div>
     <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center">
       <div style="flex:1;min-width:150px;max-width:220px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 6px 12px;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--v) 10%,transparent),transparent 70%);border-radius:16px">
@@ -336,28 +338,6 @@ function renderCuerpo(){
           : 'Registra 2 mediciones en fechas distintas para activarlo.'}</div>
       </div>
     </div></section>`;
-
-  // Mi cuerpo 3D, directo en la pantalla (lo monta c3dMontarInline)
-  const cuerpo3dHTML=`<section class="en-sec"><div class="en-sec-h"><h3>Mi cuerpo</h3><span>${todas.length>1?'Desde tu primera medición':'Tu punto de partida'}</span></div>
-    <div class="c3d c3d-in" id="c3d-in"></div></section>`;
-
-  if(!ultima){
-    cont.innerHTML=`${cuerpo3dHTML}${inputsHTML}${dosGraficasHTML}`;
-    c3dMontarInline();
-    return;
-  }
-
-  cont.innerHTML=`
-    ${cuerpo3dHTML}
-    <section class="en-sec"><div class="en-sec-h"><h3>Evolución por zona</h3><span>Toca una medida</span></div>
-    <div class="chips-row">
-      ${MED_CAMPOS.map(c=>`<button type="button" class="chip-sel ${medChartSel===c.id?'ac':''}" data-med="${c.id}" onclick="setMedChart('${c.id}')">${sc(c.nm)}</button>`).join('')}
-    </div>
-    <canvas class="chart" id="chart-med"></canvas></section>
-    ${inputsHTML}
-    ${dosGraficasHTML}`;
-  c3dMontarInline();
-  dibujarMedChart();
 }
 
 function guardarPeso(){ asegurarLogs(activeSocio);

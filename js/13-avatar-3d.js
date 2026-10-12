@@ -42,6 +42,8 @@ function c3dActual(todas){
   const r={}; todas.forEach(m=>MED_CAMPOS.forEach(c=>{ if(+m[c.id]) r[c.id]=+m[c.id]; })); return r;
 }
 function c3dSerie(todas,id){ return todas.filter(m=>+m[id]).map(m=>({fecha:m.fecha,v:+m[id]})); }
+// Avance: en cintura y cadera es bueno bajar; en lo demás, subir
+const c3dAvance=(id,d)=>['cintura','cadera'].includes(id)?d<0:d>0;
 function c3dFmt(v){ return (Math.round(v*10)/10).toString(); }
 
 // Vista abierta: inline (dentro de Progreso) o a pantalla completa. Solo una a la vez.
@@ -60,7 +62,7 @@ function c3dVistaHTML(full){
     <div class="c3d-arriba">
       <div>
         ${full?`<div class="c3d-kick">Mi cuerpo</div><h2 class="c3d-t" id="c3d-t">Tus músculos,<br><em>a tu medida</em></h2>`:''}
-        <p class="c3d-pista">${full?'Desliza para girar · pellizca para acercar · toca un músculo':'Desliza a los lados para girar · toca un músculo'}</p>
+        <p class="c3d-pista">${full?'Desliza para girar · pellizca para acercar · toca un músculo o una medida':'Desliza a los lados para girar · toca un músculo o una medida'}</p>
       </div>
       ${full
         ?`<button type="button" class="c3d-x" onclick="cerrarMiCuerpo()" aria-label="Cerrar pantalla completa">✕</button>`
@@ -154,7 +156,7 @@ function c3dVer(modo,inmediato){
   document.getElementById('c3d-b-ini')?.setAttribute('aria-pressed',String(modo==='inicio'));
   document.getElementById('c3d-b-hoy')?.setAttribute('aria-pressed',String(modo==='hoy'));
   const cu=document.getElementById('c3d-cuando');
-  if(cu) cu.textContent = !nMed ? 'Registra tus primeras medidas para empezar'
+  if(cu) cu.textContent = !nMed ? 'Toca una medida para guardar tu punto de partida'
     : modo==='inicio' ? 'Tu punto de partida · '+fmtFecha(av3d.desde.fecha)
     : nMed<2 ? 'Primera medición: aquí empieza tu evolución'
     : 'Hoy · '+fmtFecha(av3d.todas[av3d.todas.length-1].fecha);
@@ -164,59 +166,104 @@ function c3dVer(modo,inmediato){
   c3dPintarChips();
 }
 
+// Tarjetas de medidas del cuerpo: se tocan para ver su evolución y registrar la medida de hoy
 function c3dPintarChips(){
   const el=document.getElementById('c3d-chips'); if(!el||!av3d) return;
   const {ref,hoy,modo,nMed}=av3d;
-  const ids=C3D_CAMPOS.filter(id=>hoy[id]!=null);
-  if(!ids.length){ el.innerHTML=`<button type="button" class="c3d-vacio" onclick="${av3d.full?'cerrarMiCuerpo();':''}const i=document.getElementById('med-pecho'); i?.scrollIntoView({block:'center'}); i?.focus()">Registra tus primeras medidas abajo: ese día empieza tu evolución</button>`; return; }
-  el.innerHTML=ids.map(id=>{
+  el.innerHTML=C3D_CAMPOS.map(id=>{
+    if(hoy[id]==null) return `<button type="button" class="c3d-chip vacio" onclick="c3dFichaMedida('${id}')"><span>${c3dNombre(id)}</span><b class="num">—</b><small class="mas">+ Agregar</small></button>`;
     const v=modo==='hoy'?hoy[id]:ref[id], d=+(hoy[id]-ref[id]).toFixed(1);
-    const dTx = modo==='hoy' && nMed>=2 ? `<small class="${d>0?'mas':''}">${d>0?'+':''}${c3dFmt(d)} cm</small>` : '<small>&nbsp;</small>';
-    return `<div class="c3d-chip${modo==='hoy'&&d>0?' sube':''}"><span>${c3dNombre(id)}</span><b class="num">${c3dFmt(v)}<i>cm</i></b>${dTx}</div>`;
+    const dTx = modo==='hoy' && nMed>=2 ? `<small class="${c3dAvance(id,d)?'mas':''}">${d>0?'+':''}${c3dFmt(d)} cm</small>` : '<small>Editar</small>';
+    return `<button type="button" class="c3d-chip${modo==='hoy'&&c3dAvance(id,d)?' sube':''}" onclick="c3dFichaMedida('${id}')" aria-label="${c3dNombre(id)} ${c3dFmt(v)} centímetros. Ver evolución y registrar"><span>${c3dNombre(id)}</span><b class="num">${c3dFmt(v)}<i>cm</i></b>${dTx}</button>`;
   }).join('');
 }
 
-// Tocar un músculo: su nombre y cómo ha cambiado la medida que lo mueve
-function c3dToque(r){
+// Ficha: un músculo tocado o una medida. Muestra cuánto cambió, su gráfica y deja registrar la de hoy.
+function c3dFicha(o){
   const f=document.getElementById('c3d-ficha'); if(!f||!av3d) return;
-  if(!r || !r.grupo){ f.hidden=true; document.getElementById('c3d-chips')?.removeAttribute('hidden'); av3d.V?.resaltar(null); return; }
-  const {todas,ref,hoy}=av3d, id=r.medida;
-  const lado=r.lado?(' '+r.lado):'';
-  const zona={hombros:'Hombro',brazo:'Brazo',antebrazo:'Antebrazo',pecho:'Pecho',cadera:'Cadera',muslo:'Muslo',pantorrilla:'Pierna',cuello:'Cuello'}[id]||'';
+  const {todas,ref,hoy}=av3d, id=o.id, c=id&&MED_CAMPOS.find(x=>x.id===id);
   let cuerpo='';
   if(!id){
     cuerpo=`<p class="c3d-f-nota">Este músculo no tiene una medida con cinta asociada.</p>`;
-  } else if(hoy[id]==null){
-    cuerpo=`<p class="c3d-f-nota">Aún no registras tu medida de ${c3dNombre(id).toLowerCase()}. Agrégala en tus medidas para ver cómo evoluciona.</p>`;
   } else {
-    const d=+(hoy[id]-ref[id]).toFixed(1), pct=ref[id]?Math.round((hoy[id]/ref[id]-1)*1000)/10:0;
     const serie=c3dSerie(todas,id);
-    cuerpo=`<div class="c3d-f-num">
-        <b class="c3d-f-d${d>0?' mas':''}">${d>0?'+':''}${c3dFmt(d)} cm</b>
-        <span>${c3dNombre(id)} ${c3dFmt(ref[id])} → ${c3dFmt(hoy[id])} cm<br>${serie.length>1?(pct>0?'+':'')+pct+' % desde tu primera medición':'Tu primera medición'}</span>
-      </div>
-      ${serie.length>1?`<canvas class="c3d-f-graf" id="c3d-graf" role="img" aria-label="Evolución de ${c3dNombre(id)}: ${serie.map(p=>c3dFmt(p.v)).join(', ')} cm"></canvas>`:''}`;
+    if(hoy[id]==null){
+      cuerpo=`<p class="c3d-f-nota">Aún no registras tu medida de ${c3dNombre(id).toLowerCase()}. La primera que guardes será tu punto de partida.</p>`;
+    } else {
+      const d=+(hoy[id]-ref[id]).toFixed(1), pct=ref[id]?Math.round((hoy[id]/ref[id]-1)*1000)/10:0;
+      cuerpo=`<div class="c3d-f-num">
+          <b class="c3d-f-d${c3dAvance(id,d)?' mas':''}">${d>0?'+':''}${c3dFmt(d)} cm</b>
+          <span>${c3dNombre(id)} ${c3dFmt(ref[id])} → ${c3dFmt(hoy[id])} cm<br>${serie.length>1?(pct>0?'+':'')+pct+' % desde tu primera medición':'Tu primera medición'}</span>
+        </div>
+        ${serie.length>1?`<canvas class="c3d-f-graf" id="c3d-graf" role="img" aria-label="Evolución de ${c3dNombre(id)}: ${serie.map(p=>c3dFmt(p.v)).join(', ')} cm"></canvas>`
+          :`<p class="c3d-f-nota">Con tu próxima medición verás aquí su curva.</p>`}`;
+    }
+    cuerpo+=`<form class="c3d-f-reg" onsubmit="event.preventDefault();c3dGuardar('${id}')">
+        <label for="c3d-in-v">Medida de hoy</label>
+        <span class="c3d-f-in"><input id="c3d-in-v" type="number" step="0.5" min="${c.min}" max="${c.max}" inputmode="decimal" placeholder="${c3dFmt(hoy[id]||c.base)}" required><i>cm</i></span>
+        <button type="submit">Guardar</button>
+      </form>`;
   }
-  f.innerHTML=`<div class="c3d-f-h"><div><div class="c3d-kick">Tocaste</div><b class="c3d-f-n">${esc(r.grupo)}</b>
-      <span class="c3d-f-s">${esc((zona||'')+lado)}${zona?' · ':''}${esc(r.nombre)}</span></div>
+  f.innerHTML=`<div class="c3d-f-h"><div><div class="c3d-kick">${o.kick}</div><b class="c3d-f-n">${esc(o.titulo)}</b>
+      ${o.sub?`<span class="c3d-f-s">${esc(o.sub)}</span>`:''}</div>
       <button type="button" class="c3d-f-x" onclick="c3dToque(null)" aria-label="Cerrar ficha">✕</button></div>${cuerpo}`;
   f.hidden=false; document.getElementById('c3d-chips')?.setAttribute('hidden','');
   if(id && hoy[id]!=null) c3dGrafica(document.getElementById('c3d-graf'), c3dSerie(todas,id));
 }
+// Tocar un músculo en el cuerpo
+function c3dToque(r){
+  const f=document.getElementById('c3d-ficha'); if(!f||!av3d) return;
+  if(!r || !r.grupo){ f.hidden=true; document.getElementById('c3d-chips')?.removeAttribute('hidden'); av3d.V?.resaltar(null); return; }
+  // el abdomen no crece con la cinta, pero su evolución se sigue con la cintura
+  const id=r.medida || (r.g==='abdomen' ? 'cintura' : null);
+  const zona={hombros:'Hombro',brazo:'Brazo',antebrazo:'Antebrazo',pecho:'Pecho',cadera:'Cadera',muslo:'Muslo',pantorrilla:'Pierna',cuello:'Cuello',cintura:'Abdomen'}[id]||'';
+  const donde=[zona, r.lado].filter(Boolean).join(' ');
+  c3dFicha({kick:'Tocaste', titulo:r.grupo, sub:[donde, r.nombre].filter(Boolean).join(' · '), id});
+}
+// Tocar una tarjeta de medida
+function c3dFichaMedida(id){
+  if(!av3d) return;
+  av3d.V?.resaltar(null);
+  c3dFicha({kick:'Tu medida', titulo:c3dNombre(id), sub:av3d.hoy[id]!=null?'Toca un músculo del cuerpo para ver cuál mueve':'', id});
+  setTimeout(()=>document.getElementById('c3d-in-v')?.focus(),50);
+}
+// Registrar la medida de hoy desde la ficha (reemplaza la de hoy si ya había)
+function c3dGuardar(id){
+  const s=activeSocio, c=MED_CAMPOS.find(x=>x.id===id), inp=document.getElementById('c3d-in-v');
+  if(!s||!c||!inp||!av3d) return;
+  const v=parseFloat(String(inp.value).replace(',','.'));
+  if(!(v>=c.min && v<=c.max)){ showToast(`⚠ Escribe tu ${c3dNombre(id).toLowerCase()} entre ${c.min} y ${c.max} cm`); inp.focus(); return; }
+  asegurarLogs(s); if(!s.logs.medidas) s.logs.medidas=[];
+  const hoyF=fechaISO(new Date()), ex=s.logs.medidas.find(m=>m.fecha===hoyF);
+  if(ex) ex[id]=v; else s.logs.medidas.push({fecha:hoyF,[id]:v});
+  s.logs.medidas.sort((a,b)=>String(a.fecha).localeCompare(String(b.fecha)));
+  dbSave(s.code);
+  showToast(`📏 ${c3dNombre(id)}: ${c3dFmt(v)} cm guardado`);
+  // el cuerpo, las tarjetas y los mapas se actualizan sin recargar el modelo
+  const {todas}=getMedidas(s);
+  Object.assign(av3d,{todas, ref:c3dReferencia(todas), hoy:c3dActual(todas),
+    nMed:todas.filter(m=>MED_CAMPOS.some(x=>+m[x.id])).length, desde:todas.find(m=>MED_CAMPOS.some(x=>+m[x.id]))});
+  av3d.V?.ponerReferencia(av3d.ref);
+  c3dVer('hoy');
+  c3dFichaMedida(id);
+  const mp=document.getElementById('cuerpo-mapas'); if(mp && typeof mapasHTML==='function') mp.innerHTML=mapasHTML(s);
+  if(typeof refreshDash==='function') refreshDash();
+}
 function c3dGrafica(cv,serie){
   if(!cv||serie.length<2) return;
-  const dpr=window.devicePixelRatio||1, W=cv.clientWidth||300, H=cv.clientHeight||84;
+  const dpr=window.devicePixelRatio||1, W=cv.clientWidth||300, H=cv.clientHeight||110;
   cv.width=W*dpr; cv.height=H*dpr; const x=cv.getContext('2d'); x.scale(dpr,dpr);
-  const L='#C8F23A', vals=serie.map(p=>p.v); let mn=Math.min(...vals), mx=Math.max(...vals); const rg=Math.max(1,mx-mn); mn-=rg*.2; mx+=rg*.25;
-  const pad={l:10,r:14,t:20,b:18}, X=i=>pad.l+(W-pad.l-pad.r)*(i/(serie.length-1)), Y=v=>pad.t+(H-pad.t-pad.b)*(1-(v-mn)/(mx-mn));
+  const L='#C8F23A', vals=serie.map(p=>p.v); let mn=Math.min(...vals), mx=Math.max(...vals); const rg=Math.max(1,mx-mn); mn-=rg*.25; mx+=rg*.35;
+  const pad={l:14,r:14,t:24,b:20}, X=i=>pad.l+(W-pad.l-pad.r)*(i/(serie.length-1)), Y=v=>pad.t+(H-pad.t-pad.b)*(1-(v-mn)/(mx-mn));
+  x.strokeStyle='rgba(241,245,247,.07)'; x.lineWidth=1; for(let g=0;g<=2;g++){ const y=pad.t+(H-pad.t-pad.b)*g/2; x.beginPath(); x.moveTo(pad.l,y); x.lineTo(W-pad.r,y); x.stroke(); }
   const g=x.createLinearGradient(0,pad.t,0,H-pad.b); g.addColorStop(0,'rgba(200,242,58,.28)'); g.addColorStop(1,'rgba(200,242,58,0)');
   x.beginPath(); x.moveTo(X(0),H-pad.b); serie.forEach((p,i)=>x.lineTo(X(i),Y(p.v))); x.lineTo(X(serie.length-1),H-pad.b); x.closePath(); x.fillStyle=g; x.fill();
   x.beginPath(); serie.forEach((p,i)=>i?x.lineTo(X(i),Y(p.v)):x.moveTo(X(i),Y(p.v))); x.strokeStyle=L; x.lineWidth=2.5; x.lineJoin='round'; x.stroke();
-  const n=serie.length-1;
-  serie.forEach((p,i)=>{ x.beginPath(); x.arc(X(i),Y(p.v),i===n?4.5:3,0,7); x.fillStyle=i===n?L:'#10151C'; x.fill(); x.strokeStyle=L; x.lineWidth=1.6; x.stroke(); });
+  const n=serie.length-1, cada=Math.max(1,Math.ceil(serie.length/6));
+  serie.forEach((p,i)=>{ x.beginPath(); x.arc(X(i),Y(p.v),i===n?4.5:3,0,7); x.fillStyle=i===n?L:'#10151C'; x.fill(); x.strokeStyle=L; x.lineWidth=1.6; x.stroke();
+    if(i===n || i%cada===0){ x.textAlign=i===0?'left':i===n?'right':'center'; x.fillStyle=i===n?L:'rgba(241,245,247,.8)'; x.font='700 11px Figtree, sans-serif'; x.fillText(c3dFmt(p.v),X(i)+(i===0?-4:i===n?4:0),Y(p.v)-9); } });
   x.font='600 10px Figtree, sans-serif'; x.fillStyle='rgba(241,245,247,.55)';
-  x.textAlign='left'; x.fillText(fmtFecha(serie[0].fecha),pad.l,H-4); x.textAlign='right'; x.fillText(fmtFecha(serie[n].fecha),W-pad.r+4,H-4);
-  x.fillStyle=L; x.font='700 11px Figtree, sans-serif'; x.fillText(c3dFmt(serie[n].v),X(n)+4,Y(serie[n].v)-9);
+  x.textAlign='left'; x.fillText(fmtFecha(serie[0].fecha),pad.l-4,H-4); x.textAlign='right'; x.fillText(fmtFecha(serie[n].fecha),W-pad.r+4,H-4);
 }
 
 // Guardar medidas del día

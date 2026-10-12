@@ -420,26 +420,26 @@ function renderProgresoTab(){
     ${appHead('Mi progreso',desde?'Desde el '+fmtFecha(desde):'Tu esfuerzo se ve en los resultados.')}
     <div class="en-goal">
       <div class="en-goal-top"><div><h3>Vas <span>${ev.estaSemana}</span> de ${meta}</h3><p>${goalTxt}</p></div>
-        <div class="en-racha" aria-label="Racha de ${ev.racha} semanas">${ico('flame')}<b class="num">${ev.racha}</b><small>${ev.racha===1?'semana':'semanas'}</small></div></div>
+        <div class="en-goal-lado">
+          <div class="en-racha" aria-label="Racha de ${ev.racha} semanas">${ico('flame')}<b class="num">${ev.racha}</b><small>${ev.racha===1?'semana':'semanas'}</small></div>
+          <div class="en-peso-mini">
+            <label for="peso-nuevo">Peso de hoy</label>
+            <div><input type="number" id="peso-nuevo" placeholder="${pesoNow}" step="0.1" min="30" max="250" inputmode="decimal" onkeydown="if(event.key==='Enter')guardarPeso()"><span>kg</span></div>
+            <button type="button" onclick="guardarPeso()">Guardar</button>
+          </div>
+        </div></div>
       <div class="en-slots" aria-hidden="true">${Array.from({length:meta},(_,i)=>`<i class="${i<hechas?'ok':''}"></i>`).join('')}</div>
     </div>
-
-    <div id="cuerpo-contenido"></div>
 
     <section class="en-sec"><div class="en-sec-h"><h3>Constancia</h3><span>${ev.total} ${ev.total===1?'sesión':'sesiones'} · ${ev.adherencia}% en 4 semanas</span></div>
       ${enHeatHTML(s,ses)}</section>
 
-    <section class="en-sec"><div class="en-sec-h"><h3>Fuerza</h3><span>Mejor peso de cada mes</span></div>
-      ${enFuerzaHTML(s,ses)}</section>
+    <div id="cuerpo-contenido"></div>
 
     <section class="en-sec"><div class="en-sec-h"><h3>Peso corporal</h3>${ev.deltaPeso!==null?`<span class="${ev.deltaPeso<=0?'en-up':''}">${ev.deltaPeso>0?'+':''}${ev.deltaPeso} kg desde tu registro</span>`:''}</div>
       <div class="en-peso">
         <div class="en-peso-top"><b class="num">${pesoNow}<small> kg</small></b></div>
         ${enPesoSVG(pesos)}
-        <div class="peso-input-row">
-          <input type="number" id="peso-nuevo" placeholder="${pesoNow}" step="0.1" min="30" max="250" inputmode="decimal" aria-label="Tu peso de hoy en kilos">
-          <button type="button" class="btn-mini" onclick="guardarPeso()">Registrar peso</button>
-        </div>
       </div></section>
 
     ${enHitoHTML(ev.total)}
@@ -453,6 +453,9 @@ function renderProgresoTab(){
         <div class="en-h-t"><b>${esc(sc(x.tipo||'Sesión'))}</b><span>${x.ejercicios||0} ejercicios${x.sensacion?' · '+esc(x.sensacion):''}</span></div>
         <div class="en-h-v num">${x.volumen>0?Math.round(x.volumen).toLocaleString('es-MX'):'—'}${x.volumen>0?'<small>kg</small>':''}</div></div>`; }).join('')}</div>`
       :'<div class="empty-msg">Aún no hay sesiones registradas.<br>Al terminar tu primera sesión aparecerá aquí.</div>'}</section>
+
+    <section class="en-sec"><div class="en-sec-h"><h3>Fuerza</h3><span>Mejor peso de cada mes</span></div>
+      ${enFuerzaHTML(s,ses)}</section>
 `;
   renderCuerpo();
 }
