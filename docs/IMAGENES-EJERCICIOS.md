@@ -115,19 +115,19 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 1 | Imagen y video en el estilo nuevo: sentadilla goblet. |
-| **Rehacer** | 24 | Tienen imagen, pero en el estilo anterior. |
+| **Listo** | 25 | En el estilo nuevo: sentadilla goblet (imagen y video) y 24 ejercicios con imagen. |
+| **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
 | **Falta** | 201 | No tienen imagen. |
 
-Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y luego los ejercicios compuestos de cada zona.
+Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
 ### Rack / barra libre
 
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
-| Sentadilla libre | `sentadilla-libre` | Cuádriceps · Glúteo | Rehacer (estilo anterior) |
-| Sentadilla frontal | `sentadilla-frontal` | Cuádriceps · Core | Rehacer (estilo anterior) |
-| Peso muerto convencional | `peso-muerto-convencional` | Glúteo · Femorales · Espalda | Rehacer (estilo anterior) |
+| Sentadilla libre | `sentadilla-libre` | Cuádriceps · Glúteo | **Listo** (imagen) |
+| Sentadilla frontal | `sentadilla-frontal` | Cuádriceps · Core | **Listo** (imagen) |
+| Peso muerto convencional | `peso-muerto-convencional` | Glúteo · Femorales · Espalda | **Listo** (imagen) |
 | Peso muerto rumano | `peso-muerto-rumano` | Femorales · Glúteo | Falta |
 | Remo con barra | `remo-con-barra` | Dorsal · Romboides | Falta |
 | Press militar con barra | `press-militar-con-barra` | Deltoides anterior | Falta |
@@ -141,21 +141,21 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
 | Sentadilla goblet | `sentadilla-goblet` | Cuádriceps · Glúteo | **Listo** (imagen + video) |
-| Desplante | `desplante` | Cuádriceps · Glúteo | Rehacer (estilo anterior) |
-| Sentadilla búlgara | `sentadilla-bulgara` | Cuádriceps · Glúteo | Rehacer (estilo anterior) |
+| Desplante | `desplante` | Cuádriceps · Glúteo | **Listo** (imagen) |
+| Sentadilla búlgara | `sentadilla-bulgara` | Cuádriceps · Glúteo | **Listo** (imagen) |
 | Peso muerto rumano con mancuernas | `peso-muerto-rumano-con-mancuernas` | Femorales · Glúteo | Falta |
 | Press inclinado con mancuernas | `press-inclinado-con-mancuernas` | Pecho superior | Falta |
 | Press plano con mancuernas | `press-plano-con-mancuernas` | Pecho mayor | Falta |
 | Aperturas con mancuernas | `aperturas-con-mancuernas` | Pecho | Falta |
 | Pullover con mancuerna | `pullover-con-mancuerna` | Dorsal · Pecho | Falta |
 | Remo con mancuerna | `remo-con-mancuerna` | Dorsal · Romboides | Falta |
-| Press de hombro con mancuernas | `press-de-hombro-con-mancuernas` | Deltoides | Rehacer (estilo anterior) |
-| Elevaciones laterales | `elevaciones-laterales` | Deltoides lateral | Rehacer (estilo anterior) |
+| Press de hombro con mancuernas | `press-de-hombro-con-mancuernas` | Deltoides | **Listo** (imagen) |
+| Elevaciones laterales | `elevaciones-laterales` | Deltoides lateral | **Listo** (imagen) |
 | Elevación frontal ligera | `elevacion-frontal-ligera` | Deltoides anterior | Falta |
 | Pájaros con mancuerna | `pajaros-con-mancuerna` | Deltoides posterior | Falta |
 | Encogimientos con mancuerna | `encogimientos-con-mancuerna` | Trapecio | Falta |
 | Curl con barra Z | `curl-con-barra-z` | Bíceps | Falta |
-| Curl alterno con mancuernas | `curl-alterno-con-mancuernas` | Bíceps | Rehacer (estilo anterior) |
+| Curl alterno con mancuernas | `curl-alterno-con-mancuernas` | Bíceps | **Listo** (imagen) |
 | Curl martillo | `curl-martillo` | Braquial · Braquiorradial | Falta |
 | Extensión de tríceps sobre la cabeza | `extension-de-triceps-sobre-la-cabeza` | Tríceps (porción larga) | Falta |
 | Farmer walk | `farmer-walk` | Core · Agarre · Trapecio | Falta |
@@ -185,13 +185,13 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
 | Sentadilla hack | `sentadilla-hack` | Cuádriceps | Falta |
-| Prensa de piernas | `prensa-de-piernas` | Cuádriceps · Glúteo | Rehacer (estilo anterior) |
+| Prensa de piernas | `prensa-de-piernas` | Cuádriceps · Glúteo | **Listo** (imagen) |
 | Prensa con pies bajos | `prensa-con-pies-bajos` | Cuádriceps | Falta |
-| Extensión de cuádriceps | `extension-de-cuadriceps` | Cuádriceps | Rehacer (estilo anterior) |
+| Extensión de cuádriceps | `extension-de-cuadriceps` | Cuádriceps | **Listo** (imagen) |
 | Abducción de cadera en máquina | `abduccion-de-cadera-en-maquina` | Glúteo medio | Falta |
-| Curl femoral acostado | `curl-femoral-acostado` | Femorales | Rehacer (estilo anterior) |
+| Curl femoral acostado | `curl-femoral-acostado` | Femorales | **Listo** (imagen) |
 | Curl femoral sentado | `curl-femoral-sentado` | Femorales | Falta |
-| Elevación de talones de pie | `elevacion-de-talones-de-pie` | Gemelos | Rehacer (estilo anterior) |
+| Elevación de talones de pie | `elevacion-de-talones-de-pie` | Gemelos | **Listo** (imagen) |
 | Pantorrilla en prensa | `pantorrilla-en-prensa` | Gemelos | Falta |
 | Press de pecho en máquina | `press-de-pecho-en-maquina` | Pecho mayor | Falta |
 | Press inclinado en máquina | `press-inclinado-en-maquina` | Pecho superior | Falta |
@@ -227,7 +227,7 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 |---|---|---|---|
 | Step-up al cajón | `step-up-al-cajon` | Glúteo · Cuádriceps | Falta |
 | Fondos en paralelas | `fondos-en-paralelas` | Pecho inferior · Tríceps | Falta |
-| Dominadas | `dominadas` | Dorsal ancho · Bíceps | Rehacer (estilo anterior) |
+| Dominadas | `dominadas` | Dorsal ancho · Bíceps | **Listo** (imagen) |
 | Remo invertido en TRX | `remo-invertido-en-trx` | Espalda media · Core | Falta |
 | Elevación de piernas colgado | `elevacion-de-piernas-colgado` | Abdomen inferior | Falta |
 | Swing con kettlebell | `swing-con-kettlebell` | Glúteo · Cadena posterior | Falta |
@@ -245,7 +245,7 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 | Sentadilla sissy asistida | `sentadilla-sissy-asistida` | Cuádriceps | Falta |
 | Isométrico de cuádriceps | `isometrico-de-cuadriceps` | Cuádriceps | Falta |
 | Sentadilla isométrica en pared | `sentadilla-isometrica-en-pared` | Cuádriceps | Falta |
-| Puente de glúteo | `puente-de-gluteo` | Glúteo | Rehacer (estilo anterior) |
+| Puente de glúteo | `puente-de-gluteo` | Glúteo | **Listo** (imagen) |
 | Caminata lateral con banda | `caminata-lateral-con-banda` | Glúteo medio | Falta |
 | Curl femoral en fitball | `curl-femoral-en-fitball` | Femorales | Falta |
 | Curl nórdico asistido | `curl-nordico-asistido` | Femorales | Falta |
@@ -253,11 +253,11 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 | Lagartijas | `lagartijas` | Pecho · Tríceps · Core | Falta |
 | Rotación externa con banda | `rotacion-externa-con-banda` | Manguito rotador | Falta |
 | Fondos en banco | `fondos-en-banco` | Tríceps | Falta |
-| Plancha frontal | `plancha-frontal` | Core | Rehacer (estilo anterior) |
-| Plancha lateral | `plancha-lateral` | Oblicuos | Rehacer (estilo anterior) |
+| Plancha frontal | `plancha-frontal` | Core | **Listo** (imagen) |
+| Plancha lateral | `plancha-lateral` | Oblicuos | **Listo** (imagen) |
 | Dead bug | `dead-bug` | Core profundo | Falta |
 | Bird-dog | `bird-dog` | Core · Erectores | Falta |
-| Rueda abdominal | `rueda-abdominal` | Core anterior | Rehacer (estilo anterior) |
+| Rueda abdominal | `rueda-abdominal` | Core anterior | **Listo** (imagen) |
 | Sentadilla con salto | `sentadilla-con-salto` | Cuádriceps · Glúteo | Falta |
 | Aguante de zancada (split squat isométrico) | `aguante-de-zancada-split-squat-isometrico` | Cuádriceps · Glúteo | Falta |
 | Puente de glúteo isométrico | `puente-de-gluteo-isometrico` | Glúteo | Falta |
@@ -277,7 +277,7 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 | Plancha con toque de hombro | `plancha-con-toque-de-hombro` | Core · Hombro | Falta |
 | Crunch abdominal | `crunch-abdominal` | Recto abdominal | Falta |
 | Elevación de rodillas en banco | `elevacion-de-rodillas-en-banco` | Abdomen bajo | Falta |
-| Escaladores | `escaladores` | Core · Hombro | Rehacer (estilo anterior) |
+| Escaladores | `escaladores` | Core · Hombro | **Listo** (imagen) |
 | Crunch bicicleta | `crunch-bicicleta` | Oblicuos · Abdomen | Falta |
 | Tijeras (flutter kicks) | `tijeras-flutter-kicks` | Abdomen bajo | Falta |
 | Salto de cuerda | `salto-de-cuerda` | Sistema cardiovascular | Falta |
@@ -290,7 +290,7 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 |---|---|---|---|
 | Hip thrust | `hip-thrust` | Glúteo mayor | Falta |
 | Hiperextensión 45° | `hiperextension-45` | Erectores · Glúteo | Falta |
-| Press banca plano | `press-banca-plano` | Pecho mayor · Tríceps | Rehacer (estilo anterior) |
+| Press banca plano | `press-banca-plano` | Pecho mayor · Tríceps | **Listo** (imagen) |
 | Press inclinado con barra | `press-inclinado-con-barra` | Pecho superior | Falta |
 | Press francés con barra Z | `press-frances-con-barra-z` | Tríceps (porción larga) | Falta |
 | Press banca agarre cerrado | `press-banca-agarre-cerrado` | Tríceps · Pecho | Falta |
@@ -303,13 +303,13 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
 | Patada de glúteo en polea | `patada-de-gluteo-en-polea` | Glúteo mayor | Falta |
-| Cruce de poleas | `cruce-de-poleas` | Pecho (porción media) | Rehacer (estilo anterior) |
+| Cruce de poleas | `cruce-de-poleas` | Pecho (porción media) | **Listo** (imagen) |
 | Cruce de poleas de abajo hacia arriba | `cruce-de-poleas-de-abajo-hacia-arriba` | Pecho superior | Falta |
-| Cruce de poleas de arriba hacia abajo | `cruce-de-poleas-de-arriba-hacia-abajo` | Pecho inferior | Rehacer (estilo anterior) |
-| Jalón al pecho | `jalon-al-pecho` | Dorsal ancho | Rehacer (estilo anterior) |
+| Cruce de poleas de arriba hacia abajo | `cruce-de-poleas-de-arriba-hacia-abajo` | Pecho inferior | **Listo** (imagen) |
+| Jalón al pecho | `jalon-al-pecho` | Dorsal ancho | **Listo** (imagen) |
 | Jalón unilateral en polea | `jalon-unilateral-en-polea` | Dorsal ancho | Falta |
-| Pullover en polea alta | `pullover-en-polea-alta` | Dorsal ancho | Rehacer (estilo anterior) |
-| Remo en polea baja | `remo-en-polea-baja` | Dorsal · Romboides | Rehacer (estilo anterior) |
+| Pullover en polea alta | `pullover-en-polea-alta` | Dorsal ancho | **Listo** (imagen) |
+| Remo en polea baja | `remo-en-polea-baja` | Dorsal · Romboides | **Listo** (imagen) |
 | Face pull | `face-pull` | Deltoides posterior · Manguito | Falta |
 | Elevación lateral en polea | `elevacion-lateral-en-polea` | Deltoides lateral | Falta |
 | Elevación frontal en polea | `elevacion-frontal-en-polea` | Deltoides anterior | Falta |
