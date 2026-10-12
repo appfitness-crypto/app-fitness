@@ -115,11 +115,11 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 24 | En el estilo nuevo: sentadilla goblet (imagen y video) y 23 ejercicios con imagen. |
-| **Rehacer** | 1 | Tienen imagen, pero en el estilo anterior. |
+| **Listo** | 25 | En el estilo nuevo: sentadilla goblet (imagen y video) y 24 ejercicios con imagen. |
+| **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
 | **Falta** | 201 | No tienen imagen. |
 
-Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y luego los ejercicios compuestos de cada zona.
+Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
 ### Rack / barra libre
 
@@ -254,7 +254,7 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 | Rotación externa con banda | `rotacion-externa-con-banda` | Manguito rotador | Falta |
 | Fondos en banco | `fondos-en-banco` | Tríceps | Falta |
 | Plancha frontal | `plancha-frontal` | Core | **Listo** (imagen) |
-| Plancha lateral | `plancha-lateral` | Oblicuos | Rehacer (estilo anterior) |
+| Plancha lateral | `plancha-lateral` | Oblicuos | **Listo** (imagen) |
 | Dead bug | `dead-bug` | Core profundo | Falta |
 | Bird-dog | `bird-dog` | Core · Erectores | Falta |
 | Rueda abdominal | `rueda-abdominal` | Core anterior | **Listo** (imagen) |
