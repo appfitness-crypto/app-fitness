@@ -115,8 +115,8 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 1 | Imagen y video en el estilo nuevo: sentadilla goblet. |
-| **Rehacer** | 24 | Tienen imagen, pero en el estilo anterior. |
+| **Listo** | 9 | En el estilo nuevo: sentadilla goblet (imagen y video) y 8 ejercicios con imagen. |
+| **Rehacer** | 16 | Tienen imagen, pero en el estilo anterior. |
 | **Falta** | 201 | No tienen imagen. |
 
 Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y luego los ejercicios compuestos de cada zona.
@@ -125,9 +125,9 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
-| Sentadilla libre | `sentadilla-libre` | Cuádriceps · Glúteo | Rehacer (estilo anterior) |
+| Sentadilla libre | `sentadilla-libre` | Cuádriceps · Glúteo | **Listo** (imagen) |
 | Sentadilla frontal | `sentadilla-frontal` | Cuádriceps · Core | Rehacer (estilo anterior) |
-| Peso muerto convencional | `peso-muerto-convencional` | Glúteo · Femorales · Espalda | Rehacer (estilo anterior) |
+| Peso muerto convencional | `peso-muerto-convencional` | Glúteo · Femorales · Espalda | **Listo** (imagen) |
 | Peso muerto rumano | `peso-muerto-rumano` | Femorales · Glúteo | Falta |
 | Remo con barra | `remo-con-barra` | Dorsal · Romboides | Falta |
 | Press militar con barra | `press-militar-con-barra` | Deltoides anterior | Falta |
@@ -149,8 +149,8 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 | Aperturas con mancuernas | `aperturas-con-mancuernas` | Pecho | Falta |
 | Pullover con mancuerna | `pullover-con-mancuerna` | Dorsal · Pecho | Falta |
 | Remo con mancuerna | `remo-con-mancuerna` | Dorsal · Romboides | Falta |
-| Press de hombro con mancuernas | `press-de-hombro-con-mancuernas` | Deltoides | Rehacer (estilo anterior) |
-| Elevaciones laterales | `elevaciones-laterales` | Deltoides lateral | Rehacer (estilo anterior) |
+| Press de hombro con mancuernas | `press-de-hombro-con-mancuernas` | Deltoides | **Listo** (imagen) |
+| Elevaciones laterales | `elevaciones-laterales` | Deltoides lateral | **Listo** (imagen) |
 | Elevación frontal ligera | `elevacion-frontal-ligera` | Deltoides anterior | Falta |
 | Pájaros con mancuerna | `pajaros-con-mancuerna` | Deltoides posterior | Falta |
 | Encogimientos con mancuerna | `encogimientos-con-mancuerna` | Trapecio | Falta |
@@ -185,11 +185,11 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
 | Sentadilla hack | `sentadilla-hack` | Cuádriceps | Falta |
-| Prensa de piernas | `prensa-de-piernas` | Cuádriceps · Glúteo | Rehacer (estilo anterior) |
+| Prensa de piernas | `prensa-de-piernas` | Cuádriceps · Glúteo | **Listo** (imagen) |
 | Prensa con pies bajos | `prensa-con-pies-bajos` | Cuádriceps | Falta |
 | Extensión de cuádriceps | `extension-de-cuadriceps` | Cuádriceps | Rehacer (estilo anterior) |
 | Abducción de cadera en máquina | `abduccion-de-cadera-en-maquina` | Glúteo medio | Falta |
-| Curl femoral acostado | `curl-femoral-acostado` | Femorales | Rehacer (estilo anterior) |
+| Curl femoral acostado | `curl-femoral-acostado` | Femorales | **Listo** (imagen) |
 | Curl femoral sentado | `curl-femoral-sentado` | Femorales | Falta |
 | Elevación de talones de pie | `elevacion-de-talones-de-pie` | Gemelos | Rehacer (estilo anterior) |
 | Pantorrilla en prensa | `pantorrilla-en-prensa` | Gemelos | Falta |
@@ -306,10 +306,10 @@ Sugerencia de orden: primero los **Rehacer**, que ya aparecen en los planes, y l
 | Cruce de poleas | `cruce-de-poleas` | Pecho (porción media) | Rehacer (estilo anterior) |
 | Cruce de poleas de abajo hacia arriba | `cruce-de-poleas-de-abajo-hacia-arriba` | Pecho superior | Falta |
 | Cruce de poleas de arriba hacia abajo | `cruce-de-poleas-de-arriba-hacia-abajo` | Pecho inferior | Rehacer (estilo anterior) |
-| Jalón al pecho | `jalon-al-pecho` | Dorsal ancho | Rehacer (estilo anterior) |
+| Jalón al pecho | `jalon-al-pecho` | Dorsal ancho | **Listo** (imagen) |
 | Jalón unilateral en polea | `jalon-unilateral-en-polea` | Dorsal ancho | Falta |
 | Pullover en polea alta | `pullover-en-polea-alta` | Dorsal ancho | Rehacer (estilo anterior) |
-| Remo en polea baja | `remo-en-polea-baja` | Dorsal · Romboides | Rehacer (estilo anterior) |
+| Remo en polea baja | `remo-en-polea-baja` | Dorsal · Romboides | **Listo** (imagen) |
 | Face pull | `face-pull` | Deltoides posterior · Manguito | Falta |
 | Elevación lateral en polea | `elevacion-lateral-en-polea` | Deltoides lateral | Falta |
 | Elevación frontal en polea | `elevacion-frontal-en-polea` | Deltoides anterior | Falta |
