@@ -1858,3 +1858,11 @@ button.c3d-chip:focus-visible{outline:3px solid #C8F23A;outline-offset:2px;}
 .en-peso-mini button{height:38px;padding:0 16px;border:0;border-radius:999px;background:var(--acc-tx);color:#FFFFFF;font-family:var(--fb);font-weight:800;font-size:var(--fs-sm);cursor:pointer;}
 .en-peso-mini button:focus-visible{outline:3px solid var(--v2);outline-offset:2px;}
 html[data-theme="dark"] .en-peso-mini button{color:#0A0E13;}
+
+/* Tiempo en la sesión: botón de temporizador del ejercicio y menú del cronómetro */
+.en-btn-l{background:var(--acc-soft);color:var(--acc-tx);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--acc) 55%,transparent);}
+.en-tm-row{display:flex;margin-bottom:10px;}
+.en-desc-a.ops{grid-column:1/-1;}
+.en-tm-ops{display:flex;flex-wrap:wrap;gap:6px;width:100%;}
+.en-tm-ops button{flex:1 1 auto;}
+.en-desc-a button:focus-visible,.en-btn-l:focus-visible{outline:3px solid var(--acc);outline-offset:2px;}
