@@ -420,14 +420,12 @@ function renderProgresoTab(){
     ${appHead('Mi progreso',desde?'Desde el '+fmtFecha(desde):'Tu esfuerzo se ve en los resultados.')}
     <div class="en-goal">
       <div class="en-goal-top"><div><h3>Vas <span>${ev.estaSemana}</span> de ${meta}</h3><p>${goalTxt}</p></div>
-        <div class="en-goal-lado">
-          <div class="en-racha" aria-label="Racha de ${ev.racha} semanas">${ico('flame')}<b class="num">${ev.racha}</b><small>${ev.racha===1?'semana':'semanas'}</small></div>
-          <div class="en-peso-mini">
-            <label for="peso-nuevo">Peso de hoy</label>
-            <div><input type="number" id="peso-nuevo" placeholder="${pesoNow}" step="0.1" min="30" max="250" inputmode="decimal" onkeydown="if(event.key==='Enter')guardarPeso()"><span>kg</span></div>
-            <button type="button" onclick="guardarPeso()">Guardar</button>
-          </div>
-        </div></div>
+        <div class="en-racha" aria-label="Racha de ${ev.racha} semanas">${ico('flame')}<b class="num">${ev.racha}</b><small>${ev.racha===1?'semana':'semanas'}</small></div></div>
+      <div class="en-peso-mini">
+        <label for="peso-nuevo">Peso de hoy</label>
+        <div><input type="number" id="peso-nuevo" placeholder="${pesoNow}" step="0.1" min="30" max="250" inputmode="decimal" onkeydown="if(event.key==='Enter')guardarPeso()"><span>kg</span></div>
+        <button type="button" onclick="guardarPeso()">Guardar</button>
+      </div>
       <div class="en-slots" aria-hidden="true">${Array.from({length:meta},(_,i)=>`<i class="${i<hechas?'ok':''}"></i>`).join('')}</div>
     </div>
 
@@ -461,7 +459,10 @@ function renderProgresoTab(){
 }
 // Mapa de 12 semanas (filas lunes a domingo): completa si hizo al menos el 80% de las series
 function enHeatHTML(s,ses){
-  const ini=inicioSemana(new Date()); ini.setDate(ini.getDate()-77);
+  // empieza en la semana de su primer entrenamiento (hasta 12 semanas), para no llenar de recuadros vacíos
+  const lunes=inicioSemana(new Date()), t0=ses.reduce((m,x)=>x&&x.ts&&x.ts<m?x.ts:m, Infinity);
+  const semanas=isFinite(t0)?Math.max(1,Math.min(12,Math.floor((lunes.getTime()-inicioSemana(new Date(t0)).getTime())/(7*86400000)+.5)+1)):1;
+  const ini=new Date(lunes); ini.setDate(ini.getDate()-(semanas-1)*7);
   const hoy=new Date(); hoy.setHours(23,59,59,999);
   const nivel=(t0)=>{ const t1=t0+86400000; const del=ses.filter(x=>x.ts>=t0&&x.ts<t1); if(!del.length) return 0;
     const det=del.flatMap(x=>comoArray(x.detalle)); if(!det.length) return 2;
@@ -470,14 +471,15 @@ function enHeatHTML(s,ses){
   let h='';
   for(let d=0;d<7;d++){
     h+=`<span class="en-hl">${'LMXJVSD'[d]}</span>`;
-    for(let w=0;w<12;w++){
+    for(let w=0;w<semanas;w++){
       const f=new Date(ini); f.setDate(ini.getDate()+w*7+d);
       const fut=f>hoy, esHoy=fechaISO(f)===fechaISO(new Date()), v=fut?0:nivel(f.getTime());
       h+=`<span class="en-cell${v===2?' c2':v===1?' c1':''}${fut?' fut':''}${esHoy?' hoy':''}"></span>`;
     }
   }
-  return `<div class="en-heat-w"><div class="en-heat" role="img" aria-label="Mapa de entrenamientos de las últimas 12 semanas">${h}</div>
-    <div class="en-heat-leg"><span>Hace 12 semanas</span><span><i class="c0"></i>Nada<i class="c1"></i>Parcial<i class="c2"></i>Completa</span></div></div>`;
+  const desde=!isFinite(t0)?'Tu primer entrenamiento cuenta aquí':semanas===1?'Esta semana':semanas>=12?'Hace 12 semanas':'Desde tu primer entrenamiento';
+  return `<div class="en-heat-w"><div class="en-heat" style="grid-template-columns:16px repeat(${semanas},minmax(0,34px))" role="img" aria-label="Mapa de entrenamientos de ${semanas===1?'esta semana':'las últimas '+semanas+' semanas'}">${h}</div>
+    <div class="en-heat-leg"><span>${desde}</span><span><i class="c0"></i>Nada<i class="c1"></i>Parcial<i class="c2"></i>Completa</span></div></div>`;
 }
 // Ejercicios con más registros: mejor peso de cada mes (hasta 6 meses)
 function enFuerzaHTML(s,ses){
