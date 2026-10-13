@@ -161,6 +161,61 @@ function rutDiaHTML(s){
     <div class="en-cta">${cta}</div>
   </article>`;
 }
+// ═════════════ DETALLE DEL DÍA ═════════════
+// Lo que la tarjeta de "Mi plan" no dice: qué músculos trabajas, qué equipo necesitas, cómo se hacen los
+// métodos del día y, si ya entrenaste, lo que hiciste en cada ejercicio. Un solo botón: la sesión.
+const DD_ZONA={rack:'Rack',banco:'Banco',cardio:'Cardio',corporal:'Peso corporal',disco:'Discos',funcional:'Funcional',liga:'Ligas',mancuernas:'Mancuernas',maquina:'Máquinas',polea:'Poleas',trx:'TRX'};
+let ddK=null;
+function openDay(key){
+  const s=activeSocio; if(!s||!s.rutina[key]) return;
+  ddK=key; activeRutinaKey=key; normalizarEmomRutina(s.rutina);
+  document.getElementById('dd').innerHTML=ddHTML(s,key);
+  go('s-det'); window.scrollTo(0,0);
+}
+function ddVolver(){ go('s-dash'); refreshDash(); dashTab('rutina'); }
+function ddFecha(i){ const d=inicioSemana(new Date()); d.setDate(d.getDate()+i); return d; }
+function ddHTML(s,k){
+  const i=DIAS_ORDER.indexOf(k), d=s.rutina[k], ejs=(d&&d.ejercicios)||[], esHoy=k===HOY_KEY;
+  const f=ddFecha(i), fISO=fechaISO(f), reg=(s.logs&&s.logs.sesiones||[]).filter(x=>x&&x.fecha===fISO).pop();
+  const enCurso=esHoy&&sesionTemp&&sesionTemp.diaKey===k&&Object.keys(sesionTemp.ej||{}).length;
+  const cuando=EN_DIAS[i].charAt(0).toUpperCase()+EN_DIAS[i].slice(1)+' '+f.getDate()+(esHoy?' · hoy':'');
+  const top=`<div class="dd-top"><button type="button" class="en-icon-btn dd-back" onclick="ddVolver()" aria-label="Volver a Mi plan">${ico('chevl')}</button></div>`;
+  if(!ejs.length) return `${top}<section class="dd-hero dd-hero-rest"><div class="dd-hero-tx"><p>${esc(cuando)}</p><h1>Descanso</h1></div></section>
+    <div class="dd-body"><p class="dd-lead">El músculo crece hoy. Camina 20 a 30 minutos, estira y duerme 7 u 8 horas.</p></div>`;
+  const series=ejs.reduce((a,e)=>a+(parseInt(e.series)||0),0);
+  // músculos: el principal de cada ejercicio cuenta 1 y los secundarios ½
+  const pesoM={};
+  ejs.forEach(e=>String(e.ms||'').split(/[·,/]/).map(x=>sc(x.trim())).filter(Boolean).forEach((m,j)=>{ pesoM[m]=(pesoM[m]||0)+(j?.5:1); }));
+  const musc=Object.entries(pesoM).sort((a,b)=>b[1]-a[1]).slice(0,6), mMax=musc.length?musc[0][1]:1;
+  const zonas=[...new Set(ejs.map(e=>{ const kb=kbBuscar(e.nm); return kb&&DD_ZONA[kb.z]; }).filter(Boolean))];
+  const mets=[...new Map(ejs.filter(e=>e.metodo&&KB_METODOS[e.metodo.id]).map(e=>[e.metodo.id,KB_METODOS[e.metodo.id]])).values()];
+  const hechoDe=nm=>reg&&(reg.detalle||[]).find(x=>x.n===nm);
+  const filas=ejs.map((e,j)=>{
+    const r=rxTexto(e,s), c=cargaSugerida(s,e), h=hechoDe(e.nm), dp=descansoPlan(e.descanso);
+    const des=dp.nada?'':dp.libre?'descanso libre'+(dp.meta?' ~'+(dp.meta<120?dp.meta+' s':Math.round(dp.meta/6)/10+' min'):''):'descanso '+(dp.seg<120?dp.seg+' s':Math.round(dp.seg/6)/10+' min');
+    const sub=[limpiarReps(r.sr).replace(/\s*[—–]\s*/g,' '), des, e.metodo&&KB_METODOS[e.metodo.id]?e.metodo.nm:''].filter(Boolean).join(' · ');
+    const der=h?`<b class="num">${h.kg?enKg(h.kg):h.seg?h.seg+' s':h.fc?h.fc+' lpm':ico('check')}</b><small>${h.s||0} de ${h.p||parseInt(e.series)||0}</small>`
+      : c?`<b class="num">${enKg(c.kg)}</b><small>${c.sube>0?'+'+kgToDisplay(c.sube):'sugerido'}</small>`:'';
+    const g=e.grupo?String(e.grupo):'', gSig=ejs[j+1]&&ejs[j+1].grupo&&String(ejs[j+1].grupo).charAt(0)===g.charAt(0);
+    return `<li class="dd-ej${h?' hecho':''}${g&&gSig?' liga':''}"><button type="button" onclick="verComoDia('${k}',${j})" aria-label="${esc(e.nm)}: ver cómo se hace">
+      <span class="dd-n num" aria-hidden="true">${esc(g||String(j+1))}</span>
+      <span class="en-th">${pic(basesEjercicioMini(e),'dumbbell','thumb')}</span>
+      <span class="dd-ej-t"><b>${esc(e.nm)}</b><span>${esc(sub)}</span></span>
+      <span class="en-carga">${der}</span></button></li>`;
+  }).join('');
+  const cta=esHoy?`<div class="dd-cta"><button type="button" class="en-btn en-btn-p" onclick="iniciarSesion('${k}')">${ico('play')}${enCurso?'Continuar sesión':reg?'Registrar otra sesión':'Empezar sesión'}</button></div>`:'';
+  return `${top}
+  <section class="dd-hero">${pic(basesSesion(d.tipo),iconoTipo(d.tipo),'fill')}
+    <div class="dd-hero-tx"><p>${reg?ico('check')+'Hecho · ':''}${esc(cuando)}</p><h1>${esc(sc(d.tipo))}</h1></div></section>
+  <div class="dd-body">
+    <p class="dd-facts num"><span><b>~${minutosDia(d)}</b> min</span><span><b>${ejs.length}</b> ejercicios</span><span><b>${series}</b> series</span>${reg&&reg.volumen?`<span><b>${Math.round(reg.volumen).toLocaleString('es-MX')}</b> kg movidos</span>`:''}</p>
+    ${musc.length?`<section class="dd-sec"><h2>Qué trabajas</h2><p class="dd-chips">${musc.map(([m,v])=>`<span class="${v>=mMax*.75?'p':''}">${esc(m)}</span>`).join('')}</p></section>`:''}
+    ${zonas.length?`<section class="dd-sec"><h2>Necesitas</h2><p class="dd-chips">${zonas.map(z=>`<span>${esc(z)}</span>`).join('')}</p></section>`:''}
+    ${mets.length?`<section class="dd-sec"><h2>${mets.length===1?'Método de hoy':'Métodos de hoy'}</h2>${mets.map(M=>`<div class="dd-met"><b>${esc(M.nm)}</b><p>${esc(sinEmoji(M.como))}</p></div>`).join('')}</section>`:''}
+    <section class="dd-sec"><h2>${reg&&ejs.some(e=>hechoDe(e.nm))?'Lo que hiciste':'Ejercicios'}</h2><ol class="dd-ejs">${filas}</ol>
+      <p class="dd-nota">Toca un ejercicio para ver cómo se hace.${esHoy?'':' Este día toca el '+EN_DIAS[i]+'.'}</p></section>
+  </div>${cta}`;
+}
 function verComoDia(k,j){ const s=activeSocio; const e=s&&s.rutina[k]&&s.rutina[k].ejercicios[j]; if(e) abrirFicha(e); }
 
 // ═════════════ FICHA "CÓMO SE HACE" ═════════════

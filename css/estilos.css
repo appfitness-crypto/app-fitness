@@ -1866,3 +1866,43 @@ html[data-theme="dark"] .en-peso-mini button{color:#0A0E13;}
 .en-tm-ops{display:flex;flex-wrap:wrap;gap:6px;width:100%;}
 .en-tm-ops button{flex:1 1 auto;}
 .en-desc-a button:focus-visible,.en-btn-l:focus-visible{outline:3px solid var(--acc);outline-offset:2px;}
+
+/* ═══ Detalle del día (js/38-entreno.js · openDay): vista previa, sin registro; la sesión registra ═══ */
+.dd{max-width:640px;margin:0 auto;width:100%;padding-bottom:calc(110px + env(safe-area-inset-bottom,0px));}
+.dd-top{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:max(12px,calc(50% - 308px));z-index:5;}
+.dd-back{background:color-mix(in srgb,var(--dk) 72%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);}
+.dd-hero{position:relative;height:clamp(220px,34vh,300px);overflow:hidden;border-radius:0 0 var(--r-xl) var(--r-xl);background:#111820;isolation:isolate;}
+.dd-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(10,14,19,.86) 0%,rgba(10,14,19,.25) 55%,rgba(10,14,19,.1) 100%);z-index:1;}
+.dd-hero-rest{height:auto;min-height:180px;display:flex;align-items:flex-end;background:linear-gradient(160deg,#141C25,#0A0E13);}
+.dd-hero-tx{position:absolute;left:20px;right:20px;bottom:18px;z-index:2;color:#F1F5F7;}
+.dd-hero-rest .dd-hero-tx{position:relative;left:auto;right:auto;padding:76px 20px 18px;}
+.dd-hero-tx p{display:flex;align-items:center;gap:6px;margin:0 0 6px;font-size:var(--fs-sm);font-weight:600;color:rgba(241,245,247,.82);}
+.dd-hero-tx p .ico{width:16px;height:16px;color:#C8F23A;}
+.dd-hero-tx h1{margin:0;font-family:var(--fd);font-weight:800;font-style:italic;font-size:clamp(30px,8vw,40px);line-height:1.05;letter-spacing:-.01em;text-transform:uppercase;padding-bottom:2px;}
+.dd-body{padding:16px 20px 0;display:grid;gap:22px;}
+.dd-lead{margin:0;color:var(--mu);font-size:var(--fs-base);line-height:1.5;}
+.dd-facts{display:flex;flex-wrap:wrap;gap:6px 20px;margin:0;font-size:var(--fs-md);color:var(--mu);}
+.dd-facts b{font-family:var(--fd);font-weight:800;font-size:var(--fs-xl);color:var(--tx);}
+.dd-sec h2{margin:0 0 10px;font-family:var(--fd);font-weight:800;font-size:var(--fs-xl);letter-spacing:-.01em;}
+.dd-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0;}
+.dd-chips span{padding:7px 12px;border-radius:999px;background:var(--fill-track);font-size:var(--fs-sm);font-weight:600;}
+.dd-chips span.p{background:var(--acc-soft);color:var(--acc-tx);font-weight:700;}
+.dd-met{padding:12px 14px;border-radius:var(--r-md);background:var(--acc-soft);}
+.dd-met+.dd-met{margin-top:8px;}
+.dd-met b{display:block;font-weight:800;color:var(--acc-tx);}
+.dd-met p{margin:4px 0 0;font-size:var(--fs-sm);line-height:1.45;color:var(--tx);}
+.dd-ejs{list-style:none;margin:0;padding:0;border-radius:var(--r-lg);background:var(--gl);box-shadow:var(--shadow);overflow:hidden;}
+.dd-ej+.dd-ej{border-top:1px solid var(--b);}
+.dd-ej.liga+.dd-ej{border-top-style:dashed;}
+.dd-ej button{display:grid;grid-template-columns:22px 48px 1fr auto;gap:12px;align-items:center;width:100%;padding:12px 16px 12px 12px;border:0;background:none;color:var(--tx);text-align:left;font-family:var(--fb);cursor:pointer;transition:background-color .2s ease;}
+.dd-ej button:active{background:var(--fill-track);}
+.dd-ej button:focus-visible{outline:3px solid var(--acc);outline-offset:-3px;}
+@media(hover:hover) and (pointer:fine){.dd-ej button:hover{background:color-mix(in srgb,var(--fill-track) 60%,transparent);}}
+.dd-n{font-family:var(--fd);font-weight:800;font-size:var(--fs-sm);color:var(--mu);text-align:center;}
+.dd-ej-t b{display:block;font-weight:700;font-size:var(--fs-md);line-height:1.25;}
+.dd-ej-t span{display:block;margin-top:2px;color:var(--mu);font-size:var(--fs-sm);line-height:1.35;}
+.dd-ej.hecho .en-carga small{color:var(--mu);}
+.dd-ej.hecho .dd-n{color:var(--acc-tx);}
+.dd-nota{margin:10px 2px 0;color:var(--mu);font-size:var(--fs-sm);}
+.dd-cta{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:12px 20px calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--dk) 34%);display:flex;justify-content:center;}
+.dd-cta .en-btn{max-width:600px;width:100%;flex:none;}
