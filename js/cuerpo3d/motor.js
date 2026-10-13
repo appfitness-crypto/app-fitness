@@ -21,6 +21,10 @@
   // Nombres que Z-Anatomy dejó sin traducir
   const TRAD = {'Abdominal part of pectoralis major muscle':'Porción abdominal del pectoral mayor', 'Adductor minimus':'Aductor mínimo',
     'Opponens digiti minimi muscle of foot':'Oponente del dedo mínimo del pie', 'Linea alba':'Línea alba', 'Long head of biceps femoris':'Cabeza larga del bíceps femoral'};
+  // Complexión de partida: más atlética que el modelo anatómico (hombros, pecho, espalda y brazos marcados, como en
+  // las fotos de ejercicios). Solo cambia la forma: el brillo de "crecimiento" sigue midiendo contra tus medidas.
+  const COMPLEXION = {hombro:1.26, pecho:1.16, espalda:1.16, biceps:1.22, triceps:1.2, antebrazo:1.1, cuello:1.08,
+    cuadriceps:1.15, isquios:1.1, aductores:1.05, gluteo:1.06, pantorrilla:1.12, pierna:1.06};
   const GANANCIA = 1.6;   // la cinta mide más que el músculo: 10 % más de brazo ≈ 16 % más de músculo
   const LIMA = [0.578, 0.888, 0.042];   // #C8F23A en lineal
 
@@ -206,7 +210,7 @@
     // Deforma la piel según los factores de cada grupo y actualiza el short y el brillo
     function aplicar(f){
       if(!D.length) return;
-      const s = canalG.map(g => (f[g] == null ? 1 : f[g]) - 1);
+      const s = canalG.map(g => Math.min(1.9, (f[g] == null ? 1 : f[g]) * (COMPLEXION[g] || 1)) - 1);
       for(const d of D){
         const {P0, N0, GA, WA, GB, WB, T} = d, pa = d.m.geometry.attributes.position, p = pa.array, n = P0.length / 3;
         const K = d.K || (d.K = new Float32Array(n)), K2 = d.K2 || (d.K2 = new Float32Array(n));
