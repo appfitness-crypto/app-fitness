@@ -57,8 +57,11 @@
       sh.vertexShader = 'attribute float brillo;\nattribute float cavidad;\nvarying float vBrillo;\nvarying float vCav;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvBrillo = brillo; vCav = cavidad;');
       sh.fragmentShader = 'varying float vBrillo;\nvarying float vCav;\n' + sh.fragmentShader
         .replace('#include <emissivemap_fragment>',
-        '#include <emissivemap_fragment>\ndiffuseColor.rgb *= vCav;\ndiffuseColor.rgb = mix(diffuseColor.rgb, vec3(' + LIMA.join(',') + ')*.3, clamp(vBrillo,0.,1.)*.78);\ntotalEmissiveRadiance += vec3(' + LIMA.join(',') + ') * vBrillo * (.35 + .65 * vBrillo) * .95;')
-        .replace('#include <aomap_fragment>', '#include <aomap_fragment>\nreflectedLight.indirectDiffuse *= vCav; reflectedLight.directSpecular *= mix(.35, 1., vCav);');
+        '#include <emissivemap_fragment>\nfloat cav = pow(clamp(vCav, 0., 1.1), 1.55);\ndiffuseColor.rgb *= cav;\n'
+        // el músculo encendido se tiñe de lima pero conserva su volumen (luz y sombra), como en las fotos de ejercicios
+        + 'float br = clamp(vBrillo, 0., 1.);\ndiffuseColor.rgb = mix(diffuseColor.rgb, vec3(' + LIMA.join(',') + ') * .3 * cav, br * (.55 + .4 * br));\n'
+        + 'totalEmissiveRadiance += vec3(' + LIMA.join(',') + ') * br * (.05 + .38 * br * br) * (.4 + .6 * cav);')
+        .replace('#include <aomap_fragment>', '#include <aomap_fragment>\nreflectedLight.indirectDiffuse *= vCav; reflectedLight.directSpecular *= mix(.25, 1., clamp(vCav, 0., 1.)) * (1. - .7 * clamp(vBrillo, 0., 1.));');
     };
     return m;
   }
@@ -72,6 +75,17 @@
     for(let t=0;t<idx.length;t+=3){ const a = idx[t], b = idx[t+1], c = idx[t+2];
       ady[pos[a]++] = b; ady[pos[a]++] = c; ady[pos[b]++] = a; ady[pos[b]++] = c; ady[pos[c]++] = a; ady[pos[c]++] = b; }
     return {ini, ady};
+  }
+  // Promedia las normales con sus vecinas: quita el granulado del escaneo sin encoger la forma (la silueta no cambia)
+  function suavizarNormales(geo, V, pasos){
+    const N = geo.attributes.normal.array, n = N.length / 3, T = suavizarNormales.T && suavizarNormales.T.length === N.length ? suavizarNormales.T : (suavizarNormales.T = new Float32Array(N.length));
+    for(let r=0;r<pasos;r++){
+      for(let i=0;i<n;i++){ const j = i*3; let x = N[j], y = N[j+1], z = N[j+2];
+        for(let q=V.ini[i];q<V.ini[i+1];q++){ const k = V.ady[q]*3; x += N[k]; y += N[k+1]; z += N[k+2]; }
+        const l = Math.hypot(x, y, z) || 1; T[j] = x/l; T[j+1] = y/l; T[j+2] = z/l; }
+      N.set(T);
+    }
+    geo.attributes.normal.needsUpdate = true;
   }
   function montar(cont, op){
     op = op || {};
@@ -88,14 +102,15 @@
     const camera = new THREE.PerspectiveCamera(30, W()/H(), .05, 20);
     camera.position.set(0, .95, 4.2);
 
-    // Estudio como las fotos de ejercicios: principal suave, contraluces fríos
-    scene.add(new THREE.HemisphereLight(0xc4d0de, 0x06080b, .06));
+    // Estudio como las fotos de ejercicios: una principal alta y lateral que marca el relieve, casi sin relleno,
+    // y dos contraluces azules por detrás que recortan la silueta contra el fondo oscuro
+    scene.add(new THREE.HemisphereLight(0xc8ccd2, 0x05070a, .08));
     const luces = new THREE.Group(); scene.add(luces);      // giran con la cámara: el cuerpo siempre se ve bien iluminado
-    const key = new THREE.DirectionalLight(0xfff6ee, .62); key.position.set(1.6, 2.8, 2.2); luces.add(key);
-    const fill = new THREE.DirectionalLight(0xaebfd4, .035); fill.position.set(-2.6, .8, 1.6); luces.add(fill);
-    const rimA = new THREE.DirectionalLight(0x7fb0ff, .5); rimA.position.set(-2.4, 1.8, -2.0); luces.add(rimA);
-    const rimB = new THREE.DirectionalLight(0x7fb0ff, .36); rimB.position.set(2.6, 1.4, -1.8); luces.add(rimB);
-    const top = new THREE.DirectionalLight(0xdfe8f2, .1); top.position.set(0, 4, -.4); luces.add(top);
+    const key = new THREE.DirectionalLight(0xfff1e4, .8); key.position.set(-2.3, 2.8, 1.4); luces.add(key);
+    const fill = new THREE.DirectionalLight(0x9fb3cc, .12); fill.position.set(2.4, .6, 1.8); luces.add(fill);
+    const rimA = new THREE.DirectionalLight(0x6f9dff, 1.0); rimA.position.set(-2.6, 1.6, -2.2); luces.add(rimA);
+    const rimB = new THREE.DirectionalLight(0x6f9dff, .85); rimB.position.set(2.8, 1.2, -2.0); luces.add(rimB);
+    const top = new THREE.DirectionalLight(0xdfe8f2, .22); top.position.set(0, 4, -.6); luces.add(top);
     [key, fill, rimA, rimB, top].forEach(l => { l.target.position.set(0, .9, 0); luces.add(l.target); });
 
     // sin posproceso: el resplandor lima lo hace la capa "halo" (más limpio y ligero en el teléfono)
@@ -114,7 +129,8 @@
     let MUS, BR, BRS, CUB, CAV, TMAX, canalG, D = [];   // D: mallas que se deforman (piel y short) con sus datos
     let crecimiento = false;
 
-    const matPiel = materialConBrillo({color:0x6E747C, roughness:.44, metalness:0, clearcoat:.18, clearcoatRoughness:.55});
+    // gris arcilla mate con un velo de brillo suave (como un modelo esculpido)
+    const matPiel = materialConBrillo({color:0x55565A, roughness:.5, metalness:0, clearcoat:.22, clearcoatRoughness:.42});
     const matShort = new THREE.MeshStandardMaterial({color:0x060708, roughness:.78, metalness:0, side:THREE.DoubleSide});
     // lo que brilla debajo del short (glúteo, cadera) se ve en la tela, no asomándose por los bordes
     matShort.onBeforeCompile = sh => {
@@ -201,7 +217,7 @@
           const k = K[i], j = i*3;
           p[j] = P0[j] + N0[j]*k; p[j+1] = P0[j+1] + N0[j+1]*k; p[j+2] = P0[j+2] + N0[j+2]*k;
         }
-        pa.needsUpdate = true; d.m.geometry.computeVertexNormals(); d.m.geometry.computeBoundingSphere();
+        pa.needsUpdate = true; d.m.geometry.computeVertexNormals(); suavizarNormales(d.m.geometry, Vd, d.m === piel ? 3 : 1); d.m.geometry.computeBoundingSphere();
       }
       pintarBrillo(f);
     }
@@ -218,15 +234,15 @@
       for(let i=0;i<n;i++){
         const a = GA[i], b = GB[i];
         // el brillo se concentra en el vientre del músculo (donde es más grueso) y se apaga en los bordes
-        const ca = a >= 0 ? WA[i] * val[a] * (.08 + .92 * Math.pow(Math.min(1, T[i] / (TMAX[a] * .75)), 1.6)) : 0;
-        const cb = b >= 0 ? WB[i] * val[b] * (.08 + .92 * Math.pow(Math.min(1, T[i] / (TMAX[b] * .75)), 1.6)) : 0;
+        const ca = a >= 0 ? WA[i] * val[a] * (.12 + .88 * Math.pow(Math.min(1, T[i] / TMAX[a]), 1.15)) : 0;
+        const cb = b >= 0 ? WB[i] * val[b] * (.12 + .88 * Math.pow(Math.min(1, T[i] / TMAX[b]), 1.15)) : 0;
         const v = Math.min(1, ca + cb);
         BR[i] = v;
       }
       // se difumina sobre la malla: bordes del brillo suaves, sin puntitos
       const Vd = D[0].V || (D[0].V = vecinos(piel.geometry)), B2 = D[0].B2 || (D[0].B2 = new Float32Array(n));
-      for(let r=0;r<4;r++){ for(let i=0;i<n;i++){ let sm = BR[i], c = 1; for(let q=Vd.ini[i];q<Vd.ini[i+1];q++){ sm += BR[Vd.ady[q]]; c++; } B2[i] = sm / c; } BR.set(B2); }
-      for(let i=0;i<n;i++){ const v = BR[i] * (1 - CUB[i]); BR[i] = v * v * (3 - 2 * v); }
+      for(let r=0;r<7;r++){ for(let i=0;i<n;i++){ let sm = BR[i], c = 1; for(let q=Vd.ini[i];q<Vd.ini[i+1];q++){ sm += BR[Vd.ady[q]]; c++; } B2[i] = sm / c; } BR.set(B2); }
+      for(let i=0;i<n;i++){ const v = BR[i] * (1 - CUB[i]); BR[i] = Math.min(1, v * (1.35 - .35 * v)); }
       piel.geometry.attributes.brillo.needsUpdate = true;
       // el short toma el brillo de lo que cubre
       if(BRS){

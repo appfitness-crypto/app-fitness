@@ -25,6 +25,12 @@ El modelo modificado (`modelos/cuerpo.glb` y `modelos/cuerpo.json`) se comparte 
 4. **Sombra y GLB**: `PLIEGUE=0 SUAVE=2 node hornear.cjs recon.json horneado.glb`
    - Quita piezas sueltas y triángulos rotos.
    - Calcula la oclusión ambiental con rayos sobre vóxeles (atributo `_cav`), que da la sombra entre músculos.
-5. **Compresión**: `npx @gltf-transform/cli meshopt horneado.glb cuerpo.glb --level medium` (≈ 1.7 MB).
+5. **Compresión**: `npx @gltf-transform/cli meshopt horneado.glb cuerpo-paso5.glb --level medium` (≈ 1.7 MB).
+6. **Alisado final**: `IT=14 ITS=6 node refinar.mjs cuerpo-paso5.glb cuerpo.glb`
+   - Taubin sobre la piel (menos en manos y pies) y el short: quita el granulado del escaneo sin encoger los músculos.
+   - Se aplica una sola vez a la salida del paso 5 (no sobre un `cuerpo.glb` ya alisado).
+
+El visor además promedia las normales con sus vecinas al deformar (`suavizarNormales` en `motor.js`), así la luz
+marca el relieve de los músculos y no la textura del modelo.
 
 El visor de la app (`js/cuerpo3d/motor.js`) solo lee el modelo ya horneado: no repite estos pasos en el teléfono.
