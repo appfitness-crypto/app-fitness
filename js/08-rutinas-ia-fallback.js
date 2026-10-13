@@ -1156,10 +1156,8 @@ function logoMiniHTML(){
     ? `<img src="icons/icon-192.png" alt="${esc(GYM.nombreCorto)}">`
     : `<video autoplay muted loop playsinline disablepictureinpicture poster="icons/icon-192.png" aria-label="${esc(GYM.nombreCorto)}"><source src="video/logo-animado.mp4" type="video/mp4"><source src="video/logo-animado.webm" type="video/webm"></video>`}</div>`;
 }
-// La intro del logo de bienvenida (5 s) termina y sigue con el bucle de 4 s, sin volver a negro
 // Con "reducir movimiento" los logos animados de index.html quedan como imagen fija
-if(sinMovimiento()) document.querySelectorAll('.lm video, .wc-logo video').forEach(v=>{ const i=new Image(); i.src=v.getAttribute('poster'); i.alt=(window.GYM&&GYM.nombreCorto)||v.getAttribute('aria-label')||''; v.replaceWith(i); });
-window.logoABucle=v=>{ v.onended=null; v.loop=true; v.innerHTML='<source src="video/logo-bucle.webm" type="video/webm"><source src="video/logo-bucle.mp4" type="video/mp4">'; v.load(); v.play().catch(()=>{}); };
+if(sinMovimiento()) document.querySelectorAll('.lm video').forEach(v=>{ const i=new Image(); i.src=v.getAttribute('poster'); i.alt=(window.GYM&&GYM.nombreCorto)||v.getAttribute('aria-label')||''; v.replaceWith(i); });
 function appHead(titulo,sub){
   return `<div class="app-h"><div class="app-h-l">${logoMiniHTML()}<div><div class="app-t">${titulo}</div>${sub?`<div class="app-sub">${sub}</div>`:''}</div></div></div>`;
 }
