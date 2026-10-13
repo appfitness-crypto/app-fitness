@@ -655,18 +655,7 @@
 </div>
 
 <!-- ═══ S6: DETALLE DÍA ═══ -->
-<div class="sc" id="s-det">
-  <button type="button" class="btn-bk fl" onclick="go('s-dash');refreshDash();" aria-label="Volver"><svg class="ico " aria-hidden="true"><use href="#i-chevl"/></svg></button>
-  <button type="button" class="btn-bk fr" id="btn-rest-timer" onclick="toggleBurbujaVisible()" aria-label="Cronómetro de descanso"><svg class="ico" aria-hidden="true"><use href="#i-timer"/></svg></button>
-  <div class="det-hero" id="det-hero"></div>
-  <div class="det-stats" id="det-stats"></div>
-  <div class="det-prog-w"><div class="det-prog-t"><b>Tu avance</b><span id="det-prog-n">0 de 0</span></div><div class="det-prog"><i id="det-prog-i"></i></div></div>
-  <div class="ej-list" id="ej-list"></div>
-  <div class="det-foot">
-    <div class="btn-sec" onclick="go('s-dash');refreshDash();">Volver</div>
-    <div class="btn-full" id="btn-finalizar" onclick="finalizarSesion()">Finalizar sesión</div>
-  </div>
-</div>
+<div class="sc" id="s-det"><main class="dd" id="dd" aria-label="Detalle del día"></main></div>
 
 <!-- SESIÓN EN CURSO (js/38-entreno.js) -->
 <div class="sc" id="s-ses"><main class="en-ses" id="en-ses" aria-label="Sesión en curso"></main></div>

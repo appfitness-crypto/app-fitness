@@ -96,6 +96,7 @@ function minutosDia(d){
 let rutDia=null;
 function renderRutinaTab(){
   const s=activeSocio; if(!s) return;
+  normalizarEmomRutina(s.rutina);
   actualizarHoy();
   const cont=document.getElementById('dsec-rutina');
   const fechas=fechasSemana(), sem=sesionesSemana(s);
@@ -160,6 +161,61 @@ function rutDiaHTML(s){
     <div class="en-cta">${cta}</div>
   </article>`;
 }
+// ═════════════ DETALLE DEL DÍA ═════════════
+// Lo que la tarjeta de "Mi plan" no dice: qué músculos trabajas, qué equipo necesitas, cómo se hacen los
+// métodos del día y, si ya entrenaste, lo que hiciste en cada ejercicio. Un solo botón: la sesión.
+const DD_ZONA={rack:'Rack',banco:'Banco',cardio:'Cardio',corporal:'Peso corporal',disco:'Discos',funcional:'Funcional',liga:'Ligas',mancuernas:'Mancuernas',maquina:'Máquinas',polea:'Poleas',trx:'TRX'};
+let ddK=null;
+function openDay(key){
+  const s=activeSocio; if(!s||!s.rutina[key]) return;
+  ddK=key; activeRutinaKey=key; normalizarEmomRutina(s.rutina);
+  document.getElementById('dd').innerHTML=ddHTML(s,key);
+  go('s-det'); window.scrollTo(0,0);
+}
+function ddVolver(){ go('s-dash'); refreshDash(); dashTab('rutina'); }
+function ddFecha(i){ const d=inicioSemana(new Date()); d.setDate(d.getDate()+i); return d; }
+function ddHTML(s,k){
+  const i=DIAS_ORDER.indexOf(k), d=s.rutina[k], ejs=(d&&d.ejercicios)||[], esHoy=k===HOY_KEY;
+  const f=ddFecha(i), fISO=fechaISO(f), reg=(s.logs&&s.logs.sesiones||[]).filter(x=>x&&x.fecha===fISO).pop();
+  const enCurso=esHoy&&sesionTemp&&sesionTemp.diaKey===k&&Object.keys(sesionTemp.ej||{}).length;
+  const cuando=EN_DIAS[i].charAt(0).toUpperCase()+EN_DIAS[i].slice(1)+' '+f.getDate()+(esHoy?' · hoy':'');
+  const top=`<div class="dd-top"><button type="button" class="en-icon-btn dd-back" onclick="ddVolver()" aria-label="Volver a Mi plan">${ico('chevl')}</button></div>`;
+  if(!ejs.length) return `${top}<section class="dd-hero dd-hero-rest"><div class="dd-hero-tx"><p>${esc(cuando)}</p><h1>Descanso</h1></div></section>
+    <div class="dd-body"><p class="dd-lead">El músculo crece hoy. Camina 20 a 30 minutos, estira y duerme 7 u 8 horas.</p></div>`;
+  const series=ejs.reduce((a,e)=>a+(parseInt(e.series)||0),0);
+  // músculos: el principal de cada ejercicio cuenta 1 y los secundarios ½
+  const pesoM={};
+  ejs.forEach(e=>String(e.ms||'').split(/[·,/]/).map(x=>sc(x.trim())).filter(Boolean).forEach((m,j)=>{ pesoM[m]=(pesoM[m]||0)+(j?.5:1); }));
+  const musc=Object.entries(pesoM).sort((a,b)=>b[1]-a[1]).slice(0,6), mMax=musc.length?musc[0][1]:1;
+  const zonas=[...new Set(ejs.map(e=>{ const kb=kbBuscar(e.nm); return kb&&DD_ZONA[kb.z]; }).filter(Boolean))];
+  const mets=[...new Map(ejs.filter(e=>e.metodo&&KB_METODOS[e.metodo.id]).map(e=>[e.metodo.id,KB_METODOS[e.metodo.id]])).values()];
+  const hechoDe=nm=>reg&&(reg.detalle||[]).find(x=>x.n===nm);
+  const filas=ejs.map((e,j)=>{
+    const r=rxTexto(e,s), c=cargaSugerida(s,e), h=hechoDe(e.nm), dp=descansoPlan(e.descanso);
+    const des=dp.nada?'':dp.libre?'descanso libre'+(dp.meta?' ~'+(dp.meta<120?dp.meta+' s':Math.round(dp.meta/6)/10+' min'):''):'descanso '+(dp.seg<120?dp.seg+' s':Math.round(dp.seg/6)/10+' min');
+    const sub=[limpiarReps(r.sr).replace(/\s*[—–]\s*/g,' '), des, e.metodo&&KB_METODOS[e.metodo.id]?e.metodo.nm:''].filter(Boolean).join(' · ');
+    const der=h?`<b class="num">${h.kg?enKg(h.kg):h.seg?h.seg+' s':h.fc?h.fc+' lpm':ico('check')}</b><small>${h.s||0} de ${h.p||parseInt(e.series)||0}</small>`
+      : c?`<b class="num">${enKg(c.kg)}</b><small>${c.sube>0?'+'+kgToDisplay(c.sube):'sugerido'}</small>`:'';
+    const g=e.grupo?String(e.grupo):'', gSig=ejs[j+1]&&ejs[j+1].grupo&&String(ejs[j+1].grupo).charAt(0)===g.charAt(0);
+    return `<li class="dd-ej${h?' hecho':''}${g&&gSig?' liga':''}"><button type="button" onclick="verComoDia('${k}',${j})" aria-label="${esc(e.nm)}: ver cómo se hace">
+      <span class="dd-n num" aria-hidden="true">${esc(g||String(j+1))}</span>
+      <span class="en-th">${pic(basesEjercicioMini(e),'dumbbell','thumb')}</span>
+      <span class="dd-ej-t"><b>${esc(e.nm)}</b><span>${esc(sub)}</span></span>
+      <span class="en-carga">${der}</span></button></li>`;
+  }).join('');
+  const cta=esHoy?`<div class="dd-cta"><button type="button" class="en-btn en-btn-p" onclick="iniciarSesion('${k}')">${ico('play')}${enCurso?'Continuar sesión':reg?'Registrar otra sesión':'Empezar sesión'}</button></div>`:'';
+  return `${top}
+  <section class="dd-hero">${pic(basesSesion(d.tipo),iconoTipo(d.tipo),'fill')}
+    <div class="dd-hero-tx"><p>${reg?ico('check')+'Hecho · ':''}${esc(cuando)}</p><h1>${esc(sc(d.tipo))}</h1></div></section>
+  <div class="dd-body">
+    <p class="dd-facts num"><span><b>~${minutosDia(d)}</b> min</span><span><b>${ejs.length}</b> ejercicios</span><span><b>${series}</b> series</span>${reg&&reg.volumen?`<span><b>${Math.round(reg.volumen).toLocaleString('es-MX')}</b> kg movidos</span>`:''}</p>
+    ${musc.length?`<section class="dd-sec"><h2>Qué trabajas</h2><p class="dd-chips">${musc.map(([m,v])=>`<span class="${v>=mMax*.75?'p':''}">${esc(m)}</span>`).join('')}</p></section>`:''}
+    ${zonas.length?`<section class="dd-sec"><h2>Necesitas</h2><p class="dd-chips">${zonas.map(z=>`<span>${esc(z)}</span>`).join('')}</p></section>`:''}
+    ${mets.length?`<section class="dd-sec"><h2>${mets.length===1?'Método de hoy':'Métodos de hoy'}</h2>${mets.map(M=>`<div class="dd-met"><b>${esc(M.nm)}</b><p>${esc(sinEmoji(M.como))}</p></div>`).join('')}</section>`:''}
+    <section class="dd-sec"><h2>${reg&&ejs.some(e=>hechoDe(e.nm))?'Lo que hiciste':'Ejercicios'}</h2><ol class="dd-ejs">${filas}</ol>
+      <p class="dd-nota">Toca un ejercicio para ver cómo se hace.${esHoy?'':' Este día toca el '+EN_DIAS[i]+'.'}</p></section>
+  </div>${cta}`;
+}
 function verComoDia(k,j){ const s=activeSocio; const e=s&&s.rutina[k]&&s.rutina[k].ejercicios[j]; if(e) abrirFicha(e); }
 
 // ═════════════ FICHA "CÓMO SE HACE" ═════════════
@@ -196,6 +252,7 @@ function iniciarSesion(k){
   const s=activeSocio; if(!s) return;
   const d=s.rutina[k]; if(!d||!d.ejercicios||!d.ejercicios.length) return;
   activeRutinaKey=k;
+  normalizarEmomRutina(s.rutina);
   if(!sesionTemp||sesionTemp.diaKey!==k) sesionTemp={diaKey:k, ej:{}};
   if(!sesionTemp.t0) sesionTemp.t0=Date.now();
   if(sesUI.k!==k) sesUI={k, cur:0, alts:false, borr:{}, aviso:false};
@@ -223,17 +280,22 @@ function renderSes(){
   const alt=ejEjecutado(e0,i), e=alt?Object.assign({},e0,{nm:alt.nm,ms:alt.ms||e0.ms,tip:alt.nota||e0.tip}):e0;
   const f=fichaEj(e), c=cargaSugerida(s,alt?e:e0), d=s.rutina[sesUI.k];
   const especial=enEspecial(e0), reg=sesReg(i);
-  const M=e0.metodo&&KB_METODOS[e0.metodo.id]&&!especial?KB_METODOS[e0.metodo.id]:null;
-  const des=segundosDescanso(e0.descanso);
+  if(e0.metodo&&e0.metodo.id==='emom') normalizarEmom(e0);
+  const esEmom=!!(e0.metodo&&e0.metodo.id==='emom'), w=segTrabajo(e0);
+  const M=e0.metodo&&KB_METODOS[e0.metodo.id]&&(!especial||esEmom)?KB_METODOS[e0.metodo.id]:null;
+  const des=segundosDescanso(e0.descanso), dPlan=descansoPlan(e0.descanso);
+  const btnTiempo=esEmom?`<button type="button" class="en-btn en-btn-l" onclick="sesEmom(${i})">${ico('timer')}Iniciar EMOM ${esc(e0.series)} min</button>`
+    : w?`<button type="button" class="en-btn en-btn-l" onclick="sesTrabajo(${i})">${ico('timer')}Temporizador ${w<120?w+' s':Math.round(w/6)/10+' min'}</button>`:'';
   const prog=ejs.map((x,j)=>{ const p=sesAvance(j,x); return `<i class="${p>=1?'done':''}${j===i?' cur':''}"><b style="transform:scaleX(${p})"></b></i>`; }).join('');
   let series='';
   if(especial){
     const r=rxTexto(e0,s), n=sesHechas(i);
     series=`<div class="en-esp"><p>${esc(r.sr)}${r.carga?' · '+esc(r.carga):''}</p>
-      <button type="button" class="en-btn en-btn-p" onclick="openModal(${i})">${ico('timer')}${n?'Ver o cambiar registro':'Registrar'}</button></div>`;
+      ${btnTiempo}
+      <button type="button" class="en-btn en-btn-p" onclick="openModal(${i})">${ico('check')}${n?'Ver o cambiar registro':'Registrar'}</button></div>`;
   } else {
     const B=sesBorrador(i,e0,c), prev=c&&c.sr;
-    series=`<div class="en-sets" role="table" aria-label="Series de ${esc(e.nm)}">
+    series=`${btnTiempo?`<div class="en-tm-row">${btnTiempo}</div>`:''}<div class="en-sets" role="table" aria-label="Series de ${esc(e.nm)}">
       <div class="en-set-h" role="row"><span role="columnheader">#</span><span role="columnheader">Anterior</span>
         <span role="columnheader"><button type="button" class="en-unit" onclick="sesUnidad()" aria-label="Cambiar a ${unidadPeso==='kg'?'libras':'kilos'}">${unidadPeso.toUpperCase()}</button></span>
         <span role="columnheader">REPS</span><span role="columnheader"><span class="sr-only">Hecha</span></span></div>
@@ -253,6 +315,7 @@ function renderSes(){
     <div class="en-s-top">
       <button type="button" class="en-icon-btn" aria-label="Salir de la sesión (se guarda lo que llevas)" onclick="sesSalir()">${ico('chevl')}</button>
       <div class="en-s-t"><b>${esc(sc(d.tipo))}</b><span>${ico('clock')}<span class="num" id="en-reloj">${enMMSS((Date.now()-sesionTemp.t0)/1000)}</span></span></div>
+      <button type="button" class="en-icon-btn" aria-label="Cronómetro y temporizador" onclick="tmMenu()">${ico('timer')}</button>
       <button type="button" class="en-btn-sm" onclick="sesTerminar()">Terminar</button>
     </div>
     <div class="en-prog" aria-hidden="true">${prog}</div>
@@ -263,13 +326,14 @@ function renderSes(){
         <span class="en-media-cta">${ico('play')}Cómo se hace</span>
       </button>
       <h3>${esc(e.nm)}</h3>
-      <div class="en-meta"><span>Ejercicio ${i+1} de ${ejs.length}</span>${!especial?`<span>${esc(e0.series)} × ${esc(limpiarRepsTxt(e0.reps))}</span>`:''}${f.eq?`<span>${ico('dumbbell')}${esc(f.eq)}</span>`:''}${e0.grupo?`<span>Grupo ${esc(e0.grupo)}</span>`:''}</div>
+      <div class="en-meta"><span>Ejercicio ${i+1} de ${ejs.length}</span>${esEmom?`<span>EMOM ${esc(e0.series)} min · ${esc(e0.reps)}</span>`:!especial?`<span>${esc(e0.series)} × ${esc(limpiarRepsTxt(e0.reps))}</span>`:''}${f.eq?`<span>${ico('dumbbell')}${esc(f.eq)}</span>`:''}${e0.grupo?`<span>Grupo ${esc(e0.grupo)}</span>`:''}</div>
       ${alt?`<div class="en-swap">Solo hoy, en lugar de ${esc(e0.nm)}</div>`:''}
       ${f.ms.length?`<div class="en-musc">${f.ms.map((m,j)=>`<span class="${j?'':'p'}"><i></i>${esc(m)}</span>`).join('')}</div>`:''}
       ${!especial?`<div class="en-pills">
         ${c?`<span class="en-pill l">${ico('bolt')}Hoy <b>${enKg(c.kg)}</b>${c.sube>0?' · +'+kgToDisplay(c.sube):''}</span>`:''}
         ${(()=>{ const pr=s.logs&&s.logs.prs&&s.logs.prs[prKey(e.nm)]; return pr?`<span class="en-pill">${ico('trophy')}Récord <b>${enKg(pr.kg)}</b></span>`:''; })()}
-        ${des?`<span class="en-pill">${ico('timer')}Descanso <b>${des<120?des+' s':Math.round(des/60*10)/10+' min'}</b></span>`:''}
+        ${dPlan.nada?'':dPlan.libre?`<span class="en-pill">${ico('timer')}Descanso <b>libre${dPlan.meta?' · ~'+(dPlan.meta<120?dPlan.meta+' s':Math.round(dPlan.meta/6)/10+' min'):''}</b></span>`
+          :des?`<span class="en-pill">${ico('timer')}Descanso <b>${des<120?des+' s':Math.round(des/60*10)/10+' min'}</b></span>`:''}
         ${M?`<span class="en-pill">${ico('bolt')}<b>${esc(M.nm)}</b></span>`:''}
       </div>`:''}
     </div>
@@ -291,7 +355,7 @@ function sesValor(i,j,campo,v){
   B[j][campo]=val;
   const st=sesReg(i).sets[j]; if(st&&st.ok) st[campo]=val;
 }
-function sesMarcar(i,j){
+function sesMarcar(i,j,sinDescanso){
   const ejs=sesEjs(), e=ejs[i], reg=sesReg(i), B=sesUI.borr[i]; if(!B) return;
   const on=!(reg.sets[j]&&reg.sets[j].ok);
   // Solo las series marcadas se guardan: así el peso sugerido nunca cuenta como hecho
@@ -304,11 +368,11 @@ function sesMarcar(i,j){
   if(!on) return;
   vibrarToque();
   const n=parseInt(e.series)||B.length, sigSerie=B.findIndex((x,k)=>k>j&&!(reg.sets[k]&&reg.sets[k].ok));
-  const des=segundosDescanso(e.descanso)||90;
-  if(sigSerie>=0) descansoIniciar(des,`Serie ${sigSerie+1} · ${B[sigSerie].kg?enKg(B[sigSerie].kg)+' × ':''}${B[sigSerie].r||''}`);
-  else if(ejs[i+1]) descansoIniciar(des,ejs[i+1].nm);
-  else descansoOcultar();
   if(sesHechas(i)>=n) reg.done=true;
+  if(sinDescanso) return;
+  if(sigSerie>=0) tmDescanso(e,`Serie ${sigSerie+1} · ${B[sigSerie].kg?enKg(B[sigSerie].kg)+' × ':''}${B[sigSerie].r||''}`);
+  else if(ejs[i+1]) tmDescanso(e,ejs[i+1].nm);
+  else descansoOcultar();
 }
 function sesAlternativa(i,ai){
   const reg=sesReg(i); reg.alt=reg.alt===ai?null:ai;
@@ -322,36 +386,137 @@ function sesTerminar(){ descansoOcultar(); finalizarSesion(); }
 // La ventana de siempre (cardio, rondas…) avisa al cerrarse para actualizar el avance
 function sesRefrescar(){ if(document.getElementById('s-ses').classList.contains('on')) renderSes(); }
 
-// ── Descanso: cuenta regresiva que sale desde abajo ──
-const EN_C=2*Math.PI*30; let enD={left:0,total:0,iv:null,to:null};
-function descansoIniciar(seg,sig){
-  clearInterval(enD.iv); clearTimeout(enD.to); enD.left=enD.total=seg;
-  const el=document.getElementById('en-desc'); if(!el) return;
+// ── Tiempo en la sesión: un solo panel que sale desde abajo ──
+//  · descanso: cuenta atrás si el plan da un tiempo fijo ("90 s"); LIBRE (cuenta hacia arriba, con la meta
+//    como guía) si da un rango o es autorregulado ("30-45 s", "Autorregulado (~90 s)"); nada si no lleva.
+//  · temporizador de trabajo (plancha, isométricos, "45 seg") y EMOM (una ronda por minuto).
+//  · el botón del reloj de arriba abre el cronómetro libre o un temporizador en cualquier momento.
+const EN_C=2*Math.PI*30; let enD={modo:null,left:0,total:0,t0:0,iv:null,to:null,meta:0,ronda:0,rondas:0,alFin:null,alRonda:null};
+function descansoPlan(txt){
+  const t=String(txt||'').toLowerCase().trim();
+  if(!t) return {libre:true, meta:0};
+  if(t==='—'||t==='-'||/sin descanso|resto del minuto/.test(t)) return {nada:true};
+  const esMin=/min/.test(t), nums=(t.match(/\d+(?:[.,]\d+)?/g)||[]).map(x=>parseFloat(x.replace(',','.'))*(esMin?60:1));
+  if(/autorreg|libre|a tu ritmo|lo que necesites/.test(t) || /\d\s*[-–a]\s*\d/.test(t)) return {libre:true, meta:nums.length?Math.round(Math.max(...nums)):0};
+  const seg=segundosDescanso(t);
+  return seg?{seg}:{libre:true, meta:0};
+}
+// Segundos de trabajo de una serie ("45 seg", "30 s por lado", "1 min"); 0 si va por repeticiones
+function segTrabajo(e){
+  const r=String(e&&e.reps||'').toLowerCase();
+  if(/rep/.test(r) && !/seg|min/.test(r)) return 0;
+  let m; if((m=r.match(/(\d+(?:[.,]\d+)?)\s*min/))) return Math.round(parseFloat(m[1].replace(',','.'))*60);
+  if((m=r.match(/(\d+)\s*(?:s|seg)\b/))) return +m[1];
+  return 0;
+}
+function tmBip(f,ms){ try{ const C=window.AudioContext||window.webkitAudioContext; if(!C) return; const a=tmBip.ctx||(tmBip.ctx=new C()); const o=a.createOscillator(), g=a.createGain();
+  o.frequency.value=f||880; g.gain.setValueAtTime(.0001,a.currentTime); g.gain.exponentialRampToValueAtTime(.25,a.currentTime+.02); g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+(ms||180)/1000);
+  o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime+(ms||180)/1000+.05); }catch(e){} }
+// Pinta el panel (una vez por arranque); cada segundo solo cambian el número y el anillo
+function tmPanel(o){
+  clearInterval(enD.iv); clearTimeout(enD.to);
+  const el=document.getElementById('en-desc'); if(!el) return null;
   el.classList.remove('fin');
   el.innerHTML=`<div class="en-desc-in">
-    <div class="en-ring"><svg viewBox="0 0 72 72" aria-hidden="true"><circle class="bgc" cx="36" cy="36" r="30"/><circle class="fg" cx="36" cy="36" r="30" stroke-dasharray="${EN_C}" stroke-dashoffset="0"/></svg><b class="num" id="en-d-t">${enMMSS(seg)}</b></div>
-    <div class="en-desc-t"><b id="en-d-h">Descansa</b><span>Sigue: ${esc(sig)}</span></div>
-    <div class="en-desc-a"><button type="button" onclick="descansoAjustar(-15)" aria-label="Quitar 15 segundos">−15</button><button type="button" onclick="descansoAjustar(15)" aria-label="Agregar 15 segundos">+15</button><button type="button" class="skip" onclick="descansoOcultar()">Saltar</button></div></div>`;
+    <div class="en-ring"><svg viewBox="0 0 72 72" aria-hidden="true"><circle class="bgc" cx="36" cy="36" r="30"/><circle class="fg" cx="36" cy="36" r="30" stroke-dasharray="${EN_C}" stroke-dashoffset="${o.lleno?0:EN_C}"/></svg><b class="num" id="en-d-t">${o.t}</b></div>
+    <div class="en-desc-t"><b id="en-d-h">${esc(o.h)}</b><span id="en-d-s">${esc(o.s||'')}</span></div>
+    <div class="en-desc-a${o.ops?' ops':''}">${o.botones}</div></div>`;
   el.setAttribute('aria-hidden','false'); el.inert=false;
   requestAnimationFrame(()=>{ if(el.getAttribute('aria-hidden')==='false') el.classList.add('on'); });
-  enD.iv=setInterval(()=>{ enD.left=Math.max(0,enD.left-1); descansoPintar(); if(enD.left===0) descansoListo(); },1000);
+  return el;
 }
-function descansoPintar(){
-  const t=document.getElementById('en-d-t'); if(t) t.textContent=enMMSS(enD.left);
-  const fg=document.querySelector('#en-desc .fg'); if(fg) fg.setAttribute('stroke-dashoffset',EN_C*(1-enD.left/enD.total));
+function tmAnillo(frac){ const fg=document.querySelector('#en-desc .fg'); if(fg) fg.setAttribute('stroke-dashoffset',EN_C*(1-Math.max(0,Math.min(1,frac)))); }
+function tmTexto(id,v){ const t=document.getElementById(id); if(t) t.textContent=v; }
+// Cuenta atrás (descanso fijo o trabajo)
+function tmCuenta(seg,h,sub,alFin,trabajo){
+  enD=Object.assign(enD,{modo:trabajo?'trabajo':'cuenta',left:seg,total:seg,alFin:alFin||null});
+  tmPanel({t:enMMSS(seg), h, s:sub, lleno:true, botones:`<button type="button" onclick="descansoAjustar(-15)" aria-label="Quitar 15 segundos">−15</button><button type="button" onclick="descansoAjustar(15)" aria-label="Agregar 15 segundos">+15</button><button type="button" class="skip" onclick="${trabajo?'tmTerminar()':'descansoOcultar()'}">${trabajo?'Listo':'Saltar'}</button>`});
+  enD.iv=setInterval(()=>{ enD.left=Math.max(0,enD.left-1); descansoPintar(); if(enD.left<=3&&enD.left>0) tmBip(660,90); if(enD.left===0) descansoListo(); },1000);
 }
+// Cronómetro libre (cuenta hacia arriba); con meta, el anillo se llena hacia ella y avisa al llegar
+function tmLibre(h,sub,meta){
+  enD=Object.assign(enD,{modo:'libre',t0:Date.now(),meta:meta||0,avisado:false,alFin:null});
+  tmPanel({t:'00:00', h, s:sub, botones:`<button type="button" onclick="tmLibre(${JSON.stringify(h).replace(/"/g,'&quot;')},${JSON.stringify(sub||'').replace(/"/g,'&quot;')},${meta||0})" aria-label="Reiniciar en cero">Reiniciar</button><button type="button" class="skip" onclick="descansoOcultar()">Listo</button>`});
+  enD.iv=setInterval(()=>{ const t=(Date.now()-enD.t0)/1000; tmTexto('en-d-t',enMMSS(t));
+    if(enD.meta){ tmAnillo(t/enD.meta); if(!enD.avisado && t>=enD.meta){ enD.avisado=true; document.getElementById('en-desc')?.classList.add('fin'); tmTexto('en-d-h','Meta cumplida · sigue cuando estés listo'); vibrarToque([80,60,80]); tmBip(880,200); } }
+    else tmAnillo((t%60)/60); },250);
+}
+// EMOM: una ronda por minuto; avisa al empezar cada minuto
+function tmEmom(min,nm,alRonda,alFin){
+  enD=Object.assign(enD,{modo:'emom',t0:Date.now(),rondas:min,ronda:1,alRonda:alRonda||null,alFin:alFin||null});
+  tmPanel({t:'01:00', h:'Ronda 1 de '+min, s:nm+' · haz tus reps y descansa lo que sobre', lleno:true, botones:`<button type="button" class="skip" onclick="tmTerminar()">Terminar EMOM</button>`});
+  tmBip(880,220); vibrarToque([60,40,60]);
+  enD.iv=setInterval(()=>{
+    const t=(Date.now()-enD.t0)/1000, r=Math.floor(t/60)+1, quedan=60-(t%60);
+    if(r>enD.ronda){ if(enD.alRonda) enD.alRonda(enD.ronda); enD.ronda=r;
+      if(r>enD.rondas){ tmTerminar(); return; }
+      tmTexto('en-d-h','Ronda '+r+' de '+enD.rondas); tmBip(880,220); vibrarToque([60,40,60]); }
+    tmTexto('en-d-t',enMMSS(Math.ceil(quedan))); tmAnillo(quedan/60);
+    if(quedan<=3.2 && quedan>2.8 || quedan<=2.2 && quedan>1.8 || quedan<=1.2 && quedan>.8) tmBip(660,80);
+  },200);
+}
+function tmTerminar(){
+  const fin=enD.alFin, modo=enD.modo; enD.alFin=null;
+  if(modo==='emom' && enD.alRonda && enD.ronda<=enD.rondas && (Date.now()-enD.t0)/1000>=enD.ronda*60-1) enD.alRonda(enD.ronda);
+  clearInterval(enD.iv);
+  const el=document.getElementById('en-desc');
+  if(el){ el.classList.add('fin'); tmTexto('en-d-h',modo==='emom'?'¡EMOM terminado!':'¡Serie lista!'); tmTexto('en-d-t','✓'); tmAnillo(1); }
+  vibrarToque([80,60,80]); tmBip(990,260);
+  enD.to=setTimeout(()=>{ descansoOcultar(); if(fin) fin(); },1100);
+}
+// Compatibilidad: descanso fijo de siempre
+function descansoIniciar(seg,sig){ tmCuenta(seg,'Descansa','Sigue: '+sig); }
+// Descanso según el plan del ejercicio
+function tmDescanso(e,sig){
+  const p=descansoPlan(e&&e.descanso);
+  if(p.nada){ descansoOcultar(); return; }
+  if(p.libre) tmLibre('Descanso libre'+(p.meta?' · meta ~'+(p.meta<120?p.meta+' s':Math.round(p.meta/6)/10+' min'):''),'Sigue: '+sig,p.meta);
+  else tmCuenta(p.seg,'Descansa','Sigue: '+sig);
+}
+function descansoPintar(){ tmTexto('en-d-t',enMMSS(enD.left)); tmAnillo(enD.left/enD.total); }
 function descansoAjustar(d){ enD.left=Math.max(0,enD.left+d); enD.total=Math.max(enD.total,enD.left); descansoPintar(); if(enD.left===0) descansoListo(); }
 function descansoListo(){
+  if(enD.modo==='trabajo'){ tmTerminar(); return; }
   clearInterval(enD.iv);
   const el=document.getElementById('en-desc'); if(!el) return;
-  el.classList.add('fin'); const h=document.getElementById('en-d-h'); if(h) h.textContent='¡A darle!';
-  vibrarToque([80,60,80]);
+  el.classList.add('fin'); tmTexto('en-d-h','¡A darle!');
+  vibrarToque([80,60,80]); tmBip(990,260);
   enD.to=setTimeout(descansoOcultar,2600);
 }
 function descansoOcultar(){
-  clearInterval(enD.iv); clearTimeout(enD.to);
+  clearInterval(enD.iv); clearTimeout(enD.to); enD.modo=null;
   const el=document.getElementById('en-desc'); if(!el) return;
   el.classList.remove('on'); el.setAttribute('aria-hidden','true'); el.inert=true;
+}
+// Botón del reloj (arriba): cronómetro libre o temporizador rápido, en cualquier momento de la sesión
+function tmMenu(){
+  if(enD.modo){ descansoOcultar(); return; }
+  const e=sesEjs()[sesUI.cur], w=segTrabajo(e), emom=e&&e.metodo&&e.metodo.id==='emom';
+  const op=(txt,fn)=>`<button type="button" onclick="${fn}">${txt}</button>`;
+  tmPanel({t:'⏱', h:'Cronómetro', s:'Elige cómo quieres medir', lleno:true, ops:true, botones:`<div class="en-tm-ops">
+    ${emom?op('EMOM '+e.series+' min',`sesEmom(${sesUI.cur})`):''}${w?op('Trabajo '+(w<120?w+' s':Math.round(w/6)/10+' min'),`sesTrabajo(${sesUI.cur})`):''}
+    ${op('Libre','tmLibre(\'Cronómetro libre\',\'Cuenta hacia arriba\',0)')}${[30,45,60,90,120].map(x=>op(x<120?x+' s':'2 min',`tmCuenta(${x},'Temporizador','${x<120?x+' segundos':'2 minutos'}')`)).join('')}
+    <button type="button" class="skip" onclick="descansoOcultar()">Cerrar</button></div>`});
+}
+// Temporizador de trabajo de la siguiente serie (plancha, isométricos, "45 seg")
+function sesTrabajo(i){
+  const ejs=sesEjs(), e=ejs[i]; if(!e) return;
+  const w=segTrabajo(e); if(!w) return;
+  const especial=enEspecial(e), n=parseInt(e.series)||1, reg=sesReg(i);
+  let j=0; if(!especial){ j=Array.from({length:n},(_,k)=>k).find(k=>!(reg.sets[k]&&reg.sets[k].ok)); if(j==null) j=n-1; }
+  else { sesUI.tmSerie=sesUI.tmSerie||{}; j=Math.min(n-1,sesUI.tmSerie[i]||0); }
+  tmCuenta(w,'Serie '+(j+1)+' de '+n+' · ¡aguanta!',e.nm,()=>{
+    if(!especial){ if(!(reg.sets[j]&&reg.sets[j].ok)) sesMarcar(i,j); }
+    else { sesUI.tmSerie[i]=j+1; const sig=j+1<n?'Serie '+(j+2):(ejs[i+1]?ejs[i+1].nm:''); if(sig) tmDescanso(e,sig); showToast('Serie '+(j+1)+' lista. Regístrala al terminar el ejercicio'); }
+  },true);
+}
+// EMOM: cada minuto que termina cuenta como una ronda hecha
+function sesEmom(i){
+  const ejs=sesEjs(), e=ejs[i]; if(!e) return;
+  normalizarEmom(e);
+  const especial=enEspecial(e), n=parseInt(e.series)||EMOM_MIN;
+  tmEmom(n,e.nm,r=>{ if(!especial){ const reg=sesReg(i); if(!(reg.sets[r-1]&&reg.sets[r-1].ok)) sesMarcar(i,r-1,true); } },
+    ()=>{ if(especial) openModal(i); });
 }
 
 // ═════════════ RESUMEN AL TERMINAR ═════════════
@@ -420,14 +585,12 @@ function renderProgresoTab(){
     ${appHead('Mi progreso',desde?'Desde el '+fmtFecha(desde):'Tu esfuerzo se ve en los resultados.')}
     <div class="en-goal">
       <div class="en-goal-top"><div><h3>Vas <span>${ev.estaSemana}</span> de ${meta}</h3><p>${goalTxt}</p></div>
-        <div class="en-goal-lado">
-          <div class="en-racha" aria-label="Racha de ${ev.racha} semanas">${ico('flame')}<b class="num">${ev.racha}</b><small>${ev.racha===1?'semana':'semanas'}</small></div>
-          <div class="en-peso-mini">
-            <label for="peso-nuevo">Peso de hoy</label>
-            <div><input type="number" id="peso-nuevo" placeholder="${pesoNow}" step="0.1" min="30" max="250" inputmode="decimal" onkeydown="if(event.key==='Enter')guardarPeso()"><span>kg</span></div>
-            <button type="button" onclick="guardarPeso()">Guardar</button>
-          </div>
-        </div></div>
+        <div class="en-racha" aria-label="Racha de ${ev.racha} semanas">${ico('flame')}<b class="num">${ev.racha}</b><small>${ev.racha===1?'semana':'semanas'}</small></div></div>
+      <div class="en-peso-mini">
+        <label for="peso-nuevo">Peso de hoy</label>
+        <div><input type="number" id="peso-nuevo" placeholder="${pesoNow}" step="0.1" min="30" max="250" inputmode="decimal" onkeydown="if(event.key==='Enter')guardarPeso()"><span>kg</span></div>
+        <button type="button" onclick="guardarPeso()">Guardar</button>
+      </div>
       <div class="en-slots" aria-hidden="true">${Array.from({length:meta},(_,i)=>`<i class="${i<hechas?'ok':''}"></i>`).join('')}</div>
     </div>
 
@@ -461,7 +624,11 @@ function renderProgresoTab(){
 }
 // Mapa de 12 semanas (filas lunes a domingo): completa si hizo al menos el 80% de las series
 function enHeatHTML(s,ses){
-  const ini=inicioSemana(new Date()); ini.setDate(ini.getDate()-77);
+  // 12 semanas siempre; la primera columna es la semana de su primer entrenamiento y se van pintando hacia la derecha.
+  // Si ya pasaron más de 12 semanas, se ven las últimas 12.
+  const semanas=12, lunes=inicioSemana(new Date()), t0=ses.reduce((m,x)=>x&&x.ts&&x.ts<m?x.ts:m, Infinity);
+  const yaVan=isFinite(t0)?Math.floor((lunes.getTime()-inicioSemana(new Date(t0)).getTime())/(7*86400000)+.5)+1:1;
+  const ini=new Date(lunes); ini.setDate(ini.getDate()-(Math.min(yaVan,semanas)-1)*7);
   const hoy=new Date(); hoy.setHours(23,59,59,999);
   const nivel=(t0)=>{ const t1=t0+86400000; const del=ses.filter(x=>x.ts>=t0&&x.ts<t1); if(!del.length) return 0;
     const det=del.flatMap(x=>comoArray(x.detalle)); if(!det.length) return 2;
@@ -470,14 +637,15 @@ function enHeatHTML(s,ses){
   let h='';
   for(let d=0;d<7;d++){
     h+=`<span class="en-hl">${'LMXJVSD'[d]}</span>`;
-    for(let w=0;w<12;w++){
+    for(let w=0;w<semanas;w++){
       const f=new Date(ini); f.setDate(ini.getDate()+w*7+d);
       const fut=f>hoy, esHoy=fechaISO(f)===fechaISO(new Date()), v=fut?0:nivel(f.getTime());
       h+=`<span class="en-cell${v===2?' c2':v===1?' c1':''}${fut?' fut':''}${esHoy?' hoy':''}"></span>`;
     }
   }
-  return `<div class="en-heat-w"><div class="en-heat" role="img" aria-label="Mapa de entrenamientos de las últimas 12 semanas">${h}</div>
-    <div class="en-heat-leg"><span>Hace 12 semanas</span><span><i class="c0"></i>Nada<i class="c1"></i>Parcial<i class="c2"></i>Completa</span></div></div>`;
+  const desde=!isFinite(t0)?'Tu primer entrenamiento cuenta aquí':yaVan>semanas?'Hace 12 semanas':'Desde tu primer entrenamiento';
+  return `<div class="en-heat-w"><div class="en-heat" role="img" aria-label="Mapa de entrenamientos: ${yaVan>semanas?'últimas 12 semanas':'12 semanas desde tu primer entrenamiento'}">${h}</div>
+    <div class="en-heat-leg"><span>${desde}</span><span><i class="c0"></i>Nada<i class="c1"></i>Parcial<i class="c2"></i>Completa</span></div></div>`;
 }
 // Ejercicios con más registros: mejor peso de cada mes (hasta 6 meses)
 function enFuerzaHTML(s,ses){

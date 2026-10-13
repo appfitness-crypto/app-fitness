@@ -193,6 +193,7 @@ function ultimoFc(sx,nm){
 // Texto corto de la prescripción (lista del día, vista previa, PDF)
 function rxTexto(e,sx){
   const base=sx||((typeof activeSocio!=='undefined'&&activeSocio)?activeSocio:qAnswers);
+  if(e.metodo&&e.metodo.id==='emom'){ normalizarEmom(e); return {sr:'EMOM '+e.series+' min · '+e.reps, carga:esEjRondas(e)?(e.peso||''):(pct1RM(e.peso)?'Peso que puedas mover rápido y con técnica':(e.peso||''))}; }
   if(esEjCardio(e)){ const r=cardioRx(e,base); return {sr:r.minTxt, carga:'FC objetivo '+r.lo+'–'+r.hi+' lpm'}; }
   if(esEjRondas(e)){ const r=rondasRx(e,base); return {sr:r.series+' rondas × '+txtUnidad(r.base,r.u), carga:'FC objetivo '+r.lo+'–'+r.hi+' lpm'}; }
   if(esEjMovilidad(e)) return {sr:movRx(e).sr, carga:'Sin carga'};
@@ -330,11 +331,33 @@ function aplicarMetodo(e,id,extra){
   const M=KB_METODOS[id];
   const repsOrig=e.reps||'';
   e.metodo={id, nm:M.nm, detalle:extra||''};
+  if(id==='emom'){ normalizarEmom(e); return; }
   if(M.series) e.series=M.series;
   if(M.reps){
     if(id==='drop_set'||id==='rest_pause') e.metodo.detalle=(extra||'Solo en la última serie');
     else { const prop=(repsOrig.split('—')[1]||'').trim(); e.reps=M.reps+(prop?' — '+prop:''); }
   }
+}
+// EMOM: cada minuto es una ronda, así que las series SON los minutos (10 min = 10 rondas × N reps).
+// También corrige rutinas guardadas antes (que decían "3 × EMOM 10 min · 8 reps").
+const EMOM_MIN=10;
+function normalizarEmom(e){
+  if(!e||!e.metodo||e.metodo.id!=='emom') return e;
+  const txt=String(e.reps||''), mMin=txt.match(/EMOM\s*(\d+)\s*min/i);
+  const min=Math.max(4,Math.min(20, mMin?+mMin[1]:(/cada minuto/i.test(txt)?parseInt(e.series)||EMOM_MIN:EMOM_MIN)));
+  const mRep=txt.replace(/EMOM\s*\d+\s*min/i,'').match(/(\d+)\s*reps?/i)||txt.match(/^\s*(\d+)/);
+  const reps=mRep?Math.max(3,Math.min(20,+mRep[1])):8;
+  e.series=min; e.reps=reps+' reps cada minuto';
+  e.descanso='El resto del minuto';
+  e.metodo.detalle='EMOM '+min+' min · '+min+' rondas';
+  return e;
+}
+function normalizarEmomRutina(rutina){ Object.values(rutina||{}).forEach(d=>(d&&d.ejercicios||[]).forEach(normalizarEmom)); }
+// Ejercicio metabólico (donde sí va un EMOM): rondas por repeticiones (burpees, swings, saltos…) o zona funcional
+function esEjMetabolico(e){
+  const kb=kbBuscar(e.nm||e.nombre);
+  if(kb && kb.rondas) return !(kb.rx && kb.rx.u && kb.rx.u!=='reps');
+  return !!(kb && kb.z==='funcional') || /burpee|swing|thruster|wall ?ball|kettlebell|salto|box jump|clean|snatch/i.test(e.nm||e.nombre||'');
 }
 function descansoPara(e,ctx,d){
   if(e.descanso) return e.descanso;
@@ -375,7 +398,7 @@ function enriquecerDia(ejs, ctx, seed){
   // 2) Métodos de intensidad
   const perm=metodosPermitidos(ctx);
   const valido=id=>perm.includes(id);
-  ejs.forEach(e=>{ if(e.metodo && (!KB_METODOS[e.metodo.id] || esEjCardio(e) || esEjRondas(e) || esEjMovilidad(e))) delete e.metodo; });
+  ejs.forEach(e=>{ if(e.metodo && (!KB_METODOS[e.metodo.id] || esEjCardio(e) || (esEjRondas(e) && e.metodo.id!=='emom') || esEjMovilidad(e) || (e.metodo.id==='emom' && !esEjMetabolico(e)))) delete e.metodo; });
   let faltan=cuantosMetodos(ctx,ejs.length)-ejs.filter(e=>e.metodo).length;
   const libre=i=>ejs[i] && !ejs[i].metodo && !/cardio/.test(ds[i].enf) && !esEjCardio(ejs[i]) && !esEjRondas(ejs[i]) && !esEjMovilidad(ejs[i]);
   // Sobre la zona lesionada solo métodos de baja carga (la fase manda: isométrico → resistencia → hipertrofia)
@@ -425,15 +448,22 @@ function enriquecerDia(ejs, ctx, seed){
   intentos.push(()=>{
     for(let i=0;i<ejs.length;i++){
       if(!libre(i)) continue;
-      const ops=['tempo','pausa','una_y_media','emom',...kbMetodosPropios(m=>!m.pareja)].filter(id=>valido(id)&&puede(i,id)&&(KB_METODOS[id].aplica==='ambos'||(KB_METODOS[id].aplica==='compuesto')===(ds[i].tipo==='c')));
+      const ops=['tempo','pausa','una_y_media',...kbMetodosPropios(m=>!m.pareja)].filter(id=>valido(id)&&puede(i,id)&&(KB_METODOS[id].aplica==='ambos'||(KB_METODOS[id].aplica==='compuesto')===(ds[i].tipo==='c')));
       const id=elegirPonderado(rnd,ops,ctx); if(!id) continue;
       aplicarMetodo(ejs[i],id); return true;
     }
     return false;
   });
+  // e) EMOM solo en un ejercicio metabólico por repeticiones (burpees, swings, saltos…)
+  intentos.push(()=>{
+    if(!valido('emom') || ejs.some(e=>e.metodo&&e.metodo.id==='emom')) return false;
+    const i=ejs.findIndex((e,j)=>!e.metodo && !esEjCardio(e) && !esEjMovilidad(e) && esEjMetabolico(e) && !cargaLesion(ctx,ds[j]));
+    if(i<0) return false;
+    aplicarMetodo(ejs[i],'emom'); return true;
+  });
   const gruposUsados={}; ejs.forEach(e=>{ if(e.grupo) gruposUsados[e.grupo.charAt(0)]=1; });
   // orden: aleatorizado ligeramente por día para que no todas las sesiones se vean iguales
-  const orden=[0,1,2,3].sort(()=>rnd()-0.5);
+  const orden=[0,1,2,3,4].sort(()=>rnd()-0.5);
   if(ctx.obj==='R') orden.sort((x,y)=>(x===1?-1:y===1?1:0));
   for(let pass=0; pass<2 && faltan>0; pass++) for(const k of orden){ if(faltan<=0) break; if(intentos[k] && intentos[k]()) faltan--; }
   // 3) Descansos (en parejas, el primero va sin descanso)
@@ -465,6 +495,7 @@ function normalizarRutinaIA(r){
     e.nm=e.nm||e.nombre; e.ms=e.ms||e.musculo;
     if(typeof e.metodo==='string') e.metodo={id:e.metodo};
     if(e.metodo && KB_METODOS[e.metodo.id]) e.metodo.nm=KB_METODOS[e.metodo.id].nm; else delete e.metodo;
+    if(e.metodo && e.metodo.id==='emom') normalizarEmom(e);
     if(Array.isArray(e.alternativas)) e.alternativas=e.alternativas.map(a=>{
       const nm=(a&&(a.nombre||a.nm))||String(a||''); const kb=kbBuscar(nm);
       return nm?{nm, ms:(a&&(a.musculo||a.ms))||(kb&&kb.ms)||'', z:kb?kb.z:'', nota:(a&&a.nota)||''}:null;

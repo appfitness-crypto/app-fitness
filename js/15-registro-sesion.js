@@ -6,74 +6,7 @@
 // ═════════════════════════════════════════
 let sesionTemp = null; // {diaKey, ej:{idx:{done, sets:[{kg,ok}]}}}
 
-function openDay(key){
-  const s=activeSocio; if(!s) return;
-  const d=s.rutina[key]; if(!d) return;
-  activeRutinaKey=key;
-  sesionTemp={diaKey:key, ej:{}};
-  const ejs=d.ejercicios||[];
-  const series=ejs.reduce((a,e)=>a+(parseInt(e.series)||0),0);
-  const grupos=[...new Set(ejs.map(e=>sc(String(e.ms||'').split(' ')[0])).filter(Boolean))].slice(0,3).join(' · ');
-  document.getElementById('det-hero').innerHTML=`
-    ${pic(basesSesion(d.tipo),iconoTipo(d.tipo),'fill')}
-    <div class="det-ov"></div>
-    <div class="det-tx">
-      <span class="det-badge">${esc(sc(d.tipo.split(' ')[0]))}</span>
-      <h1>${esc(sc(d.tipo))}</h1>
-      <div class="det-meta">${esc(sc(d.label))}${key===HOY_KEY?' · hoy':''}${grupos?' · '+esc(grupos):''}</div>
-    </div>`;
-  document.getElementById('det-stats').innerHTML=ejs.length?`
-    <div class="ds">${ico('layers')}<b>${ejs.length}</b><span>Ejercicios</span></div>
-    <div class="ds">${ico('dumbbell')}<b>${series}</b><span>Series</span></div>
-    ${tutIsoPrescrito(ejs,nivelNum(s.nivel))>0?`<div class="ds">${ico('timer')}<b>${fmtTut(tutIsoPrescrito(ejs,nivelNum(s.nivel)))}</b><span>Isométrico</span></div>`:''}
-    <div class="ds">${ico('target')}<b>${esc(sc(s.nivel))}</b><span>Nivel</span></div>`:'';
-  document.getElementById('btn-finalizar').style.display = key===HOY_KEY ? 'flex':'none';
-
-  const list=document.getElementById('ej-list');
-  list.innerHTML='';
-  if(!ejs.length){
-    list.innerHTML='<div class="empty-msg" style="padding:40px">Día de descanso / recuperación activa</div>';
-  } else {
-    ejs.forEach((ej,idx)=>{
-      list.innerHTML+=`
-        <div class="ej-card" id="ejc-${idx}" onclick="openModal(${idx})" data-sin-rol="1">
-          <div class="ej-pic">${pic(basesEjercicioMini(ej),'dumbbell','thumb')}<span class="ej-n">${ej.grupo?esc(ej.grupo):String(idx+1)}</span></div>
-          <div class="ej-i">
-            <div class="ej-nm" id="ejnm-${idx}" role="button" tabindex="0" onclick="event.stopPropagation();openModal(${idx})">${esc(ej.nm)}</div>
-            <div class="ej-dt">${esc(rxTexto(ej).sr)} · ${esc(rxTexto(ej).carga)}${ej.descanso?' · '+esc(ej.descanso):''}</div>
-            <div class="ej-ms">${esc(ej.ms)}</div>
-            ${((ej.metodo&&!esEjCardio(ej)&&!esEjRondas(ej)&&!esEjMovilidad(ej))||(ej.alternativas||[]).length)?`<div class="ej-extra">${(ej.metodo&&!esEjCardio(ej)&&!esEjRondas(ej)&&!esEjMovilidad(ej))?`<span class="ej-met">${ico('bolt')}${esc(ej.metodo.nm)}</span>`:''}${(ej.alternativas||[]).length?`<span class="ej-alt">${ej.alternativas.length} ${ej.alternativas.length>1?'opciones':'opción'} por área ocupada</span>`:''}</div>`:''}
-          </div>
-          <div class="ej-r">
-            <button type="button" class="ck" id="ejk-${idx}" onclick="event.stopPropagation();toggleEjDone(${idx})" aria-pressed="false" aria-label="Marcar ${esc(ej.nm)} como hecho">${ico('check')}</button>
-          </div>
-        </div>`;
-    });
-  }
-  actualizarProgresoDia();
-  go('s-det');
-  window.scrollTo(0,0);
-}
-
-function actualizarProgresoDia(){
-  const tot=document.querySelectorAll('#ej-list .ej-card').length;
-  const ok=document.querySelectorAll('#ej-list .ck.yes').length;
-  const i=document.getElementById('det-prog-i'); if(i) i.style.width=(tot?Math.round(ok/tot*100):0)+'%';
-  const n=document.getElementById('det-prog-n'); if(n) n.textContent=ok+' de '+tot;
-}
-
-function toggleEjDone(idx){
-  const card=document.getElementById('ejc-'+idx);
-  const ck=document.getElementById('ejk-'+idx);
-  const on=!ck.classList.contains('yes');
-  ck.classList.toggle('yes',on);
-  ck.setAttribute('aria-pressed',String(on));
-  card.classList.toggle('done',on);
-  if(on) vibrarToque();
-  if(!sesionTemp.ej[idx]) sesionTemp.ej[idx]={done:false,sets:[]};
-  sesionTemp.ej[idx].done=on;
-  actualizarProgresoDia();
-}
+// openDay (detalle del día) vive en js/38-entreno.js
 
 // Ejercicio que se ejecuta HOY (original u opción elegida por área ocupada)
 function ejEjecutado(ej,idx){
