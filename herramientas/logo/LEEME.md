@@ -25,5 +25,5 @@ node render.cjs intro 300   # 5 s a 60 fps con desenfoque de movimiento → cuad
 node render.cjs bucle 240   # bucle de 4 s sin costura → cuadros-bucle/
 ```
 Los cuadros se unen con ffmpeg (ver la historia del PR). En la app:
-`video/logo-animado.*` (barra, bucle recortado a 240 px), `video/logo-progreso.*` (intro) y
-`video/logo-bucle.*` (sigue después de la intro). `render.cjs` usa Playwright.
+`video/logo-animado.*` (barra de cada pantalla, bucle recortado a 240 px) y
+`video/logo-inicio.*` (esquina de bienvenida: se arma una vez y queda fijo; recorte cuadrado 320 px del video de Gemini, póster `icons/logo-inicio.webp`). `render.cjs` usa Playwright.

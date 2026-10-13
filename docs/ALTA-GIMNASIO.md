@@ -26,7 +26,7 @@ Cada gimnasio tiene **su propio Firebase, su propio repositorio de GitHub y su p
 1. **`js/config.js`:** nombre, nombre corto, título, siglas, prefijo de ID, texto del PDF, color, ubicación y el bloque `firebase` del paso 7. (Hay una plantilla en `docs/config-plantilla.js`.)
 2. **`manifest.json`:** `name`, `short_name`, `description` y los colores `background_color` / `theme_color`.
 3. **`icons/`:** reemplaza `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` y `apple-touch-icon.png` con el logo del gimnasio (mismos nombres y tamaños).
-4. **`video/`:** reemplaza `logo-animado.mp4` (portada) y `logo-progreso.mp4` (pantalla Progreso), o déjalos si no hay video.
+4. **`video/`:** reemplaza `logo-animado.mp4` (barra de cada pantalla) y `logo-inicio.mp4` (esquina de bienvenida, con su póster `icons/logo-inicio.webp`), o déjalos si no hay video.
 5. **`img/hero/`:** fotos de bienvenida e inicio del gimnasio (opcional).
 6. **`sw.js`:** sube el número de `CACHE_VERSION` (por ejemplo `gym-titanes-v1`).
 7. Si usarás IA de rutinas: despliega `servidor/worker-ia.js` en Cloudflare, agrega el dominio del gimnasio en la lista `ALLOWED_ORIGINS` del Worker y pega su dirección en `aiEndpoint` de `config.js`. Sin esto, la app usa las plantillas locales.
