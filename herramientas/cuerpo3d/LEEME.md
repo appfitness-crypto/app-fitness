@@ -33,12 +33,21 @@ El modelo modificado (`modelos/cuerpo.glb` y `modelos/cuerpo.json`) se comparte 
    ```
    node manos.mjs antebrazo cuerpo-paso6.glb antebrazo.json
    python3 mano.py antebrazo.json mano.json
-   node manos.mjs cuerpo-paso6.glb mano.json cuerpo.glb
+   node manos.mjs cuerpo-paso6.glb mano.json cuerpo-paso7.glb
    ```
    - `mano.py` hace una mano relajada (dedos juntos y algo flexionados, pulgar al lado) como volumen con uniones
      suaves; la muñeca continúa la forma real del antebrazo.
    - `manos.mjs` corta la piel en la muñeca, coloca la mano (y su espejo) en el eje del antebrazo y cose los dos
      bordes con una tira de triángulos: una sola superficie, sin escalón.
+8. **Pies nuevos** (los del modelo eran planos y con dedos en punta), con el mismo método:
+   ```
+   PARTE=pie node manos.mjs antebrazo cuerpo-paso7.glb pierna.json
+   python3 pie.py pierna.json pie.json
+   PARTE=pie node manos.mjs cuerpo-paso7.glb pie.json cuerpo.glb
+   ```
+   - `pie.py`: talón, tobillos, arco por dentro, empeine y cinco dedos, con la planta plana en el suelo. Respeta la
+     forma real del tobillo hasta 10 cm del suelo para que la costura (a 17 cm) no se note.
+   - Tras coser, `manos.mjs` suaviza la banda de la costura (en manos y pies) para que no quede un anillo marcado.
 
 El visor además promedia las normales con sus vecinas al deformar (`suavizarNormales` en `motor.js`), así la luz
 marca el relieve de los músculos y no la textura del modelo.

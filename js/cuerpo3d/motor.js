@@ -25,6 +25,9 @@
   // las fotos de ejercicios). Solo cambia la forma: el brillo de "crecimiento" sigue midiendo contra tus medidas.
   const COMPLEXION = {hombro:1.26, pecho:1.16, espalda:1.16, biceps:1.22, triceps:1.2, antebrazo:1.1, cuello:1.08,
     cuadriceps:1.15, isquios:1.1, aductores:1.05, gluteo:1.06, pantorrilla:1.12, pierna:1.06};
+  // Grupos que mueve cada medida (los de peso fuerte): al tocar una tarjeta se iluminan
+  const GRUPOS_MEDIDA = {cintura:['abdomen']};
+  for(const g in C3D_MAPA) for(const [m, p] of C3D_MAPA[g]) if(p >= .9) (GRUPOS_MEDIDA[m] = GRUPOS_MEDIDA[m] || []).push(g);
   const GANANCIA = 1.6;   // la cinta mide más que el músculo: 10 % más de brazo ≈ 16 % más de músculo
   const LIMA = [0.578, 0.888, 0.042];   // #C8F23A en lineal
 
@@ -129,7 +132,7 @@
     let info = null, listo = false, raf = 0, destruido = false;
     let REF = op.referencia || C3D_BASE;
     let fAct = factores(null), fIni = fAct, fFin = fAct, t0 = 0, dur = 0;
-    let piel = null, short = null, sel = null;     // sel: índice de canal resaltado
+    let piel = null, short = null, sel = null, selGs = null;     // sel: índice de canal resaltado · selGs: grupos de una medida
     let MUS, BR, BRS, CUB, CAV, TMAX, canalG, D = [];   // D: mallas que se deforman (piel y short) con sus datos
     let crecimiento = false;
 
@@ -233,7 +236,7 @@
       // crecimiento: brilla más lo que más creció; lo que creció poco queda tenue (como en la foto)
       const cre = canalG.map(g => Math.max(0, (f[g] || 1) - 1)), tope = Math.max(.02, ...cre);
       const selG = sel != null ? canalG[sel] : null;
-      const val = canalG.map((g, c) => selG != null ? (g === selG ? (c === sel ? 1 : .55) : 0)
+      const val = canalG.map((g, c) => selGs ? (selGs.has(g) ? 1 : 0) : selG != null ? (g === selG ? (c === sel ? 1 : .55) : 0)
         : crecimiento ? Math.pow(cre[c] / tope, 3) * Math.min(1, tope * 5) : 0);
       for(let i=0;i<n;i++){
         const a = GA[i], b = GB[i];
@@ -276,6 +279,7 @@
         const f = {}; for(const k in fFin) f[k] = fIni[k] + (fFin[k] - fIni[k]) * e;
         fAct = f; aplicar(f); if(v >= 1) dur = 0;
       }
+      pasoGiro(now);
       controls.update();
       luces.quaternion.copy(camera.quaternion);
       renderer.render(scene, camera);
@@ -288,7 +292,7 @@
     // Tocar → nombre del músculo y brillo en su grupo
     const ray = new THREE.Raycaster(), v2 = new THREE.Vector2();
     let abajo = null;
-    renderer.domElement.addEventListener('pointerdown', e => { abajo = [e.clientX, e.clientY]; });
+    renderer.domElement.addEventListener('pointerdown', e => { abajo = [e.clientX, e.clientY]; giro = null; });
     renderer.domElement.addEventListener('pointerup', e => {
       if(!abajo || Math.hypot(e.clientX - abajo[0], e.clientY - abajo[1]) > 6 || !listo) return;
       const r = renderer.domElement.getBoundingClientRect();
@@ -308,7 +312,34 @@
       let nom = m.es.replace(/ \((izq|der)\.\)$/, ''); nom = TRAD[nom] || nom;
       return {nombre:nom, grupo:NOMBRE_G[m.g] || '', g:m.g, lado, medida:MEDIDA_G[m.g] || null, factor:fAct[m.g] || 1};
     }
-    function resaltar(c){ sel = c == null ? null : c; pintarBrillo(fAct); }
+    function resaltar(c){ sel = c == null ? null : c; selGs = null; pintarBrillo(fAct); }
+    // Ilumina los músculos de una medida y gira el cuerpo para que se vean de frente
+    function resaltarMedida(medida){
+      const gs = GRUPOS_MEDIDA[medida]; sel = null; selGs = gs ? new Set(gs) : null; pintarBrillo(fAct);
+      if(!selGs || !listo) return;
+      // si buena parte ya mira a la cámara, no se gira (el bíceps basta para "brazo")
+      const N = D[0].N0, t = controls.target, ca = Math.atan2(camera.position.x - t.x, camera.position.z - t.z), cx = Math.sin(ca), cz = Math.cos(ca);
+      let x = 0, z = 0, tot = 0, vis = 0;
+      for(let i=0;i<BR.length;i++){ const b = BR[i]; if(b > .3){ const nx = N[i*3], nz = N[i*3+2]; x += nx * b; z += nz * b; tot += b; if(nx * cx + nz * cz > .2) vis += b; } }
+      if(!tot || vis / tot > .3 || Math.hypot(x, z) < 1e-3) return;
+      girarA(Math.atan2(x, z));
+    }
+    // giro suave de la cámara alrededor del cuerpo hasta el ángulo pedido (por el camino más corto)
+    let giro = null;
+    function girarA(az){
+      const t = controls.target, p = camera.position, r = Math.hypot(p.x - t.x, p.z - t.z), a0 = Math.atan2(p.x - t.x, p.z - t.z);
+      let d = az - a0; d = Math.atan2(Math.sin(d), Math.cos(d));
+      if(Math.abs(d) < .5) return;     // ya se ve: no mover
+      const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      giro = {a0, d, r, t0:performance.now(), dur:quieto ? 0 : 750};
+    }
+    function pasoGiro(now){
+      if(!giro) return;
+      const v = giro.dur ? Math.min(1, (now - giro.t0) / giro.dur) : 1, e = v < .5 ? 4*v*v*v : 1 - Math.pow(-2*v + 2, 3) / 2;
+      const a = giro.a0 + giro.d * e, t = controls.target;
+      camera.position.x = t.x + Math.sin(a) * giro.r; camera.position.z = t.z + Math.cos(a) * giro.r;
+      if(v >= 1) giro = null;
+    }
     function canal(g, lado){ return info.canales.findIndex(c => c.g === g && c.lado === lado); }
 
     function redimensionar(){ camera.aspect = W()/H(); camera.updateProjectionMatrix(); renderer.setSize(W(), H()); }
@@ -320,7 +351,7 @@
       renderer.dispose(); renderer.domElement.remove();
     }
     return {promesa, ponerMedidas, mezclar, verCrecimiento, ponerReferencia, pausar, destruir, cuadro, camera, controls, factores,
-            resaltar, canal, tocarVertice, info:() => info, piel:() => piel};
+            resaltar, resaltarMedida, canal, tocarVertice, info:() => info, piel:() => piel};
   }
   window.Cuerpo3D = {montar, factores, C3D_BASE, MEDIDA_G, NOMBRE_G};
 })();

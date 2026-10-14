@@ -85,10 +85,35 @@ def mano(P):
                   capsula(P, (.077, .051, .027), (.099, .052, .033), .0094, .0076), .003)
     return smin(m, pulgar, .01)
 
+def densificar_borde(V, F, veces=2):
+    # la simplificación deja pocos vértices en el borde abierto: se parte cada arista del borde en dos
+    # (el punto nuevo queda en el arco, no en la cuerda) para coser con triángulos parejos
+    V = [tuple(v) for v in V]; F = [tuple(f) for f in F]
+    for _ in range(veces):
+        cuenta = {}
+        for f in F:
+            for e in range(3):
+                a, b = f[e], f[(e + 1) % 3]; cuenta[(min(a, b), max(a, b))] = cuenta.get((min(a, b), max(a, b)), 0) + 1
+        nuevo = []
+        for f in F:
+            hecho = False
+            for e in range(3):
+                a, b, c = f[e], f[(e + 1) % 3], f[(e + 2) % 3]
+                if cuenta[(min(a, b), max(a, b))] == 1:
+                    pa, pb = np.array(V[a]), np.array(V[b]); m = (pa + pb) / 2
+                    r = (np.hypot(*pa[1:]) + np.hypot(*pb[1:])) / 2; rm = np.hypot(*m[1:])
+                    if rm > 1e-6: m[1:] *= r / rm
+                    V.append(tuple(m)); k = len(V) - 1
+                    nuevo += [(a, k, c), (k, b, c)]; hecho = True; break
+            if not hecho: nuevo.append(f)
+        F = nuevo
+    return np.array(V, np.float32), np.array(F, np.int32)
+
 D = mano(G)
 V, F, N, _ = marching_cubes(D, 0, spacing=(PASO, PASO, PASO))
 V += np.array([U[0], Vv[0], W[0]])
 V, F = fast_simplification.simplify(V.astype(np.float32), F.astype(np.int32), target_reduction=1 - 9000 / len(F))
+V, F = densificar_borde(V, F)
 
 # normales y oclusión ambiental a partir del volumen (sombra entre dedos y en la palma)
 Nv = np.zeros_like(V)
