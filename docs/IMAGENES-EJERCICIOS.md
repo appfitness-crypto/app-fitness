@@ -115,9 +115,9 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 54 | En el estilo nuevo: sentadilla goblet (imagen y video) y 53 ejercicios con imagen. |
+| **Listo** | 64 | En el estilo nuevo: sentadilla goblet (imagen y video) y 63 ejercicios con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
-| **Falta** | 172 | No tienen imagen. |
+| **Falta** | 162 | No tienen imagen. |
 
 Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
@@ -177,25 +177,25 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Curl inclinado con mancuernas | `curl-inclinado-con-mancuernas` | Bíceps (cabeza larga) | Falta |
 | Curl concentrado | `curl-concentrado` | Bíceps | Falta |
 | Curl isométrico a 90° | `curl-isometrico-a-90` | Bíceps · Braquial | Falta |
-| Patada de tríceps con mancuerna | `patada-de-triceps-con-mancuerna` | Tríceps | Falta |
-| Press francés con mancuernas | `press-frances-con-mancuernas` | Tríceps | Falta |
+| Patada de tríceps con mancuerna | `patada-de-triceps-con-mancuerna` | Tríceps | **Listo** (imagen) |
+| Press francés con mancuernas | `press-frances-con-mancuernas` | Tríceps | **Listo** (imagen) |
 
 ### Máquinas
 
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
-| Sentadilla hack | `sentadilla-hack` | Cuádriceps | Falta |
+| Sentadilla hack | `sentadilla-hack` | Cuádriceps | **Listo** (imagen) |
 | Prensa de piernas | `prensa-de-piernas` | Cuádriceps · Glúteo | **Listo** (imagen) |
-| Prensa con pies bajos | `prensa-con-pies-bajos` | Cuádriceps | Falta |
+| Prensa con pies bajos | `prensa-con-pies-bajos` | Cuádriceps | **Listo** (imagen) |
 | Extensión de cuádriceps | `extension-de-cuadriceps` | Cuádriceps | **Listo** (imagen) |
-| Abducción de cadera en máquina | `abduccion-de-cadera-en-maquina` | Glúteo medio | Falta |
+| Abducción de cadera en máquina | `abduccion-de-cadera-en-maquina` | Glúteo medio | **Listo** (imagen) |
 | Curl femoral acostado | `curl-femoral-acostado` | Femorales | **Listo** (imagen) |
-| Curl femoral sentado | `curl-femoral-sentado` | Femorales | Falta |
+| Curl femoral sentado | `curl-femoral-sentado` | Femorales | **Listo** (imagen) |
 | Elevación de talones de pie | `elevacion-de-talones-de-pie` | Gemelos | **Listo** (imagen) |
-| Pantorrilla en prensa | `pantorrilla-en-prensa` | Gemelos | Falta |
-| Press de pecho en máquina | `press-de-pecho-en-maquina` | Pecho mayor | Falta |
-| Press inclinado en máquina | `press-inclinado-en-maquina` | Pecho superior | Falta |
-| Pec deck (aperturas en máquina) | `pec-deck-aperturas-en-maquina` | Pecho | Falta |
+| Pantorrilla en prensa | `pantorrilla-en-prensa` | Gemelos | **Listo** (imagen) |
+| Press de pecho en máquina | `press-de-pecho-en-maquina` | Pecho mayor | **Listo** (imagen) |
+| Press inclinado en máquina | `press-inclinado-en-maquina` | Pecho superior | **Listo** (imagen) |
+| Pec deck (aperturas en máquina) | `pec-deck-aperturas-en-maquina` | Pecho | **Listo** (imagen) |
 | Dominada asistida en máquina | `dominada-asistida-en-maquina` | Dorsal ancho | Falta |
 | Remo en máquina con apoyo de pecho | `remo-en-maquina-con-apoyo-de-pecho` | Dorsal · Romboides | Falta |
 | Press de hombro en máquina | `press-de-hombro-en-maquina` | Deltoides | Falta |
