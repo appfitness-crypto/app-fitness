@@ -115,7 +115,7 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 136 | En el estilo nuevo: sentadilla goblet (imagen y video) y 135 ejercicios con imagen. |
+| **Listo** | 136 | En el estilo nuevo: sentadilla goblet y peso muerto rumano con mancuernas (imagen y video) y 134 ejercicios con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
 | **Falta** | 90 | No tienen imagen. |
 
@@ -143,7 +143,7 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Sentadilla goblet | `sentadilla-goblet` | Cuádriceps · Glúteo | **Listo** (imagen + video) |
 | Desplante | `desplante` | Cuádriceps · Glúteo | **Listo** (imagen) |
 | Sentadilla búlgara | `sentadilla-bulgara` | Cuádriceps · Glúteo | **Listo** (imagen) |
-| Peso muerto rumano con mancuernas | `peso-muerto-rumano-con-mancuernas` | Femorales · Glúteo | **Listo** (imagen) |
+| Peso muerto rumano con mancuernas | `peso-muerto-rumano-con-mancuernas` | Femorales · Glúteo | **Listo** (imagen y video) |
 | Press inclinado con mancuernas | `press-inclinado-con-mancuernas` | Pecho superior | **Listo** (imagen) |
 | Press plano con mancuernas | `press-plano-con-mancuernas` | Pecho mayor | **Listo** (imagen) |
 | Aperturas con mancuernas | `aperturas-con-mancuernas` | Pecho | **Listo** (imagen) |
