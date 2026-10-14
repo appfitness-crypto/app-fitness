@@ -151,7 +151,7 @@ const EJ_PASOS = {
 };
 // ── Videos en bucle del estilo nuevo (img/ejercicios/<nombre>.webm y .mp4, 4:5, sin audio).
 //    Solo se piden los que están en esta lista; los demás ejercicios usan su imagen fija.
-const EJ_VIDEOS = new Set(['sentadilla-goblet','peso-muerto-rumano-con-mancuernas']);
+const EJ_VIDEOS = new Set(['sentadilla-goblet','peso-muerto-rumano-con-mancuernas','sentadilla-libre']);
 function videoEjHTML(ej){
   const n=slugEj(ej&&ej.nm); if(!EJ_VIDEOS.has(n)) return '';
   if(matchMedia('(prefers-reduced-motion: reduce)').matches) return '';
