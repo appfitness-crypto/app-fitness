@@ -115,9 +115,9 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 110 | En el estilo nuevo: sentadilla goblet (imagen y video) y 109 ejercicios con imagen. |
+| **Listo** | 111 | En el estilo nuevo: sentadilla goblet (imagen y video) y 110 ejercicios con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
-| **Falta** | 116 | No tienen imagen. |
+| **Falta** | 115 | No tienen imagen. |
 
 Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
@@ -231,7 +231,7 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Remo invertido en TRX | `remo-invertido-en-trx` | Espalda media · Core | **Listo** (imagen) |
 | Elevación de piernas colgado | `elevacion-de-piernas-colgado` | Abdomen inferior | **Listo** (imagen) |
 | Swing con kettlebell | `swing-con-kettlebell` | Glúteo · Cadena posterior | **Listo** (imagen) |
-| Dominada agarre neutro | `dominada-agarre-neutro` | Dorsal · Bíceps | Falta |
+| Dominada agarre neutro | `dominada-agarre-neutro` | Dorsal · Bíceps | **Listo** (imagen) |
 | Dominada excéntrica (negativa) | `dominada-excentrica-negativa` | Dorsal · Bíceps | **Listo** (imagen) |
 | Aguante isométrico en barra (arriba) | `aguante-isometrico-en-barra-arriba` | Dorsal · Bíceps | **Listo** (imagen) |
 | Aguante en L (L-sit) | `aguante-en-l-l-sit` | Abdomen · Tríceps | **Listo** (imagen) |
