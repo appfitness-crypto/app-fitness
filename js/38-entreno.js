@@ -128,7 +128,7 @@ const EJ_PASOS = {
 //    Solo se piden los que están en esta lista; los demás ejercicios usan su imagen fija.
 const EJ_VIDEOS = new Set(['sentadilla-goblet']);
 function videoEjHTML(ej){
-  const n=slugImg(ej&&ej.nm); if(!EJ_VIDEOS.has(n)) return '';
+  const n=slugEj(ej&&ej.nm); if(!EJ_VIDEOS.has(n)) return '';
   if(matchMedia('(prefers-reduced-motion: reduce)').matches) return '';
   // Va encima de la imagen fija: aparece al empezar a reproducirse y, si falla, se quita y queda la imagen.
   return `<video class="en-vid" muted loop playsinline autoplay preload="auto" aria-hidden="true" disablepictureinpicture onplaying="this.classList.add('on')">
@@ -147,7 +147,7 @@ function enKg(kg){ return kgToDisplay(kg)+' '+unidadPeso; }
 function fichaEj(ej){
   const kb=kbBuscar(ej.nm);
   const ms=String(ej.ms||(kb&&kb.ms)||'').split(/\s*[·,\/]\s*|\s+y\s+/).map(x=>sc(x.trim())).filter(Boolean);
-  const d=EJ_PASOS[slugImg(ej.nm)]||(kb&&EJ_PASOS[slugImg(kb.nm)])||null;
+  const d=EJ_PASOS[slugEj(ej.nm)]||(kb&&EJ_PASOS[slugEj(kb.nm)])||null;
   return {ms:[...new Set(ms)], eq:(d&&d.e)||(kb&&KB_ZONAS[kb.z])||'', pasos:d?d.p:null, evita:d?d.x:null};
 }
 

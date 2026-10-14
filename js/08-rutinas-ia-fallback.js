@@ -1133,10 +1133,25 @@ function imgErr(el){
 }
 function iconoTipo(t){ t=slugImg(t); if(/cardio|hiit|resist/.test(t)) return 'heart'; if(/movil|yoga|flex|estir|core/.test(t)) return 'stretch'; if(/descanso|recuper/.test(t)) return 'moon'; return 'dumbbell'; }
 function basesSesion(tipo){ const t=slugImg(tipo), p=t.split('-')[0]; return ['sesiones/'+t,'sesiones/'+p,'sesiones/general']; }
-function basesEjercicio(ej){ const n=slugImg(ej.nm), g=slugImg(ej.ms||''), g1=g.split('-')[0]; return ['ejercicios/'+n,'grupos/'+g,'grupos/'+g1]; }
+// Nombres de ejercicio que usan la foto (y la ficha) de otro: en "X o Y" y "X / Y" va la del
+// primero, y una nota entre paréntesis no cambia el ejercicio.
+const EJ_ALIAS={
+  'sentadilla-con-barra-o-goblet':'sentadilla-libre',
+  'press-de-banca-mancuernas':'press-banca-plano',
+  'swing-con-mancuerna-kettlebell':'swing-con-kettlebell',
+  'jalon-dorsal-pull-up-asistido':'jalon-al-pecho',
+  'flexiones-push-ups':'lagartijas',
+  'burpee-a-tu-ritmo':'burpees',
+  'isometrico-de-cuadriceps-pierna-recta':'isometrico-de-cuadriceps',
+  'prensa-de-piernas-rango-parcial':'prensa-de-piernas',
+  'press-pallof-anti-rotacion':'press-pallof',
+  'rotacion-externa-con-banda-codo-fijo':'rotacion-externa-con-banda'
+};
+function slugEj(nm){ const n=slugImg(nm); return EJ_ALIAS[n]||n; }
+function basesEjercicio(ej){ const n=slugEj(ej.nm), g=slugImg(ej.ms||''), g1=g.split('-')[0]; return ['ejercicios/'+n,'grupos/'+g,'grupos/'+g1]; }
 // Miniatura de la lista: si subes 'ejercicios/mini-<nombre>' la usa ahí; si no existe,
 // usa la misma foto grande del ejercicio (y si tampoco existe, la del grupo muscular).
-function basesEjercicioMini(ej){ const n=slugImg(ej.nm); return ['ejercicios/mini-'+n, ...basesEjercicio(ej)]; }
+function basesEjercicioMini(ej){ const n=slugEj(ej.nm); return ['ejercicios/mini-'+n, ...basesEjercicio(ej)]; }
 // ── Recuadro de imagen del ejercicio (reemplaza el muñeco de silueta) ──
 // Busca en img/ejercicios/<nombre>.webp|jpg; si no existe aún esa foto, cae a la
 // foto del grupo muscular (img/grupos/...) y, si tampoco existe, muestra un ícono neutro.
