@@ -115,9 +115,9 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 111 | En el estilo nuevo: sentadilla goblet (imagen y video) y 110 ejercicios con imagen. |
+| **Listo** | 129 | En el estilo nuevo: sentadilla goblet (imagen y video) y 128 ejercicios con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
-| **Falta** | 115 | No tienen imagen. |
+| **Falta** | 97 | No tienen imagen. |
 
 Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
@@ -258,24 +258,24 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Dead bug | `dead-bug` | Core profundo | Falta |
 | Bird-dog | `bird-dog` | Core · Erectores | Falta |
 | Rueda abdominal | `rueda-abdominal` | Core anterior | **Listo** (imagen) |
-| Sentadilla con salto | `sentadilla-con-salto` | Cuádriceps · Glúteo | Falta |
-| Aguante de zancada (split squat isométrico) | `aguante-de-zancada-split-squat-isometrico` | Cuádriceps · Glúteo | Falta |
-| Puente de glúteo isométrico | `puente-de-gluteo-isometrico` | Glúteo | Falta |
-| Puente isométrico con talones elevados | `puente-isometrico-con-talones-elevados` | Femorales · Glúteo | Falta |
-| Aguante de pantorrilla en punta | `aguante-de-pantorrilla-en-punta` | Gemelos · Sóleo | Falta |
-| Lagartijas inclinadas (manos elevadas) | `lagartijas-inclinadas-manos-elevadas` | Pecho · Tríceps | Falta |
-| Lagartijas diamante | `lagartijas-diamante` | Tríceps · Pecho | Falta |
-| Lagartijas declinadas (pies elevados) | `lagartijas-declinadas-pies-elevados` | Pecho superior · Hombro | Falta |
-| Presión isométrica de palmas | `presion-isometrica-de-palmas` | Pecho mayor | Falta |
-| Aguante isométrico en lagartija (abajo) | `aguante-isometrico-en-lagartija-abajo` | Pecho · Tríceps · Core | Falta |
-| Superman | `superman` | Espalda baja · Glúteo | Falta |
-| Superman isométrico | `superman-isometrico` | Espalda baja · Glúteo | Falta |
-| Rotación externa isométrica en pared | `rotacion-externa-isometrica-en-pared` | Manguito rotador | Falta |
-| Plancha alta (brazos extendidos) | `plancha-alta-brazos-extendidos` | Core · Hombro | Falta |
-| Plancha lateral con pierna elevada | `plancha-lateral-con-pierna-elevada` | Oblicuos · Glúteo medio | Falta |
-| Hollow hold | `hollow-hold` | Abdomen · Core | Falta |
-| Plancha con toque de hombro | `plancha-con-toque-de-hombro` | Core · Hombro | Falta |
-| Crunch abdominal | `crunch-abdominal` | Recto abdominal | Falta |
+| Sentadilla con salto | `sentadilla-con-salto` | Cuádriceps · Glúteo | **Listo** (imagen) |
+| Aguante de zancada (split squat isométrico) | `aguante-de-zancada-split-squat-isometrico` | Cuádriceps · Glúteo | **Listo** (imagen) |
+| Puente de glúteo isométrico | `puente-de-gluteo-isometrico` | Glúteo | **Listo** (imagen) |
+| Puente isométrico con talones elevados | `puente-isometrico-con-talones-elevados` | Femorales · Glúteo | **Listo** (imagen) |
+| Aguante de pantorrilla en punta | `aguante-de-pantorrilla-en-punta` | Gemelos · Sóleo | **Listo** (imagen) |
+| Lagartijas inclinadas (manos elevadas) | `lagartijas-inclinadas-manos-elevadas` | Pecho · Tríceps | **Listo** (imagen) |
+| Lagartijas diamante | `lagartijas-diamante` | Tríceps · Pecho | **Listo** (imagen) |
+| Lagartijas declinadas (pies elevados) | `lagartijas-declinadas-pies-elevados` | Pecho superior · Hombro | **Listo** (imagen) |
+| Presión isométrica de palmas | `presion-isometrica-de-palmas` | Pecho mayor | **Listo** (imagen) |
+| Aguante isométrico en lagartija (abajo) | `aguante-isometrico-en-lagartija-abajo` | Pecho · Tríceps · Core | **Listo** (imagen) |
+| Superman | `superman` | Espalda baja · Glúteo | **Listo** (imagen) |
+| Superman isométrico | `superman-isometrico` | Espalda baja · Glúteo | **Listo** (imagen) |
+| Rotación externa isométrica en pared | `rotacion-externa-isometrica-en-pared` | Manguito rotador | **Listo** (imagen) |
+| Plancha alta (brazos extendidos) | `plancha-alta-brazos-extendidos` | Core · Hombro | **Listo** (imagen) |
+| Plancha lateral con pierna elevada | `plancha-lateral-con-pierna-elevada` | Oblicuos · Glúteo medio | **Listo** (imagen) |
+| Hollow hold | `hollow-hold` | Abdomen · Core | **Listo** (imagen) |
+| Plancha con toque de hombro | `plancha-con-toque-de-hombro` | Core · Hombro | **Listo** (imagen) |
+| Crunch abdominal | `crunch-abdominal` | Recto abdominal | **Listo** (imagen) |
 | Elevación de rodillas en banco | `elevacion-de-rodillas-en-banco` | Abdomen bajo | Falta |
 | Escaladores | `escaladores` | Core · Hombro | **Listo** (imagen) |
 | Crunch bicicleta | `crunch-bicicleta` | Oblicuos · Abdomen | Falta |
