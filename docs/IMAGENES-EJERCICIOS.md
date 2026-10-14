@@ -115,9 +115,9 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 102 | En el estilo nuevo: sentadilla goblet (imagen y video) y 101 ejercicios con imagen. |
+| **Listo** | 107 | En el estilo nuevo: sentadilla goblet (imagen y video) y 106 ejercicios con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
-| **Falta** | 124 | No tienen imagen. |
+| **Falta** | 119 | No tienen imagen. |
 
 Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
@@ -196,7 +196,7 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Press de pecho en máquina | `press-de-pecho-en-maquina` | Pecho mayor | **Listo** (imagen) |
 | Press inclinado en máquina | `press-inclinado-en-maquina` | Pecho superior | **Listo** (imagen) |
 | Pec deck (aperturas en máquina) | `pec-deck-aperturas-en-maquina` | Pecho | **Listo** (imagen) |
-| Dominada asistida en máquina | `dominada-asistida-en-maquina` | Dorsal ancho | Falta |
+| Dominada asistida en máquina | `dominada-asistida-en-maquina` | Dorsal ancho | **Listo** (imagen) |
 | Remo en máquina con apoyo de pecho | `remo-en-maquina-con-apoyo-de-pecho` | Dorsal · Romboides | **Listo** (imagen) |
 | Press de hombro en máquina | `press-de-hombro-en-maquina` | Deltoides | **Listo** (imagen) |
 | Elevación lateral en máquina | `elevacion-lateral-en-maquina` | Deltoides lateral | **Listo** (imagen) |
@@ -205,9 +205,9 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Curl predicador en máquina | `curl-predicador-en-maquina` | Bíceps (porción corta) | **Listo** (imagen) |
 | Crunch en máquina | `crunch-en-maquina` | Recto abdominal | **Listo** (imagen) |
 | Sentadilla en Smith | `sentadilla-en-smith` | Cuádriceps · Glúteo | **Listo** (imagen) |
-| Prensa de piernas unilateral | `prensa-de-piernas-unilateral` | Cuádriceps · Glúteo | Falta |
+| Prensa de piernas unilateral | `prensa-de-piernas-unilateral` | Cuádriceps · Glúteo | **Listo** (imagen) |
 | Hip thrust en máquina | `hip-thrust-en-maquina` | Glúteo mayor | **Listo** (imagen) |
-| Patada de glúteo en máquina | `patada-de-gluteo-en-maquina` | Glúteo mayor | Falta |
+| Patada de glúteo en máquina | `patada-de-gluteo-en-maquina` | Glúteo mayor | **Listo** (imagen) |
 | Peso muerto rumano en Smith | `peso-muerto-rumano-en-smith` | Femorales · Glúteo | **Listo** (imagen) |
 | Pantorrilla sentado en máquina | `pantorrilla-sentado-en-maquina` | Sóleo | **Listo** (imagen) |
 | Pantorrilla en Smith | `pantorrilla-en-smith` | Gemelos | **Listo** (imagen) |
@@ -218,7 +218,7 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Pec deck inverso | `pec-deck-inverso` | Deltoide posterior | **Listo** (imagen) |
 | Encogimientos en Smith | `encogimientos-en-smith` | Trapecio superior | **Listo** (imagen) |
 | Fondos asistidos en máquina | `fondos-asistidos-en-maquina` | Tríceps · Pecho | **Listo** (imagen) |
-| Extensión de tríceps en máquina | `extension-de-triceps-en-maquina` | Tríceps | Falta |
+| Extensión de tríceps en máquina | `extension-de-triceps-en-maquina` | Tríceps | **Listo** (imagen) |
 | Aguante en hiperextensión | `aguante-en-hiperextension` | Espalda baja · Glúteo | **Listo** (imagen) |
 
 ### Funcional (kettlebell, cajón, trineo)
@@ -251,7 +251,7 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Curl nórdico asistido | `curl-nordico-asistido` | Femorales | **Listo** (imagen) |
 | Pantorrilla unilateral en escalón | `pantorrilla-unilateral-en-escalon` | Gemelos | Falta |
 | Lagartijas | `lagartijas` | Pecho · Tríceps · Core | **Listo** (imagen) |
-| Rotación externa con banda | `rotacion-externa-con-banda` | Manguito rotador | Falta |
+| Rotación externa con banda | `rotacion-externa-con-banda` | Manguito rotador | **Listo** (imagen) |
 | Fondos en banco | `fondos-en-banco` | Tríceps | Falta |
 | Plancha frontal | `plancha-frontal` | Core | **Listo** (imagen) |
 | Plancha lateral | `plancha-lateral` | Oblicuos | **Listo** (imagen) |
