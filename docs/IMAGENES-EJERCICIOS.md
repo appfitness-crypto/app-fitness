@@ -115,9 +115,9 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 45 | En el estilo nuevo: sentadilla goblet (imagen y video) y 44 ejercicios con imagen. |
+| **Listo** | 54 | En el estilo nuevo: sentadilla goblet (imagen y video) y 53 ejercicios con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
-| **Falta** | 181 | No tienen imagen. |
+| **Falta** | 172 | No tienen imagen. |
 
 Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
@@ -159,15 +159,15 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Curl martillo | `curl-martillo` | Braquial · Braquiorradial | **Listo** (imagen) |
 | Extensión de tríceps sobre la cabeza | `extension-de-triceps-sobre-la-cabeza` | Tríceps (porción larga) | **Listo** (imagen) |
 | Farmer walk | `farmer-walk` | Core · Agarre · Trapecio | **Listo** (imagen) |
-| Caminata con peso unilateral | `caminata-con-peso-unilateral` | Oblicuos · Core | Falta |
-| Zancada reversa con mancuernas | `zancada-reversa-con-mancuernas` | Cuádriceps · Glúteo | Falta |
-| Sentadilla isométrica con mancuerna | `sentadilla-isometrica-con-mancuerna` | Cuádriceps · Glúteo | Falta |
-| Sentadilla sumo con mancuerna | `sentadilla-sumo-con-mancuerna` | Glúteo · Aductores | Falta |
-| Desplante lateral | `desplante-lateral` | Glúteo · Cuádriceps · Aductores | Falta |
-| Peso muerto a una pierna con mancuerna | `peso-muerto-a-una-pierna-con-mancuerna` | Femorales · Glúteo | Falta |
-| Peso muerto piernas rígidas con mancuernas | `peso-muerto-piernas-rigidas-con-mancuernas` | Femorales | Falta |
-| Pantorrilla a una pierna con mancuerna | `pantorrilla-a-una-pierna-con-mancuerna` | Gemelos | Falta |
-| Press declinado con mancuernas | `press-declinado-con-mancuernas` | Pecho (porción baja) | Falta |
+| Caminata con peso unilateral | `caminata-con-peso-unilateral` | Oblicuos · Core | **Listo** (imagen) |
+| Zancada reversa con mancuernas | `zancada-reversa-con-mancuernas` | Cuádriceps · Glúteo | **Listo** (imagen) |
+| Sentadilla isométrica con mancuerna | `sentadilla-isometrica-con-mancuerna` | Cuádriceps · Glúteo | **Listo** (imagen) |
+| Sentadilla sumo con mancuerna | `sentadilla-sumo-con-mancuerna` | Glúteo · Aductores | **Listo** (imagen) |
+| Desplante lateral | `desplante-lateral` | Glúteo · Cuádriceps · Aductores | **Listo** (imagen) |
+| Peso muerto a una pierna con mancuerna | `peso-muerto-a-una-pierna-con-mancuerna` | Femorales · Glúteo | **Listo** (imagen) |
+| Peso muerto piernas rígidas con mancuernas | `peso-muerto-piernas-rigidas-con-mancuernas` | Femorales | **Listo** (imagen) |
+| Pantorrilla a una pierna con mancuerna | `pantorrilla-a-una-pierna-con-mancuerna` | Gemelos | **Listo** (imagen) |
+| Press declinado con mancuernas | `press-declinado-con-mancuernas` | Pecho (porción baja) | **Listo** (imagen) |
 | Press en el suelo con mancuernas | `press-en-el-suelo-con-mancuernas` | Pecho mayor · Tríceps | Falta |
 | Aperturas inclinadas con mancuernas | `aperturas-inclinadas-con-mancuernas` | Pecho superior | Falta |
 | Remo al mentón agarre ancho | `remo-al-menton-agarre-ancho` | Deltoide lateral · Trapecio | Falta |
