@@ -115,7 +115,7 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 136 | En el estilo nuevo: sentadilla goblet y peso muerto rumano con mancuernas (imagen y video) y 134 ejercicios con imagen. |
+| **Listo** | 136 | En el estilo nuevo: 3 ejercicios con imagen y video (sentadilla goblet, peso muerto rumano con mancuernas y sentadilla libre) y 133 con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
 | **Falta** | 90 | No tienen imagen. |
 
@@ -125,7 +125,7 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
-| Sentadilla libre | `sentadilla-libre` | Cuádriceps · Glúteo | **Listo** (imagen) |
+| Sentadilla libre | `sentadilla-libre` | Cuádriceps · Glúteo | **Listo** (imagen y video) |
 | Sentadilla frontal | `sentadilla-frontal` | Cuádriceps · Core | **Listo** (imagen) |
 | Peso muerto convencional | `peso-muerto-convencional` | Glúteo · Femorales · Espalda | **Listo** (imagen) |
 | Peso muerto rumano | `peso-muerto-rumano` | Femorales · Glúteo | **Listo** (imagen) |
