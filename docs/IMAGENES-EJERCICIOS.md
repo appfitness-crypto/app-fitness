@@ -115,9 +115,9 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 107 | En el estilo nuevo: sentadilla goblet (imagen y video) y 106 ejercicios con imagen. |
+| **Listo** | 110 | En el estilo nuevo: sentadilla goblet (imagen y video) y 109 ejercicios con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
-| **Falta** | 119 | No tienen imagen. |
+| **Falta** | 116 | No tienen imagen. |
 
 Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
@@ -281,7 +281,7 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Crunch bicicleta | `crunch-bicicleta` | Oblicuos · Abdomen | Falta |
 | Tijeras (flutter kicks) | `tijeras-flutter-kicks` | Abdomen bajo | Falta |
 | Salto de cuerda | `salto-de-cuerda` | Sistema cardiovascular | Falta |
-| Burpees | `burpees` | Sistema cardiovascular · Cuerpo completo | Falta |
+| Burpees | `burpees` | Sistema cardiovascular · Cuerpo completo | **Listo** (imagen) |
 | Jumping jacks | `jumping-jacks` | Sistema cardiovascular | Falta |
 
 ### Bancos + barra
@@ -317,14 +317,14 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Curl en polea baja | `curl-en-polea-baja` | Bíceps | Falta |
 | Curl martillo en polea con cuerda | `curl-martillo-en-polea-con-cuerda` | Braquial | Falta |
 | Extensión de tríceps en polea | `extension-de-triceps-en-polea` | Tríceps | Falta |
-| Press Pallof | `press-pallof` | Core antirrotación | Falta |
+| Press Pallof | `press-pallof` | Core antirrotación | **Listo** (imagen) |
 | Crunch en polea | `crunch-en-polea` | Recto abdominal | Falta |
 | Abducción de cadera en polea | `abduccion-de-cadera-en-polea` | Glúteo medio | Falta |
 | Pull-through en polea | `pull-through-en-polea` | Glúteo · Femorales | Falta |
 | Curl femoral en polea con tobillera | `curl-femoral-en-polea-con-tobillera` | Femorales | Falta |
 | Jalón agarre neutro | `jalon-agarre-neutro` | Dorsal · Bíceps | Falta |
 | Extensión de tríceps con cuerda | `extension-de-triceps-con-cuerda` | Tríceps | Falta |
-| Pallof isométrico (sostén al frente) | `pallof-isometrico-sosten-al-frente` | Core · Oblicuos | Falta |
+| Pallof isométrico (sostén al frente) | `pallof-isometrico-sosten-al-frente` | Core · Oblicuos | **Listo** (imagen) |
 | Leñador en polea | `lenador-en-polea` | Oblicuos · Core | Falta |
 
 ### Cardio
