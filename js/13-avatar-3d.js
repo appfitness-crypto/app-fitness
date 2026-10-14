@@ -223,8 +223,9 @@ function c3dToque(r){
 // Tocar una tarjeta de medida
 function c3dFichaMedida(id){
   if(!av3d) return;
-  av3d.V?.resaltar(null);
-  c3dFicha({kick:'Tu medida', titulo:c3dNombre(id), sub:av3d.hoy[id]!=null?'Toca un músculo del cuerpo para ver cuál mueve':'', id});
+  // el músculo que mueve esta medida se ilumina en el cuerpo (como al tocarlo)
+  if(av3d.V?.resaltarMedida) av3d.V.resaltarMedida(id); else av3d.V?.resaltar(null);
+  c3dFicha({kick:'Tu medida', titulo:c3dNombre(id), sub:'En verde, el músculo que mueve esta medida', id});
   setTimeout(()=>document.getElementById('c3d-in-v')?.focus(),50);
 }
 // Registrar la medida de hoy desde la ficha (reemplaza la de hoy si ya había)
