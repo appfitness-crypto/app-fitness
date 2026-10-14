@@ -115,9 +115,9 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 129 | En el estilo nuevo: sentadilla goblet (imagen y video) y 128 ejercicios con imagen. |
+| **Listo** | 136 | En el estilo nuevo: sentadilla goblet (imagen y video) y 135 ejercicios con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
-| **Falta** | 97 | No tienen imagen. |
+| **Falta** | 90 | No tienen imagen. |
 
 Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
@@ -252,11 +252,11 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Pantorrilla unilateral en escalón | `pantorrilla-unilateral-en-escalon` | Gemelos | Falta |
 | Lagartijas | `lagartijas` | Pecho · Tríceps · Core | **Listo** (imagen) |
 | Rotación externa con banda | `rotacion-externa-con-banda` | Manguito rotador | **Listo** (imagen) |
-| Fondos en banco | `fondos-en-banco` | Tríceps | Falta |
+| Fondos en banco | `fondos-en-banco` | Tríceps | **Listo** (imagen) |
 | Plancha frontal | `plancha-frontal` | Core | **Listo** (imagen) |
 | Plancha lateral | `plancha-lateral` | Oblicuos | **Listo** (imagen) |
 | Dead bug | `dead-bug` | Core profundo | Falta |
-| Bird-dog | `bird-dog` | Core · Erectores | Falta |
+| Bird-dog | `bird-dog` | Core · Erectores | **Listo** (imagen) |
 | Rueda abdominal | `rueda-abdominal` | Core anterior | **Listo** (imagen) |
 | Sentadilla con salto | `sentadilla-con-salto` | Cuádriceps · Glúteo | **Listo** (imagen) |
 | Aguante de zancada (split squat isométrico) | `aguante-de-zancada-split-squat-isometrico` | Cuádriceps · Glúteo | **Listo** (imagen) |
@@ -276,13 +276,13 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Hollow hold | `hollow-hold` | Abdomen · Core | **Listo** (imagen) |
 | Plancha con toque de hombro | `plancha-con-toque-de-hombro` | Core · Hombro | **Listo** (imagen) |
 | Crunch abdominal | `crunch-abdominal` | Recto abdominal | **Listo** (imagen) |
-| Elevación de rodillas en banco | `elevacion-de-rodillas-en-banco` | Abdomen bajo | Falta |
+| Elevación de rodillas en banco | `elevacion-de-rodillas-en-banco` | Abdomen bajo | **Listo** (imagen) |
 | Escaladores | `escaladores` | Core · Hombro | **Listo** (imagen) |
-| Crunch bicicleta | `crunch-bicicleta` | Oblicuos · Abdomen | Falta |
-| Tijeras (flutter kicks) | `tijeras-flutter-kicks` | Abdomen bajo | Falta |
-| Salto de cuerda | `salto-de-cuerda` | Sistema cardiovascular | Falta |
+| Crunch bicicleta | `crunch-bicicleta` | Oblicuos · Abdomen | **Listo** (imagen) |
+| Tijeras (flutter kicks) | `tijeras-flutter-kicks` | Abdomen bajo | **Listo** (imagen) |
+| Salto de cuerda | `salto-de-cuerda` | Sistema cardiovascular | **Listo** (imagen) |
 | Burpees | `burpees` | Sistema cardiovascular · Cuerpo completo | **Listo** (imagen) |
-| Jumping jacks | `jumping-jacks` | Sistema cardiovascular | Falta |
+| Jumping jacks | `jumping-jacks` | Sistema cardiovascular | **Listo** (imagen) |
 
 ### Bancos + barra
 
