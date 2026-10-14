@@ -115,9 +115,9 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 35 | En el estilo nuevo: sentadilla goblet (imagen y video) y 34 ejercicios con imagen. |
+| **Listo** | 45 | En el estilo nuevo: sentadilla goblet (imagen y video) y 44 ejercicios con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
-| **Falta** | 191 | No tienen imagen. |
+| **Falta** | 181 | No tienen imagen. |
 
 Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
@@ -146,19 +146,19 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Peso muerto rumano con mancuernas | `peso-muerto-rumano-con-mancuernas` | Femorales · Glúteo | **Listo** (imagen) |
 | Press inclinado con mancuernas | `press-inclinado-con-mancuernas` | Pecho superior | **Listo** (imagen) |
 | Press plano con mancuernas | `press-plano-con-mancuernas` | Pecho mayor | **Listo** (imagen) |
-| Aperturas con mancuernas | `aperturas-con-mancuernas` | Pecho | Falta |
-| Pullover con mancuerna | `pullover-con-mancuerna` | Dorsal · Pecho | Falta |
-| Remo con mancuerna | `remo-con-mancuerna` | Dorsal · Romboides | Falta |
+| Aperturas con mancuernas | `aperturas-con-mancuernas` | Pecho | **Listo** (imagen) |
+| Pullover con mancuerna | `pullover-con-mancuerna` | Dorsal · Pecho | **Listo** (imagen) |
+| Remo con mancuerna | `remo-con-mancuerna` | Dorsal · Romboides | **Listo** (imagen) |
 | Press de hombro con mancuernas | `press-de-hombro-con-mancuernas` | Deltoides | **Listo** (imagen) |
 | Elevaciones laterales | `elevaciones-laterales` | Deltoides lateral | **Listo** (imagen) |
-| Elevación frontal ligera | `elevacion-frontal-ligera` | Deltoides anterior | Falta |
-| Pájaros con mancuerna | `pajaros-con-mancuerna` | Deltoides posterior | Falta |
-| Encogimientos con mancuerna | `encogimientos-con-mancuerna` | Trapecio | Falta |
-| Curl con barra Z | `curl-con-barra-z` | Bíceps | Falta |
+| Elevación frontal ligera | `elevacion-frontal-ligera` | Deltoides anterior | **Listo** (imagen) |
+| Pájaros con mancuerna | `pajaros-con-mancuerna` | Deltoides posterior | **Listo** (imagen) |
+| Encogimientos con mancuerna | `encogimientos-con-mancuerna` | Trapecio | **Listo** (imagen) |
+| Curl con barra Z | `curl-con-barra-z` | Bíceps | **Listo** (imagen) |
 | Curl alterno con mancuernas | `curl-alterno-con-mancuernas` | Bíceps | **Listo** (imagen) |
-| Curl martillo | `curl-martillo` | Braquial · Braquiorradial | Falta |
-| Extensión de tríceps sobre la cabeza | `extension-de-triceps-sobre-la-cabeza` | Tríceps (porción larga) | Falta |
-| Farmer walk | `farmer-walk` | Core · Agarre · Trapecio | Falta |
+| Curl martillo | `curl-martillo` | Braquial · Braquiorradial | **Listo** (imagen) |
+| Extensión de tríceps sobre la cabeza | `extension-de-triceps-sobre-la-cabeza` | Tríceps (porción larga) | **Listo** (imagen) |
+| Farmer walk | `farmer-walk` | Core · Agarre · Trapecio | **Listo** (imagen) |
 | Caminata con peso unilateral | `caminata-con-peso-unilateral` | Oblicuos · Core | Falta |
 | Zancada reversa con mancuernas | `zancada-reversa-con-mancuernas` | Cuádriceps · Glúteo | Falta |
 | Sentadilla isométrica con mancuerna | `sentadilla-isometrica-con-mancuerna` | Cuádriceps · Glúteo | Falta |
