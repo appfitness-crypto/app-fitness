@@ -1819,7 +1819,7 @@ html.c3d-abierto,html.c3d-abierto body{overflow:hidden;}
 @media(min-width:720px){.c3d-abajo,.c3d-arriba{padding-left:max(18px,calc(50% - 300px));padding-right:max(18px,calc(50% - 300px));}}
 
 /* ═══ Logos: el grande (intro + bucle) en bienvenida; el chico animado en el encabezado de cada pantalla ═══ */
-/* bienvenida: el logo nuevo (se arma una vez y queda fijo) en la esquina superior izquierda */
+/* bienvenida: el logo nuevo (se arma y se repite en bucle) en la esquina superior izquierda */
 .lm.lm-bv{display:none;width:58px;height:58px;border-radius:18px;background:#0A0E13;}
 .tb.tb-bienvenida .lm:not(.lm-bv){display:none;}
 .tb.tb-bienvenida .lm.lm-bv{display:flex;}
