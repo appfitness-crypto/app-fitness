@@ -115,9 +115,9 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 25 | En el estilo nuevo: sentadilla goblet (imagen y video) y 24 ejercicios con imagen. |
+| **Listo** | 35 | En el estilo nuevo: sentadilla goblet (imagen y video) y 34 ejercicios con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
-| **Falta** | 201 | No tienen imagen. |
+| **Falta** | 191 | No tienen imagen. |
 
 Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
@@ -128,13 +128,13 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Sentadilla libre | `sentadilla-libre` | Cuádriceps · Glúteo | **Listo** (imagen) |
 | Sentadilla frontal | `sentadilla-frontal` | Cuádriceps · Core | **Listo** (imagen) |
 | Peso muerto convencional | `peso-muerto-convencional` | Glúteo · Femorales · Espalda | **Listo** (imagen) |
-| Peso muerto rumano | `peso-muerto-rumano` | Femorales · Glúteo | Falta |
-| Remo con barra | `remo-con-barra` | Dorsal · Romboides | Falta |
-| Press militar con barra | `press-militar-con-barra` | Deltoides anterior | Falta |
-| Press landmine | `press-landmine` | Deltoides anterior · Pecho superior | Falta |
-| Sentadilla a la caja | `sentadilla-a-la-caja` | Cuádriceps · Glúteo | Falta |
-| Peso muerto sumo | `peso-muerto-sumo` | Glúteo · Femorales · Aductores | Falta |
-| Buenos días con barra | `buenos-dias-con-barra` | Femorales · Espalda baja | Falta |
+| Peso muerto rumano | `peso-muerto-rumano` | Femorales · Glúteo | **Listo** (imagen) |
+| Remo con barra | `remo-con-barra` | Dorsal · Romboides | **Listo** (imagen) |
+| Press militar con barra | `press-militar-con-barra` | Deltoides anterior | **Listo** (imagen) |
+| Press landmine | `press-landmine` | Deltoides anterior · Pecho superior | **Listo** (imagen) |
+| Sentadilla a la caja | `sentadilla-a-la-caja` | Cuádriceps · Glúteo | **Listo** (imagen) |
+| Peso muerto sumo | `peso-muerto-sumo` | Glúteo · Femorales · Aductores | **Listo** (imagen) |
+| Buenos días con barra | `buenos-dias-con-barra` | Femorales · Espalda baja | **Listo** (imagen) |
 
 ### Mancuernas
 
@@ -143,9 +143,9 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Sentadilla goblet | `sentadilla-goblet` | Cuádriceps · Glúteo | **Listo** (imagen + video) |
 | Desplante | `desplante` | Cuádriceps · Glúteo | **Listo** (imagen) |
 | Sentadilla búlgara | `sentadilla-bulgara` | Cuádriceps · Glúteo | **Listo** (imagen) |
-| Peso muerto rumano con mancuernas | `peso-muerto-rumano-con-mancuernas` | Femorales · Glúteo | Falta |
-| Press inclinado con mancuernas | `press-inclinado-con-mancuernas` | Pecho superior | Falta |
-| Press plano con mancuernas | `press-plano-con-mancuernas` | Pecho mayor | Falta |
+| Peso muerto rumano con mancuernas | `peso-muerto-rumano-con-mancuernas` | Femorales · Glúteo | **Listo** (imagen) |
+| Press inclinado con mancuernas | `press-inclinado-con-mancuernas` | Pecho superior | **Listo** (imagen) |
+| Press plano con mancuernas | `press-plano-con-mancuernas` | Pecho mayor | **Listo** (imagen) |
 | Aperturas con mancuernas | `aperturas-con-mancuernas` | Pecho | Falta |
 | Pullover con mancuerna | `pullover-con-mancuerna` | Dorsal · Pecho | Falta |
 | Remo con mancuerna | `remo-con-mancuerna` | Dorsal · Romboides | Falta |
