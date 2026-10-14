@@ -115,9 +115,9 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 64 | En el estilo nuevo: sentadilla goblet (imagen y video) y 63 ejercicios con imagen. |
+| **Listo** | 102 | En el estilo nuevo: sentadilla goblet (imagen y video) y 101 ejercicios con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
-| **Falta** | 162 | No tienen imagen. |
+| **Falta** | 124 | No tienen imagen. |
 
 Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
@@ -173,7 +173,7 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Remo al mentón agarre ancho | `remo-al-menton-agarre-ancho` | Deltoide lateral · Trapecio | Falta |
 | Aguante lateral isométrico con mancuernas | `aguante-lateral-isometrico-con-mancuernas` | Deltoide lateral | Falta |
 | Rotación externa acostado con mancuerna | `rotacion-externa-acostado-con-mancuerna` | Manguito rotador | Falta |
-| Encogimientos con mancuernas | `encogimientos-con-mancuernas` | Trapecio superior | Falta |
+| Encogimientos con mancuernas | `encogimientos-con-mancuernas` | Trapecio superior | **Listo** (imagen) |
 | Curl inclinado con mancuernas | `curl-inclinado-con-mancuernas` | Bíceps (cabeza larga) | Falta |
 | Curl concentrado | `curl-concentrado` | Bíceps | Falta |
 | Curl isométrico a 90° | `curl-isometrico-a-90` | Bíceps · Braquial | Falta |
@@ -197,60 +197,60 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Press inclinado en máquina | `press-inclinado-en-maquina` | Pecho superior | **Listo** (imagen) |
 | Pec deck (aperturas en máquina) | `pec-deck-aperturas-en-maquina` | Pecho | **Listo** (imagen) |
 | Dominada asistida en máquina | `dominada-asistida-en-maquina` | Dorsal ancho | Falta |
-| Remo en máquina con apoyo de pecho | `remo-en-maquina-con-apoyo-de-pecho` | Dorsal · Romboides | Falta |
-| Press de hombro en máquina | `press-de-hombro-en-maquina` | Deltoides | Falta |
-| Elevación lateral en máquina | `elevacion-lateral-en-maquina` | Deltoides lateral | Falta |
-| Reverse pec deck | `reverse-pec-deck` | Deltoides posterior | Falta |
-| Encogimientos en máquina | `encogimientos-en-maquina` | Trapecio | Falta |
-| Curl predicador en máquina | `curl-predicador-en-maquina` | Bíceps (porción corta) | Falta |
-| Crunch en máquina | `crunch-en-maquina` | Recto abdominal | Falta |
-| Sentadilla en Smith | `sentadilla-en-smith` | Cuádriceps · Glúteo | Falta |
+| Remo en máquina con apoyo de pecho | `remo-en-maquina-con-apoyo-de-pecho` | Dorsal · Romboides | **Listo** (imagen) |
+| Press de hombro en máquina | `press-de-hombro-en-maquina` | Deltoides | **Listo** (imagen) |
+| Elevación lateral en máquina | `elevacion-lateral-en-maquina` | Deltoides lateral | **Listo** (imagen) |
+| Reverse pec deck | `reverse-pec-deck` | Deltoides posterior | **Listo** (imagen) |
+| Encogimientos en máquina | `encogimientos-en-maquina` | Trapecio | **Listo** (imagen) |
+| Curl predicador en máquina | `curl-predicador-en-maquina` | Bíceps (porción corta) | **Listo** (imagen) |
+| Crunch en máquina | `crunch-en-maquina` | Recto abdominal | **Listo** (imagen) |
+| Sentadilla en Smith | `sentadilla-en-smith` | Cuádriceps · Glúteo | **Listo** (imagen) |
 | Prensa de piernas unilateral | `prensa-de-piernas-unilateral` | Cuádriceps · Glúteo | Falta |
-| Hip thrust en máquina | `hip-thrust-en-maquina` | Glúteo mayor | Falta |
+| Hip thrust en máquina | `hip-thrust-en-maquina` | Glúteo mayor | **Listo** (imagen) |
 | Patada de glúteo en máquina | `patada-de-gluteo-en-maquina` | Glúteo mayor | Falta |
-| Peso muerto rumano en Smith | `peso-muerto-rumano-en-smith` | Femorales · Glúteo | Falta |
-| Pantorrilla sentado en máquina | `pantorrilla-sentado-en-maquina` | Sóleo | Falta |
-| Pantorrilla en Smith | `pantorrilla-en-smith` | Gemelos | Falta |
-| Press banca en Smith | `press-banca-en-smith` | Pecho mayor · Tríceps | Falta |
-| Remo en máquina con pecho apoyado | `remo-en-maquina-con-pecho-apoyado` | Espalda media | Falta |
-| Remo unilateral en máquina | `remo-unilateral-en-maquina` | Dorsal · Espalda media | Falta |
-| Remo invertido en Smith | `remo-invertido-en-smith` | Espalda media · Bíceps | Falta |
-| Pec deck inverso | `pec-deck-inverso` | Deltoide posterior | Falta |
-| Encogimientos en Smith | `encogimientos-en-smith` | Trapecio superior | Falta |
-| Fondos asistidos en máquina | `fondos-asistidos-en-maquina` | Tríceps · Pecho | Falta |
+| Peso muerto rumano en Smith | `peso-muerto-rumano-en-smith` | Femorales · Glúteo | **Listo** (imagen) |
+| Pantorrilla sentado en máquina | `pantorrilla-sentado-en-maquina` | Sóleo | **Listo** (imagen) |
+| Pantorrilla en Smith | `pantorrilla-en-smith` | Gemelos | **Listo** (imagen) |
+| Press banca en Smith | `press-banca-en-smith` | Pecho mayor · Tríceps | **Listo** (imagen) |
+| Remo en máquina con pecho apoyado | `remo-en-maquina-con-pecho-apoyado` | Espalda media | **Listo** (imagen) |
+| Remo unilateral en máquina | `remo-unilateral-en-maquina` | Dorsal · Espalda media | **Listo** (imagen) |
+| Remo invertido en Smith | `remo-invertido-en-smith` | Espalda media · Bíceps | **Listo** (imagen) |
+| Pec deck inverso | `pec-deck-inverso` | Deltoide posterior | **Listo** (imagen) |
+| Encogimientos en Smith | `encogimientos-en-smith` | Trapecio superior | **Listo** (imagen) |
+| Fondos asistidos en máquina | `fondos-asistidos-en-maquina` | Tríceps · Pecho | **Listo** (imagen) |
 | Extensión de tríceps en máquina | `extension-de-triceps-en-maquina` | Tríceps | Falta |
-| Aguante en hiperextensión | `aguante-en-hiperextension` | Espalda baja · Glúteo | Falta |
+| Aguante en hiperextensión | `aguante-en-hiperextension` | Espalda baja · Glúteo | **Listo** (imagen) |
 
 ### Funcional (kettlebell, cajón, trineo)
 
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
-| Step-up al cajón | `step-up-al-cajon` | Glúteo · Cuádriceps | Falta |
-| Fondos en paralelas | `fondos-en-paralelas` | Pecho inferior · Tríceps | Falta |
+| Step-up al cajón | `step-up-al-cajon` | Glúteo · Cuádriceps | **Listo** (imagen) |
+| Fondos en paralelas | `fondos-en-paralelas` | Pecho inferior · Tríceps | **Listo** (imagen) |
 | Dominadas | `dominadas` | Dorsal ancho · Bíceps | **Listo** (imagen) |
-| Remo invertido en TRX | `remo-invertido-en-trx` | Espalda media · Core | Falta |
-| Elevación de piernas colgado | `elevacion-de-piernas-colgado` | Abdomen inferior | Falta |
-| Swing con kettlebell | `swing-con-kettlebell` | Glúteo · Cadena posterior | Falta |
+| Remo invertido en TRX | `remo-invertido-en-trx` | Espalda media · Core | **Listo** (imagen) |
+| Elevación de piernas colgado | `elevacion-de-piernas-colgado` | Abdomen inferior | **Listo** (imagen) |
+| Swing con kettlebell | `swing-con-kettlebell` | Glúteo · Cadena posterior | **Listo** (imagen) |
 | Dominada agarre neutro | `dominada-agarre-neutro` | Dorsal · Bíceps | Falta |
-| Dominada excéntrica (negativa) | `dominada-excentrica-negativa` | Dorsal · Bíceps | Falta |
-| Aguante isométrico en barra (arriba) | `aguante-isometrico-en-barra-arriba` | Dorsal · Bíceps | Falta |
-| Aguante en L (L-sit) | `aguante-en-l-l-sit` | Abdomen · Tríceps | Falta |
-| Cuerdas de batalla | `cuerdas-de-batalla` | Sistema cardiovascular · Hombro | Falta |
-| Empuje de trineo | `empuje-de-trineo` | Sistema cardiovascular · Piernas | Falta |
+| Dominada excéntrica (negativa) | `dominada-excentrica-negativa` | Dorsal · Bíceps | **Listo** (imagen) |
+| Aguante isométrico en barra (arriba) | `aguante-isometrico-en-barra-arriba` | Dorsal · Bíceps | **Listo** (imagen) |
+| Aguante en L (L-sit) | `aguante-en-l-l-sit` | Abdomen · Tríceps | **Listo** (imagen) |
+| Cuerdas de batalla | `cuerdas-de-batalla` | Sistema cardiovascular · Hombro | **Listo** (imagen) |
+| Empuje de trineo | `empuje-de-trineo` | Sistema cardiovascular · Piernas | **Listo** (imagen) |
 
 ### Peso corporal
 
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
-| Sentadilla sissy asistida | `sentadilla-sissy-asistida` | Cuádriceps | Falta |
-| Isométrico de cuádriceps | `isometrico-de-cuadriceps` | Cuádriceps | Falta |
-| Sentadilla isométrica en pared | `sentadilla-isometrica-en-pared` | Cuádriceps | Falta |
+| Sentadilla sissy asistida | `sentadilla-sissy-asistida` | Cuádriceps | **Listo** (imagen) |
+| Isométrico de cuádriceps | `isometrico-de-cuadriceps` | Cuádriceps | **Listo** (imagen) |
+| Sentadilla isométrica en pared | `sentadilla-isometrica-en-pared` | Cuádriceps | **Listo** (imagen) |
 | Puente de glúteo | `puente-de-gluteo` | Glúteo | **Listo** (imagen) |
-| Caminata lateral con banda | `caminata-lateral-con-banda` | Glúteo medio | Falta |
-| Curl femoral en fitball | `curl-femoral-en-fitball` | Femorales | Falta |
-| Curl nórdico asistido | `curl-nordico-asistido` | Femorales | Falta |
+| Caminata lateral con banda | `caminata-lateral-con-banda` | Glúteo medio | **Listo** (imagen) |
+| Curl femoral en fitball | `curl-femoral-en-fitball` | Femorales | **Listo** (imagen) |
+| Curl nórdico asistido | `curl-nordico-asistido` | Femorales | **Listo** (imagen) |
 | Pantorrilla unilateral en escalón | `pantorrilla-unilateral-en-escalon` | Gemelos | Falta |
-| Lagartijas | `lagartijas` | Pecho · Tríceps · Core | Falta |
+| Lagartijas | `lagartijas` | Pecho · Tríceps · Core | **Listo** (imagen) |
 | Rotación externa con banda | `rotacion-externa-con-banda` | Manguito rotador | Falta |
 | Fondos en banco | `fondos-en-banco` | Tríceps | Falta |
 | Plancha frontal | `plancha-frontal` | Core | **Listo** (imagen) |
