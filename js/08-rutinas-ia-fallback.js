@@ -386,7 +386,7 @@ function renderPreview(rutina){
   } else { pvCons.style.display='none'; pvCons.innerHTML=''; }
 
   // ── Preview de nutrición calculada ──
-  const tmpSocio={peso:qAnswers.peso,estatura:qAnswers.estatura,edad:qAnswers.edad,genero:qAnswers.genero,dias:qAnswers.dias,objetivo:qAnswers.objetivo,nivel:qAnswers.nivel,cintura:qAnswers.cintura||0,logs:{pesoCorporal:[]}};
+  const tmpSocio={peso:qAnswers.peso,estatura:qAnswers.estatura,edad:qAnswers.edad,genero:qAnswers.genero,dias:qAnswers.dias,objetivo:qAnswers.objetivo,nivel:qAnswers.nivel,cintura:qAnswers.cintura||0,actividad:qAnswers.actividad||'',logs:{pesoCorporal:[]}};
   const nut=calcNutricion(tmpSocio);
   document.getElementById('pv-nutri').innerHTML=`
     <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:0;color:var(--mu);margin-bottom:10px;display:flex;align-items:center;gap:10px;">
@@ -464,7 +464,7 @@ async function confirmarRutina(){
     code, nombre:limpiarTexto(qAnswers.nombre).toUpperCase(), id:'#'+(GYM.prefijoId||'FS')+'-'+code.slice(0,5).toUpperCase(),
     objetivo:qAnswers.objetivo, nivel:qAnswers.nivel,
     edad:qAnswers.edad, genero:qAnswers.genero,
-    peso:qAnswers.peso, estatura:qAnswers.estatura, dias:qAnswers.dias, cintura:qAnswers.cintura||0,
+    peso:qAnswers.peso, estatura:qAnswers.estatura, dias:qAnswers.dias, cintura:qAnswers.cintura||0, actividad:qAnswers.actividad||'',
     diasSemana:[...(qAnswers.diasSemana||[])],
     clasesGrupales:(qAnswers.clasesGrupales||[]).filter(c=>c.dias&&c.dias.length).map(c=>({clase:c.clase,dias:[...c.dias],entrenaMismoDia:!!c.entrenaMismoDia})),
     zonas:[...qAnswers.zonas],
@@ -509,7 +509,8 @@ async function confirmarRutina(){
   { const c=document.getElementById('qi-cintura'); if(c) c.value=''; }
   document.querySelectorAll('.q-sc .opt').forEach(o=>o.classList.remove('sel'));
   document.querySelectorAll('.q-sc .chk').forEach(c=>c.classList.remove('ck'));
-  ['qb2','qb3','qb6','qb11','qbT'].forEach(id=>{const b=document.getElementById(id); if(b) b.disabled=true;});
+  qAnswers.actividad=''; qAnswers.actividadLbl='';
+  ['qb2','qb3','qb4','qb6','qb11','qbT'].forEach(id=>{const b=document.getElementById(id); if(b) b.disabled=true;});
   go('s-pending');
 }
 
@@ -1394,6 +1395,12 @@ function editarCintura(){
     s.cintura=c; dbSave(s.code); showToast('Cintura guardada: tu plan de nutrición ya la considera'); renderPerfilTab();
   });
 }
+function editarActividad(){
+  const s=activeSocio; if(!s) return;
+  uiOpciones('¿Cómo es tu trabajo o tu día fuera del gym? Con esto se calculan mejor tus calorías.',
+    Object.entries(ACTIVIDAD_TRABAJO).map(([value,a])=>({value,label:a.lbl,sub:a.sub,sel:s.actividad===value})),
+    v=>{ s.actividad=v; dbSave(s.code); showToast('Listo: tus calorías ya consideran tu actividad diaria'); renderPerfilTab(); });
+}
 function renderPerfilTab(){
   const s=activeSocio; if(!s) return;
   asegurarLogs(s);
@@ -1442,6 +1449,7 @@ function renderPerfilTab(){
     <div class="sec-row"><div class="sec-t">Composición</div></div>
     <div class="card pf-card">
       <button type="button" class="pf-row" onclick="editarCintura()">${it('target','sm')}<span>Cintura: ${s.cintura?esc(s.cintura)+' cm':'agregar (opcional)'}</span>${ico('chev')}</button>
+      <button type="button" class="pf-row" onclick="editarActividad()">${it('star','sm')}<span>Tu día fuera del gym: ${ACTIVIDAD_TRABAJO[s.actividad]?esc(ACTIVIDAD_TRABAJO[s.actividad].lbl.toLowerCase()):'indícalo'}</span>${ico('chev')}</button>
     </div>
     <div class="sec-row"><div class="sec-t">Cuenta</div></div>
     <div class="card pf-card">

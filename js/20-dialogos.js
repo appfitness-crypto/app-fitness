@@ -34,3 +34,17 @@ function uiPrompt(msg,expected,onYes,opts){
 }
 function uiNo(){ document.getElementById('modal-uic').classList.remove('open'); UIC_CB=null; }
 function uiYes(){ const cb=UIC_CB; if(document.getElementById('uic-yes').disabled) return; document.getElementById('modal-uic').classList.remove('open'); UIC_CB=null; if(cb) cb(); }
+
+// Diálogo de opciones (elige una). ops: [{value,label,sub,sel}]
+function uiOpciones(msg,ops,onPick){
+  let m=document.getElementById('modal-uio');
+  if(!m){ m=document.createElement('div'); m.className='modal'; m.id='modal-uio'; m.onclick=e=>{ if(e.target===m) m.classList.remove('open'); }; document.body.appendChild(m); }
+  m.innerHTML=`<div class="mbox" style="max-width:420px" role="dialog" aria-modal="true">
+    <div style="font-size:var(--fs-base);line-height:1.6;color:var(--tx);margin-bottom:14px">${esc(msg)}</div>
+    <div class="opts" style="grid-template-columns:1fr;gap:8px;max-height:none">${ops.map((o,i)=>`<div class="opt${o.sel?' sel':''}" role="button" tabindex="0" data-i="${i}"><div class="ol">${esc(o.label)}</div>${o.sub?`<div class="os">${esc(o.sub)}</div>`:''}</div>`).join('')}</div>
+    <button type="button" class="sd-b" style="width:100%;margin-top:14px">Cancelar</button></div>`;
+  m.querySelectorAll('.opt').forEach(el=>{ const go=()=>{ m.classList.remove('open'); onPick(ops[+el.dataset.i].value); };
+    el.onclick=go; el.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); } }; });
+  m.querySelector('button').onclick=()=>m.classList.remove('open');
+  m.classList.add('open');
+}

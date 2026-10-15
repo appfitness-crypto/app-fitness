@@ -5,6 +5,12 @@
 // MOTOR DE NUTRICIÓN — fórmulas verificadas
 // BMR: Mifflin-St Jeor (1990)
 // ═════════════════════════════════════════
+// Actividad del día fuera del gym (pregunta del cuestionario). Factor base sin contar el entrenamiento.
+const ACTIVIDAD_TRABAJO={
+  sentado:{lbl:'Sentado la mayor parte del día', sub:'Oficina, escuela, manejar', f:1.2},
+  depie:{lbl:'De pie o caminando', sub:'Comercio, docencia, mesero, enfermería', f:1.375},
+  fisico:{lbl:'Trabajo físico', sub:'Cargar, construcción, campo, almacén', f:1.55},
+};
 // Composición corporal estimada: IMC y, si hay cintura, % de grasa con la fórmula RFM (Relative Fat Mass):
 // RFM = 64 − 20 × estatura / cintura (+12 en mujeres). Con eso se distingue un IMC alto por músculo de uno por grasa.
 function composicionCorporal(s,peso){
@@ -36,9 +42,11 @@ function calcNutricion(s){
   const bmr = comp.grasa!=null ? Math.round(370+21.6*peso*(1-comp.grasa/100))
     : Math.round(esHombre ? bmrH : esMujer ? bmrM : (bmrH+bmrM)/2);
 
-  // Factor de actividad según días de entrenamiento/semana
+  // Factor de actividad: actividad del trabajo (base) + cada día de entrenamiento.
+  // Socios registrados antes de esta pregunta conservan la tabla anterior (solo días de entrenamiento).
   const factores = {2:1.375, 3:1.45, 4:1.55, 5:1.65, 6:1.725};
-  const factor = factores[s.dias] || 1.55;
+  const act = ACTIVIDAD_TRABAJO[s.actividad];
+  const factor = act ? Math.min(1.9, Math.round((act.f + 0.05*(parseInt(s.dias)||4))*1000)/1000) : (factores[s.dias] || 1.55);
   const tdee = Math.round(bmr * factor);
 
   // Ajuste calórico según objetivo
