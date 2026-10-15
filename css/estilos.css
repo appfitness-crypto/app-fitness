@@ -1244,14 +1244,42 @@ html[data-theme="light2"] .wk.hoy .wk-d,html[data-theme="light2"] .wk.hoy .wk-m{
 .seg2 button[aria-pressed="true"]{background:var(--lime);border-color:var(--lime);color:#0E1318;box-shadow:var(--glow);}
 
 /* BARRA DE NAVEGACIÓN INFERIOR */
-.bnav{position:fixed;left:0;right:0;bottom:0;z-index:120;display:flex;justify-content:space-around;padding:8px 6px calc(8px + var(--safe-b));background:var(--topbar);border-top:1px solid var(--b);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);max-width:none;}
-.bn-i{flex:1;max-width:96px;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:none;color:var(--mu);font-size:var(--fs-xs);font-weight:700;cursor:pointer;padding:0;}
-.bn-i i{width:44px;height:30px;border-radius:999px;display:grid;place-items:center;font-style:normal;transition:background .2s,color .2s;}
-.bn-i .ico{width:22px;height:22px;}
+/* ── Barra inferior: base flotante con indicador que se desliza entre pestañas ──
+   Solo anima transform y opacity. El indicador se mueve con --i (índice de la pestaña activa, js/08 dashTab). */
+.bnav{--n:5;--pad:6px;position:fixed;left:12px;right:12px;bottom:calc(10px + var(--safe-b));z-index:120;display:flex;padding:var(--pad);
+  max-width:460px;margin:0 auto;border-radius:26px;isolation:isolate;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--tx) 5%,transparent),transparent 60%),var(--topbar);
+  border:1px solid var(--b2);
+  -webkit-backdrop-filter:blur(22px) saturate(1.6);backdrop-filter:blur(22px) saturate(1.6);
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--tx) 8%,transparent),0 18px 40px -16px rgba(0,0,0,.55),0 2px 6px -2px rgba(0,0,0,.25);}
+.bn-ind{position:absolute;z-index:0;top:var(--pad);bottom:var(--pad);left:var(--pad);width:calc((100% - var(--pad)*2)/var(--n));
+  transform:translateX(calc(var(--i,0)*100%));transition:transform .5s cubic-bezier(.32,1.25,.5,1);pointer-events:none;}
+.bn-ind::before{content:"";position:absolute;inset:0 4px;border-radius:20px;
+  background:radial-gradient(120% 90% at 50% 0%,color-mix(in srgb,var(--lime) 22%,transparent),transparent 70%),color-mix(in srgb,var(--lime) 10%,transparent);
+  border:1px solid color-mix(in srgb,var(--lime) 28%,transparent);}
+.bn-ind::after{content:"";position:absolute;left:50%;top:-1px;width:22px;height:3px;margin-left:-11px;border-radius:0 0 3px 3px;background:var(--lime);
+  box-shadow:0 2px 10px color-mix(in srgb,var(--lime) 70%,transparent);}
+.bn-i{position:relative;z-index:1;flex:1;min-width:0;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  border:none;background:none;color:var(--mu);font-size:var(--fs-2xs);font-weight:700;letter-spacing:.01em;cursor:pointer;padding:6px 0 5px;border-radius:20px;
+  -webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;transition:color .25s,transform .18s cubic-bezier(.2,.8,.2,1);}
+.bn-i i{width:30px;height:28px;display:grid;place-items:center;font-style:normal;transition:transform .35s cubic-bezier(.32,1.4,.5,1);}
+.bn-i .ico{width:22px;height:22px;transition:filter .3s;}
+.bn-i span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.bn-i:active{transform:scale(.92);}
 .bn-i.ac{color:var(--tx);}
-.bn-i.ac i{background:var(--lime);color:#0E1318;}
+.bn-i.ac i{transform:translateY(-1px) scale(1.08);}
 html[data-theme="dark"] .bn-i.ac{color:var(--lime);}
-@media(min-width:1025px){ .bnav{left:50%;right:auto;transform:translateX(-50%);width:520px;bottom:14px;border:1px solid var(--b2);border-radius:999px;padding:8px 10px;box-shadow:0 18px 40px -14px rgba(0,0,0,.35);} }
+html[data-theme="dark"] .bn-i.ac .ico{filter:drop-shadow(0 0 6px color-mix(in srgb,var(--lime) 55%,transparent));}
+html:not([data-theme="dark"]) .bn-ind::before{background:var(--lime);border-color:transparent;}
+html:not([data-theme="dark"]) .bn-ind::after{display:none;}
+html:not([data-theme="dark"]) .bn-i.ac{color:#0E1318;}
+.bn-i:focus-visible{outline:2px solid var(--lime);outline-offset:-2px;}
+.bn-i.pop i{animation:bnPop .45s cubic-bezier(.32,1.4,.5,1);}
+@keyframes bnPop{0%{transform:scale(.82)}60%{transform:translateY(-2px) scale(1.14)}100%{transform:translateY(-1px) scale(1.08)}}
+@media (hover:hover){ .bn-i:not(.ac):hover{color:var(--tx);} .bn-i:not(.ac):hover i{transform:translateY(-1px);} }
+@media (prefers-reduced-motion:reduce){ .bn-ind,.bn-i,.bn-i i{transition:none;} .bn-i.pop i{animation:none;} }
+@media (prefers-reduced-transparency:reduce){ .bnav{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--dk2,var(--topbar));} }
+@media(min-width:1025px){ .bnav{left:50%;right:auto;transform:translateX(-50%);width:480px;bottom:16px;margin:0;} }
 
 /* DETALLE DEL DÍA */
 #s-det{padding:0;}

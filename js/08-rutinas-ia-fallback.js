@@ -1186,6 +1186,13 @@ function tabActiva(){ return NAV_TABS.find(x=>document.getElementById('dsec-'+x)
 
 function dashTab(t){
   if(!NAV_TABS.includes(t)) t='inicio';
+  const nav=document.querySelector('.bnav'), antes=tabActiva();
+  if(nav) nav.style.setProperty('--i', NAV_TABS.indexOf(t));   // mueve el indicador
+  if(antes!==t){
+    const b=document.getElementById('dtab-'+t);
+    if(b){ b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); }
+    try{ if(navigator.vibrate && !matchMedia('(prefers-reduced-motion: reduce)').matches) navigator.vibrate(8); }catch(_){}
+  }
   if(t!=='progreso') av3dDestruir();
   NAV_TABS.forEach(x=>{
     document.getElementById('dtab-'+x).classList.toggle('ac', x===t);
