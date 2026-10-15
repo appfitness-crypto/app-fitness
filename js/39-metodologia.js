@@ -28,6 +28,12 @@ function metRango(txt,def){
   const a=Math.max(1,Math.min(30,+n[0])), b=Math.max(1,Math.min(30,n[1]?+n[1]:+n[0]));
   return [Math.min(a,b),Math.max(a,b)];
 }
+// "80-90", "80 a 90%" → "80-90" (tope 95 %); vacío → ''
+function metPct(txt){
+  const n=String(txt||'').match(/\d{1,3}/g); if(!n) return '';
+  const a=Math.min(95,+n[0]), b=n[1]?Math.min(95,+n[1]):a;
+  return a===b?String(a):Math.min(a,b)+'-'+Math.max(a,b);
+}
 function metRepsTxt(r,letra){ return (r[0]===r[1]?r[0]:r[0]+'-'+r[1])+' reps — '+MET_PROP[letra]; }
 function metLista(s){ return String(s||'').split(/[,;\n]+/).map(kbNorm).filter(x=>x.length>2); }
 function metNombre(ent){ return tc(String((ent&&ent.nombre)||'tu entrenador')).split(' ')[0]; }
@@ -43,36 +49,54 @@ function metSplitClave(txt,nivel){
   const g=frases.find(f=>!/principiante|novato|empiez/.test(f) && clave(f));
   return g?clave(g):null;
 }
+// Split que el entrenador eligió para ese número de días (tabla del cuestionario). Con principiantes manda su nota
+// ("full body para principiantes") si la escribió; si no eligió nada para esos días, se lee su texto.
+function metSplitElegido(ph,nFull,nivel){
+  const st=(ph&&ph.structure)||{};
+  const nota=nivel===1 && String(st.split||'').split(/[.;\n]+/).some(f=>/principiante|novato|empiez/i.test(f));
+  const tabla=(st.splitPorDias||{})[Math.max(2,Math.min(6,nFull||0))];
+  if(tabla && !nota) return tabla;
+  return metSplitClave(st.split,nivel);
+}
+function metFrecuencia(ph){ return parseInt(ph&&ph.structure&&ph.structure.frecuencia)||2; }
 // El objetivo del cliente manda: cada músculo debe trabajarse al menos 2 veces por semana. Si el split del entrenador
 // no lo permite con los días que tiene el socio (empuje/jalón/pierna con menos de 6 días, un grupo por día con
-// menos de 6), se usa la estructura más cercana que sí lo cumple.
-function metSplitEfectivo(k,nFull){
+// menos de 6), se usa la estructura más cercana que sí lo cumple. Si el entrenador eligió frecuencia 1, se respeta
+// su split clásico siempre que haya días para completarlo.
+function metSplitEfectivo(k,nFull,frec){
   if(!k) return null;
+  if(frec===1){
+    if(k==='ppl' && nFull>=3) return k;
+    if(k==='grupos' && nFull>=4) return k;
+  }
   if(k==='ppl' && nFull<6) return nFull>=4?'torso':'full';
   if(k==='grupos' && nFull<6) return nFull>=4?'torso':'full';
-  if(k==='torso' && nFull<=2) return 'full';
+  if((k==='torso'||k==='hibrido') && nFull<=2) return 'full';
   return k;
 }
 function metSplitTipos(ph,nFull,nivel){
   if(!metActiva(ph) || !nFull) return null;
-  const k=metSplitEfectivo(metSplitClave(ph.structure&&ph.structure.split, nivel), nFull); if(!k) return null;
+  const k=metSplitEfectivo(metSplitElegido(ph,nFull,nivel), nFull, metFrecuencia(ph)); if(!k) return null;
   const col=['verde','gold','neon','hombro','red','verde'];
   let nombres;
   if(k==='full' || nFull===1) nombres=['Full Body A','Full Body B','Full Body C'];
   else if(k==='torso') nombres=nFull===3?['Torso A','Pierna A','Full Body B']:['Torso A','Pierna A','Torso B','Pierna B'];
+  else if(k==='hibrido') nombres=nFull===4?['Torso A','Pierna A','Full Body B','Full Body C']:['Torso A','Pierna A','Full Body B','Torso B','Pierna B','Full Body C'];
   else if(k==='ppl') nombres=nFull<3?['Full Body A','Full Body B']:['Empuje · Pecho + Tríceps','Jalón · Espalda + Bíceps','Pierna A','Empuje · Pecho + Tríceps B','Jalón · Espalda + Bíceps B','Pierna B'];
   else nombres=nFull<4?null:['Pecho + Tríceps','Espalda + Bíceps','Pierna A','Hombro + Core','Pierna B','Full Body Funcional'];
   if(!nombres) return null;
   const out=[]; for(let i=0;i<nFull;i++) out.push([nombres[i%nombres.length], col[i%col.length]]);
   return {clave:k, tipos:out};
 }
-const MET_SPLIT_TXT={full:'cuerpo completo en cada sesión',torso:'torso y pierna en días alternos',ppl:'empuje, jalón y pierna',grupos:'un grupo muscular por día'};
+const MET_SPLIT_TXT={full:'cuerpo completo en cada sesión',torso:'torso y pierna en días alternos',hibrido:'torso, pierna y cuerpo completo combinados',ppl:'empuje, jalón y pierna',grupos:'un grupo muscular por día'};
 // Variedad baja = pocos ejercicios dominados: las sesiones A, B y C repiten los mismos ejercicios
 function metPocaVariedad(ph){ return metActiva(ph) && ((ph.exerciseStyle&&ph.exerciseStyle.variety)||3)<=2; }
 
 // ── Intensidad: cómo la dosifica el entrenador, según el tipo de día y el nivel del socio ──
-function metEsfuerzo(metodo,letra,nivel){
+function metEsfuerzo(metodo,letra,nivel,pctT){
   if(letra==='P') return {txt:'Máxima velocidad en cada repetición; descansa completo',rir:3};
+  const pc=metodo==='porcentajes' && pctT && metPct(pctT[letra]);
+  if(pc) return {txt:pc+'% de tu 1RM',rir:letra==='F'?2:letra==='H'?2:3};
   if(metodo==='rpe') return letra==='F'?{txt:'RPE 8: termina sintiendo que te quedaban 2 reps',rir:2}
     : letra==='H'?{txt:nivel>1?'RPE 8-9: te queda 1 rep, quizá 2':'RPE 8: te quedan 2 reps',rir:nivel>1?1:2}
     : {txt:'RPE 7: te quedan unas 3 reps',rir:3};
@@ -134,6 +158,43 @@ function metLetraDia(fase,obj){
   return obj;
 }
 
+// ── Patrones de movimiento obligatorios (cuestionario, bloque de selección) ──
+const MET_PATRONES={
+  sentadilla:{rx:/sentadilla|prensa|hack|goblet/, ids:['goblet','sentadilla','prensa','sentadilla_smith','hack'], zona:'pierna'},
+  bisagra:{rx:/peso muerto|rumano|hip thrust|puente|good morning|swing|pull through/, ids:['pm_rumano','pm_rumano_mancuerna','hip_thrust','hip_thrust_maquina','puente'], zona:'pierna'},
+  unilateral:{rx:/bulgara|zancada|desplante|step up|una pierna|unilateral|split|pistol/, ids:['bulgara','zancada_reversa','step_up','desplante'], zona:'pierna'},
+  empujeH:{rx:/press (banca|de banca|de pecho|pecho|inclinado|declinado|con mancuernas|en maquina|al suelo)|lagartija|flexion|fondos(?! en banco)/, ids:['press_banca','press_mancuerna','press_maquina','lagartija'], zona:'torso'},
+  empujeV:{rx:/press (militar|de hombro|hombro|arnold|landmine)/, ids:['press_hombro_mancuerna','press_militar','press_hombro_maquina','landmine_press'], zona:'torso'},
+  jalonH:{rx:/remo(?! al menton| erg)/, ids:['remo_polea','remo_mancuerna','remo_apoyo','remo_maquina'], zona:'torso'},
+  jalonV:{rx:/jalon|dominada/, ids:['jalon','jalon_neutro','dominada_asistida'], zona:'torso'},
+  cargar:{rx:/farmer|granjero|caminata con peso/, ids:['farmer','farmer_unilateral'], zona:'core', extra:{series:3, reps:'30 m — resistencia', peso:'Moderado'}},
+  antirrotacion:{rx:/pallof|plancha lateral|bird dog|antirrot/, ids:['pallof','pallof_liga','plancha_lateral','bird_dog'], zona:'core'},
+  rotacion:{rx:/lenador|woodchop|giro ruso|rotacion de tronco|rotacion rusa/, ids:['woodchop_polea','woodchop_liga','giro_ruso_disco'], zona:'core'},
+};
+function metCubrirPatrones(dias,patrones,ctx,nunca){
+  const lista=(Array.isArray(patrones)?patrones:Object.values(patrones||{})).filter(id=>MET_PATRONES[id]);
+  if(!lista.length || !dias.length) return 0;
+  let n=0;
+  const nms=()=>dias.flatMap(d=>d.ejercicios.map(e=>kbNorm(e.nm||e.nombre)));
+  const zonaDia=d=>{ const enf=[...metEnfDia(d)]; return {pierna:enf.some(x=>MET_PIERNA.includes(x)), torso:enf.some(x=>x&&!MET_PIERNA.includes(x)&&x!=='core'&&x!=='abdomen')}; };
+  lista.forEach(id=>{
+    const P=MET_PATRONES[id];
+    const ya=dias.flatMap(d=>d.ejercicios).find(e=>P.rx.test(kbNorm(e.nm||e.nombre)));
+    if(ya){ if(!ya._patron) ya._patron=id; return; }   // ya está: se protege para que los recortes no lo quiten
+    const cand=dias.filter(d=>P.zona==='core'||zonaDia(d)[P.zona]).sort((a,b)=>a.ejercicios.length-b.ejercicios.length);
+    for(const d of cand){
+      const x=metElegir(P.ids,ctx,nunca,d.ejercicios); if(!x) continue;
+      const iso=!!x.iso;
+      const e=metNuevo(x,Object.assign({series:3, reps:iso?'30 seg — isométrico':(x.t==='c'?'10-12 reps — hipertrofia':'12 reps — resistencia'), peso:x.z==='corporal'?'Corporal':'Moderado'},P.extra||{}));
+      e._patron=id;
+      const iCore=d.ejercicios.findIndex(y=>metEsCore(y)||esEjCardio(y)||y.fase==='cierre');
+      if(P.zona!=='core' && iCore>=0) d.ejercicios.splice(iCore,0,e); else d.ejercicios.push(e);
+      n++; break;
+    }
+  });
+  return n;
+}
+
 // ═════════════════════════════════════════
 // Aplica la metodología a una semana ya armada (plantilla). Devuelve las líneas para el socio.
 // p = {objetivo, nivel, edad, zonas}
@@ -143,15 +204,18 @@ function aplicarMetodologia(semana,ent,ctx,p){
   if(!metActiva(ph) || ctx.sinMetodos || ctx.soloSuaves) return null;
   const nivel=ctx.nivel, obj=ctx.obj, edad=parseInt(p.edad)||35;
   const ss=ph.sesion||{}, pr=ph.priorities||{}, se=ph.seleccion||{};
-  const nunca=metLista(se.nunca);
+  const nunca=[...new Set([...metLista(se.nunca), ...(ctx.evitaNm||[])])];   // + halterofilia / pliometría que no usa
   const per=(ph.structure&&ph.structure.periodization)||'';
   const metodoInt=(ph.structure&&ph.structure.method)||'';
   const modelo=(typeof filoModeloReps==='function')?filoModeloReps(ph,p.objetivo):null;
   const dosis=ph.dosis||{};
-  const rangos={F:metRango(dosis.fuerza,MET_REPS_DEF.F), H:metRango(dosis.hipertrofia,MET_REPS_DEF.H), R:metRango(dosis.resistencia,MET_REPS_DEF.R)};
+  const rangos={F:metRango(dosis.fuerza,MET_REPS_DEF.F), H:metRango(dosis.hipertrofia,MET_REPS_DEF.H), R:metRango(dosis.resistencia,MET_REPS_DEF.R), P:metRango(dosis.potencia,[3,5])};
   if(modelo && !String(dosis[MET_PROP[obj]]||'').trim()) rangos[obj]=[modelo.min,modelo.max];
+  // Series de la tabla del entrenador: el principal toma el tope del rango y los demás el mínimo
+  const seriesT={}; ['F','H','R','P'].forEach(L=>{ const t=(dosis.series||{})[L]; if(String(t||'').match(/\d/)) seriesT[L]=metRango(t,[3,3]).map(x=>Math.max(1,Math.min(6,x))); });
+  const pctT=dosis.pct||{};
   // Seguridad: principiantes y mayores de 60 no bajan de 6 reps
-  if(nivel===1 || edad>=60){ rangos.F=[Math.max(6,rangos.F[0]),Math.max(6,rangos.F[1])]; }
+  if(nivel===1 || edad>=60){ rangos.F=[Math.max(6,rangos.F[0]),Math.max(6,rangos.F[1])]; rangos.P=[Math.max(3,rangos.P[0]),Math.max(5,rangos.P[1])]; }
   const dias=(semana||[]).filter(metDiaFuerza);
   if(!dias.length) return null;
 
@@ -167,6 +231,9 @@ function aplicarMetodologia(semana,ent,ctx,p){
     });
   });
 
+  // 1b) Patrones que el entrenador exige cada semana: si falta alguno se agrega en el día que le corresponde
+  metCubrirPatrones(dias,se.patrones,ctx,nunca);
+
   // 2) Periodización, rangos, series e intensidad
   dias.forEach((d,i)=>{
     const fase=metFaseDia(per,d.tipo,i,nivel);
@@ -174,7 +241,7 @@ function aplicarMetodologia(semana,ent,ctx,p){
     const letraDia=fase?metLetraDia(fase,obj):obj;
     let principal=true;
     d.ejercicios.forEach(e=>{
-      if(!metEsFuerza(e) || e.potencia) return;
+      if(!metEsFuerza(e) || e.potencia || e._patron==='cargar') return;
       const dd=datosEj(e), comp=dd.tipo==='c';
       let letra = comp ? letraDia : (letraDia==='F'?'H':letraDia);
       if(letra==='F' && cargaLesion(ctx,dd)) letra='H';   // sobre la zona lesionada no se carga pesado
@@ -186,14 +253,18 @@ function aplicarMetodologia(semana,ent,ctx,p){
       }
       e.reps=metRepsTxt(rango,letra);
       if(modelo && modelo.series) e.series=Math.max(2,Math.min(6,modelo.series));
-      if(comp && principal){
+      const st=seriesT[letra];
+      if(st){ e.series=(comp&&principal)?st[1]:st[0]; if(comp&&principal) principal=false; }
+      else if(comp && principal){
         if((pr.fuerza||3)>=4 && nivel>1) e.series=Math.min(5,(parseInt(e.series)||3)+1);
         if(per==='bloques') e.series=Math.min(5,(parseInt(e.series)||3)+1);
         principal=false;
       } else if(!comp && (pr.hipertrofia||3)>=4) e.series=Math.min(4,(parseInt(e.series)||3)+1);
-      const esf=metEsfuerzo(metodoInt,letra,nivel);
+      const esf=metEsfuerzo(metodoInt,letra,nivel,pctT);
       if(esf){ e.esfuerzo=esf.txt; e.rir=esf.rir; }
-      if(!/1\s*RM/i.test(e.peso||'') && !/^(corporal|banda|sin carga)/i.test(e.peso||'')) e.peso='Moderado — 60% 1RM';
+      const pc=metodoInt==='porcentajes' && metPct(pctT[letra]);
+      if(pc && !/^(corporal|banda|sin carga)/i.test(e.peso||'')) e.peso=(letra==='F'?'Pesado':letra==='R'?'Ligero':'Moderado')+' — '+pc.split('-')[0]+'% 1RM';
+      else if(!/1\s*RM/i.test(e.peso||'') && !/^(corporal|banda|sin carga)/i.test(e.peso||'')) e.peso='Moderado — 60% 1RM';
     });
   });
 
@@ -203,8 +274,8 @@ function aplicarMetodologia(semana,ent,ctx,p){
     dias.forEach(d=>{
       if(n>=2 || ![...metEnfDia(d)].some(x=>MET_PIERNA.includes(x))) return;
       const x=metElegir(['sentadilla_salto','kb_swing'],ctx,nunca,d.ejercicios); if(!x) return;
-      d.ejercicios.unshift(metNuevo(x,{series:4, reps:'5 reps — potencia', peso:x.z==='corporal'?'Corporal':'Moderado', potencia:true,
-        esfuerzo:'Máxima velocidad en cada repetición; descansa completo', rir:3, descanso:'90 s',
+      d.ejercicios.unshift(metNuevo(x,{series:seriesT.P?seriesT.P[1]:4, reps:(rangos.P[0]===rangos.P[1]?rangos.P[0]:rangos.P[0]+'-'+rangos.P[1])+' reps — potencia', peso:x.z==='corporal'?'Corporal':'Moderado', potencia:true,
+        esfuerzo:'Máxima velocidad en cada repetición; descansa completo', rir:3, descanso:String((dosis.desc||{}).P||'').trim()||'90 s',
         tip:'Explota hacia arriba con toda la intención y aterriza suave; si la velocidad baja, termina la serie.'}));
       n++;
     });
@@ -341,12 +412,15 @@ function metLineas(ph,ent,p,ctx){
   if(!metActiva(ph)) return null;
   const L=[], nm=metNombre(ent), ss=ph.sesion||{}, nivel=ctx?ctx.nivel:nivelNum(p.nivel);
   const nDias=(p.diasSemana&&p.diasSemana.length)||parseInt(p.dias)||0;
-  const sp0=metSplitClave(ph.structure&&ph.structure.split, nivel), sp=nDias?metSplitEfectivo(sp0,nDias):sp0;
+  const sp0=metSplitElegido(ph,nDias,nivel), sp=nDias?metSplitEfectivo(sp0,nDias,metFrecuencia(ph)):sp0;
   // Full body con días seguidos: la regla de recuperación alterna torso y pierna (ver splitRecuperacion)
   const dsel=(p.diasSemana||[]).map(d=>DIAS_ORDER.indexOf(d)).filter(i=>i>=0).sort((a,b)=>a-b);
   const seguidos=dsel.some((d,i)=>i>0 && d-dsel[i-1]===1);
-  if(sp==='full' && seguidos) L.push('Tu plan es de cuerpo completo, pero como entrenas días seguidos se alterna torso y pierna para que cada músculo descanse 48 horas.');
+  const seg=ss.seguidos;
+  if(sp==='full' && seguidos && seg!=='si') L.push('Tu plan es de cuerpo completo, pero como entrenas días seguidos se alterna torso y pierna para que cada músculo descanse 48 horas.');
   else if(sp) L.push('Semana organizada en '+MET_SPLIT_TXT[sp]+(sp0&&sp0!==sp?', para trabajar cada músculo 2 veces por semana con tus '+nDias+' días':'')+'.');
+  const dur=parseInt(ss.duracion), nEj=maxEjSesion(ss);
+  if(dur||nEj) L.push('Sesiones '+(dur?'de unos '+dur+' minutos':'')+(dur&&nEj?', con ':'')+(nEj?(dur?'':'con ')+'hasta '+nEj+' ejercicios de trabajo':'')+'.');
   const per=ph.structure&&ph.structure.periodization;
   if(per==='ondulante') L.push('Periodización ondulante: alternas días pesados, medios y ligeros en la misma semana.');
   else if(per==='lineal') L.push('Progresión lineal: cuando completes todas las reps con buena técnica, sube un poco el peso.');

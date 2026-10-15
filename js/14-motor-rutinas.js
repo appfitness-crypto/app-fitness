@@ -25,6 +25,23 @@ const ANTAG={pecho:'dorsal',pecho_sup:'espalda_media',deltoide:'dorsal',deltoide
 
 function prng(seedStr){ let h=2166136261; for(const c of String(seedStr)) h=Math.imul(h^c.charCodeAt(0),16777619); return ()=>{ h=Math.imul(h^(h>>>15),2246822507); h=Math.imul(h^(h>>>13),3266489909); return ((h^=h>>>16)>>>0)/4294967296; }; }
 
+// Halterofilia y pliometría según el cuestionario del entrenador → nombres que no se programan
+const HALTERO_COMPLETO=['cargada','arranque','envion','clean','snatch','jerk'], HALTERO_VARIANTE=['swing','jalon alto','high pull','tiron alto'];
+const PLIO_NM=['salto','saltos','pliometr','jump','brinco'];
+function evitaSeleccion(se,nivel,objetivo){
+  se=se||{}; const out=[];
+  if(se.halterofilia==='no') out.push(...HALTERO_COMPLETO,...HALTERO_VARIANTE);
+  else if(se.halterofilia==='variantes' || (se.halterofilia==='avanzados' && nivel<3)) out.push(...HALTERO_COMPLETO);
+  if(se.pliometria==='no' || (se.pliometria==='deportistas' && objetivo!=='RENDIMIENTO DEPORTIVO') || (se.pliometria==='intermedio' && nivel<2)) out.push(...PLIO_NM);
+  return out;
+}
+// Ejercicios de trabajo por sesión: lo que el entrenador eligió, o lo que cabe en la duración de su sesión
+function maxEjSesion(ses){
+  ses=ses||{};
+  const porNum={'4-5':5,'6-7':7,'8+':9}[ses.ejercicios];
+  const porDur={45:5,60:7,75:8,90:9}[parseInt(ses.duracion)];
+  return porNum&&porDur?Math.min(porNum,porDur):(porNum||porDur||0);
+}
 function ctxDesdePerfil(p, filo){
   const f=filo||{};
   const m=f.metodos||{};
@@ -32,7 +49,9 @@ function ctxDesdePerfil(p, filo){
   return {
     edad:parseInt(p.edad)||0, imc:Math.round(imc*10)/10,
     dosisH:(f.dosis&&f.dosis.hipertrofia)||'', metodoInt:(f.structure&&f.structure.method)||'',
-    evitaNm:String((f.seleccion&&f.seleccion.nunca)||'').split(/[,;\n]+/).map(kbNorm).filter(x=>x.length>2),   // lo que el entrenador nunca programa
+    evitaNm:[...String((f.seleccion&&f.seleccion.nunca)||'').split(/[,;\n]+/).map(kbNorm).filter(x=>x.length>2), ...evitaSeleccion(f.seleccion,nivelNum(p.nivel),p.objetivo)],   // lo que el entrenador nunca programa
+    dosisR:(f.dosis&&f.dosis.resistencia)||'', descT:(f.dosis&&f.dosis.desc)||{}, pctT:(f.dosis&&f.dosis.pct)||{},
+    volT:f.volumen||{}, maxEj:maxEjSesion(f.sesion), seguidos:(f.sesion&&f.sesion.seguidos)||'',
     nivel:nivelNum(p.nivel), obj:objLetra(p.objetivo), objetivo:p.objetivo||'',
     les:lesionKeys(p.limitaciones), evita:m.evita||[],
     fav:[...new Set([...(m.favoritos||[]), ...((typeof filoModeloPara==='function'&&filoModeloPara(f,p.objetivo)&&filoAprenderRutina(filoModeloPara(f,p.objetivo).texto).metodos)||[])])].filter(id=>!(m.evita||[]).includes(id)),   // + los métodos que usa en su rutina modelo
@@ -325,15 +344,18 @@ function principalesDia(d,ctx){
 function ajustarRangosFuerza(semana,ctx){
   let cambios=0;
   const rH=(String(ctx.dosisH||'').match(/\d{1,2}/g)||[]), txtH=rH.length?(rH[0]+(rH[1]?'-'+rH[1]:'')):'10-12';
+  const rR=(String(ctx.dosisR||'').match(/\d{1,2}/g)||[]), txtR=rR.length?(rR[0]+(rR[1]?'-'+rR[1]:'')):'12-15';
   (semana||[]).forEach(d=>{
     if(!d||!Array.isArray(d.ejercicios)) return;
     const pr=principalesDia(d,ctx);
     d.ejercicios.forEach((e,i)=>{
       if(pr.has(i) || !/—\s*fuerza/i.test(String(e.reps||''))) return;
       const kb=kbBuscar(e.nm||e.nombre), ligero=ejLigero(kb,e), letra=ligero?'R':'H';
-      e.reps=String(e.reps).replace(/^[^—·]*/,(ligero?'12-15':txtH)+' reps ').replace(/—\s*fuerza/i,'— '+(ligero?'resistencia':'hipertrofia'));
-      if(e.esfuerzo && ctx.metodoInt && typeof metEsfuerzo==='function'){ const x=metEsfuerzo(ctx.metodoInt,letra,ctx.nivel); if(x){ e.esfuerzo=x.txt; e.rir=x.rir; } }
-      if(/1\s*RM/i.test(e.peso||'')) e.peso=ligero?'Ligero — 40% 1RM':'Moderado — 55% 1RM';
+      e.reps=String(e.reps).replace(/^[^—·]*/,(ligero?txtR:txtH)+' reps ').replace(/—\s*fuerza/i,'— '+(ligero?'resistencia':'hipertrofia'));
+      if(e.esfuerzo && ctx.metodoInt && typeof metEsfuerzo==='function'){ const x=metEsfuerzo(ctx.metodoInt,letra,ctx.nivel,ctx.pctT); if(x){ e.esfuerzo=x.txt; e.rir=x.rir; } }
+      const pc=ctx.metodoInt==='porcentajes' && typeof metPct==='function' && metPct((ctx.pctT||{})[letra]);
+      if(pc && !/^(corporal|banda|sin carga)/i.test(e.peso||'')) e.peso=(ligero?'Ligero':'Moderado')+' — '+pc.split('-')[0]+'% 1RM';
+      else if(/1\s*RM/i.test(e.peso||'')) e.peso=ligero?'Ligero — 40% 1RM':'Moderado — 55% 1RM';
       cambios++;
     });
   });
@@ -485,14 +507,17 @@ function filtrarLesiones(semana,ctx){
       e.tip=(zona?'Sustituye a '+antes+' para cuidar tu '+zona+'. ':'Versión guiada de '+antes+': más estable mientras dominas el movimiento. ')+(e.tip||'');
       return true;
     });
-    limpiarParejas(d);
+    limpiarParejas(d,ctx);
   });
   return cambios;
 }
 // Parejas que quedaron sin compañero (superserie, biserie, pre-agotamiento…): se deshacen
-function limpiarParejas(d){
+function limpiarParejas(d,ctx){
   const cuenta={}; d.ejercicios.forEach(e=>{ if(e.grupo) cuenta[e.grupo.charAt(0)]=(cuenta[e.grupo.charAt(0)]||0)+1; });
-  d.ejercicios.forEach(e=>{ if(e.grupo && cuenta[e.grupo.charAt(0)]<2){ delete e.grupo; if(e.metodo && KB_METODOS[e.metodo.id] && KB_METODOS[e.metodo.id].pareja) delete e.metodo; } });
+  d.ejercicios.forEach(e=>{
+    if(e.grupo && cuenta[e.grupo.charAt(0)]<2){ delete e.grupo; if(e.metodo && KB_METODOS[e.metodo.id] && KB_METODOS[e.metodo.id].pareja) delete e.metodo; }
+    if(!e.grupo && /^Sin descanso/i.test(e.descanso||'')){ e.descanso=''; e.descanso=ctx?descansoPara(e,ctx,datosEj(e)):'90 s'; }   // ya no tiene con quién ir seguido
+  });
 }
 // ═════════════════════════════════════════
 // VOLUMEN — tope de series por músculo en una sesión y en la semana, según nivel (más bajo con 60+ años o IMC ≥ 35).
@@ -503,6 +528,8 @@ const GRUPO_VOL={cuadriceps:'cuádriceps',gluteo:'glúteo',femoral:'femoral',pec
   deltoide:'hombro',deltoide_lat:'hombro',deltoide_post:'hombro',biceps:'bíceps',braquial:'bíceps',triceps:'tríceps',pantorrilla:'pantorrilla'};
 function topesVolumen(ctx){
   let ses={1:8,2:10,3:12}[ctx.nivel]||10, sem={1:12,2:16,3:20}[ctx.nivel]||16;
+  const v=String((ctx.volT||{})[ctx.nivel]||'').match(/\d{1,2}/g);   // el entrenador define sus series semanales por nivel
+  if(v){ sem=Math.max(6,Math.min(24,+v[v.length-1])); ses=Math.min(ses,sem); }
   if((ctx.edad||0)>=60 || (ctx.imc||0)>=35){ ses-=2; sem-=2; }
   return {ses,sem};
 }
@@ -528,7 +555,7 @@ function limitarVolumen(semana,ctx){
       bajar(x,2); }
     for(let k=lista.length-1;k>=0&&exceso>0;k--){ const x=lista[k]; if(x.princ&&!x.borrar) bajar(x,3); }
     for(const tipo of ['a','c']) for(let k=lista.length-1;k>=0&&exceso>0;k--){
-      const x=lista[k]; if(x.princ||x.borrar) continue;
+      const x=lista[k]; if(x.princ||x.borrar||x.e._patron) continue;
       const kb=kbBuscar(x.e.nm||x.e.nombre); if((kb?kb.t:'c')!==tipo) continue;
       if(x.d.ejercicios.filter(e=>!e._borrar&&grupoVol(e)===x.g).length<2) continue;
       x.borrar=true; x.e._borrar=true; exceso-=parseInt(x.e.series)||0; cambios++;
@@ -540,11 +567,34 @@ function limitarVolumen(semana,ctx){
     const it=items(d), grupos=[...new Set(it.map(x=>x.g))];
     grupos.forEach(g=>{ const l=it.filter(x=>x.g===g), s=suma(l); if(s>T.ses) recortar(l,s-T.ses); });
   });
-  dias.forEach(d=>{ d.ejercicios=d.ejercicios.filter(e=>!e._borrar); limpiarParejas(d); });
+  dias.forEach(d=>{ d.ejercicios=d.ejercicios.filter(e=>!e._borrar); limpiarParejas(d,ctx); });
   const todo=dias.flatMap(items), gruposS=[...new Set(todo.map(x=>x.g))];   // por semana
   gruposS.forEach(g=>{ const l=todo.filter(x=>x.g===g), s=suma(l); if(s>T.sem) recortar(l,s-T.sem); });
-  dias.forEach(d=>{ d.ejercicios=d.ejercicios.filter(e=>!e._borrar); limpiarParejas(d); });
+  dias.forEach(d=>{ d.ejercicios=d.ejercicios.filter(e=>!e._borrar); limpiarParejas(d,ctx); });
   return cambios;
+}
+// EJERCICIOS POR SESIÓN — tope del entrenador (duración o número de ejercicios). No cuentan calentamiento,
+// movilidad ni cardio. Se quitan primero los aislamientos y luego los compuestos accesorios, sin tocar
+// los principales, la potencia ni los patrones que el entrenador exige, y sin dejar un músculo sin trabajo en su día.
+function limitarEjercicios(semana,ctx){
+  if(!ctx || !ctx.maxEj || ctx.sinMetodos || ctx.soloSuaves) return 0;
+  let quitados=0;
+  (semana||[]).forEach(d=>{
+    if(!d || !Array.isArray(d.ejercicios)) return;
+    const trabajo=()=>d.ejercicios.filter(e=>!e.fase && !esEjMovilidad(e) && !esEjCardio(e) && !esEjRondas(e));
+    let sobra=trabajo().length-ctx.maxEj;
+    if(sobra<=0) return;
+    const pr=principalesDia(d,ctx), prot=new Set([...pr].map(i=>d.ejercicios[i]));
+    for(const tipo of ['a','c']) for(let k=d.ejercicios.length-1;k>=0&&sobra>0;k--){
+      const e=d.ejercicios[k];
+      if(prot.has(e) || e.potencia || e._patron || e.fase || esEjMovilidad(e) || esEjCardio(e) || esEjRondas(e)) continue;
+      const kb=kbBuscar(e.nm||e.nombre); if((kb?kb.t:'c')!==tipo) continue;
+      const g=grupoVol(e); if(g && d.ejercicios.filter(y=>grupoVol(y)===g).length<2) continue;
+      d.ejercicios.splice(k,1); sobra--; quitados++;
+    }
+    limpiarParejas(d,ctx);
+  });
+  return quitados;
 }
 // Días "Ligero" que pone la regla de recuperación (full body el día siguiente a otra sesión): menos series y rango de resistencia
 function aligerarDias(semana){
@@ -563,6 +613,9 @@ function aligerarDias(semana){
 function descansoPara(e,ctx,d){
   if(e.descanso) return e.descanso;
   let t = ctx.obj==='F' ? (d.tipo==='c'?'2-3 min':'90 s') : ctx.obj==='R' ? '30-45 s' : (d.tipo==='c'?'90 s':'60 s');
+  const L={fuerza:'F',hipertrofia:'H',resistencia:'R',potencia:'P'}[((String(e.reps||'').match(/—\s*(fuerza|hipertrofia|resistencia|potencia)/i)||[])[1]||'').toLowerCase()];
+  const propio=L && String((ctx.descT||{})[L]||'').trim();   // descanso de la tabla del entrenador
+  if(propio) t=/^\d+$/.test(propio)?propio+' s':propio;
   if(/cardio/i.test(d.enf)) t='—';
   return ctx.restStyle==='autorregulado' && t!=='—' ? 'Autorregulado (~'+t+')' : t;
 }
