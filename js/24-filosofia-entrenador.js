@@ -53,10 +53,12 @@ function actualizarBotonMiFilosofia(){
 }
 function filoBase(){
   return {tagline:'',priorities:{fuerza:3,hipertrofia:3,movilidad:3,rendimiento:3,funcional:3},progressStyle:'',
-    structure:{split:'',splitPorDias:{},frecuencia:'2',periodization:'',warmupRatio:2,method:''},exerciseStyle:{variety:3,restStyle:''},
+    structure:{split:'',splitPorDias:{},frecuencia:'2',periodization:'',perObjetivo:{},warmupRatio:2,method:''},exerciseStyle:{variety:3,restStyle:''},
     // reps por objetivo (texto "3-6") + tabla de series, descanso y % 1RM; vacío = valor del sistema
     dosis:{fuerza:'',hipertrofia:'',resistencia:'',potencia:'',series:{},desc:{},pct:{}},
-    volumen:{},   // series semanales por músculo según nivel: {1:'8-12',2:'12-16',3:'16-20'}
+    volumen:{},
+    // bloques, descarga, regla de progresión, incremento, ajuste si llega cansado y RIR por nivel (js/40-autorregulacion.js)
+    progresion:{semanas:'',descarga:'',tipoDescarga:'',regla:'',incremento:'',hoy:'',rir:{}},   // series semanales por músculo según nivel: {1:'8-12',2:'12-16',3:'16-20'}
     metodos:{favoritos:[],evita:[],frecuencia:3,principiantes:'basicos'},
     seleccion:{libreVsMaquina:3,unilateral:3,firma:'',nunca:'',patrones:[],halterofilia:'',pliometria:''},
     sesion:{calentamiento:'',orden:'',tempo:'',core:'',cardio:'',duracion:'',ejercicios:'',seguidos:''},
@@ -136,6 +138,13 @@ function filoTablaSplit(F){
   return `<div class="filo-tabla">${[2,3,4,5,6].map(n=>`<label class="filo-fila"><span>${n} días</span>
     <select class="ti" onchange="filoDraft.structure.splitPorDias[${n}]=this.value">${FILO_SPLITS.map(([v,l])=>`<option value="${v}" ${(sel[n]||'')===v?'selected':''}>${v?l:l+' (sugerido: '+FILO_SPLITS.find(x=>x[0]===FILO_SPLIT_SUG[n])[1].toLowerCase()+')'}</option>`).join('')}</select></label>`).join('')}</div>`;
 }
+const FILO_PER=[['','Mi modelo general'],['lineal','Lineal'],['ondulante','Ondulante'],['bloques','Por bloques'],['conjugada','Conjugada'],['flexible','Flexible (sesión a sesión)']];
+const FILO_OBJ_PER=[['F','Fuerza','bloques'],['H','Hipertrofia','ondulante'],['G','Pérdida de grasa','lineal'],['R','Resistencia','lineal'],['D','Rendimiento deportivo','bloques']];
+function filoTablaPer(F){
+  const sel=F.structure.perObjetivo||{};
+  return `<div class="filo-tabla">${FILO_OBJ_PER.map(([k,nm,sug])=>`<label class="filo-fila filo-fila-w"><span>${nm}</span>
+    <select class="ti" onchange="filoDraft.structure.perObjetivo['${k}']=this.value">${FILO_PER.map(([v,l])=>`<option value="${v}" ${(sel[k]||'')===v?'selected':''}>${v?l:l+' (sugerido: '+FILO_PER.find(x=>x[0]===sug)[1].toLowerCase()+')'}</option>`).join('')}</select></label>`).join('')}</div>`;
+}
 function filoIn(path,val,ph){
   return `<input class="ti" placeholder="${ph}" value="${esc(val||'')}" oninput="filoDraft.${path}=this.value">`;
 }
@@ -187,15 +196,25 @@ function renderFiloStep(){
       ${filoSub('Notas sobre tu estructura (opcional)')}
       ${filoText('structure.split','Ej. Full body para principiantes los primeros 2 meses.')}`;
   } else if(filoStep===3){
+    const P=F.progresion||(F.progresion={rir:{}});
     html+=`${T('Progreso y periodización')}
       ${filoSub('¿Cómo defines el progreso?')}
       ${filoChoiceGroup('progressStyle',[{value:'numeros',label:'Por números (peso, reps, cargas)'},{value:'calidad',label:'Por calidad de movimiento'},{value:'mixto',label:'Ambos, según la persona'}], F.progressStyle)}
-      ${filoSub('¿Cómo periodizas?')}
+      ${filoSub('Tu modelo general de periodización')}
       ${filoChoiceGroup('structure.periodization',[
         {value:'lineal',label:'Lineal',sub:'Subo carga poco a poco, bloque tras bloque'},
         {value:'ondulante',label:'Ondulante',sub:'Alterno días pesados, medios y ligeros en la semana'},
         {value:'bloques',label:'Por bloques',sub:'Acumulación → intensificación → descarga'},
-        {value:'conjugada',label:'Conjugada',sub:'Fuerza máxima y velocidad en la misma semana'}], F.structure.periodization)}`;
+        {value:'conjugada',label:'Conjugada',sub:'Fuerza máxima y velocidad en la misma semana'},
+        {value:'flexible',label:'Flexible',sub:'Sin periodización fija: ajusto sesión a sesión'}], F.structure.periodization)}
+      ${filoSub('¿Usas otro modelo según el objetivo del socio?')}
+      ${filoTablaPer(F)}
+      ${filoSub('¿Cuánto dura un bloque?')}
+      ${filoChoiceGroup('progresion.semanas',[{value:'3',label:'3 semanas'},{value:'4',label:'4 semanas',sub:'Sugerido'},{value:'5',label:'5 semanas'},{value:'6',label:'6 semanas'}], String(P.semanas||''))}
+      ${filoSub('¿Cada cuándo haces descarga?')}
+      ${filoChoiceGroup('progresion.descarga',[{value:'ultima',label:'Última semana de cada bloque',sub:'Sugerido'},{value:'cada2',label:'Cada 2 bloques'},{value:'fatiga',label:'Solo con señales de fatiga',sub:'Si el socio llega cansado 2 de sus últimas 3 sesiones'},{value:'no',label:'No programo descargas'}], P.descarga)}
+      ${filoSub('¿Cómo es tu descarga?')}
+      ${filoChoiceGroup('progresion.tipoDescarga',[{value:'volumen',label:'Bajo el volumen 40-50 % y mantengo la carga',sub:'Sugerido'},{value:'intensidad',label:'Bajo la intensidad (15 % menos de peso)'},{value:'activa',label:'Semana libre o activa'}], P.tipoDescarga)}`;
   } else if(filoStep===4){
     html+=`${T('Dosis por objetivo')}
       ${filoSub('Tu tabla de trabajo. Deja vacío lo que quieras que el sistema decida (el gris es el valor sugerido).')}
@@ -207,9 +226,20 @@ function renderFiloStep(){
       ${filoSub('Ejercicios por sesión')}
       ${filoChoiceGroup('sesion.ejercicios',[{value:'4-5',label:'4-5',sub:'Pocos y bien hechos'},{value:'6-7',label:'6-7'},{value:'8+',label:'8 o más'}], F.sesion.ejercicios)}`;
   } else if(filoStep===5){
-    html+=`${T('Intensidad')}
+    const P=F.progresion||(F.progresion={rir:{}}); if(!P.rir) P.rir={};
+    html+=`${T('Intensidad y autorregulación')}
       ${filoSub('¿Con qué dosificas la intensidad?')}
-      ${filoChoiceGroup('structure.method',[{value:'rpe',label:'RPE (esfuerzo percibido)'},{value:'rir',label:'RIR (repeticiones en reserva)'},{value:'porcentajes',label:'% de 1RM'},{value:'fallo',label:'Series al fallo'}], F.structure.method)}
+      ${filoChoiceGroup('structure.method',[{value:'rir',label:'RIR (repeticiones en reserva)',sub:'Sugerido'},{value:'rpe',label:'RPE (esfuerzo percibido)'},{value:'porcentajes',label:'% de 1RM'},{value:'fallo',label:'Series al fallo'},{value:'velocidad',label:'Velocidad de la barra'},{value:'sensaciones',label:'Por sensaciones'}], F.structure.method)}
+      ${filoSub('¿Qué tan cerca del fallo, según nivel? (reps en reserva)')}
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+        ${[['1','Principiante','3-4'],['2','Intermedio','1-3'],['3','Avanzado','0-2']].map(([k,l,ph])=>`<label style="font-size:var(--fs-2xs);color:var(--mu)">${l}${filoIn('progresion.rir['+k+']',P.rir[k],ph)}</label>`).join('')}
+      </div>
+      ${filoSub('¿Cómo progresas la carga?')}
+      ${filoChoiceGroup('progresion.regla',[{value:'doble',label:'Doble progresión',sub:'Subo repeticiones y al llegar al tope subo peso (sugerido)'},{value:'fija',label:'Carga fija semanal',sub:'+2.5 kg en torso, +5 kg en pierna'},{value:'rpe',label:'Por RPE',sub:'Si la sesión se sintió fácil o bien, subo'},{value:'porcentajes',label:'Porcentajes programados por semana'}], P.regla)}
+      ${filoSub('¿Cuánto subes cuando toca?')}
+      ${filoChoiceGroup('progresion.incremento',[{value:'minimo',label:'El mínimo que permita el equipo',sub:'Sugerido'},{value:'2.5',label:'2.5 %'},{value:'5',label:'5 %'}], P.incremento)}
+      ${filoSub('Si el socio llega cansado o durmió mal...')}
+      ${filoChoiceGroup('progresion.hoy',[{value:'serie',label:'Quito una serie por ejercicio',sub:'Sugerido'},{value:'carga',label:'Bajo la carga 10 %'},{value:'tecnica',label:'Cambio a técnica: cargas ligeras'},{value:'mantener',label:'Mantengo el plan'}], P.hoy)}
       ${filoSub('Descanso entre series')}
       ${filoChoiceGroup('exerciseStyle.restStyle',[{value:'fijo',label:'Tiempo fijo'},{value:'autorregulado',label:'Autorregulado'}], F.exerciseStyle.restStyle)}
       ${filoSliderRow('Variedad de ejercicios', F.exerciseStyle.variety, 'exerciseStyle.variety',['Pocos y dominados','Mucha variedad'])}`;

@@ -536,6 +536,7 @@ html[data-theme="light"] .m-ejimg-fig,html[data-theme="light2"] .m-ejimg-fig{bac
 .filo-tabla{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
 .filo-fila{display:grid;grid-template-columns:62px 1fr;align-items:center;gap:8px;font-size:var(--fs-sm);font-weight:600}
 .filo-fila .ti{margin:0;padding:9px 10px}
+.filo-fila-w{grid-template-columns:96px 1fr;font-size:var(--fs-xs)}
 .filo-dosis{display:grid;grid-template-columns:minmax(72px,auto) repeat(4,minmax(0,1fr));gap:5px;align-items:center;margin-bottom:14px;font-size:var(--fs-2xs);color:var(--mu)}
 .filo-dosis .ti{margin:0;padding:8px 6px;font-size:var(--fs-xs);text-align:center;min-width:0}
 .filo-dosis .fd-nm{font-size:var(--fs-xs);font-weight:700;color:var(--tx)}
@@ -1563,6 +1564,9 @@ html[data-theme="light2"]{--acc:var(--lime);--acc-tx:#5444DC;--acc-ink:#FFFFFF;-
 /* Sesión en curso */
 .en-ses,.en-fin{width:100%;max-width:520px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 140px;display:grid;gap:16px;align-content:start;}
 .en-ses .en-tip{margin:0;}
+.en-aj{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:var(--r-md);border:1px solid color-mix(in srgb,var(--acc-tx) 35%,transparent);color:var(--tx);font-size:var(--fs-sm);line-height:1.45;}
+.en-aj .ico{color:var(--acc-tx);width:18px;height:18px;flex-shrink:0;margin-top:1px;}
+.en-aj.soft{border-color:var(--b);color:var(--mu);}
 .en-s-top{display:flex;align-items:center;gap:10px;}
 .en-s-t{flex:1;min-width:0;line-height:1.2;}
 .en-s-t b{display:block;font-weight:800;}

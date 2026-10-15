@@ -420,7 +420,7 @@ function finalizarSesionConfirmada(reemplazar){
         if(fcs.length){ const prom=Math.round(fcs.reduce((a,b)=>a+b,0)/fcs.length);
           fcInfo={fc:prom, fcMeta:[rxC.lo,rxC.hi], fcEval:prom<rxC.lo?'bajo':prom>rxC.hi?'alto':'ok'}; }
       }
-      if(hechas||kgs.length||segsEj.length||fcInfo){ const reg={n:ej.nm, s:hechas, p:parseInt(ej.series)||hechas}; if(kgs.length) reg.kg=Math.max(...kgs); if(segsEj.length) reg.seg=Math.max(...segsEj); if(fcInfo) Object.assign(reg,fcInfo); { const sr=sets.filter(x=>x&&x.ok&&+x.kg>0).map(x=>[+x.kg,+x.r||0]); if(sr.length && sr.some(x=>x[1])) reg.sr=sr; } if(alt) reg.alt=alt.nm; detalle.push(reg); }
+      if(hechas||kgs.length||segsEj.length||fcInfo){ const reg={n:ej.nm, s:hechas, p:seriesHoy(ej,sesionTemp.aj)||hechas}; if(sesionTemp.aj&&sesionTemp.aj.activo&&!esIsoEj) reg.aj=1; if(kgs.length) reg.kg=Math.max(...kgs); if(segsEj.length) reg.seg=Math.max(...segsEj); if(fcInfo) Object.assign(reg,fcInfo); { const sr=sets.filter(x=>x&&x.ok&&+x.kg>0).map(x=>[+x.kg,+x.r||0]); if(sr.length && sr.some(x=>x[1])) reg.sr=sr; } if(alt) reg.alt=alt.nm; detalle.push(reg); }
       if(esIsoEj) return;
       (sesionTemp.ej[i].sets||[]).forEach((set,si)=>{
         if(set&&set.kg>0){
@@ -441,7 +441,7 @@ function finalizarSesionConfirmada(reemplazar){
     });
 
     // Series hechas contra las del plan del día → completa, parcial o incompleta (ver sesEstado)
-    const sp=d.ejercicios.reduce((a,e)=>a+(parseInt(e.series)||1),0);
+    const sp=d.ejercicios.reduce((a,e)=>a+(seriesHoy(e,sesionTemp.aj)||1),0);
     const sh=detalle.reduce((a,x)=>a+Math.min(+x.s||0,+x.p||0),0);
     const reg={
       fecha:hoy, ts:Date.now(), diaKey:sesionTemp.diaKey,
@@ -449,6 +449,8 @@ function finalizarSesionConfirmada(reemplazar){
       volumen:Math.round(volumen), tut:Math.round(tutSes), cardioMin:Math.round(cardioMinSes),
       hora:new Date().toTimeString().substring(0,5), cambios, detalle
     };
+    if(sesionTemp.hoy) reg.hoy=sesionTemp.hoy;
+    if(sesionTemp.aj&&sesionTemp.aj.descarga) reg.descarga=sesionTemp.aj.descarga;
     s.logs.sesiones.push(reg);
     dbSave(s.code);
     sesionTemp=null;

@@ -34,7 +34,8 @@ const PQ_MOL_NM={hombro:'hombro',codo:'codo o muñeca',lumbar:'espalda baja',cad
 function pqBloque(s){
   const b=s.bloque||{};
   const primera=comoArray(s.logs&&s.logs.sesiones).map(x=>x&&x.fecha).filter(Boolean).sort()[0];
-  return {n:+b.n||1, desde:b.desde||s.fechaRegistro||primera||fechaISO(new Date()), semanas:+b.semanas||4};
+  const def=(typeof progSocio==='function'&&progSocio(s).semanas)||4;   // duración de bloque del entrenador
+  return {n:+b.n||1, desde:b.desde||s.fechaRegistro||primera||fechaISO(new Date()), semanas:+b.semanas||def};
 }
 function pqSemanaActual(s){ const d=diasDesde(pqBloque(s).desde)||0; return Math.floor(Math.max(0,d)/7)+1; }
 function pqEstado(s){ return (s.progresion&&s.progresion.estado)||''; }
@@ -99,6 +100,9 @@ function pqOrdenEstrategias(s,r,suave){
   if(st.adherencia<65 || r.asistencia==='mitad' || r.asistencia==='poco' || r.recuperacion==='cansado' || r.recuperacion==='dolor' || r.enfoque==='tiempo') lista=lista.filter(x=>x!=='volumen');
   // Si tiene ejercicios estancados (3 sesiones con el mismo peso), el cambio de estímulo va primero entre las alternativas
   try{ if(analisisSocio(s).estancados.length>=2) lista=['carga','estimulo'].concat(lista.filter(x=>x!=='carga'&&x!=='estimulo')); }catch(_){}
+  // La regla de progresión del entrenador va primero (doble progresión → repeticiones; las demás → carga)
+  const pref=typeof progSocio==='function' && {doble:'reps',fija:'carga',rpe:'carga',porcentajes:'carga'}[progSocio(s).regla];
+  if(pref && lista.includes(pref)) lista=[pref].concat(lista.filter(x=>x!==pref));
   return lista;
 }
 function pqEstrategia(s,r,variante){
@@ -336,7 +340,7 @@ function pqPropuestaHTML(s,p){
     ${dias||'<div class="pg-p">Sin cambios automáticos: mantiene la misma rutina. Puedes aprobarla y ajustarla a mano.</div>'}
     <div class="pg-apr">
       <label>Duración del nuevo bloque
-        <select class="sf-in" id="pq-sem-${esc(s.code)}">${[4,5,6].map(n=>`<option value="${n}" ${n===(pqBloque(s).semanas||4)?'selected':''}>${n} semanas</option>`).join('')}</select>
+        <select class="sf-in" id="pq-sem-${esc(s.code)}">${[3,4,5,6].map(n=>`<option value="${n}" ${n===(pqBloque(s).semanas||4)?'selected':''}>${n} semanas</option>`).join('')}</select>
       </label>
       <button type="button" class="sd-pri" onclick="pqAprobar('${esc(s.code)}')">Aprobar y activar bloque ${p.deBloque+1}</button>
       <div class="pg-acts"><button type="button" class="sd-b" onclick="pqGenerar('${esc(s.code)}')">Regenerar</button><button type="button" class="sd-b" onclick="pqDescartar('${esc(s.code)}')">Descartar</button></div>
@@ -466,7 +470,8 @@ function pqCardSocio(s){
 function pqPlanChip(s){
   if(!s || s.status!=='activo') return '';
   const b=pqBloque(s), sem=Math.min(pqSemanaActual(s),b.semanas);
-  return `<button type="button" class="pg-plan" onclick="pqVerProgreso()"><div><b>Bloque ${esc(b.n)}</b><span>Semana ${sem} de ${b.semanas}</span></div><em>Mi progresión ${ico('chev')}</em></button>`;
+  const dl=typeof semanaDescarga==='function'&&semanaDescarga(s);
+  return `<button type="button" class="pg-plan" onclick="pqVerProgreso()"><div><b>Bloque ${esc(b.n)}</b><span>Semana ${sem} de ${b.semanas}${dl?' · descarga':''}</span></div><em>Mi progresión ${ico('chev')}</em></button>`;
 }
 function pqVerProgreso(marcarVisto){
   const s=activeSocio; if(!s) return;
