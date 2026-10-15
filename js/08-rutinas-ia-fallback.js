@@ -14,6 +14,13 @@ function detalleFilosofiaAvanzada(ph,objetivo){
   if(per) L.push('Periodización: '+per+'.');
   const d=ph.dosis||{};
   if(d.fuerza||d.hipertrofia||d.resistencia) L.push(`Rangos de reps del entrenador: fuerza ${d.fuerza||'3-6'}, hipertrofia ${d.hipertrofia||'8-12'}, resistencia ${d.resistencia||'15-20'}.`);
+  const NM={F:'fuerza',H:'hipertrofia',R:'resistencia',P:'potencia'};
+  const tab=['F','H','R','P'].map(k=>{ const x=[(d.series||{})[k]&&d.series[k]+' series',(d.desc||{})[k]&&'descanso '+d.desc[k],(d.pct||{})[k]&&d.pct[k]+'% 1RM'].filter(Boolean); return x.length?NM[k]+': '+x.join(', '):''; }).filter(Boolean);
+  if(tab.length) L.push('Dosis del entrenador — '+tab.join('; ')+'.');
+  const st=ph.structure||{}, ses0=ph.sesion||{};
+  if(st.frecuencia) L.push('Frecuencia por músculo: '+st.frecuencia+' vez/veces por semana.');
+  if(ses0.duracion||ses0.ejercicios) L.push('Sesión: '+[ses0.duracion&&ses0.duracion+' min',ses0.ejercicios&&ses0.ejercicios+' ejercicios de trabajo'].filter(Boolean).join(', ')+' (sin contar calentamiento).');
+  if(ses0.seguidos) L.push('Días seguidos: '+{nunca:'nunca el mismo músculo dos días seguidos',ligero:'el segundo día va ligero',si:'se permite sin ajuste'}[ses0.seguidos]+'.');
   const m=ph.metodos||{};
   if((m.favoritos||[]).length) L.push('Métodos FAVORITOS (úsalos con prioridad cuando el nivel lo permita): '+m.favoritos.map(id=>KB_METODOS[id]?KB_METODOS[id].nm:id).join(', ')+'.');
   if((m.evita||[]).length) L.push('Métodos que este entrenador NO usa: '+m.evita.map(id=>KB_METODOS[id]?KB_METODOS[id].nm:id).join(', ')+'.');
@@ -22,6 +29,11 @@ function detalleFilosofiaAvanzada(ph,objetivo){
   const se=ph.seleccion||{};
   if(se.libreVsMaquina) L.push('Equipo preferido: '+(se.libreVsMaquina>=4?'peso libre':se.libreVsMaquina<=2?'máquinas y poleas':'mezcla de peso libre y máquinas')+'. Trabajo unilateral: '+(se.unilateral>=4?'mucho':se.unilateral<=2?'poco':'moderado')+'.');
   if(se.firma) L.push('Ejercicios firma (inclúyelos cuando encajen): '+se.firma);
+  const PAT={sentadilla:'sentadilla',bisagra:'bisagra de cadera',empujeH:'empuje horizontal',empujeV:'empuje vertical',jalonH:'remo',jalonV:'jalón vertical',unilateral:'zancada/unilateral',cargar:'cargar (farmer)',antirrotacion:'antirrotación',rotacion:'rotación'};
+  const pats=(Array.isArray(se.patrones)?se.patrones:Object.values(se.patrones||{})).filter(x=>PAT[x]);
+  if(pats.length) L.push('Patrones OBLIGATORIOS en la semana: '+pats.map(x=>PAT[x]).join(', ')+'.');
+  if(se.halterofilia) L.push('Halterofilia: '+{no:'no la usa',variantes:'solo variantes (swing, jalón alto)',avanzados:'movimientos completos solo con avanzados'}[se.halterofilia]+'.');
+  if(se.pliometria) L.push('Pliometría: '+{no:'no la usa',deportistas:'solo con deportistas',intermedio:'desde nivel intermedio',todos:'con todos en baja intensidad'}[se.pliometria]+'.');
   if(se.nunca) L.push('NUNCA programar: '+se.nunca);
   const ss=ph.sesion||{};
   const txt={calentamiento:{movilidad:'movilidad general + activación',aproximacion:'series de aproximación del primer ejercicio',especifico:'activación específica del músculo del día'},
@@ -148,7 +160,9 @@ async function generarRutina(){
       5:'Torso / Pierna + 1 sesión de accesorios',
       6:'División por grupos musculares (Push/Pull/Legs o similar)',
     };
-    const splitRecomendado=splitMap[nFull]!==undefined?splitMap[nFull]:splitMap[4];
+    const entIA=entRutina(qAnswers.entrenadorId), spIA=nFull?metSplitTipos(entIA&&entIA.filosofia, nFull, nivelNum(qAnswers.nivel)):null;
+    const splitRecomendado=spIA ? 'Split del entrenador: '+splitRecuperacion(deriv.puro, spIA.tipos, entIA.filosofia.sesion&&entIA.filosofia.sesion.seguidos).map(x=>x[0]).join(' / ')
+      : splitMap[nFull]!==undefined?splitMap[nFull]:splitMap[4];
 
     let faseInicial='';
     if(tieneLesion){
@@ -345,6 +359,7 @@ function procesarRutina(data){
     ajustarCardioRondas(data.semana, {edad:qAnswers.edad, objetivo:qAnswers.objetivo, nivel:qAnswers.nivel});
     enriquecerSemana(data.semana, ctxP, semillaP);
     data.recorteVol=limitarVolumen(data.semana, ctxP);   // al final: tope de series por músculo (sesión y semana)
+    data.recorteEj=limitarEjercicios(data.semana, ctxP); // ejercicios por sesión según la duración del entrenador
   }
   catch(e){ console.warn('No se pudo enriquecer la rutina',e); }
   return data;
@@ -554,7 +569,7 @@ function buildFallback(){
   let tiposSesion=(splitCoach&&splitCoach.tipos)||TIPOS_SPLIT[nFull]||TIPOS_SPLIT[Math.max(1,Math.min(6,nFull))]||TIPOS_SPLIT[4];
   // Recuperación: dos sesiones de cuerpo completo en días seguidos cargan los mismos músculos sin 48 h de descanso.
   // En cada racha de días seguidos se alterna torso / pierna (y un full body ligero si son 3).
-  tiposSesion=splitRecuperacion(deriv.puro, tiposSesion);
+  tiposSesion=splitRecuperacion(deriv.puro, tiposSesion, filoFB&&filoFB.tagline&&filoFB.sesion&&filoFB.sesion.seguidos);
   const mapaDias={};
   deriv.puro.forEach((d,i)=>{ mapaDias[d]={tipo:(tiposSesion[i]||tiposSesion[tiposSesion.length-1])[0], color:(tiposSesion[i]||tiposSesion[tiposSesion.length-1])[1]}; });
   deriv.conClase.forEach(d=>{ mapaDias[d]={tipo:'Complemento — '+deriv.infoClasePorDia[d].clase, color:'hombro', complemento:deriv.infoClasePorDia[d]}; });
@@ -726,7 +741,8 @@ function buildFallback(){
   }
 
   const tiposTxt=tiposSesion.map(x=>x[0]).join(' ');
-  const splitRec=/Torso|Pierna/.test(tiposTxt) && /Full Body/.test(tiposTxt) ? 'Torso/Pierna + Full Body ligero'
+  const splitRec=splitCoach&&splitCoach.clave==='hibrido' ? 'Híbrido: Torso/Pierna + Full Body'
+    : /Torso|Pierna/.test(tiposTxt) && /Full Body/.test(tiposTxt) ? 'Torso/Pierna + Full Body ligero'
     : (!/Full Body/.test(tiposTxt) && /Torso/.test(tiposTxt) && ((splitCoach&&splitCoach.clave==='full') || nFull<=3)) ? 'Torso/Pierna' : '';
   const splitLabelBase=splitRec||(splitCoach&&{full:'Full Body '+nFull+'x',torso:'Torso/Pierna',ppl:'Empuje/Jalón/Pierna',grupos:'Por grupos musculares'}[splitCoach.clave])
     ||{1:'Full Body 1x',2:'Full Body 2x',3:'Full Body 3x',4:'Torso/Pierna',5:'Torso/Pierna + Accesorios',6:'Por grupos musculares'}[nFull]||(nFull>6?'Por grupos musculares':'Sin sesión completa esta semana');
@@ -752,15 +768,22 @@ function buildFallback(){
 }
 
 // ══ BUILDER: RENDIMIENTO DEPORTIVO ══
-function splitRecuperacion(puro,tipos){
+// seguidos (cuestionario del entrenador): 'si' = no se ajusta · 'nunca' = sin día ligero, solo torso/pierna · otro = día ligero
+function splitRecuperacion(puro,tipos,seguidos){
   const t=puro.map((d,i)=>(tipos[i]||tipos[tipos.length-1]).slice());
-  if(!t.length || !t.every(x=>/full body/i.test(x[0]))) return t;
+  if(!t.length || seguidos==='si') return t;
   const idx=puro.map(d=>DIAS_ORDER.indexOf(d));
+  if(!t.every(x=>/full body/i.test(x[0]))){
+    // Split mixto (híbrido): dos full body en días seguidos → el segundo va ligero (o solo torso si nunca se repite)
+    for(let i=1;i<t.length;i++) if(idx[i]-idx[i-1]===1 && /full body/i.test(t[i][0]) && /full body/i.test(t[i-1][0]) && !/Ligero/.test(t[i-1][0]))
+      t[i]=seguidos==='nunca'?['Torso B','neon']:['Full Body Ligero','neon'];
+    return t;
+  }
   for(let i=0;i<idx.length;){
     let j=i; while(j+1<idx.length && idx[j+1]-idx[j]===1) j++;
     const n=j-i+1;
     if(n===2){ t[i]=['Torso A','verde']; t[i+1]=['Pierna A','gold']; }
-    else if(n===3){ t[i]=['Torso A','verde']; t[i+1]=['Pierna A','gold']; t[i+2]=['Full Body Ligero','neon']; }
+    else if(n===3){ t[i]=['Torso A','verde']; t[i+1]=['Pierna A','gold']; t[i+2]=seguidos==='nunca'?['Torso B','neon']:['Full Body Ligero','neon']; }
     else if(n>3){ for(let k=0;k<n;k++) t[i+k]= k%2 ? ['Pierna '+(Math.floor(k/2)%2?'B':'A'),'gold'] : ['Torso '+(Math.floor(k/2)%2?'B':'A'),'verde']; }
     i=j+1;
   }

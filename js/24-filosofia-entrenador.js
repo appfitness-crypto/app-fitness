@@ -28,7 +28,7 @@ function svgRadarFilosofia(ph, size){
 }
 
 // ═════════════════════════════════════════
-// MI FILOSOFÍA — quiz del entrenador (9 pasos)
+// MI FILOSOFÍA — quiz del entrenador (12 pasos)
 // Se guarda en DB.entrenadores[id].filosofia y de ahí
 // alimenta el prompt de IA y el selector de coach del socio.
 // ═════════════════════════════════════════
@@ -53,11 +53,13 @@ function actualizarBotonMiFilosofia(){
 }
 function filoBase(){
   return {tagline:'',priorities:{fuerza:3,hipertrofia:3,movilidad:3,rendimiento:3,funcional:3},progressStyle:'',
-    structure:{split:'',periodization:'',warmupRatio:2,method:''},exerciseStyle:{variety:3,restStyle:''},
-    dosis:{fuerza:'',hipertrofia:'',resistencia:''},
+    structure:{split:'',splitPorDias:{},frecuencia:'2',periodization:'',warmupRatio:2,method:''},exerciseStyle:{variety:3,restStyle:''},
+    // reps por objetivo (texto "3-6") + tabla de series, descanso y % 1RM; vacío = valor del sistema
+    dosis:{fuerza:'',hipertrofia:'',resistencia:'',potencia:'',series:{},desc:{},pct:{}},
+    volumen:{},   // series semanales por músculo según nivel: {1:'8-12',2:'12-16',3:'16-20'}
     metodos:{favoritos:[],evita:[],frecuencia:3,principiantes:'basicos'},
-    seleccion:{libreVsMaquina:3,unilateral:3,firma:'',nunca:''},
-    sesion:{calentamiento:'',orden:'',tempo:'',core:'',cardio:''},
+    seleccion:{libreVsMaquina:3,unilateral:3,firma:'',nunca:'',patrones:[],halterofilia:'',pliometria:''},
+    sesion:{calentamiento:'',orden:'',tempo:'',core:'',cardio:'',duracion:'',ejercicios:'',seguidos:''},
     horaPico:{sustitucion:'maquina',nota:''},
     sampleRoutineNote:'',adjustmentPhilosophy:'',
     rutinasModelo:{}};   // hasta 3 rutinas reales del entrenador: fuerza · grasa · rendimiento (ver js/32-filosofia-modelos.js)
@@ -70,7 +72,7 @@ function filoMezclar(base,obj){
   });
   return out;
 }
-const FILO_TOTAL=10;
+const FILO_TOTAL=12;
 let filoEditId=null; // a quién se le está editando la filosofía (coordinador puede editar la de otros)
 function abrirMiFilosofia(idAjeno){
   const id = idAjeno || staffActivoEntId;
@@ -121,6 +123,33 @@ function filoText(path, ph, rows){
   return `<textarea rows="${rows||2}" style="width:100%;padding:11px;background:var(--in-bg);border:1px solid var(--b);border-radius:10px;font-family:var(--fb);font-size:var(--fs-sm);color:var(--tx);outline:none;resize:vertical;margin-bottom:12px" placeholder="${ph}" oninput="filoDraft.${path}=this.value">${esc(val)}</textarea>`;
 }
 function filoSub(t){ return `<div class="q-sub" style="margin:4px 0 7px">${t}</div>`; }
+// Estructura por número de días (bloque 3), tabla de dosis (bloque 5) y patrones obligatorios (bloque 7)
+const FILO_SPLITS=[['','Automático'],['full','Full body'],['torso','Torso / pierna'],['hibrido','Híbrido (T/P + full body)'],['ppl','Empuje / jalón / pierna'],['grupos','Un grupo por día']];
+const FILO_SPLIT_SUG={2:'full',3:'full',4:'torso',5:'hibrido',6:'ppl'};
+const FILO_DOSIS=[['F','fuerza','Fuerza','3-5','3-6','2-3 min','80-90'],['H','hipertrofia','Hipertrofia','3-4','6-12','60-120 s','65-80'],
+  ['R','resistencia','Resistencia','2-3','12-20','30-60 s','50-65'],['P','potencia','Potencia','3-5','1-5','2-3 min','30-60']];
+const FILO_PATRONES=[['sentadilla','Sentadilla'],['bisagra','Bisagra de cadera'],['empujeH','Empuje horizontal'],['empujeV','Empuje vertical'],
+  ['jalonH','Jalón horizontal (remo)'],['jalonV','Jalón vertical'],['unilateral','Zancada / unilateral'],['cargar','Cargar (farmer)'],
+  ['antirrotacion','Antirrotación'],['rotacion','Rotación']];
+function filoTablaSplit(F){
+  const sel=F.structure.splitPorDias||{};
+  return `<div class="filo-tabla">${[2,3,4,5,6].map(n=>`<label class="filo-fila"><span>${n} días</span>
+    <select class="ti" onchange="filoDraft.structure.splitPorDias[${n}]=this.value">${FILO_SPLITS.map(([v,l])=>`<option value="${v}" ${(sel[n]||'')===v?'selected':''}>${v?l:l+' (sugerido: '+FILO_SPLITS.find(x=>x[0]===FILO_SPLIT_SUG[n])[1].toLowerCase()+')'}</option>`).join('')}</select></label>`).join('')}</div>`;
+}
+function filoIn(path,val,ph){
+  return `<input class="ti" placeholder="${ph}" value="${esc(val||'')}" oninput="filoDraft.${path}=this.value">`;
+}
+function filoTablaDosis(F){
+  const d=F.dosis;
+  return `<div class="filo-dosis"><span></span><span>Series</span><span>Reps</span><span>Descanso</span><span>% 1RM</span>
+    ${FILO_DOSIS.map(([L,k,nm,s,r,ds,pc])=>`<span class="fd-nm">${nm}</span>${filoIn('dosis.series.'+L,d.series[L],s)}${filoIn('dosis.'+k,d[k],r)}${filoIn('dosis.desc.'+L,d.desc[L],ds)}${filoIn('dosis.pct.'+L,d.pct[L],pc)}`).join('')}
+  </div>`;
+}
+function filoTogglePatron(id,el){
+  const l=filoDraft.seleccion.patrones||(filoDraft.seleccion.patrones=[]);
+  const i=l.indexOf(id); if(i>=0) l.splice(i,1); else l.push(id);
+  el.className='filo-chip '+(l.includes(id)?'fav':'');
+}
 function filoCycleMetodo(id,el){
   const m=filoDraft.metodos;
   if(m.favoritos.includes(id)){ m.favoritos=m.favoritos.filter(x=>x!==id); m.evita.push(id); }
@@ -134,8 +163,9 @@ function renderFiloStep(){
   const F=filoDraft;
   const paso=`<div style="font-size:var(--fs-2xs);color:var(--mu);margin-bottom:6px">Paso ${filoStep} de ${FILO_TOTAL}</div>`;
   let html=paso;
+  const T=t=>`<div class="q-title" style="font-size:var(--fs-2xl)">${t}</div>`;
   if(filoStep===1){
-    html+=`<div class="q-title" style="font-size:var(--fs-2xl)">En una frase, ¿cuál es tu método?</div>
+    html+=`${T('En una frase, ¿cuál es tu método?')}
       ${filoSub('Es lo primero que lee el socio cuando te elige.')}
       ${filoText('tagline','Ej. Construyo fuerza real antes que estética.')}
       ${filoSub('¿Qué prioriza tu método? (1 casi nada · 5 tu sello)')}
@@ -145,7 +175,19 @@ function renderFiloStep(){
       ${filoSliderRow('Rendimiento deportivo', F.priorities.rendimiento, 'priorities.rendimiento')}
       ${filoSliderRow('Entrenamiento funcional', F.priorities.funcional, 'priorities.funcional')}`;
   } else if(filoStep===2){
-    html+=`<div class="q-title" style="font-size:var(--fs-2xl)">Progreso y estructura</div>
+    html+=`${T('Estructura semanal')}
+      ${filoSub('¿Cómo organizas la semana según los días que entrena el socio?')}
+      ${filoTablaSplit(F)}
+      ${filoSub('¿Cuántas veces por semana trabajas cada músculo?')}
+      ${filoChoiceGroup('structure.frecuencia',[{value:'1',label:'1 vez',sub:'Un grupo por día; acepto splits clásicos'},{value:'2',label:'2 veces',sub:'Lo recomendado para casi todos'},{value:'3',label:'3 veces',sub:'Alta frecuencia, menos series por sesión'}], String(F.structure.frecuencia||''))}
+      ${filoSub('Duración típica de tu sesión')}
+      ${filoChoiceGroup('sesion.duracion',[{value:'45',label:'45 min'},{value:'60',label:'60 min'},{value:'75',label:'75 min'},{value:'90',label:'90 min'}], String(F.sesion.duracion||''))}
+      ${filoSub('Si el socio entrena días seguidos...')}
+      ${filoChoiceGroup('sesion.seguidos',[{value:'nunca',label:'Nunca el mismo músculo dos días seguidos'},{value:'ligero',label:'Se permite, con el segundo día ligero'},{value:'si',label:'Sí, sin problema'}], F.sesion.seguidos)}
+      ${filoSub('Notas sobre tu estructura (opcional)')}
+      ${filoText('structure.split','Ej. Full body para principiantes los primeros 2 meses.')}`;
+  } else if(filoStep===3){
+    html+=`${T('Progreso y periodización')}
       ${filoSub('¿Cómo defines el progreso?')}
       ${filoChoiceGroup('progressStyle',[{value:'numeros',label:'Por números (peso, reps, cargas)'},{value:'calidad',label:'Por calidad de movimiento'},{value:'mixto',label:'Ambos, según la persona'}], F.progressStyle)}
       ${filoSub('¿Cómo periodizas?')}
@@ -153,57 +195,68 @@ function renderFiloStep(){
         {value:'lineal',label:'Lineal',sub:'Subo carga poco a poco, bloque tras bloque'},
         {value:'ondulante',label:'Ondulante',sub:'Alterno días pesados, medios y ligeros en la semana'},
         {value:'bloques',label:'Por bloques',sub:'Acumulación → intensificación → descarga'},
-        {value:'conjugada',label:'Conjugada',sub:'Fuerza máxima y velocidad en la misma semana'}], F.structure.periodization)}
-      ${filoSub('¿Cómo estructuras la semana?')}
-      ${filoText('structure.split','Ej. Torso/pierna 4 días; full body para principiantes.')}`;
-  } else if(filoStep===3){
-    html+=`<div class="q-title" style="font-size:var(--fs-2xl)">Intensidad y dosis</div>
+        {value:'conjugada',label:'Conjugada',sub:'Fuerza máxima y velocidad en la misma semana'}], F.structure.periodization)}`;
+  } else if(filoStep===4){
+    html+=`${T('Dosis por objetivo')}
+      ${filoSub('Tu tabla de trabajo. Deja vacío lo que quieras que el sistema decida (el gris es el valor sugerido).')}
+      ${filoTablaDosis(F)}
+      ${filoSub('Series semanales por músculo según nivel')}
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+        ${[['1','Principiante','8-12'],['2','Intermedio','12-16'],['3','Avanzado','16-20']].map(([k,l,ph])=>`<label style="font-size:var(--fs-2xs);color:var(--mu)">${l}${filoIn('volumen['+k+']',F.volumen[k],ph)}</label>`).join('')}
+      </div>
+      ${filoSub('Ejercicios por sesión')}
+      ${filoChoiceGroup('sesion.ejercicios',[{value:'4-5',label:'4-5',sub:'Pocos y bien hechos'},{value:'6-7',label:'6-7'},{value:'8+',label:'8 o más'}], F.sesion.ejercicios)}`;
+  } else if(filoStep===5){
+    html+=`${T('Intensidad')}
       ${filoSub('¿Con qué dosificas la intensidad?')}
       ${filoChoiceGroup('structure.method',[{value:'rpe',label:'RPE (esfuerzo percibido)'},{value:'rir',label:'RIR (repeticiones en reserva)'},{value:'porcentajes',label:'% de 1RM'},{value:'fallo',label:'Series al fallo'}], F.structure.method)}
-      ${filoSub('Tus rangos de repeticiones por objetivo')}
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
-        ${[['fuerza','Fuerza','3-6'],['hipertrofia','Hipertrofia','8-12'],['resistencia','Resistencia','15-20']].map(([k,l,ph])=>`<label style="font-size:var(--fs-2xs);color:var(--mu)">${l}<input class="ti" style="margin-top:4px" placeholder="${ph}" value="${esc(F.dosis[k]||'')}" oninput="filoDraft.dosis.${k}=this.value"></label>`).join('')}
-      </div>
       ${filoSub('Descanso entre series')}
       ${filoChoiceGroup('exerciseStyle.restStyle',[{value:'fijo',label:'Tiempo fijo'},{value:'autorregulado',label:'Autorregulado'}], F.exerciseStyle.restStyle)}
       ${filoSliderRow('Variedad de ejercicios', F.exerciseStyle.variety, 'exerciseStyle.variety',['Pocos y dominados','Mucha variedad'])}`;
-  } else if(filoStep===4){
-    html+=`<div class="q-title" style="font-size:var(--fs-2xl)">Tus métodos de intensidad</div>
+  } else if(filoStep===6){
+    html+=`${T('Tus métodos de intensidad')}
       ${filoSub('Toca una vez = lo uso seguido (verde). Dos veces = no lo uso (rojo). Tres = neutral.')}
       <div class="filo-chips">${Object.entries(KB_METODOS).map(([id,M])=>`<div class="filo-chip ${F.metodos.favoritos.includes(id)?'fav':F.metodos.evita.includes(id)?'no':''}" title="${esc(M.como)}" onclick="filoCycleMetodo('${id}',this)">${M.nm}</div>`).join('')}</div>
       ${filoSliderRow('¿Qué tanto los usas?', F.metodos.frecuencia, 'metodos.frecuencia',['Rutinas limpias','Casi cada ejercicio'])}
       ${filoSub('Con principiantes...')}
       ${filoChoiceGroup('metodos.principiantes',[{value:'no',label:'Nada de métodos: técnica primero'},{value:'basicos',label:'Solo básicos (tempo, pausas, superserie antagonista)'},{value:'si',label:'También intermedios si la técnica lo permite'}], F.metodos.principiantes)}`;
-  } else if(filoStep===5){
-    html+=`<div class="q-title" style="font-size:var(--fs-2xl)">Cómo eliges ejercicios</div>
+  } else if(filoStep===7){
+    const pat=F.seleccion.patrones||[];
+    html+=`${T('Cómo eliges ejercicios')}
+      ${filoSub('Patrones que no pueden faltar en la semana. Marca solo los indispensables: con pocos días cada uno ocupa un lugar en la sesión.')}
+      <div class="filo-chips">${FILO_PATRONES.map(([id,nm])=>`<div class="filo-chip ${pat.includes(id)?'fav':''}" onclick="filoTogglePatron('${id}',this)">${nm}</div>`).join('')}</div>
       ${filoSliderRow('Equipo que prefieres', F.seleccion.libreVsMaquina, 'seleccion.libreVsMaquina',['Máquinas y poleas','Peso libre'])}
       ${filoSliderRow('Trabajo unilateral', F.seleccion.unilateral, 'seleccion.unilateral',['Casi nunca','Mucho'])}
+      ${filoSub('Halterofilia (cargadas, arranques)')}
+      ${filoChoiceGroup('seleccion.halterofilia',[{value:'no',label:'No la uso'},{value:'variantes',label:'Solo variantes (swing, jalón alto)'},{value:'avanzados',label:'Movimientos completos con avanzados'}], F.seleccion.halterofilia)}
+      ${filoSub('Pliometría (saltos)')}
+      ${filoChoiceGroup('seleccion.pliometria',[{value:'no',label:'No la uso'},{value:'deportistas',label:'Solo con deportistas'},{value:'intermedio',label:'Desde nivel intermedio'},{value:'todos',label:'Con todos, en baja intensidad'}], F.seleccion.pliometria)}
       ${filoSub('Tus ejercicios firma (los que siempre usas)')}
       ${filoText('seleccion.firma','Ej. Hip thrust con pausa, jalón unilateral, sentadilla búlgara.')}
       ${filoSub('Ejercicios que nunca programas y por qué')}
       ${filoText('seleccion.nunca','Ej. Press tras nuca (riesgo de hombro), peso muerto en principiantes.')}`;
-  } else if(filoStep===6){
-    html+=`<div class="q-title" style="font-size:var(--fs-2xl)">Anatomía de tu sesión</div>
+  } else if(filoStep===8){
+    html+=`${T('Anatomía de tu sesión')}
       ${filoSub('Calentamiento')}
       ${filoChoiceGroup('sesion.calentamiento',[{value:'movilidad',label:'Movilidad general + activación'},{value:'aproximacion',label:'Series de aproximación del primer ejercicio'},{value:'especifico',label:'Activación específica del músculo del día'}], F.sesion.calentamiento)}
       ${filoSub('Orden de los ejercicios')}
       ${filoChoiceGroup('sesion.orden',[{value:'compuesto',label:'Compuesto pesado primero, aislamiento al final'},{value:'preagot',label:'A veces pre-agoto antes del compuesto'},{value:'prioridad',label:'Primero lo que el socio más necesita'}], F.sesion.orden)}
       ${filoSub('Tempo')}
       ${filoChoiceGroup('sesion.tempo',[{value:'controlado',label:'Controlado siempre (bajada lenta)'},{value:'explosivo',label:'Bajada controlada, subida explosiva'},{value:'fase',label:'Depende de la fase'}], F.sesion.tempo)}`;
-  } else if(filoStep===7){
-    html+=`<div class="q-title" style="font-size:var(--fs-2xl)">Core y cardio</div>
+  } else if(filoStep===9){
+    html+=`${T('Core y cardio')}
       ${filoSub('Core')}
       ${filoChoiceGroup('sesion.core',[{value:'diario',label:'Algo de core en cada sesión'},{value:'semanal',label:'2-3 bloques a la semana'},{value:'integrado',label:'Integrado en los compuestos, casi sin aislado'}], F.sesion.core)}
       ${filoSub('Cardio')}
       ${filoChoiceGroup('sesion.cardio',[{value:'dias',label:'Días propios de cardio'},{value:'final',label:'Bloque corto al final (zona 2)'},{value:'intervalos',label:'Intervalos / circuitos metabólicos'},{value:'objetivo',label:'Según el objetivo del socio'}], F.sesion.cardio)}`;
-  } else if(filoStep===8){
-    html+=`<div class="q-title" style="font-size:var(--fs-2xl)">Hora pico</div>
+  } else if(filoStep===10){
+    html+=`${T('Hora pico')}
       ${filoSub('Si el área está ocupada, ¿qué opción prefieres darle al socio?')}
       ${filoChoiceGroup('horaPico.sustitucion',[{value:'maquina',label:'Máquina o polea con el mismo enfoque'},{value:'mancuernas',label:'Mancuernas o zona funcional'},{value:'corporal',label:'Peso corporal / bandas'},{value:'metodo',label:'Cambiar el método (p. ej. superserie con lo disponible)'}], F.horaPico.sustitucion)}
       ${filoSub('Mensaje para tus socios en hora pico')}
       ${filoText('horaPico.nota','Ej. No esperes más de 3 minutos: usa la opción y mantén el tempo.')}`;
-  } else if(filoStep===9){
-    html+=`<div class="q-title" style="font-size:var(--fs-2xl)">Tu sello final</div>
+  } else if(filoStep===11){
+    html+=`${T('Tu sello final')}
       ${filoSub('Describe una sesión típica tuya, como se la explicarías a otro coach. Es lo que más ayuda a que la IA escriba como tú.')}
       ${filoText('sampleRoutineNote','Ej. Pierna: calentamiento de cadera, sentadilla en pirámide 12-10-8-6, búlgara + extensión en biserie, curl femoral con drop set, cierro con pantorrilla en tempo 3-1-1.',4)}
       ${filoSub('Si un socio se estanca...')}
@@ -212,7 +265,7 @@ function renderFiloStep(){
         ${svgRadarFilosofia(F,110)}
         <div style="font-size:var(--fs-xs);color:var(--mu);line-height:1.7">Así se ve tu huella; esto verá el socio al elegirte.</div>
       </div>`;
-  } else if(filoStep===10){
+  } else if(filoStep===12){
     html+=filoPasoModelos();
   }
   c.innerHTML=html;
