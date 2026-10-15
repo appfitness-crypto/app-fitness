@@ -727,7 +727,7 @@ function buildFallback(){
 
   const tiposTxt=tiposSesion.map(x=>x[0]).join(' ');
   const splitRec=/Torso|Pierna/.test(tiposTxt) && /Full Body/.test(tiposTxt) ? 'Torso/Pierna + Full Body ligero'
-    : (!/Full Body/.test(tiposTxt) && /Torso/.test(tiposTxt) && !(splitCoach&&splitCoach.clave==='torso') && nFull<=3) ? 'Torso/Pierna' : '';
+    : (!/Full Body/.test(tiposTxt) && /Torso/.test(tiposTxt) && ((splitCoach&&splitCoach.clave==='full') || nFull<=3)) ? 'Torso/Pierna' : '';
   const splitLabelBase=splitRec||(splitCoach&&{full:'Full Body '+nFull+'x',torso:'Torso/Pierna',ppl:'Empuje/Jalón/Pierna',grupos:'Por grupos musculares'}[splitCoach.clave])
     ||{1:'Full Body 1x',2:'Full Body 2x',3:'Full Body 3x',4:'Torso/Pierna',5:'Torso/Pierna + Accesorios',6:'Por grupos musculares'}[nFull]||(nFull>6?'Por grupos musculares':'Sin sesión completa esta semana');
   const splitLabel = splitLabelBase + (deriv.conClase.length?' + complemento en días de clase':'');
