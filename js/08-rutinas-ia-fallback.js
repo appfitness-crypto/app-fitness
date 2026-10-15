@@ -1388,7 +1388,7 @@ function renderPerfilTab(){
       <div class="st"><div class="st-l">Racha</div><div class="st-v">${ev.racha}<small> sem</small></div></div>
       <div class="st"><div class="st-l">Adherencia</div><div class="st-v">${ev.adherencia}<small>%</small></div></div>
     </div>
-    ${(()=>{ const ent=s.entrenadorId&&getEntrenador(s.entrenadorId); const m=(ent&&metLineas(ent.filosofia,ent,s))||s.metodo; return m&&m.tagline?`<div class="sec-row"><div class="sec-t">El método de tu entrenador</div></div>${metodoHTML(m)}`:''; })()}
+    ${(()=>{ const ent=entRutina(s.entrenadorId); const m=(ent&&metLineas(ent.filosofia,ent,s))||s.metodo; return m&&m.tagline?`<div class="sec-row"><div class="sec-t">${m.sistema?'El método de tu plan':'El método de tu entrenador'}</div></div>${metodoHTML(m)}`:''; })()}
     <div class="sec-row"><div class="sec-t">Logros</div></div>
     <div class="logros">${logros.map(l=>`<div class="lg${l.on?' on':''}">${it(l.i)}<b>${l.t}</b><span>${esc(l.s)}</span></div>`).join('')}</div>
     <div class="sec-row"><div class="sec-t">Apariencia</div></div>
