@@ -54,6 +54,7 @@ function metSplitClave(txt,nivel){
 function metSplitElegido(ph,nFull,nivel){
   const st=(ph&&ph.structure)||{};
   const nota=nivel===1 && String(st.split||'').split(/[.;\n]+/).some(f=>/principiante|novato|empiez/i.test(f));
+  if(nivel===1 && ph && ph.poblaciones && parseInt(ph.poblaciones.adaptacion)) return 'full';   // fase de adaptación: cuerpo completo
   const tabla=(st.splitPorDias||{})[Math.max(2,Math.min(6,nFull||0))];
   if(tabla && !nota) return tabla;
   return metSplitClave(st.split,nivel);
@@ -217,7 +218,7 @@ function aplicarMetodologia(semana,ent,ctx,p){
   const nunca=[...new Set([...metLista(se.nunca), ...(ctx.evitaNm||[])])];   // + halterofilia / pliometría que no usa
   const per=metPeriodizacion(ph,p.objetivo);
   const metodoInt=(ph.structure&&ph.structure.method)||'';
-  const rirT=(ph.progresion&&ph.progresion.rir)||{};
+  const rirT=ctx.rirT||(ph.progresion&&ph.progresion.rir)||{};
   const modelo=(typeof filoModeloReps==='function')?filoModeloReps(ph,p.objetivo):null;
   const dosis=ph.dosis||{};
   const rangos={F:metRango(dosis.fuerza,MET_REPS_DEF.F), H:metRango(dosis.hipertrofia,MET_REPS_DEF.H), R:metRango(dosis.resistencia,MET_REPS_DEF.R), P:metRango(dosis.potencia,[3,5])};
@@ -249,7 +250,8 @@ function aplicarMetodologia(semana,ent,ctx,p){
   dias.forEach((d,i)=>{
     const fase=metFaseDia(per,d.tipo,i,nivel);
     if(fase) d.tipo=String(d.tipo).replace(/\s*·\s*(D[ií]a (pesado|medio|ligero)|Esfuerzo (m[aá]ximo|din[aá]mico))$/i,'')+' · '+MET_FASE_TXT[fase];
-    const letraDia=fase?metLetraDia(fase,obj):obj;
+    let letraDia=fase?metLetraDia(fase,obj):obj;
+    if(ctx.adaptacion && letraDia==='F') letraDia='H';   // adaptación: técnica antes que cargas pesadas
     let principal=true;
     d.ejercicios.forEach(e=>{
       if(!metEsFuerza(e) || e.potencia || e._patron==='cargar') return;
@@ -455,6 +457,7 @@ function metLineas(ph,ent,p,ctx){
   const prog={numeros:'Tu avance se mide en números: peso y repeticiones.',calidad:'Tu avance se mide primero por la calidad del movimiento.',mixto:'Tu avance se mide en números y en calidad de movimiento.'}[ph.progressStyle];
   if(prog) L.push(prog);
   if(typeof progLineas==='function') L.push(...progLineas(ph));
+  if(typeof cuidadoLineas==='function') L.push(...cuidadoLineas(ph,p));
   if(ph.adjustmentPhilosophy && String(ph.adjustmentPhilosophy).trim()) L.push('Si te estancas: '+String(ph.adjustmentPhilosophy).trim());
   const sistema=!!(ent && ent.rol==='coordinador');   // el director define la filosofía del sistema (plan de la app)
   return {entrenador:(ent&&ent.nombre)||'', corto:sistema?(GYM.nombreCorto||GYM.nombre||'la app'):nm, sistema, tagline:String(ph.tagline).trim(), lineas:L,

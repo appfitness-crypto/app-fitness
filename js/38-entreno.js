@@ -691,6 +691,7 @@ function mostrarResumenSesion(info){
     </div>
     <section class="en-sec"><div class="en-sec-h"><h3>¿Cómo te sentiste?</h3><span>Ayuda a ajustar tu plan</span></div>
       <div class="en-feel" role="group" aria-label="Cómo te sentiste">${['Fácil','Bien','Duro','Al límite'].map(f=>`<button type="button" aria-pressed="${x.sensacion===f}" onclick="finSentir(this,'${f}')">${f}</button>`).join('')}</div></section>
+    ${dolorHTML(x)}
     <button type="button" class="en-btn en-btn-p" onclick="finListo()">${ico('check')}Listo</button>`;
   go('s-fin');
 }
@@ -818,17 +819,19 @@ function enHeatHTML(s,ses){
     <div class="en-heat-leg"><span>${desde}</span><span><i class="c0"></i>Nada<i class="c1"></i>Parcial<i class="c2"></i>Completa</span></div></div>`;
 }
 // Ejercicios con más registros: mejor peso de cada mes (hasta 6 meses)
+// Ejercicios de referencia que el entrenador usa para medir la fuerza: van primero en la gráfica
+function enRef(s,nm){ const e=entSocio(s), C=evalCoach(e&&e.filosofia); return C.ref.length?evalRefDe(nm,C.ref):null; }
 function enFuerzaHTML(s,ses){
   const por={};
   ses.forEach(x=>comoArray(x.detalle).forEach(d=>{ if(!d||d.alt||!(+d.kg>0)||!x.fecha) return;
     const m=x.fecha.slice(0,7); (por[d.n]=por[d.n]||{})[m]=Math.max((por[d.n]||{})[m]||0,+d.kg); }));
   const lifts=Object.keys(por).map(n=>{ const ms=Object.keys(por[n]).sort().slice(-6); return {n, ms, v:ms.map(m=>por[n][m])}; })
-    .filter(l=>l.v.length>=2).sort((a,b)=>(b.v[b.v.length-1]-b.v[0])-(a.v[a.v.length-1]-a.v[0])).slice(0,4);
+    .filter(l=>l.v.length>=2).sort((a,b)=>(!!enRef(s,b.n)-!!enRef(s,a.n))||(b.v[b.v.length-1]-b.v[0])-(a.v[a.v.length-1]-a.v[0])).slice(0,4);
   if(!lifts.length) return '<div class="empty-msg">Registra el peso de tus series durante al menos dos meses y aquí verás cuánto subes en cada ejercicio.</div>';
   return `<div class="en-lifts">${lifts.map(l=>{ const a=l.v[0], b=l.v[l.v.length-1], dif=Math.round((b-a)*10)/10, pc=a>0?Math.round(dif/a*100):0;
     const mes=m=>EN_MESES[+m.slice(5,7)-1];
     return `<button type="button" class="en-lift" aria-expanded="false" onclick="this.setAttribute('aria-expanded',this.getAttribute('aria-expanded')!=='true')">
-      <span class="en-lift-n">${esc(l.n)}</span>${enSpark(l.v)}
+      <span class="en-lift-n">${esc(l.n)}${enRef(s,l.n)?'<small class="en-ref">Referencia</small>':''}</span>${enSpark(l.v)}
       <span class="en-lift-v"><b class="num">${enKg(b)}</b><span class="${dif>0?'en-up':''}">${dif>0?'+':''}${kgToDisplay(dif)} · ${dif>0?'+':''}${pc}%</span></span>
       <span class="en-lift-det">${l.ms.map((m,i)=>mes(m)+' '+kgToDisplay(l.v[i])).join(' · ')} ${unidadPeso}</span></button>`; }).join('')}</div>`;
 }

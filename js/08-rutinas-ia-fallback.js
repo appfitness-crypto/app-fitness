@@ -46,6 +46,7 @@ function detalleFilosofiaAvanzada(ph,objetivo){
   const hp=ph.horaPico||{};
   if(hp.sustitucion) L.push('Opciones por área ocupada: prefiere '+{maquina:'máquina o polea con el mismo enfoque',mancuernas:'mancuernas o zona funcional',corporal:'peso corporal y bandas',metodo:'cambiar el método con el equipo disponible'}[hp.sustitucion]+'.'+(hp.nota?' Mensaje al socio: '+hp.nota:''));
   if(typeof progIA==='function') L.push(...progIA(ph,objetivo));
+  if(typeof cuidadoIA==='function') L.push(...cuidadoIA(ph));
   if(ph.sampleRoutineNote) L.push('SESIÓN TÍPICA DE ESTE ENTRENADOR (imita su estilo): '+ph.sampleRoutineNote);
   if(typeof filoModeloIA==='function'){ const mi=filoModeloIA(ph,objetivo); if(mi) L.push(mi.replace(/^   - /,'')); }   // su rutina modelo para el objetivo de este socio
   return L.map(x=>'   - '+x).join('\n');
@@ -351,6 +352,7 @@ function procesarRutina(data){
     } else data.metodo=metLineas(entP&&entP.filosofia, entP, perfilP, ctxP);
     data.sustLesion=filtrarLesiones(data.semana, ctxP);   // seguridad: al final, después de plantilla, variedad, filosofía e IA
     ajustarRangosFuerza(data.semana, ctxP);              // fuerza solo en los principales con carga real
+    ajustarCuidado(data.semana, ctxP);                   // zona lesionada ligera, equilibrio, circuitos (filosofía del entrenador)
     aligerarDias(data.semana);                           // full body ligero tras un día seguido de entrenamiento
     if(data.metodo && data.perfil){
       if(data.origen==='plantilla') data.perfil.nota='Plan armado con el método de '+data.metodo.corto+': sus ejercicios, rangos, intensidad y forma de organizar la semana.'+(data.perfil.notaExtra||'');
@@ -1325,6 +1327,7 @@ function refreshDash(){
     </div>
     ${asist?`<div class="asist-w">${asist}</div>`:''}
     ${pqCardSocio(s)}
+    ${evalCardSocio(s)}
     ${rmAvisoHTML(s)}
 
     <div class="hero-card">
