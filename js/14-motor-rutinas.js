@@ -31,6 +31,7 @@ function ctxDesdePerfil(p, filo){
   const est=(parseFloat(p.estatura)||0)/100, imc=(est>0&&parseFloat(p.peso))?parseFloat(p.peso)/(est*est):0;
   return {
     edad:parseInt(p.edad)||0, imc:Math.round(imc*10)/10,
+    dosisH:(f.dosis&&f.dosis.hipertrofia)||'', metodoInt:(f.structure&&f.structure.method)||'',
     evitaNm:String((f.seleccion&&f.seleccion.nunca)||'').split(/[,;\n]+/).map(kbNorm).filter(x=>x.length>2),   // lo que el entrenador nunca programa
     nivel:nivelNum(p.nivel), obj:objLetra(p.objetivo), objetivo:p.objetivo||'',
     les:lesionKeys(p.limitaciones), evita:m.evita||[],
@@ -285,6 +286,59 @@ function aplicarEjCatalogo(e,x){
   else if(x.z==='liga') e.peso='Banda — resistencia media';
   else if(!e.peso||/^(corporal|banda|sin carga)/i.test(e.peso)) e.peso='Moderado — 50% 1RM';
 }
+// ═════════════════════════════════════════
+// EJERCICIO PRINCIPAL Y RANGOS DE FUERZA
+// Fuerza máxima (pocas repeticiones, carga alta) solo tiene sentido en los ejercicios principales del día
+// con carga real: barra, mancuernas, máquina o polea. Bandas, peso corporal, TRX y discos van en hipertrofia
+// o resistencia; los accesorios también, aunque sean compuestos.
+// ═════════════════════════════════════════
+const ZONAS_LIGERAS=['liga','corporal','trx','disco'];
+const RX_LIGERO=/banda|liga|trx|peso corporal|corporal|lagartija|invertido|flexi[oó]n|con disco|squeeze/i;
+function ejLigero(kb,e){
+  if(kb) return ZONAS_LIGERAS.includes(kb.z) || /invertido|lagartija|flexi[oó]n/i.test(kb.nm);
+  return RX_LIGERO.test(((e&&(e.nm||e.nombre))||'')+' '+((e&&e.peso)||''));   // ejercicios de la plantilla que no están en el catálogo
+}
+// Músculo del ejercicio aunque no esté en el catálogo (se deduce del texto "músculo" de la plantilla)
+function enfEj(e,kb){
+  if(kb&&kb.enf) return kb.enf; if(e.enf) return e.enf;
+  const t=kbNorm((e.ms||e.musculo||'')+' '+(e.nm||e.nombre||''));
+  return /pecho|pectoral/.test(t)?'pecho': /dorsal|jalon|remo|espalda|romboides/.test(t)?'dorsal': /cuadriceps|sentadilla|prensa/.test(t)?'cuadriceps'
+    : /gluteo|hip thrust/.test(t)?'gluteo': /femoral|isquio|peso muerto/.test(t)?'femoral': /deltoide|hombro|militar/.test(t)?'deltoide':'';
+}
+const PATRON_ENF={pecho:'empuje',pecho_sup:'empuje',deltoide:'empuje',dorsal:'jalon',espalda_media:'jalon',cuadriceps:'rodilla',gluteo:'cadera',femoral:'cadera'};
+function ejCargable(kb,ctx,e){
+  if(!kb){ const nm=(e&&(e.nm||e.nombre))||''; return !!e && !ejLigero(null,e) && /press|sentadilla|remo|jal[oó]n|peso muerto|prensa|hip thrust|zancada|desplante|dominada/i.test(nm); }
+  return kb.t==='c' && !kb.iso && !kb.rondas && kb.enf!=='core' && kb.enf!=='cardio' && !ejLigero(kb)
+    && !(kb.z==='funcional' && (ctx.nivel||1)<3);   // dominadas y fondos con lastre: solo avanzados
+}
+// Principales del día: el primer ejercicio con carga real de cada patrón (empuje, jalón, rodilla, cadera), hasta 2 (3 en full body)
+function principalesDia(d,ctx){
+  const max=/full body|cuerpo completo/i.test(d.tipo||'')?3:2, out=new Set(), vistos=new Set();
+  (d.ejercicios||[]).forEach((e,i)=>{
+    if(out.size>=max || e.fase || e.potencia || esEjCardio(e) || esEjRondas(e) || esEjMovilidad(e)) return;
+    const kb=kbBuscar(e.nm||e.nombre); if(!ejCargable(kb,ctx,e)) return;
+    const pat=PATRON_ENF[enfEj(e,kb)]; if(!pat || vistos.has(pat)) return;
+    vistos.add(pat); out.add(i);
+  });
+  return out;
+}
+function ajustarRangosFuerza(semana,ctx){
+  let cambios=0;
+  const rH=(String(ctx.dosisH||'').match(/\d{1,2}/g)||[]), txtH=rH.length?(rH[0]+(rH[1]?'-'+rH[1]:'')):'10-12';
+  (semana||[]).forEach(d=>{
+    if(!d||!Array.isArray(d.ejercicios)) return;
+    const pr=principalesDia(d,ctx);
+    d.ejercicios.forEach((e,i)=>{
+      if(pr.has(i) || !/—\s*fuerza/i.test(String(e.reps||''))) return;
+      const kb=kbBuscar(e.nm||e.nombre), ligero=ejLigero(kb,e), letra=ligero?'R':'H';
+      e.reps=String(e.reps).replace(/^[^—·]*/,(ligero?'12-15':txtH)+' reps ').replace(/—\s*fuerza/i,'— '+(ligero?'resistencia':'hipertrofia'));
+      if(e.esfuerzo && ctx.metodoInt && typeof metEsfuerzo==='function'){ const x=metEsfuerzo(ctx.metodoInt,letra,ctx.nivel); if(x){ e.esfuerzo=x.txt; e.rir=x.rir; } }
+      if(/1\s*RM/i.test(e.peso||'')) e.peso=ligero?'Ligero — 40% 1RM':'Moderado — 55% 1RM';
+      cambios++;
+    });
+  });
+  return cambios;
+}
 function diversificarSemana(semana,ctx,filo,semilla){
   if(ctx.sinMetodos||ctx.soloSuaves) return semana;
   const f=filo||{}, se=f.seleccion||{};
@@ -298,12 +352,14 @@ function diversificarSemana(semana,ctx,filo,semilla){
   const libres=['mancuernas','rack','banco','funcional','disco'], guiadas=['maquina','polea'];
   (semana||[]).forEach(d=>{
     if(!d||!Array.isArray(d.ejercicios)||/descanso|complemento/i.test(d.tipo||'')) return;
-    d.ejercicios.forEach(e=>{
+    const princ=principalesDia(d,ctx);
+    d.ejercicios.forEach((e,iE)=>{
       const nm=e.nm||e.nombre; if(!nm||esEjCardio(e)||esEjRondas(e)||esEjMovilidad(e)) return;
       const kb=kbBuscar(nm); if(!kb||!kb.enf||kb.enf==='cardio') return;
       const prohibido=nunca.some(n=>kbNorm(nm).includes(n));
-      const esFirma=firma.some(n=>kbNorm(nm).includes(n));
-      const cands=KB_EJERCICIOS.filter(x=>x.enf===kb.enf && x.id!==kb.id && x.t===kb.t && !!x.iso===!!kb.iso && !x.rondas && !usados.has(x.id)
+      const esFirma=firma.some(n=>kbNorm(nm).includes(n)) || princ.has(iE);   // el ejercicio principal del día no se cambia por variedad
+      const cargado=!ejLigero(kb);   // un ejercicio con carga real no se cambia por uno con banda, peso corporal o TRX
+      const cands=KB_EJERCICIOS.filter(x=>x.enf===kb.enf && x.id!==kb.id && x.t===kb.t && !!x.iso===!!kb.iso && !x.rondas && !usados.has(x.id) && !(cargado && ejLigero(x))
         && !ctx.les.some(l=>(x.ev||[]).includes(l)) && (x.nv||1)<=ctx.nivel
         && !nunca.some(n=>kbNorm(x.nm).includes(n)));
       if(!cands.length || (!prohibido && (esFirma || rnd()>pCambio))){ usados.add(kb.id); return; }

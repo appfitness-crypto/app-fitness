@@ -328,12 +328,13 @@ function procesarRutina(data){
     normalizarRutinaIA(data);
     const ctxP=ctxQuiz(), entP=entRutina(qAnswers.entrenadorId);
     const semillaP=(qAnswers.nombre||'')+Date.now();
-    const perfilP={objetivo:qAnswers.objetivo, nivel:qAnswers.nivel, edad:qAnswers.edad, zonas:qAnswers.zonas};
+    const perfilP={objetivo:qAnswers.objetivo, nivel:qAnswers.nivel, edad:qAnswers.edad, zonas:qAnswers.zonas, diasSemana:qAnswers.diasSemana, dias:qAnswers.dias};
     if(data.origen==='plantilla'){
       diversificarSemana(data.semana, ctxP, entP&&entP.filosofia, semillaP);
       data.metodo=aplicarMetodologia(data.semana, entP, ctxP, perfilP);
     } else data.metodo=metLineas(entP&&entP.filosofia, entP, perfilP, ctxP);
     data.sustLesion=filtrarLesiones(data.semana, ctxP);   // seguridad: al final, después de plantilla, variedad, filosofía e IA
+    ajustarRangosFuerza(data.semana, ctxP);              // fuerza solo en los principales con carga real
     if(data.metodo && data.perfil){
       if(data.origen==='plantilla') data.perfil.nota='Plan armado con el método de '+data.metodo.corto+': sus ejercicios, rangos, intensidad y forma de organizar la semana.'+(data.perfil.notaExtra||'');
       if(data.metodo.horaPico) data.perfil.consejos=[...(data.perfil.consejos||[]), 'Hora pico: '+data.metodo.horaPico];

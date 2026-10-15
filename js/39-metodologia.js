@@ -43,9 +43,19 @@ function metSplitClave(txt,nivel){
   const g=frases.find(f=>!/principiante|novato|empiez/.test(f) && clave(f));
   return g?clave(g):null;
 }
+// El objetivo del cliente manda: cada músculo debe trabajarse al menos 2 veces por semana. Si el split del entrenador
+// no lo permite con los días que tiene el socio (empuje/jalón/pierna con menos de 6 días, un grupo por día con
+// menos de 6), se usa la estructura más cercana que sí lo cumple.
+function metSplitEfectivo(k,nFull){
+  if(!k) return null;
+  if(k==='ppl' && nFull<6) return nFull>=4?'torso':'full';
+  if(k==='grupos' && nFull<6) return nFull>=4?'torso':'full';
+  if(k==='torso' && nFull<=2) return 'full';
+  return k;
+}
 function metSplitTipos(ph,nFull,nivel){
   if(!metActiva(ph) || !nFull) return null;
-  const k=metSplitClave(ph.structure&&ph.structure.split, nivel); if(!k) return null;
+  const k=metSplitEfectivo(metSplitClave(ph.structure&&ph.structure.split, nivel), nFull); if(!k) return null;
   const col=['verde','gold','neon','hombro','red','verde'];
   let nombres;
   if(k==='full' || nFull===1) nombres=['Full Body A','Full Body B','Full Body C'];
@@ -209,7 +219,8 @@ function aplicarMetodologia(semana,ent,ctx,p){
 
   // 4) Orden de los ejercicios
   const zonasSocio=new Set((p.zonas||[]).flatMap(z=>MET_ZONAS[z]||[]));
-  const orden = ss.orden==='prioridad' && !zonasSocio.size ? 'compuesto' : ss.orden;
+  // Con objetivo de fuerza no se pre-agota: el ejercicio principal va primero y descansado
+  const orden = (ss.orden==='prioridad' && !zonasSocio.size) || (ss.orden==='preagot' && obj==='F') ? 'compuesto' : ss.orden;
   let preagot=0;
   dias.forEach(d=>{
     const fuerza=d.ejercicios.filter(e=>metEsFuerza(e)&&!e.potencia);
@@ -328,8 +339,9 @@ function aplicarMetodologia(semana,ent,ctx,p){
 function metLineas(ph,ent,p,ctx){
   if(!metActiva(ph)) return null;
   const L=[], nm=metNombre(ent), ss=ph.sesion||{}, nivel=ctx?ctx.nivel:nivelNum(p.nivel);
-  const sp=metSplitClave(ph.structure&&ph.structure.split, nivel);
-  if(sp) L.push('Semana organizada en '+MET_SPLIT_TXT[sp]+'.');
+  const nDias=(p.diasSemana&&p.diasSemana.length)||parseInt(p.dias)||0;
+  const sp0=metSplitClave(ph.structure&&ph.structure.split, nivel), sp=nDias?metSplitEfectivo(sp0,nDias):sp0;
+  if(sp) L.push('Semana organizada en '+MET_SPLIT_TXT[sp]+(sp0&&sp0!==sp?', para trabajar cada músculo 2 veces por semana con tus '+nDias+' días':'')+'.');
   const per=ph.structure&&ph.structure.periodization;
   if(per==='ondulante') L.push('Periodización ondulante: alternas días pesados, medios y ligeros en la misma semana.');
   else if(per==='lineal') L.push('Progresión lineal: cuando completes todas las reps con buena técnica, sube un poco el peso.');
@@ -340,7 +352,7 @@ function metLineas(ph,ent,p,ctx){
   if(mi) L.push(mi);
   const cal={movilidad:'Cada sesión empieza con movilidad articular.',aproximacion:'Antes del ejercicio principal haces series de aproximación.',especifico:'Antes de cargar activas el músculo del día.'}[ss.calentamiento];
   if(cal) L.push(cal);
-  const ord={compuesto:'Primero los ejercicios compuestos pesados; el aislamiento va al final.',preagot:'Algunos días pre-agotas el músculo antes del compuesto.',prioridad:'Primero va lo que más necesitas: tus zonas prioritarias.'}[ss.orden];
+  const ord={compuesto:'Primero los ejercicios compuestos pesados; el aislamiento va al final.',preagot:'Algunos días pre-agotas el músculo antes del compuesto.',prioridad:'Primero va lo que más necesitas: tus zonas prioritarias.'}[(ss.orden==='preagot'&&ctx&&ctx.obj==='F')?'compuesto':ss.orden];
   if(ord) L.push(ord);
   const tem={controlado:'Bajadas lentas y controladas en todo.',explosivo:'Bajas controlado y subes explosivo.',fase:'El tempo cambia según el día: controlado o explosivo.'}[ss.tempo];
   if(tem) L.push(tem);
