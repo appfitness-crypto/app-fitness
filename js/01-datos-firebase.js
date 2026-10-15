@@ -482,9 +482,11 @@ function dbSaveEntrenador(entId){
 }
 
 function getEntrenador(id){ return DB.entrenadores[id]||null; }
-// Filosofía con la que se arma una rutina: la del entrenador del cliente o, si no tiene, la del director (plan de la app)
-function entSistema(){ return Object.values(DB.entrenadores||{}).find(e=>e && e.rol==='coordinador' && e.filosofia && e.filosofia.tagline)||null; }
-function entRutina(id){ return (id && getEntrenador(id)) || entSistema(); }
+// Filosofía con la que se arma una rutina: la del entrenador del cliente si ya la llenó;
+// si no tiene entrenador o su entrenador aún no la define, la del director (filosofía del sistema)
+function filoLlena(e){ return !!(e && e.filosofia && e.filosofia.tagline && String(e.filosofia.tagline).trim()); }
+function entSistema(){ return Object.values(DB.entrenadores||{}).find(e=>e && e.rol==='coordinador' && filoLlena(e))||null; }
+function entRutina(id){ const e=id&&getEntrenador(id); return filoLlena(e) ? e : (entSistema()||e||null); }
 function listaEntrenadoresConFilosofia(){
   return Object.values(DB.entrenadores||{}).filter(e=>e && e.filosofia && e.filosofia.tagline);
 }

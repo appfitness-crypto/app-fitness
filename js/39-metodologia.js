@@ -351,7 +351,8 @@ function metLineas(ph,ent,p,ctx){
   const prog={numeros:'Tu avance se mide en números: peso y repeticiones.',calidad:'Tu avance se mide primero por la calidad del movimiento.',mixto:'Tu avance se mide en números y en calidad de movimiento.'}[ph.progressStyle];
   if(prog) L.push(prog);
   if(ph.adjustmentPhilosophy && String(ph.adjustmentPhilosophy).trim()) L.push('Si te estancas: '+String(ph.adjustmentPhilosophy).trim());
-  return {entrenador:(ent&&ent.nombre)||'', corto:nm, tagline:String(ph.tagline).trim(), lineas:L,
+  const sistema=!!(ent && ent.rol==='coordinador');   // el director define la filosofía del sistema (plan de la app)
+  return {entrenador:(ent&&ent.nombre)||'', corto:sistema?(GYM.nombreCorto||GYM.nombre||'la app'):nm, sistema, tagline:String(ph.tagline).trim(), lineas:L,
     horaPico:(ph.horaPico&&ph.horaPico.nota)?String(ph.horaPico.nota).trim():''};
 }
 
@@ -359,7 +360,7 @@ function metLineas(ph,ent,p,ctx){
 function metodoHTML(m){
   if(!m || !m.tagline) return '';
   return `<div class="met-c">
-    <div class="met-k">Así entrena ${esc(m.corto||m.entrenador)}</div>
+    <div class="met-k">${m.sistema?'El método de '+esc(m.corto):'Así entrena '+esc(m.corto||m.entrenador)}</div>
     <div class="met-t">«${esc(m.tagline)}»</div>
     ${(m.lineas||[]).length?`<ul class="met-l">${m.lineas.map(l=>`<li>${esc(l)}</li>`).join('')}</ul>`:''}
   </div>`;
@@ -414,8 +415,11 @@ function rehacerPlanConEntrenador(s){
 
 // ── Panel del entrenador: rehacer la rutina de un socio con su método ──
 // Se carga en el editor como "Usar esta rutina como base": se puede deshacer y no se guarda hasta "Guardar cambios".
+// Entrenador: su propio método. Dirección: el del entrenador del socio o, si no tiene (o no lo ha definido), la filosofía del sistema.
 function staffEntMetodo(s){
-  const ent=(s&&s.entrenadorId&&getEntrenador(s.entrenadorId)) || (staffRol!=='coordinador' && staffActivoEntId && getEntrenador(staffActivoEntId));
+  if(!s) return null;
+  if(staffRol!=='coordinador' && staffActivoEntId){ const yo=getEntrenador(staffActivoEntId); return yo && metActiva(yo.filosofia) ? yo : null; }
+  const ent=entRutina(s.entrenadorId);
   return ent && metActiva(ent.filosofia) ? ent : null;
 }
 function staffBotonMetodoHTML(s){
@@ -425,19 +429,22 @@ function staffBotonMetodoHTML(s){
     return (staffRol!=='coordinador' && staffActivoEntId)
       ? `<button type="button" class="sd-b" onclick="abrirMiFilosofia()" title="Llena tu filosofía para poder rehacer rutinas con tu método">🧬 Define tu método</button>` : '';
   }
-  const propio=ent.id===staffActivoEntId;
-  return `<button type="button" class="sd-b p" onclick="staffRehacerConMetodo('${s.code}')" title="Arma de nuevo la semana con la filosofía de ${esc(ent.nombre)}: split, periodización, reps, intensidad, calentamiento, core y cardio">🧬 Rehacer con ${propio?'mi método':'el método de '+esc(metNombre(ent))}</button>`;
+  const sistema=ent.rol==='coordinador' && ent.id!==s.entrenadorId;
+  const propio=ent.id===staffActivoEntId && !sistema;
+  const txt=sistema?'la filosofía del sistema':propio?'mi método':'el método de '+esc(metNombre(ent));
+  return `<button type="button" class="sd-b p" onclick="staffRehacerConMetodo('${s.code}')" title="Arma de nuevo la semana con ${txt}: split, periodización, reps, intensidad, calentamiento, core y cardio">🧬 Rehacer con ${txt}</button>`;
 }
 function staffRehacerConMetodo(code){
   const s=getSocio(code); if(!s) return;
   const ent=staffEntMetodo(s); if(!ent) return;
-  uiConfirm('¿Rehacer la rutina de '+tc(s.nombre||'')+' con el método de '+metNombre(ent)+'?\nReemplaza la rutina en pantalla, incluidos los ajustes manuales. No se guarda hasta que presiones Guardar cambios y puedes deshacerlo. Su historial no cambia.',()=>{
+  const sistema=ent.rol==='coordinador' && ent.id!==s.entrenadorId, nomMet=sistema?'la filosofía del sistema':'el método de '+metNombre(ent);
+  uiConfirm('¿Rehacer la rutina de '+tc(s.nombre||'')+' con '+nomMet+'?\nReemplaza la rutina en pantalla, incluidos los ajustes manuales. No se guarda hasta que presiones Guardar cambios y puedes deshacerlo. Su historial no cambia.',()=>{
     const plan=planConMetodo(s,ent);
     if(!plan){ showToast('No se pudo rehacer esta rutina'); return; }
     staffRutBackup[code]=limpio(s.rutina);
     s.rutina=plan.rutina; s.metodo=plan.metodo; s.origenRutina='plantilla';
     staffDirty.add(code); staffTab='rutina'; staffRenderContent(s);
-    showToast('🧬 Rutina rehecha con el método de '+metNombre(ent)+'. Revísala y presiona GUARDAR');
+    showToast('🧬 Rutina rehecha con '+nomMet+'. Revísala y presiona GUARDAR');
   },{label:'Rehacer rutina'});
 }
 function ofrecerRehacerPlan(s){
