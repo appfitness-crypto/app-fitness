@@ -1212,7 +1212,8 @@ const EJ_ALIAS={
   'isometrico-de-cuadriceps-pierna-recta':'isometrico-de-cuadriceps',
   'prensa-de-piernas-rango-parcial':'prensa-de-piernas',
   'press-pallof-anti-rotacion':'press-pallof',
-  'rotacion-externa-con-banda-codo-fijo':'rotacion-externa-con-banda'
+  'rotacion-externa-con-banda-codo-fijo':'rotacion-externa-con-banda',
+  'movilidad-de-columna-gato-camello':'gato-camello'
 };
 function slugEj(nm){ const n=slugImg(nm); return EJ_ALIAS[n]||n; }
 function basesEjercicio(ej){ const n=slugEj(ej.nm), g=slugImg(ej.ms||''), g1=g.split('-')[0]; return ['ejercicios/'+n,'grupos/'+g,'grupos/'+g1]; }
