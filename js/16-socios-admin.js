@@ -98,7 +98,7 @@ function staffMostrarVacio(){
 function confirmarEliminarSocio(code){
   if(staffRol!=='coordinador'){ showToast('Solo el director puede eliminar socios'); return; }
   const s=getSocio(code); if(!s) return;
-  const nSes=comoArray(s.logs&&s.logs.sesiones).length;
+  const nSes=sesValidas(s).length;
   uiConfirm(`¿Eliminar a ${tc(s.nombre)}?\n\nSe borrará su rutina y todo su historial (${nSes} sesión(es), pesos y récords). No se puede deshacer.\n\nSi quieres conservar una copia, cancela y usa 💾 Respaldo.`,
     ()=>uiPrompt('Para confirmar, escribe ELIMINAR','ELIMINAR',()=>confirmarEliminarSocioFinal(code),{label:'Eliminar'}),
     {label:'Continuar',danger:true});

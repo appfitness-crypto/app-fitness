@@ -1212,7 +1212,7 @@ function refreshDash(){
   const ev=calcEvolucion(s);
   const hoy=s.rutina[HOY_KEY];
   const esDescanso=!hoy||!hoy.ejercicios||hoy.ejercicios.length===0;
-  const hechoHoy=(s.logs?.sesiones||[]).some(x=>x.fecha===fechaISO(new Date()));
+  const hechoHoy=sesValidas(s).some(x=>x.fecha===fechaISO(new Date()));
   const meta=Math.max(1,s.dias||1);
   const pct=Math.min(1,ev.estaSemana/meta);
   const sem=sesionesSemana(s);

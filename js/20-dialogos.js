@@ -13,6 +13,7 @@ function uiConfirm(msg,onYes,opts){
   document.getElementById('uic-msg').textContent=msg;
   const yes=document.getElementById('uic-yes');
   yes.textContent=opts.label||'Confirmar'; yes.className='sd-pri'+(opts.danger?' danger':''); yes.disabled=false; yes.style.opacity=1;
+  document.getElementById('uic-no').textContent=opts.cancel||'Cancelar';
   document.getElementById('uic-input-wrap').style.display='none';
   UIC_CB=onYes;
   document.getElementById('modal-uic').classList.add('open');
@@ -22,6 +23,7 @@ function uiPrompt(msg,expected,onYes,opts){
   document.getElementById('uic-msg').textContent=msg;
   const yes=document.getElementById('uic-yes');
   yes.textContent=opts.label||'Confirmar'; yes.className='sd-pri danger';
+  document.getElementById('uic-no').textContent='Cancelar';
   document.getElementById('uic-input-wrap').style.display='block';
   const inp=document.getElementById('uic-input'); inp.value=''; inp.placeholder=expected; inp.type='text';
   yes.disabled=true; yes.style.opacity=.45;

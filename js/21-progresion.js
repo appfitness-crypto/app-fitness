@@ -45,7 +45,8 @@ function pqStatsBloque(s){
   const ses=comoArray(s.logs&&s.logs.sesiones).filter(x=>x && String(x.fecha||'')>=b.desde);
   const semTrans=Math.max(1,Math.min(b.semanas,Math.ceil(((diasDesde(b.desde)||0)+1)/7)));
   const meta=Math.max(1,(parseInt(s.dias)||3)*semTrans);
-  return {sesiones:ses.length, adherencia:Math.min(100,Math.round(ses.length/meta*100)), ses};
+  const val=ses.filter(sesCuenta).length;
+  return {sesiones:val, adherencia:Math.min(100,Math.round(val/meta*100)), ses};
 }
 function pqDatosEj(s,st,nm){
   const reg=[]; st.ses.forEach(x=>comoArray(x.detalle).forEach(d=>{ if(d && d.n===nm) reg.push(d); }));
