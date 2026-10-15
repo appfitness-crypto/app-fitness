@@ -639,7 +639,11 @@ function mostrarResumenSesion(info){
   const s=activeSocio, x=info.reg, cont=document.getElementById('en-fin'); if(!s||!cont) return;
   const ev=calcEvolucion(s);
   const min=info.t0?Math.max(1,Math.round((x.ts-info.t0)/60000)):null;
-  const tot=comoArray(x.detalle).reduce((a,d)=>a+(+d.p||0),0), ok=comoArray(x.detalle).reduce((a,d)=>a+Math.min(+d.s||0,+d.p||0),0);
+  const tot=x.sp||comoArray(x.detalle).reduce((a,d)=>a+(+d.p||0),0), ok=x.sp?(x.sh||0):comoArray(x.detalle).reduce((a,d)=>a+Math.min(+d.s||0,+d.p||0),0);
+  const est=sesEstado(x);
+  const estTit={completa:'Sesión completa', parcial:'Sesión parcial', incompleta:'Sesión incompleta'}[est];
+  const estNota=est==='incompleta'?'Hiciste menos de la mitad de las series: tus pesos y récords se guardan, pero esta sesión no cuenta para tu meta de la semana ni tu racha.'
+    :est==='parcial'?'Cuenta para tu semana. La próxima vez intenta completar todas las series.':'';
   const pct=info.prevVol>0&&x.volumen>0?Math.round((x.volumen-info.prevVol)/info.prevVol*100):null, mx=Math.max(x.volumen,info.prevVol||0)||1;
   const hoyI=DIAS_ORDER.indexOf(HOY_KEY);
   const prox=DIAS_ORDER.map((k,i)=>({k,i})).filter(o=>o.i>hoyI&&s.rutina[o.k]&&(s.rutina[o.k].ejercicios||[]).length)[0];
@@ -647,10 +651,11 @@ function mostrarResumenSesion(info){
   const fmt=n=>Math.round(n).toLocaleString('es-MX');
   cont.innerHTML=`
     <div class="en-fin-hero">
-      <div class="en-fin-ck">${ico('check')}</div>
-      <h2>Sesión completa</h2>
+      <div class="en-fin-ck${est==='completa'?'':' '+est}">${ico(est==='incompleta'?'info':'check')}</div>
+      <h2>${estTit}</h2>
       <p>${esc(sc(x.tipo))} · ${EN_DIAS[hoyI]} ${new Date(x.ts).getDate()} de ${['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'][new Date(x.ts).getMonth()]}</p>
     </div>
+    ${estNota?`<p class="en-fin-nota">${estNota}</p>`:''}
     <div class="en-fin-stats"><div><b class="num">${min!=null?min:'—'}</b><span>minutos</span></div><div><b class="num">${x.volumen>0?fmt(x.volumen):'—'}</b><span>kg de volumen</span></div><div><b class="num">${tot?ok+'/'+tot:x.ejercicios}</b><span>${tot?'series':'ejercicios'}</span></div></div>
     ${info.prs.length?`<section class="en-sec"><div class="en-sec-h"><h3>${info.prs.length===1?'Récord nuevo':info.prs.length+' récords nuevos'}</h3></div>
       <div class="en-prs en-stag">${info.prs.map(p=>`<div class="en-pr"><div class="en-pr-ic">${ico('trophy')}</div><div><b>${esc(p.n)}</b><span>Antes ${enKg(p.antes)}</span></div><strong class="en-up num">+${kgToDisplay(Math.round((p.kg-p.antes)*10)/10)}</strong></div>`).join('')}</div></section>`:''}
@@ -717,22 +722,57 @@ function renderProgresoTab(){
         ${enPesoSVG(pesos)}
       </div></section>
 
-    ${enHitoHTML(ev.total)}
-
     ${prKeys.length?`<section class="en-sec"><div class="en-sec-h"><h3>Récords personales</h3></div>
       <div class="en-list">${prKeys.map(nm=>`<div class="en-li"><span>${esc(nm)}</span><b class="num">${enKg(prs[nm].kg)}</b><small>${fmtFecha(prs[nm].fecha)}</small></div>`).join('')}</div></section>`:''}
 
-    <section class="en-sec"><div class="en-sec-h"><h3>Últimas sesiones</h3>${sesRev.length?'<span>Volumen</span>':''}</div>
-      ${sesRev.length?`<div class="en-hist">${sesRev.map(x=>{ const f=new Date((x.fecha||'')+'T12:00:00'); const ok=!isNaN(f);
-        return `<div class="en-h-row"><div class="en-h-d"><b class="num">${ok?f.getDate():'—'}</b><small>${ok?EN_MESES[f.getMonth()].toUpperCase():''}</small></div>
-        <div class="en-h-t"><b>${esc(sc(x.tipo||'Sesión'))}</b><span>${x.ejercicios||0} ejercicios${x.sensacion?' · '+esc(x.sensacion):''}</span></div>
-        <div class="en-h-v num">${x.volumen>0?Math.round(x.volumen).toLocaleString('es-MX'):'—'}${x.volumen>0?'<small>kg</small>':''}</div></div>`; }).join('')}</div>`
+    <section class="en-sec"><div class="en-sec-h"><h3>Últimas sesiones</h3>${sesRev.length?'<span>Toca una para borrarla</span>':''}</div>
+      ${sesRev.length?`<div class="en-hist">${sesRev.map(x=>{ const f=new Date((x.fecha||'')+'T12:00:00'); const ok=!isNaN(f), est=sesEstado(x), v=enSesMedida(x);
+        const ejTxt=x.ejPlan?`${x.ejercicios||0} de ${x.ejPlan} ejercicios`:`${x.ejercicios||0} ejercicios`;
+        return `<div class="en-h-row" role="button" tabindex="0" onclick="sesBorrarPreg(${+x.ts||0},'${esc(x.fecha||'')}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-label="${esc(sc(x.tipo||'Sesión'))}, ${ok?f.getDate()+' de '+EN_MESES[f.getMonth()]:''}, ${EN_EST_TXT[est]}. Toca para borrarla">
+        <div class="en-h-d"><b class="num">${ok?f.getDate():'—'}</b><small>${ok?EN_MESES[f.getMonth()].toUpperCase():''}</small></div>
+        <div class="en-h-t"><b>${esc(sc(x.tipo||'Sesión'))}</b><span>${ejTxt} · <em class="en-est ${est}">${EN_EST_TXT[est]}</em>${x.sensacion?' · '+esc(x.sensacion):''}</span></div>
+        <div class="en-h-v num">${v.v}${v.u?`<small>${v.u}</small>`:''}</div></div>`; }).join('')}</div>
+      ${sesRev.some(x=>sesEstado(x)==='incompleta')?'<p class="en-h-nota">Las sesiones incompletas (menos de la mitad de las series) guardan tus pesos, pero no cuentan para tu meta de la semana, tu racha ni tu constancia.</p>':''}`
       :'<div class="empty-msg">Aún no hay sesiones registradas.<br>Al terminar tu primera sesión aparecerá aquí.</div>'}</section>
 
     <section class="en-sec"><div class="en-sec-h"><h3>Fuerza</h3><span>Mejor peso de cada mes</span></div>
       ${enFuerzaHTML(s,ses)}</section>
 `;
   renderCuerpo();
+}
+const EN_EST_TXT={completa:'Completa', parcial:'Parcial', incompleta:'Incompleta'};
+// Lo que se muestra a la derecha de cada sesión: kilos si los hubo; si no, cardio, isométricos o series
+function enSesMedida(x){
+  if(x.volumen>0) return {v:Math.round(x.volumen).toLocaleString('es-MX'), u:'kg'};
+  if(x.cardioMin>0) return {v:x.cardioMin, u:'min cardio'};
+  if(x.tut>=20) return {v:fmtTut(x.tut), u:'isométricos'};
+  if(x.sp) return {v:`${x.sh||0}/${x.sp}`, u:'series'};
+  return {v:'—', u:''};
+}
+function sesBorrarPreg(ts,fecha){
+  const s=activeSocio; if(!s) return;
+  const ses=comoArray(s.logs&&s.logs.sesiones);
+  const x=ses.find(o=>o&&(ts?o.ts===ts:o.fecha===fecha)); if(!x) return;
+  uiConfirm(`¿Eliminar la sesión de ${sc(x.tipo||'tu rutina')} del ${fmtFecha(x.fecha)}?\n\nDeja de contar en tu progreso. Los récords que marcaste ese día se recalculan con tus otras sesiones.`,
+    ()=>sesBorrar(x), {label:'Eliminar sesión', danger:true});
+}
+function sesBorrar(x){
+  const s=activeSocio; if(!s) return;
+  s.logs.sesiones=comoArray(s.logs.sesiones).filter(o=>o!==x);
+  // Récords que salieron de ese día: se recalculan con lo que queda (o se quitan si no hay otro registro)
+  const prs=s.logs.prs||{};
+  Object.keys(prs).forEach(k=>{
+    if(!prs[k]||prs[k].fecha!==x.fecha) return;
+    let mejor=null;
+    s.logs.sesiones.forEach(o=>comoArray(o&&o.detalle).forEach(d=>{
+      if(!d||!(+d.kg>0)||prKey(d.alt||d.n)!==k) return;
+      if(!mejor||+d.kg>mejor.kg) mejor={kg:+d.kg, fecha:o.fecha};
+    }));
+    if(mejor) prs[k]=mejor; else delete prs[k];
+  });
+  dbSave(s.code);
+  showToast('Sesión eliminada');
+  refreshDash(); dashTab('progreso');
 }
 // Mapa de 12 semanas (filas lunes a domingo): completa si hizo al menos el 80% de las series
 function enHeatHTML(s,ses){
@@ -742,10 +782,8 @@ function enHeatHTML(s,ses){
   const yaVan=isFinite(t0)?Math.floor((lunes.getTime()-inicioSemana(new Date(t0)).getTime())/(7*86400000)+.5)+1:1;
   const ini=new Date(lunes); ini.setDate(ini.getDate()-(Math.min(yaVan,semanas)-1)*7);
   const hoy=new Date(); hoy.setHours(23,59,59,999);
-  const nivel=(t0)=>{ const t1=t0+86400000; const del=ses.filter(x=>x.ts>=t0&&x.ts<t1); if(!del.length) return 0;
-    const det=del.flatMap(x=>comoArray(x.detalle)); if(!det.length) return 2;
-    const r=det.reduce((a,d)=>a+Math.min(+d.s||0,+d.p||0),0)/Math.max(1,det.reduce((a,d)=>a+(+d.p||0),0));
-    return r>=.8?2:1; };
+  const nivel=(t0)=>{ const t1=t0+86400000; const est=ses.filter(x=>x.ts>=t0&&x.ts<t1).map(sesEstado);
+    return est.includes('completa')?2:est.includes('parcial')?1:0; };
   let h='';
   for(let d=0;d<7;d++){
     h+=`<span class="en-hl">${'LMXJVSD'[d]}</span>`;
@@ -791,12 +829,4 @@ function enPesoSVG(pesos){
   s+=`<circle class="ini" cx="${x(0)}" cy="${y(v[0])}" r="4"/><circle class="fin" cx="${x(v.length-1)}" cy="${y(v[v.length-1])}" r="4"/>`;
   s+=`<text x="${X0}" y="132" text-anchor="start">${esc(fmtFecha(fs[0]))}</text><text x="${X1}" y="132" text-anchor="end">${esc(fmtFecha(fs[fs.length-1]))}</text>`;
   return `<svg class="en-peso-svg" viewBox="0 0 320 138" role="img" aria-label="Peso de ${v[0]} a ${v[v.length-1]} kilos">${s}</svg>`;
-}
-function enHitoHTML(total){
-  const H=[1,5,10,20,30,40,50,75,100,150,200,250,300,400,500,750,1000];
-  const sig=H.find(h=>h>total); if(!sig) return '';
-  const falta=sig-total;
-  return `<div class="en-mile"><div class="en-mile-top"><div class="en-mile-ic">${ico('trophy')}</div>
-    <div><b>${falta===1?'1 sesión':falta+' sesiones'} para tus ${sig} entrenamientos</b><span>${total?'Llevas '+total+'. Cada sesión cuenta.':'Tu primera sesión empieza la cuenta.'}</span></div></div>
-    <div class="en-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${sig}" aria-valuenow="${total}" aria-label="${total} de ${sig} entrenamientos"><i style="width:${total/sig*100}%"></i></div></div>`;
 }

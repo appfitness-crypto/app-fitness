@@ -11,8 +11,24 @@ function inicioSemana(d){
   x.setDate(x.getDate()-diff); x.setHours(0,0,0,0);
   return x;
 }
+// ── Validez de una sesión según las series hechas contra las del plan del día ──
+//    completa ≥ 80 % · parcial ≥ 50 % · incompleta < 50 %. Una incompleta se guarda (sus pesos y récords
+//    valen) pero no cuenta para la meta de la semana, la racha, la adherencia ni la constancia.
+function estadoPorRatio(r){ return r>=.8?'completa':r>=.5?'parcial':'incompleta'; }
+function sesEstado(x){
+  if(!x) return 'incompleta';
+  if(x.estado) return x.estado;
+  // Registros de antes de esta regla: se calcula con lo que guardaron
+  const det=comoArray(x.detalle).filter(Boolean);
+  if(!det.length) return (x.volumen>0||x.tut>0||x.cardioMin>0) ? 'completa' : 'incompleta';
+  const p=det.reduce((a,d)=>a+(+d.p||0),0), h=det.reduce((a,d)=>a+Math.min(+d.s||0,+d.p||0),0);
+  return estadoPorRatio(p?h/p:1);
+}
+function sesCuenta(x){ return sesEstado(x)!=='incompleta'; }
+function sesValidas(s){ return comoArray(s&&s.logs&&s.logs.sesiones).filter(sesCuenta); }
+
 function calcEvolucion(s){
-  const ses = s.logs?.sesiones || [];
+  const ses = sesValidas(s);
   const total = ses.length;
   const iniSem = inicioSemana(new Date()).getTime();
   const estaSemana = ses.filter(x=>x.ts>=iniSem).length;
@@ -141,7 +157,7 @@ function radarChartSVG(stats, opts){
 
 // Sesiones por día de la semana actual → barras
 function sesionesSemana(s){
-  const ses = s.logs?.sesiones || [];
+  const ses = sesValidas(s);
   const ini = inicioSemana(new Date());
   return DIAS_ORDER.map((k,i)=>{
     const dIni = new Date(ini); dIni.setDate(ini.getDate()+i);

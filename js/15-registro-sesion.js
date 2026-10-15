@@ -349,8 +349,18 @@ function finalizarSesion(){
   if(!sesionTemp){ showToast('⚠ Abre el día desde tu rutina para registrar la sesión'); return; }
   const idxs0=Object.keys(sesionTemp.ej);
   const hechos0=idxs0.filter(i=>sesionTemp.ej[i].done || (sesionTemp.ej[i].sets||[]).some(x=>x&&(x.ok||x.kg||x.seg||x.fc))).length;
-  if(hechos0===0) uiConfirm('No marcaste ningún ejercicio. ¿Registrar la sesión de todas formas?',finalizarSesionConfirmada,{label:'Registrar de todas formas'});
-  else finalizarSesionConfirmada();
+  // Sin ninguna serie no hay sesión: así abrir el día solo para verlo no suma a tu progreso
+  if(hechos0===0){
+    uiConfirm('No registraste ninguna serie, así que esta sesión no se guardará ni contará en tu progreso.',
+      descartarSesion, {label:'Salir sin guardar', cancel:'Seguir entrenando', danger:true});
+    return;
+  }
+  finalizarSesionConfirmada();
+}
+function descartarSesion(){
+  sesionTemp=null;
+  if(typeof sesSalir==='function') sesSalir(); else { go('s-dash'); refreshDash(); }
+  showToast('Sesión descartada: no se guardó nada');
 }
 function finalizarSesionConfirmada(reemplazar){
   try{
@@ -427,9 +437,13 @@ function finalizarSesionConfirmada(reemplazar){
       });
     });
 
+    // Series hechas contra las del plan del día → completa, parcial o incompleta (ver sesEstado)
+    const sp=d.ejercicios.reduce((a,e)=>a+(parseInt(e.series)||1),0);
+    const sh=detalle.reduce((a,x)=>a+Math.min(+x.s||0,+x.p||0),0);
     const reg={
       fecha:hoy, ts:Date.now(), diaKey:sesionTemp.diaKey,
-      tipo:d.tipo, ejercicios:hechos||d.ejercicios.length, volumen:Math.round(volumen), tut:Math.round(tutSes), cardioMin:Math.round(cardioMinSes),
+      tipo:d.tipo, ejercicios:hechos, ejPlan:d.ejercicios.length, sh, sp, estado:estadoPorRatio(sp?sh/sp:0),
+      volumen:Math.round(volumen), tut:Math.round(tutSes), cardioMin:Math.round(cardioMinSes),
       hora:new Date().toTimeString().substring(0,5), cambios, detalle
     };
     s.logs.sesiones.push(reg);
