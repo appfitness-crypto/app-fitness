@@ -146,6 +146,8 @@ function pct1RM(pesoTxt){
 // % real de 1RM según las repeticiones del ejercicio, dejando "rir" reps en reserva
 // (misma fórmula de Epley usada para estimar el 1RM, así el cálculo es consistente en ambos sentidos
 // y nunca sugiere un peso muy por debajo de lo que el socio ya demostró poder levantar).
+// Repeticiones objetivo de una prescripción: en un rango ("8-12 reps") se usa el tope, para no sugerir un peso que no deje completarlo
+function repsObjetivo(r){ const m=String(r||'').match(/(\d+)(?:\s*[-–a]\s*(\d+))?/); return m?(m[2]?+m[2]:+m[1]):10; }
 function pctPorReps(reps,rir){
   rir = rir==null ? 2 : rir;
   const r = Math.max(1, (reps||10) + rir);
@@ -201,12 +203,13 @@ function openModal(idx){
   if(pctRM && !esEjCardio(ej)){
     const rmKey=prKey(nmHoy);
     const rmKg=s.logs?.rm?.[rmKey];
-    const repsBase=parseInt(ej.reps)||10;
-    const pctCalc=pctPorReps(repsBase,2);
+    const repsBase=repsObjetivo(ej.reps);
+    const rirEj=ej.rir!=null?+ej.rir:2;
+    const pctCalc=pctPorReps(repsBase,rirEj);
     rmBox.style.display='block';
     if(rmKg){
       const kgTarget=kgToDisplay(rmKg*pctCalc);
-      document.getElementById('m-rm-txt').innerHTML=`💪 <b>Peso sugerido hoy: ${kgTarget} ${unidadPeso}</b> <span style="font-weight:400">(≈${Math.round(pctCalc*100)}% de tu 1RM estimado, dejando 2 reps en reserva)</span><br><span style="font-weight:400">Calculado con tu progreso en este ejercicio — se sigue ajustando solo cada vez que registras una serie.</span>`;
+      document.getElementById('m-rm-txt').innerHTML=`💪 <b>Peso sugerido hoy: ${kgTarget} ${unidadPeso}</b> <span style="font-weight:400">(≈${Math.round(pctCalc*100)}% de tu 1RM estimado, dejando ${rirEj} ${rirEj===1?'rep':'reps'} en reserva)</span><br><span style="font-weight:400">Calculado con tu progreso en este ejercicio — se sigue ajustando solo cada vez que registras una serie.</span>`;
     } else {
       document.getElementById('m-rm-txt').innerHTML=`💡 <b>Aún no tenemos tu peso calculado aquí.</b><br><span style="font-weight:400">Registra tus series con el peso que uses hoy. Desde tu próxima sesión, aquí verás el peso real en vez del porcentaje.</span>`;
     }

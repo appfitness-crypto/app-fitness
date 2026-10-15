@@ -1912,3 +1912,12 @@ html[data-theme="dark"] .en-peso-mini button{color:#0A0E13;}
 .dd-nota{margin:10px 2px 0;color:var(--mu);font-size:var(--fs-sm);}
 .dd-cta{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:12px 20px calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--dk) 34%);display:flex;justify-content:center;}
 .dd-cta .en-btn{max-width:600px;width:100%;flex:none;}
+
+/* Método del entrenador (vista previa del plan y perfil del socio · js/39-metodologia.js) */
+.met-c{padding:14px 16px;border-radius:20px;background:var(--gl);border:1px solid var(--b);box-shadow:var(--shadow);margin-bottom:14px;}
+.met-k{font-size:var(--fs-xs);color:var(--mu);font-weight:600;}
+.met-t{font-size:var(--fs-base);font-weight:700;line-height:1.4;margin:4px 0 2px;color:var(--tx);}
+.met-l{margin:8px 0 0;padding:0;list-style:none;}
+.met-l li{position:relative;padding:6px 0 6px 16px;font-size:var(--fs-sm);line-height:1.45;color:var(--tx);border-top:1px solid var(--b);}
+.met-l li:first-child{border-top:none;}
+.met-l li::before{content:"";position:absolute;left:2px;top:13px;width:6px;height:6px;border-radius:2px;background:var(--v);}

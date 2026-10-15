@@ -30,7 +30,8 @@ function ctxDesdePerfil(p, filo){
   const m=f.metodos||{};
   return {
     nivel:nivelNum(p.nivel), obj:objLetra(p.objetivo), objetivo:p.objetivo||'',
-    les:lesionKeys(p.limitaciones), fav:m.favoritos||[], evita:m.evita||[],
+    les:lesionKeys(p.limitaciones), evita:m.evita||[],
+    fav:[...new Set([...(m.favoritos||[]), ...((typeof filoModeloPara==='function'&&filoModeloPara(f,p.objetivo)&&filoAprenderRutina(filoModeloPara(f,p.objetivo).texto).metodos)||[])])].filter(id=>!(m.evita||[]).includes(id)),   // + los métodos que usa en su rutina modelo
     frec:m.frecuencia||3, principiantes:m.principiantes||'basicos',
     equipo:(f.seleccion&&f.seleccion.libreVsMaquina)||3, sustit:(f.horaPico&&f.horaPico.sustitucion)||'maquina',
     restStyle:(f.exerciseStyle&&f.exerciseStyle.restStyle)||'fijo',
@@ -197,7 +198,7 @@ function rxTexto(e,sx){
   if(esEjCardio(e)){ const r=cardioRx(e,base); return {sr:r.minTxt, carga:'FC objetivo '+r.lo+'–'+r.hi+' lpm'}; }
   if(esEjRondas(e)){ const r=rondasRx(e,base); return {sr:r.series+' rondas × '+txtUnidad(r.base,r.u), carga:'FC objetivo '+r.lo+'–'+r.hi+' lpm'}; }
   if(esEjMovilidad(e)) return {sr:movRx(e).sr, carga:'Sin carga'};
-  return {sr:e.series+' × '+e.reps, carga:(pct1RM(e.peso)?'Esfuerzo moderado — deja 2 reps en reserva':(e.peso||''))};
+  return {sr:e.series+' × '+e.reps, carga:e.esfuerzo||(pct1RM(e.peso)?'Esfuerzo moderado — deja 2 reps en reserva':(e.peso||''))};
 }
 // Al generar una rutina: deja escrito en el plan el tiempo fijo / rondas y la FC objetivo
 function ajustarCardioRondas(semana,sx){
@@ -335,6 +336,10 @@ function aplicarMetodo(e,id,extra){
   if(M.series) e.series=M.series;
   if(M.reps){
     if(id==='drop_set'||id==='rest_pause') e.metodo.detalle=(extra||'Solo en la última serie');
+    else if((id==='tempo'||id==='pausa') && e.rir!=null){   // dosis del entrenador: se respeta su rango y solo se agrega el tempo o la pausa
+      const p=repsOrig.split('—'), extra=M.reps.replace(/^[^·]*·\s*/,'');
+      if(!repsOrig.includes(extra)) e.reps=p[0].trim()+' · '+extra+(p[1]?' — '+p[1].trim():'');
+    }
     else { const prop=(repsOrig.split('—')[1]||'').trim(); e.reps=M.reps+(prop?' — '+prop:''); }
   }
 }
@@ -400,7 +405,7 @@ function enriquecerDia(ejs, ctx, seed){
   const valido=id=>perm.includes(id);
   ejs.forEach(e=>{ if(e.metodo && (!KB_METODOS[e.metodo.id] || esEjCardio(e) || (esEjRondas(e) && e.metodo.id!=='emom') || esEjMovilidad(e) || (e.metodo.id==='emom' && !esEjMetabolico(e)))) delete e.metodo; });
   let faltan=cuantosMetodos(ctx,ejs.length)-ejs.filter(e=>e.metodo).length;
-  const libre=i=>ejs[i] && !ejs[i].metodo && !/cardio/.test(ds[i].enf) && !esEjCardio(ejs[i]) && !esEjRondas(ejs[i]) && !esEjMovilidad(ejs[i]);
+  const libre=i=>ejs[i] && !ejs[i].metodo && !ejs[i].fase && !ejs[i].potencia && !/cardio/.test(ds[i].enf) && !esEjCardio(ejs[i]) && !esEjRondas(ejs[i]) && !esEjMovilidad(ejs[i]);
   // Sobre la zona lesionada solo métodos de baja carga (la fase manda: isométrico → resistencia → hipertrofia)
   const SEGUROS_LESION=['tempo','pausa','superserie_ant','biserie','circuito'];
   const esIsom=i=>/seg|isom|min/i.test(String(ejs[i].reps||'')+' '+(ejs[i].nm||''));

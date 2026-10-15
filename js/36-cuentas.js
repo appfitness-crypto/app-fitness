@@ -245,6 +245,7 @@ async function vincularEntrenador(){
       dbSave(s.code);
       showToast('✓ Ahora entrenas con '+ent.nombre+'. Verá tu plan y podrá ajustarlo.');
       refreshDash();
+      setTimeout(()=>ofrecerRehacerPlan(s),600);   // su rutina pasa a seguir el método del entrenador si el socio quiere
     }catch(e){ showToast(cuentaMsgError(e)); }
   });
 }
