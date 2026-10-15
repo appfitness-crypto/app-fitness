@@ -322,17 +322,30 @@ function ctxQuiz(){
   const ent=entRutina(qAnswers.entrenadorId);
   return ctxDesdePerfil({nivel:qAnswers.nivel,objetivo:qAnswers.objetivo,limitaciones:qAnswers.limitaciones}, ent&&ent.filosofia);
 }
-function mostrarPreview(data){
+// Pasa la rutina (IA o plantilla) por el motor: variedad, metodología del entrenador, isométricos, cardio y métodos
+function procesarRutina(data){
   try{
     normalizarRutinaIA(data);
     const ctxP=ctxQuiz(), entP=entRutina(qAnswers.entrenadorId);
     const semillaP=(qAnswers.nombre||'')+Date.now();
-    if(data.origen==='plantilla') diversificarSemana(data.semana, ctxP, entP&&entP.filosofia, semillaP);
+    const perfilP={objetivo:qAnswers.objetivo, nivel:qAnswers.nivel, edad:qAnswers.edad, zonas:qAnswers.zonas};
+    if(data.origen==='plantilla'){
+      diversificarSemana(data.semana, ctxP, entP&&entP.filosofia, semillaP);
+      data.metodo=aplicarMetodologia(data.semana, entP, ctxP, perfilP);
+    } else data.metodo=metLineas(entP&&entP.filosofia, entP, perfilP, ctxP);
+    if(data.metodo && data.perfil){
+      if(data.origen==='plantilla') data.perfil.nota='Plan armado con el método de '+data.metodo.corto+': sus ejercicios, rangos, intensidad y forma de organizar la semana.'+(data.perfil.notaExtra||'');
+      if(data.metodo.horaPico) data.perfil.consejos=[...(data.perfil.consejos||[]), 'Hora pico: '+data.metodo.horaPico];
+    }
     ajustarIsometricos(data.semana, ctxP);
     ajustarCardioRondas(data.semana, {edad:qAnswers.edad, objetivo:qAnswers.objetivo, nivel:qAnswers.nivel});
     enriquecerSemana(data.semana, ctxP, semillaP);
   }
   catch(e){ console.warn('No se pudo enriquecer la rutina',e); }
+  return data;
+}
+function mostrarPreview(data){
+  procesarRutina(data);
   window._rutinaTemp = data;
   renderPreview(data);
   go('s-preview');
@@ -357,6 +370,8 @@ function renderPreview(rutina){
     <div class="badge" style="color:var(--mu);border-color:color-mix(in srgb,var(--tx) 10%,transparent)">${rutina.perfil.fase||rutina.perfil.split}</div>
   `;
   document.getElementById('pv-nota').textContent='💡 '+(rutina.perfil.nota||'Plan generado según tu perfil.');
+  const pvMet=document.getElementById('pv-metodo');
+  if(pvMet){ const h=metodoHTML(rutina.metodo); pvMet.innerHTML=h; pvMet.style.display=h?'block':'none'; }
 
   const pvCons=document.getElementById('pv-consejos');
   const consejos=Array.isArray(rutina.perfil.consejos)?rutina.perfil.consejos.filter(Boolean):[];
@@ -438,23 +453,7 @@ async function confirmarRutina(){
   const code=cuentaUid();
   if(!code){ showToast('Tu sesión se cerró. Entra con tu correo para guardar tu plan.'); go('s-login'); return; }
 
-  const keys=['lun','mar','mie','jue','vie','sab','dom'];
-  const rutinaConvertida={};
-  rutina.semana.forEach((d,i)=>{
-    const k=keys[i]||keys[6];
-    rutinaConvertida[k]={
-      label:DIAS_NAMES[k], tipo:d.tipo, color:d.color||'verde',
-      ejercicios:(d.ejercicios||[]).map(e=>({
-        nm:e.nm||e.nombre, series:e.series, reps:e.reps, peso:e.peso,
-        ms:e.ms||e.musculo, tip:e.tip||'Siente este músculo durante el movimiento.',
-        enf:e.enf||e.enfoque||'', metodo:e.metodo||null, grupo:e.grupo||'', descanso:e.descanso||'',
-        alternativas:e.alternativas||[]
-      }))
-    };
-  });
-  keys.forEach(k=>{
-    if(!rutinaConvertida[k]) rutinaConvertida[k]={label:DIAS_NAMES[k],tipo:'DESCANSO',color:'descanso',ejercicios:[]};
-  });
+  const rutinaConvertida=rutinaDesdeSemana(rutina.semana);
 
   const nuevo={
     code, nombre:limpiarTexto(qAnswers.nombre).toUpperCase(), id:'#'+(GYM.prefijoId||'FS')+'-'+code.slice(0,5).toUpperCase(),
@@ -471,6 +470,7 @@ async function confirmarRutina(){
     status:'activo', asignado:qAnswers.entrenadorNombre||'Plan de la app', entrenadorId:qAnswers.entrenadorId||'', fechaRegistro:fechaISO(new Date()),
     consentimiento:consentimientoNuevo('registro'),
     rutina:rutinaConvertida,
+    metodo:rutina.metodo||null,
     logs:{ sesiones:[], pesoCorporal:[{fecha:fechaISO(new Date()),kg:qAnswers.peso}], prs:{}, asistencia:[], medidas:[], lesiones:[] }
   };
   // Datos clínicos de rehabilitación (si aplica)
@@ -542,7 +542,9 @@ function buildFallback(){
   // los días "conClase" llevan sesión ligera que evita el enfoque de la clase; "soloClase" queda en descanso de gym.
   const deriv=derivarDiasEntrenamiento();
   const nFull=deriv.puro.length;
-  const tiposSesion=TIPOS_SPLIT[nFull]||TIPOS_SPLIT[Math.max(1,Math.min(6,nFull))]||TIPOS_SPLIT[4];
+  const entFB=entRutina(qAnswers.entrenadorId), filoFB=entFB&&entFB.filosofia;
+  const splitCoach=metSplitTipos(filoFB, nFull, nivelNum(qAnswers.nivel));   // cómo organiza la semana el entrenador elegido
+  const tiposSesion=(splitCoach&&splitCoach.tipos)||TIPOS_SPLIT[nFull]||TIPOS_SPLIT[Math.max(1,Math.min(6,nFull))]||TIPOS_SPLIT[4];
   const mapaDias={};
   deriv.puro.forEach((d,i)=>{ mapaDias[d]={tipo:(tiposSesion[i]||tiposSesion[tiposSesion.length-1])[0], color:(tiposSesion[i]||tiposSesion[tiposSesion.length-1])[1]}; });
   deriv.conClase.forEach(d=>{ mapaDias[d]={tipo:'Complemento — '+deriv.infoClasePorDia[d].clase, color:'hombro', complemento:deriv.infoClasePorDia[d]}; });
@@ -565,7 +567,7 @@ function buildFallback(){
     function add(nm,series,reps,peso,ms,tip){ L.push({nombre:nm,series,reps,peso,musculo:ms,tip}); }
     // Variante A/B/C del mismo tipo de sesión (ej. "Full Body A" vs "Full Body B") → usamos un
     // ejercicio distinto por hueco muscular en cada una, para que la semana no se sienta repetida.
-    const variante = {A:0,B:1,C:2}[(tipo.trim().match(/([ABC])$/)||[])[1]] ?? 0;
+    const variante = metPocaVariedad(filoFB) ? 0 : ({A:0,B:1,C:2}[(tipo.trim().match(/([ABC])$/)||[])[1]] ?? 0);   // poca variedad: A, B y C repiten sus ejercicios base
     function elegir(v,i){ return v[(i+varSeed) % v.length]; }
 
     if(t.includes('full body')||t.includes('funcional')){
@@ -713,7 +715,8 @@ function buildFallback(){
     if(deriv.soloClase.length) notaClases+=` Los días de clase sin gym aparte (${deriv.soloClase.map(d=>DIAS_NAMES[d]).join(', ')}) quedan como descanso de gimnasio: la clase ya es el estímulo de ese día.`;
   }
 
-  const splitLabelBase={1:'Full Body 1x',2:'Full Body 2x',3:'Full Body 3x',4:'Torso/Pierna',5:'Torso/Pierna + Accesorios',6:'Por grupos musculares'}[nFull]||(nFull>6?'Por grupos musculares':'Sin sesión completa esta semana');
+  const splitLabelBase=(splitCoach&&{full:'Full Body '+nFull+'x',torso:'Torso/Pierna',ppl:'Empuje/Jalón/Pierna',grupos:'Por grupos musculares'}[splitCoach.clave])
+    ||{1:'Full Body 1x',2:'Full Body 2x',3:'Full Body 3x',4:'Torso/Pierna',5:'Torso/Pierna + Accesorios',6:'Por grupos musculares'}[nFull]||(nFull>6?'Por grupos musculares':'Sin sesión completa esta semana');
   const splitLabel = splitLabelBase + (deriv.conClase.length?' + complemento en días de clase':'');
 
   return {
@@ -724,6 +727,7 @@ function buildFallback(){
       nota: (tieneLesion
         ? `Detectamos: ${lesiones}. Sustituimos ejercicios de impacto directo por alternativas seguras — nunca eliminamos el grupo muscular. Secuencia: fuerza isométrica → resistencia → hipertrofia.`
         : `Plan ${fase.toLowerCase()} siguiendo la secuencia Fuerza → Resistencia → Hipertrofia. Cada ejercicio incluye su nota propioceptiva: dónde y cómo sentir el estímulo.`) + notaClases,
+      notaExtra: (tieneLesion ? ` Detectamos: ${lesiones}; sustituimos los ejercicios de impacto directo sin eliminar el grupo muscular.` : '') + notaClases,
       consejos: clasesLista.length ? [
         'Hidrátate bien en los días que combinas clase y gym.',
         'En la clase grupal prioriza la técnica sobre el peso o el ritmo.',
@@ -1377,6 +1381,7 @@ function renderPerfilTab(){
       <div class="st"><div class="st-l">Racha</div><div class="st-v">${ev.racha}<small> sem</small></div></div>
       <div class="st"><div class="st-l">Adherencia</div><div class="st-v">${ev.adherencia}<small>%</small></div></div>
     </div>
+    ${(()=>{ const ent=s.entrenadorId&&getEntrenador(s.entrenadorId); const m=(ent&&metLineas(ent.filosofia,ent,s))||s.metodo; return m&&m.tagline?`<div class="sec-row"><div class="sec-t">El método de tu entrenador</div></div>${metodoHTML(m)}`:''; })()}
     <div class="sec-row"><div class="sec-t">Logros</div></div>
     <div class="logros">${logros.map(l=>`<div class="lg${l.on?' on':''}">${it(l.i)}<b>${l.t}</b><span>${esc(l.s)}</span></div>`).join('')}</div>
     <div class="sec-row"><div class="sec-t">Apariencia</div></div>

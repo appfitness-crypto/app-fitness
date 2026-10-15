@@ -176,7 +176,7 @@ async function generarPDFRutina(){
         const nameLines=isDup?[ej.nm||'']:doc.splitTextToSize(ej.nm||'', NAME_WRAP_W);
         doc.setFont('helvetica','normal'); doc.setFontSize(7.4);
         const rxP=rxTexto(ej,s); const srLines=doc.splitTextToSize((esEjCardio(ej)||esEjRondas(ej)||esEjMovilidad(ej))?rxP.sr.replace(' × ','×'):`${ej.series}×${ej.reps}`, SR_W-1.5);
-        const pesoLines=doc.splitTextToSize(String((esEjCardio(ej)||esEjRondas(ej)||esEjMovilidad(ej))?rxP.carga:(pct1RM(ej.peso)?'Moderado — 2 reps en reserva':(ej.peso||'—'))), PESO_W-1.5);
+        const pesoLines=doc.splitTextToSize(String((esEjCardio(ej)||esEjRondas(ej)||esEjMovilidad(ej))?rxP.carga:(ej.esfuerzo||(pct1RM(ej.peso)?'Moderado — 2 reps en reserva':(ej.peso||'—')))), PESO_W-1.5);
         let tipLines=[];
         if(!isDup && (ej.tip || ej.metodo || (ej.alternativas||[]).length)){
           doc.setFont('helvetica','italic'); doc.setFontSize(7);

@@ -195,7 +195,7 @@ function cargaSugerida(s,ej){
   }
   if(esEjIsometrico(ej)) return null;
   const pct=pct1RM(ej.peso), rm=s.logs&&s.logs.rm&&s.logs.rm[prKey(ej.nm)];
-  if(pct&&rm) return {kg:pqRedondear(rm*pctPorReps(parseInt(ej.reps)||10,2)), ult:null, sube:null};
+  if(pct&&rm) return {kg:pqRedondear(rm*pctPorReps(repsObjetivo(ej.reps),ej.rir!=null?+ej.rir:2)), ult:null, sube:null};
   const fijo=pqParseKg(ej.peso);
   return fijo?{kg:fijo, ult:null, sube:null}:null;
 }
