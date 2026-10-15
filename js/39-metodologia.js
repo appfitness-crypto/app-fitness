@@ -342,7 +342,11 @@ function metLineas(ph,ent,p,ctx){
   const L=[], nm=metNombre(ent), ss=ph.sesion||{}, nivel=ctx?ctx.nivel:nivelNum(p.nivel);
   const nDias=(p.diasSemana&&p.diasSemana.length)||parseInt(p.dias)||0;
   const sp0=metSplitClave(ph.structure&&ph.structure.split, nivel), sp=nDias?metSplitEfectivo(sp0,nDias):sp0;
-  if(sp) L.push('Semana organizada en '+MET_SPLIT_TXT[sp]+(sp0&&sp0!==sp?', para trabajar cada músculo 2 veces por semana con tus '+nDias+' días':'')+'.');
+  // Full body con días seguidos: la regla de recuperación alterna torso y pierna (ver splitRecuperacion)
+  const dsel=(p.diasSemana||[]).map(d=>DIAS_ORDER.indexOf(d)).filter(i=>i>=0).sort((a,b)=>a-b);
+  const seguidos=dsel.some((d,i)=>i>0 && d-dsel[i-1]===1);
+  if(sp==='full' && seguidos) L.push('Tu plan es de cuerpo completo, pero como entrenas días seguidos se alterna torso y pierna para que cada músculo descanse 48 horas.');
+  else if(sp) L.push('Semana organizada en '+MET_SPLIT_TXT[sp]+(sp0&&sp0!==sp?', para trabajar cada músculo 2 veces por semana con tus '+nDias+' días':'')+'.');
   const per=ph.structure&&ph.structure.periodization;
   if(per==='ondulante') L.push('Periodización ondulante: alternas días pesados, medios y ligeros en la misma semana.');
   else if(per==='lineal') L.push('Progresión lineal: cuando completes todas las reps con buena técnica, sube un poco el peso.');
