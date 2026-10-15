@@ -198,12 +198,14 @@ function histEj(s,nm){
 // Sin historial: % de su 1RM estimado si el plan lo pide, o el peso escrito en el plan.
 function cargaSugerida(s,ej){
   if(esEjCardio(ej)||esEjRondas(ej)||esEjMovilidad(ej)) return null;
-  const u=histEj(s,ej.nm).filter(d=>+d.kg>0).pop();
+  // Los registros de una sesión ajustada (descarga o "llego cansado") no cuentan para subir el peso
+  const hs=histEjSes(s,ej.nm).filter(x=>+x.d.kg>0), base=hs.filter(x=>!x.d.aj);
+  const u=(base.length?base:hs).pop();
   if(u){
-    const kg=+u.kg, compl=(+u.s||0)>=(+u.p||1);
-    if(!compl||esEjIsometrico(ej)) return {kg, ult:kg, sube:0, sr:u.sr};
-    const nk=pqRedondear(kg+(kg>=20?2.5:kg>=5?1:0.5));
-    return {kg:nk, ult:kg, sube:Math.round((nk-kg)*10)/10, sr:u.sr};
+    const kg=+u.d.kg, compl=(+u.d.s||0)>=(+u.d.p||1);
+    if(!compl||esEjIsometrico(ej)) return {kg, ult:kg, sube:0, sr:u.d.sr};
+    const x=progSiguiente(s,ej,u);   // regla de progresión del entrenador (js/40-autorregulacion.js)
+    return {kg:x.kg, ult:kg, sube:Math.round((x.kg-kg)*10)/10, sr:u.d.sr, nota:x.nota||''};
   }
   if(esEjIsometrico(ej)) return null;
   const pct=pct1RM(ej.peso), rm=s.logs&&s.logs.rm&&s.logs.rm[prKey(ej.nm)];
@@ -377,8 +379,12 @@ function iniciarSesion(k){
   const d=s.rutina[k]; if(!d||!d.ejercicios||!d.ejercicios.length) return;
   activeRutinaKey=k;
   normalizarEmomRutina(s.rutina);
-  if(!sesionTemp||sesionTemp.diaKey!==k) sesionTemp={diaKey:k, ej:{}};
+  const nueva=!sesionTemp||sesionTemp.diaKey!==k;
+  if(nueva) sesionTemp={diaKey:k, ej:{}};
   if(!sesionTemp.t0) sesionTemp.t0=Date.now();
+  if(!sesionTemp.aj) sesionTemp.aj=ajusteSesion(s,sesionTemp.hoy);
+  // "¿Cómo llegas hoy?" una vez por sesión, si el entrenador definió qué hacer cuando llegas cansado
+  if(nueva && progPreguntaHoy(s)) setTimeout(()=>preguntarComoLlegas(s,v=>{ if(!sesionTemp) return; sesionTemp.hoy=v; sesionTemp.aj=ajusteSesion(s,v); sesUI.borr={}; renderSes(); }),250);
   if(sesUI.k!==k) sesUI={k, cur:0, alts:false, borr:{}, aviso:false};
   go('s-ses');
   renderSes();
@@ -389,11 +395,11 @@ function enMMSS(seg){ seg=Math.max(0,Math.floor(seg)); const h=Math.floor(seg/36
 function sesEjs(){ const s=activeSocio; return (s&&s.rutina[sesUI.k]&&s.rutina[sesUI.k].ejercicios)||[]; }
 function sesReg(i){ if(!sesionTemp.ej[i]) sesionTemp.ej[i]={done:false,sets:[]}; return sesionTemp.ej[i]; }
 function sesHechas(i){ const r=sesionTemp&&sesionTemp.ej[i]; if(!r) return 0; return (r.sets||[]).filter(x=>x&&(x.ok||x.seg>0||x.fc>0)).length || (r.done?1e9:0); }
-function sesAvance(i,e){ const n=parseInt(e.series)||1; return Math.min(1,sesHechas(i)/n); }
+function sesAvance(i,e){ const n=seriesHoy(e,sesionTemp&&sesionTemp.aj)||1; return Math.min(1,sesHechas(i)/n); }
 // Valores en pantalla de cada serie (todavía sin marcar): peso sugerido y reps del plan
 function sesBorrador(i,e,c){
   if(!sesUI.borr[i]){
-    const n=parseInt(e.series)||3;
+    const n=seriesHoy(e,sesionTemp&&sesionTemp.aj)||3;
     sesUI.borr[i]=Array.from({length:n},(_,j)=>({kg:c?c.kg:0, r:parseInt(repsDeSerie(e,j))||0}));
   }
   return sesUI.borr[i];
@@ -402,7 +408,7 @@ function renderSes(){
   const s=activeSocio, cont=document.getElementById('en-ses'); if(!s||!cont||!sesionTemp) return;
   const ejs=sesEjs(), i=Math.min(sesUI.cur,ejs.length-1), e0=ejs[i]; if(!e0) return;
   const alt=ejEjecutado(e0,i), e=alt?Object.assign({},e0,{nm:alt.nm,ms:alt.ms||e0.ms,tip:alt.nota||e0.tip}):e0;
-  const f=fichaEj(e), c=cargaSugerida(s,alt?e:e0), d=s.rutina[sesUI.k];
+  const aj=sesionTemp.aj, f=fichaEj(e), c=cargaHoy(cargaSugerida(s,alt?e:e0),aj), d=s.rutina[sesUI.k];
   const especial=enEspecial(e0), reg=sesReg(i);
   if(e0.metodo&&e0.metodo.id==='emom') normalizarEmom(e0);
   const esEmom=!!(e0.metodo&&e0.metodo.id==='emom'), w=segTrabajo(e0);
@@ -450,7 +456,7 @@ function renderSes(){
         <span class="en-media-cta">${ico('play')}Cómo se hace</span>
       </button>
       <h3>${esc(e.nm)}</h3>
-      <div class="en-meta"><span>Ejercicio ${i+1} de ${ejs.length}</span>${esEmom?`<span>EMOM ${esc(e0.series)} min · ${esc(e0.reps)}</span>`:!especial?`<span>${esc(e0.series)} × ${esc(limpiarRepsTxt(e0.reps))}</span>`:''}${f.eq?`<span>${ico('dumbbell')}${esc(f.eq)}</span>`:''}${e0.grupo?`<span>Grupo ${esc(e0.grupo)}</span>`:''}</div>
+      <div class="en-meta"><span>Ejercicio ${i+1} de ${ejs.length}</span>${esEmom?`<span>EMOM ${esc(e0.series)} min · ${esc(e0.reps)}</span>`:!especial?`<span>${esc(seriesHoy(e0,aj)||e0.series)} × ${esc(limpiarRepsTxt(e0.reps))}</span>`:''}${f.eq?`<span>${ico('dumbbell')}${esc(f.eq)}</span>`:''}${e0.grupo?`<span>Grupo ${esc(e0.grupo)}</span>`:''}</div>
       ${alt?`<div class="en-swap">Solo hoy, en lugar de ${esc(e0.nm)}</div>`:''}
       ${f.ms.length?`<div class="en-musc">${f.ms.map((m,j)=>`<span class="${j?'':'p'}"><i></i>${esc(m)}</span>`).join('')}</div>`:''}
       ${!especial?`<div class="en-pills">
@@ -461,6 +467,8 @@ function renderSes(){
         ${M?`<span class="en-pill">${ico('bolt')}<b>${esc(M.nm)}</b></span>`:''}
       </div>`:''}
     </div>
+    ${aj&&aj.notas.length?`<div class="en-aj" role="status">${ico('spark')}<span>${aj.notas.map(esc).join(' ')}</span></div>`:''}
+    ${c&&c.nota&&!especial?`<div class="en-aj soft">${esc(c.nota)}</div>`:''}
     ${(M&&M.como)||e.tip?`<div class="en-tip">${ico('spark')}<span>${esc(sinEmoji(M&&M.como?M.como:e.tip))}</span></div>`:''}
     ${series}
     ${alts.length?`<button type="button" class="en-alt-tg" aria-expanded="${sesUI.alts}" onclick="sesUI.alts=!sesUI.alts;renderSes()"><span>¿Área ocupada? Cámbialo solo por hoy</span>${ico('chev')}</button>

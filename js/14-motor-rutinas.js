@@ -51,7 +51,7 @@ function ctxDesdePerfil(p, filo){
     dosisH:(f.dosis&&f.dosis.hipertrofia)||'', metodoInt:(f.structure&&f.structure.method)||'',
     evitaNm:[...String((f.seleccion&&f.seleccion.nunca)||'').split(/[,;\n]+/).map(kbNorm).filter(x=>x.length>2), ...evitaSeleccion(f.seleccion,nivelNum(p.nivel),p.objetivo)],   // lo que el entrenador nunca programa
     dosisR:(f.dosis&&f.dosis.resistencia)||'', descT:(f.dosis&&f.dosis.desc)||{}, pctT:(f.dosis&&f.dosis.pct)||{},
-    volT:f.volumen||{}, maxEj:maxEjSesion(f.sesion), seguidos:(f.sesion&&f.sesion.seguidos)||'',
+    volT:f.volumen||{}, maxEj:maxEjSesion(f.sesion), seguidos:(f.sesion&&f.sesion.seguidos)||'', rirT:(f.progresion&&f.progresion.rir)||{},
     nivel:nivelNum(p.nivel), obj:objLetra(p.objetivo), objetivo:p.objetivo||'',
     les:lesionKeys(p.limitaciones), evita:m.evita||[],
     fav:[...new Set([...(m.favoritos||[]), ...((typeof filoModeloPara==='function'&&filoModeloPara(f,p.objetivo)&&filoAprenderRutina(filoModeloPara(f,p.objetivo).texto).metodos)||[])])].filter(id=>!(m.evita||[]).includes(id)),   // + los métodos que usa en su rutina modelo
@@ -352,7 +352,7 @@ function ajustarRangosFuerza(semana,ctx){
       if(pr.has(i) || !/—\s*fuerza/i.test(String(e.reps||''))) return;
       const kb=kbBuscar(e.nm||e.nombre), ligero=ejLigero(kb,e), letra=ligero?'R':'H';
       e.reps=String(e.reps).replace(/^[^—·]*/,(ligero?txtR:txtH)+' reps ').replace(/—\s*fuerza/i,'— '+(ligero?'resistencia':'hipertrofia'));
-      if(e.esfuerzo && ctx.metodoInt && typeof metEsfuerzo==='function'){ const x=metEsfuerzo(ctx.metodoInt,letra,ctx.nivel,ctx.pctT); if(x){ e.esfuerzo=x.txt; e.rir=x.rir; } }
+      if(e.esfuerzo && ctx.metodoInt && typeof metEsfuerzo==='function'){ const x=metEsfuerzo(ctx.metodoInt,letra,ctx.nivel,ctx.pctT,ctx.rirT); if(x){ e.esfuerzo=x.txt; e.rir=x.rir; } }
       const pc=ctx.metodoInt==='porcentajes' && typeof metPct==='function' && metPct((ctx.pctT||{})[letra]);
       if(pc && !/^(corporal|banda|sin carga)/i.test(e.peso||'')) e.peso=(ligero?'Ligero':'Moderado')+' — '+pc.split('-')[0]+'% 1RM';
       else if(/1\s*RM/i.test(e.peso||'')) e.peso=ligero?'Ligero — 40% 1RM':'Moderado — 55% 1RM';
@@ -579,6 +579,8 @@ function limitarVolumen(semana,ctx){
 function limitarEjercicios(semana,ctx){
   if(!ctx || !ctx.maxEj || ctx.sinMetodos || ctx.soloSuaves) return 0;
   let quitados=0;
+  // Un patrón obligatorio solo se protege si es el único ejercicio de la semana que lo cubre
+  const cubre=id=>{ const P=typeof MET_PATRONES!=='undefined'&&MET_PATRONES[id]; return P?(semana||[]).reduce((a,d)=>a+((d&&d.ejercicios)||[]).filter(e=>P.rx.test(kbNorm(e.nm||e.nombre))).length,0):0; };
   (semana||[]).forEach(d=>{
     if(!d || !Array.isArray(d.ejercicios)) return;
     const trabajo=()=>d.ejercicios.filter(e=>!e.fase && !esEjMovilidad(e) && !esEjCardio(e) && !esEjRondas(e));
@@ -587,7 +589,7 @@ function limitarEjercicios(semana,ctx){
     const pr=principalesDia(d,ctx), prot=new Set([...pr].map(i=>d.ejercicios[i]));
     for(const tipo of ['a','c']) for(let k=d.ejercicios.length-1;k>=0&&sobra>0;k--){
       const e=d.ejercicios[k];
-      if(prot.has(e) || e.potencia || e._patron || e.fase || esEjMovilidad(e) || esEjCardio(e) || esEjRondas(e)) continue;
+      if(prot.has(e) || e.potencia || (e._patron && cubre(e._patron)<2) || e.fase || esEjMovilidad(e) || esEjCardio(e) || esEjRondas(e)) continue;
       const kb=kbBuscar(e.nm||e.nombre); if((kb?kb.t:'c')!==tipo) continue;
       const g=grupoVol(e); if(g && d.ejercicios.filter(y=>grupoVol(y)===g).length<2) continue;
       d.ejercicios.splice(k,1); sobra--; quitados++;

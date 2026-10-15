@@ -45,6 +45,7 @@ function detalleFilosofiaAvanzada(ph,objetivo){
   if(ses.length) L.push('Estructura de sesión — '+ses.join('; ')+'.');
   const hp=ph.horaPico||{};
   if(hp.sustitucion) L.push('Opciones por área ocupada: prefiere '+{maquina:'máquina o polea con el mismo enfoque',mancuernas:'mancuernas o zona funcional',corporal:'peso corporal y bandas',metodo:'cambiar el método con el equipo disponible'}[hp.sustitucion]+'.'+(hp.nota?' Mensaje al socio: '+hp.nota:''));
+  if(typeof progIA==='function') L.push(...progIA(ph,objetivo));
   if(ph.sampleRoutineNote) L.push('SESIÓN TÍPICA DE ESTE ENTRENADOR (imita su estilo): '+ph.sampleRoutineNote);
   if(typeof filoModeloIA==='function'){ const mi=filoModeloIA(ph,objetivo); if(mi) L.push(mi.replace(/^   - /,'')); }   // su rutina modelo para el objetivo de este socio
   return L.map(x=>'   - '+x).join('\n');

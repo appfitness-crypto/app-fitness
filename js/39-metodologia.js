@@ -93,23 +93,33 @@ const MET_SPLIT_TXT={full:'cuerpo completo en cada sesión',torso:'torso y piern
 function metPocaVariedad(ph){ return metActiva(ph) && ((ph.exerciseStyle&&ph.exerciseStyle.variety)||3)<=2; }
 
 // ── Intensidad: cómo la dosifica el entrenador, según el tipo de día y el nivel del socio ──
-function metEsfuerzo(metodo,letra,nivel,pctT){
+// rirT = repeticiones en reserva por nivel que definió el entrenador ({1:'3-4',2:'1-3',3:'0-2'})
+function metEsfuerzo(metodo,letra,nivel,pctT,rirT){
   if(letra==='P') return {txt:'Máxima velocidad en cada repetición; descansa completo',rir:3};
   const pc=metodo==='porcentajes' && pctT && metPct(pctT[letra]);
   if(pc) return {txt:pc+'% de tu 1RM',rir:letra==='F'?2:letra==='H'?2:3};
-  if(metodo==='rpe') return letra==='F'?{txt:'RPE 8: termina sintiendo que te quedaban 2 reps',rir:2}
-    : letra==='H'?{txt:nivel>1?'RPE 8-9: te queda 1 rep, quizá 2':'RPE 8: te quedan 2 reps',rir:nivel>1?1:2}
-    : {txt:'RPE 7: te quedan unas 3 reps',rir:3};
-  if(metodo==='rir') return letra==='F'?{txt:'RIR 2: deja 2 reps en reserva',rir:2}
-    : letra==='H'?{txt:nivel>1?'RIR 1-2: deja 1 o 2 reps en reserva':'RIR 2: deja 2 reps en reserva',rir:nivel>1?1:2}
-    : {txt:'RIR 3: deja 3 reps en reserva',rir:3};
   if(metodo==='porcentajes') return letra==='F'?{txt:'80-85% de tu 1RM',rir:2}
     : letra==='H'?{txt:'67-75% de tu 1RM',rir:2} : {txt:'55-65% de tu 1RM',rir:3};
   if(metodo==='fallo'){
     if(nivel===1) return {txt:'Deja 2 reps en reserva; el fallo llega cuando domines la técnica',rir:2};
     return letra==='F'?{txt:'Pesado, deja 1 rep en reserva',rir:1}:{txt:'Última serie al fallo técnico',rir:0};
   }
-  return null;
+  if(!['rpe','rir','velocidad','sensaciones'].includes(metodo)) return null;
+  // Reps en reserva: las del entrenador para el nivel del socio o las del sistema
+  let r=letra==='F'?[2,2]:letra==='H'?(nivel>1?[1,2]:[2,2]):[3,3];
+  const t=rirT && String(rirT[nivel]||'').match(/\d/g);   // un dígito por valor (0-5)
+  if(t){ const n=t.join(' ').split(' ').map(v=>Math.min(5,+v)), x=[Math.min(n[0],n[1]??n[0]),Math.max(n[0],n[1]??n[0])]; r=letra==='R'?[x[1],x[1]]:x; }
+  const rir=Math.round((r[0]+r[1])/2), rt=r[0]===r[1]?String(r[0]):r[0]+'-'+r[1];
+  if(metodo==='rir') return {txt:'RIR '+rt+': deja '+(r[0]===r[1]?r[0]:'de '+r[0]+' a '+r[1])+' reps en reserva',rir};
+  if(metodo==='rpe'){ const a=10-r[1], b=10-r[0]; return {txt:'RPE '+(a===b?a:a+'-'+b)+': te '+(r[1]===1?'queda':'quedan')+' '+rt+' '+(r[1]===1?'rep':'reps'),rir}; }
+  if(metodo==='velocidad') return {txt:'Cada rep rápida y limpia; corta la serie cuando la barra se frene (quedan ~'+rt+' reps)',rir};
+  return {txt:'Termina sintiendo que podías hacer '+rt+' reps más',rir};
+}
+// Modelo de periodización para el objetivo del socio (cuestionario) o el modelo general del entrenador
+const MET_OBJ_PER={'FUERZA PURA':'F','GANAR MÚSCULO':'H','PERDER PESO':'G','RESISTENCIA':'R','RENDIMIENTO DEPORTIVO':'D'};
+function metPeriodizacion(ph,objetivo){
+  const st=(ph&&ph.structure)||{}, k=MET_OBJ_PER[objetivo];
+  return (k && st.perObjetivo && st.perObjetivo[k]) || st.periodization || '';
 }
 
 // ── Clasificación de ejercicios dentro del plan ──
@@ -205,8 +215,9 @@ function aplicarMetodologia(semana,ent,ctx,p){
   const nivel=ctx.nivel, obj=ctx.obj, edad=parseInt(p.edad)||35;
   const ss=ph.sesion||{}, pr=ph.priorities||{}, se=ph.seleccion||{};
   const nunca=[...new Set([...metLista(se.nunca), ...(ctx.evitaNm||[])])];   // + halterofilia / pliometría que no usa
-  const per=(ph.structure&&ph.structure.periodization)||'';
+  const per=metPeriodizacion(ph,p.objetivo);
   const metodoInt=(ph.structure&&ph.structure.method)||'';
+  const rirT=(ph.progresion&&ph.progresion.rir)||{};
   const modelo=(typeof filoModeloReps==='function')?filoModeloReps(ph,p.objetivo):null;
   const dosis=ph.dosis||{};
   const rangos={F:metRango(dosis.fuerza,MET_REPS_DEF.F), H:metRango(dosis.hipertrofia,MET_REPS_DEF.H), R:metRango(dosis.resistencia,MET_REPS_DEF.R), P:metRango(dosis.potencia,[3,5])};
@@ -260,7 +271,7 @@ function aplicarMetodologia(semana,ent,ctx,p){
         if(per==='bloques') e.series=Math.min(5,(parseInt(e.series)||3)+1);
         principal=false;
       } else if(!comp && (pr.hipertrofia||3)>=4) e.series=Math.min(4,(parseInt(e.series)||3)+1);
-      const esf=metEsfuerzo(metodoInt,letra,nivel,pctT);
+      const esf=metEsfuerzo(metodoInt,letra,nivel,pctT,rirT);
       if(esf){ e.esfuerzo=esf.txt; e.rir=esf.rir; }
       const pc=metodoInt==='porcentajes' && metPct(pctT[letra]);
       if(pc && !/^(corporal|banda|sin carga)/i.test(e.peso||'')) e.peso=(letra==='F'?'Pesado':letra==='R'?'Ligero':'Moderado')+' — '+pc.split('-')[0]+'% 1RM';
@@ -313,7 +324,7 @@ function aplicarMetodologia(semana,ent,ctx,p){
         const x=metElegir(KB_EJERCICIOS.filter(c=>c.enf===enf && c.t==='a' && !c.iso && ['maquina','polea'].includes(c.z)).map(c=>c.id),ctx,nunca,d.ejercicios);
         if(!x) return;
         iso=metNuevo(x,{series:3, reps:metRepsTxt(rangos.H,'H'), peso:'Moderado — 55% 1RM'});
-        const esf=metEsfuerzo(metodoInt,'H',nivel); if(esf){ iso.esfuerzo=esf.txt; iso.rir=esf.rir; }
+        const esf=metEsfuerzo(metodoInt,'H',nivel,pctT,rirT); if(esf){ iso.esfuerzo=esf.txt; iso.rir=esf.rir; }
       } else d.ejercicios.splice(d.ejercicios.indexOf(iso),1);
       d.ejercicios.splice(d.ejercicios.indexOf(comp),0,iso);
       const usadas=new Set(d.ejercicios.map(e=>e.grupo&&e.grupo.charAt(0)).filter(Boolean));
@@ -421,12 +432,14 @@ function metLineas(ph,ent,p,ctx){
   else if(sp) L.push('Semana organizada en '+MET_SPLIT_TXT[sp]+(sp0&&sp0!==sp?', para trabajar cada músculo 2 veces por semana con tus '+nDias+' días':'')+'.');
   const dur=parseInt(ss.duracion), nEj=maxEjSesion(ss);
   if(dur||nEj) L.push('Sesiones '+(dur?'de unos '+dur+' minutos':'')+(dur&&nEj?', con ':'')+(nEj?(dur?'':'con ')+'hasta '+nEj+' ejercicios de trabajo':'')+'.');
-  const per=ph.structure&&ph.structure.periodization;
+  const per=metPeriodizacion(ph,p.objetivo);
+  if(per==='flexible') L.push('Sin periodización fija: el plan se ajusta sesión a sesión según cómo respondes.');
   if(per==='ondulante') L.push('Periodización ondulante: alternas días pesados, medios y ligeros en la misma semana.');
   else if(per==='lineal') L.push('Progresión lineal: cuando completes todas las reps con buena técnica, sube un poco el peso.');
   else if(per==='bloques') L.push('Trabajas por bloques: primero acumulas volumen, luego subes la intensidad y después descargas.');
   else if(per==='conjugada') L.push(nivel>1?'Método conjugado: un día buscas la carga máxima y otro la velocidad.':'Cuando domines la técnica tu plan alternará días de carga máxima y de velocidad; por ahora progresas paso a paso.');
   const mi={rpe:'Mides el esfuerzo con RPE: qué tan duro se sintió la serie del 1 al 10.',rir:'Mides el esfuerzo con RIR: cuántas reps te quedaron en reserva.',
+    velocidad:'Mides el esfuerzo por la velocidad: la serie termina cuando la barra se frena.',sensaciones:'Mides el esfuerzo por sensaciones: cuántas reps sientes que te quedan.',
     porcentajes:'Las cargas van en % de tu 1RM; la app te sugiere el peso con tus registros.',fallo:nivel>1?'Las últimas series de aislamiento llegan al fallo técnico.':'Por ahora sin llegar al fallo: primero la técnica.'}[ph.structure&&ph.structure.method];
   if(mi) L.push(mi);
   const cal={movilidad:'Cada sesión empieza con movilidad articular.',aproximacion:'Antes del ejercicio principal haces series de aproximación.',especifico:'Antes de cargar activas el músculo del día.'}[ss.calentamiento];
@@ -441,6 +454,7 @@ function metLineas(ph,ent,p,ctx){
   if(car) L.push(car);
   const prog={numeros:'Tu avance se mide en números: peso y repeticiones.',calidad:'Tu avance se mide primero por la calidad del movimiento.',mixto:'Tu avance se mide en números y en calidad de movimiento.'}[ph.progressStyle];
   if(prog) L.push(prog);
+  if(typeof progLineas==='function') L.push(...progLineas(ph));
   if(ph.adjustmentPhilosophy && String(ph.adjustmentPhilosophy).trim()) L.push('Si te estancas: '+String(ph.adjustmentPhilosophy).trim());
   const sistema=!!(ent && ent.rol==='coordinador');   // el director define la filosofía del sistema (plan de la app)
   return {entrenador:(ent&&ent.nombre)||'', corto:sistema?(GYM.nombreCorto||GYM.nombre||'la app'):nm, sistema, tagline:String(ph.tagline).trim(), lineas:L,
