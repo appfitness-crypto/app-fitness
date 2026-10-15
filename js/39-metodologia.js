@@ -518,6 +518,7 @@ function rehacerPlanConEntrenador(s){
   s.rutina=plan.rutina; s.origenRutina='plantilla'; s.metodo=plan.metodo;
   s.planActualizado=fechaISO(new Date());
   dbSave(s.code);
+  rutinaUnicaSocio(s).then(c=>{ if(c.length){ dbSave(s.code); refreshDash(); } }).catch(()=>{});   // se ajusta en cuanto llegan las huellas
   return true;
 }
 
@@ -551,8 +552,10 @@ function staffRehacerConMetodo(code){
     if(!plan){ showToast('No se pudo rehacer esta rutina'); return; }
     staffRutBackup[code]=limpio(s.rutina);
     s.rutina=plan.rutina; s.metodo=plan.metodo; s.origenRutina='plantilla';
-    staffDirty.add(code); staffTab='rutina'; staffRenderContent(s);
-    showToast('🧬 Rutina rehecha con '+nomMet+'. Revísala y presiona GUARDAR');
+    rutinaUnicaSocio(s).catch(()=>[]).then(c=>{
+      staffDirty.add(code); staffTab='rutina'; staffRenderContent(s);
+      showToast('🧬 Rutina rehecha con '+nomMet+'. Revísala y presiona GUARDAR'+(c.length?'. '+unicaAviso(c):''));
+    });
   },{label:'Rehacer rutina'});
 }
 function ofrecerRehacerPlan(s){
