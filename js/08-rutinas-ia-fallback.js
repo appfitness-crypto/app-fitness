@@ -320,7 +320,7 @@ ${filas}
 
 function ctxQuiz(){
   const ent=entRutina(qAnswers.entrenadorId);
-  return ctxDesdePerfil({nivel:qAnswers.nivel,objetivo:qAnswers.objetivo,limitaciones:qAnswers.limitaciones}, ent&&ent.filosofia);
+  return ctxDesdePerfil({nivel:qAnswers.nivel,objetivo:qAnswers.objetivo,limitaciones:qAnswers.limitaciones,edad:qAnswers.edad,peso:qAnswers.peso,estatura:qAnswers.estatura}, ent&&ent.filosofia);
 }
 // Pasa la rutina (IA o plantilla) por el motor: variedad, metodología del entrenador, isométricos, cardio y métodos
 function procesarRutina(data){
@@ -333,6 +333,7 @@ function procesarRutina(data){
       diversificarSemana(data.semana, ctxP, entP&&entP.filosofia, semillaP);
       data.metodo=aplicarMetodologia(data.semana, entP, ctxP, perfilP);
     } else data.metodo=metLineas(entP&&entP.filosofia, entP, perfilP, ctxP);
+    data.sustLesion=filtrarLesiones(data.semana, ctxP);   // seguridad: al final, después de plantilla, variedad, filosofía e IA
     if(data.metodo && data.perfil){
       if(data.origen==='plantilla') data.perfil.nota='Plan armado con el método de '+data.metodo.corto+': sus ejercicios, rangos, intensidad y forma de organizar la semana.'+(data.perfil.notaExtra||'');
       if(data.metodo.horaPico) data.perfil.consejos=[...(data.perfil.consejos||[]), 'Hora pico: '+data.metodo.horaPico];
@@ -611,7 +612,7 @@ function buildFallback(){
       { const op=elegir([
           ['Jalón al Pecho','Lleva los codos hacia las caderas sintiendo el dorsal justo debajo de la axila. Varía el ángulo del tronco para sentir distinta zona.'],
           ['Remo con Barra','Torso a 45°; al jalar al ombligo siente cómo se juntan las escápulas.'],
-          ['Jalón Tras Nuca en Polea','Codos hacia abajo y atrás; siente el dorsal ancho abrirse en la parte alta de la espalda.'],
+          ['Jalón agarre neutro','Palmas enfrentadas; lleva los codos hacia abajo y atrás sintiendo el dorsal abrirse bajo la axila.'],
         ],variante); add(op[0],4,repsBase,'Moderado — 60% 1RM','Dorsal Ancho',op[1]); }
       { const op=elegir([
           ['Remo con Mancuerna','Codo a la cadera; siente cómo se junta la escápula al centro.'],

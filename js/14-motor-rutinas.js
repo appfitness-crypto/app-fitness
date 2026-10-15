@@ -28,7 +28,10 @@ function prng(seedStr){ let h=2166136261; for(const c of String(seedStr)) h=Math
 function ctxDesdePerfil(p, filo){
   const f=filo||{};
   const m=f.metodos||{};
+  const est=(parseFloat(p.estatura)||0)/100, imc=(est>0&&parseFloat(p.peso))?parseFloat(p.peso)/(est*est):0;
   return {
+    edad:parseInt(p.edad)||0, imc:Math.round(imc*10)/10,
+    evitaNm:String((f.seleccion&&f.seleccion.nunca)||'').split(/[,;\n]+/).map(kbNorm).filter(x=>x.length>2),   // lo que el entrenador nunca programa
     nivel:nivelNum(p.nivel), obj:objLetra(p.objetivo), objetivo:p.objetivo||'',
     les:lesionKeys(p.limitaciones), evita:m.evita||[],
     fav:[...new Set([...(m.favoritos||[]), ...((typeof filoModeloPara==='function'&&filoModeloPara(f,p.objetivo)&&filoAprenderRutina(filoModeloPara(f,p.objetivo).texto).metodos)||[])])].filter(id=>!(m.evita||[]).includes(id)),   // + los métodos que usa en su rutina modelo
@@ -359,10 +362,70 @@ function normalizarEmom(e){
 }
 function normalizarEmomRutina(rutina){ Object.values(rutina||{}).forEach(d=>(d&&d.ejercicios||[]).forEach(normalizarEmom)); }
 // Ejercicio metabólico (donde sí va un EMOM): rondas por repeticiones (burpees, swings, saltos…) o zona funcional
+// Solo lo que de verdad es metabólico: burpees, swings, saltos, thrusters… (no dominadas, fondos ni step-ups
+// solo por estar en la zona funcional: 10 min × 15 dominadas no es un EMOM, es una lesión)
 function esEjMetabolico(e){
   const kb=kbBuscar(e.nm||e.nombre);
   if(kb && kb.rondas) return !(kb.rx && kb.rx.u && kb.rx.u!=='reps');
-  return !!(kb && kb.z==='funcional') || /burpee|swing|thruster|wall ?ball|kettlebell|salto|box jump|clean|snatch/i.test(e.nm||e.nombre||'');
+  return /burpee|swing|thruster|wall ?ball|kettlebell|salto|box jump|clean|snatch/i.test(e.nm||e.nombre||'');
+}
+// Tope de un EMOM según el ejercicio, el nivel, la edad y el IMC: el total de repeticiones queda en un rango sensato
+function emomTope(e,ctx){
+  const nm=e.nm||e.nombre||'';
+  let porMin=/burpee|salto|box jump/i.test(nm)?6:10;
+  if(ctx.nivel>=3) porMin+=2;
+  if((ctx.edad||0)>=45 || (ctx.imc||0)>=30) porMin=Math.max(4,porMin-2);
+  const min=ctx.nivel>=3?10:8;
+  const m=String(e.reps||'').match(/(\d+)/);
+  const r=Math.max(3,Math.min(m?+m[1]:porMin,porMin));
+  e.series=min; e.reps=r+' reps cada minuto'; e.descanso='El resto del minuto';
+  if(e.metodo) e.metodo.detalle='EMOM '+min+' min · '+min+' rondas';
+  return e;
+}
+// ═════════════════════════════════════════
+// SEGURIDAD — ninguna rutina sale con un ejercicio contraindicado para la lesión del socio.
+// Se revisa al final (después de plantilla, variedad, filosofía del entrenador e IA): lo que el catálogo marca
+// como "evitar" para esa lesión se SUSTITUYE por un ejercicio seguro del mismo músculo; nunca se elimina el grupo
+// muscular salvo que no exista ninguna opción segura.
+// ═════════════════════════════════════════
+function ejContraindicado(e,ctx){
+  const nm=e&&(e.nm||e.nombre); if(!nm||!ctx.les.length) return false;
+  const kb=kbBuscar(nm); return !!(kb && ctx.les.some(l=>(kb.ev||[]).includes(l)));
+}
+function sustitutoSeguro(e,ctx,usados){
+  const kb=kbBuscar(e.nm||e.nombre); const enf=(kb&&kb.enf)||e.enf; if(!enf) return null;
+  const cands=KB_EJERCICIOS.filter(x=>x.enf===enf && !x.rondas && !usados.has(x.id) && (x.nv||1)<=ctx.nivel
+    && !ctx.les.some(l=>(x.ev||[]).includes(l)) && !(ctx.evitaNm||[]).some(n=>kbNorm(x.nm).includes(n)));
+  if(!cands.length) return null;
+  const pts=x=>(kb&&x.t===kb.t?3:0)+(kb&&!!x.iso===!!kb.iso?2:0)+(['maquina','polea'].includes(x.z)?1:0);   // estable y guiado primero
+  return cands.slice().sort((a,b)=>pts(b)-pts(a))[0];
+}
+function filtrarLesiones(semana,ctx){
+  let cambios=0;
+  if(!ctx || !ctx.les.length || ctx.soloSuaves || ctx.sinMetodos) return cambios;
+  const LES={rodilla:'rodilla',lumbar:'espalda baja',hombro:'hombro',cadera:'cadera',cuello:'cuello',cardiaca:'condición cardiaca'};
+  (semana||[]).forEach(d=>{
+    if(!d||!Array.isArray(d.ejercicios)) return;
+    const usados=new Set(d.ejercicios.map(e=>{ const k=kbBuscar(e.nm||e.nombre); return k&&k.id; }).filter(Boolean));
+    d.ejercicios=d.ejercicios.filter(e=>{
+      if(Array.isArray(e.alternativas)) e.alternativas=e.alternativas.filter(a=>!ejContraindicado(a,ctx));
+      if(!ejContraindicado(e,ctx)) return true;
+      const antes=e.nm||e.nombre, x=sustitutoSeguro(e,ctx,usados);
+      cambios++;
+      if(!x) return false;
+      usados.add(x.id);
+      const esf=e.esfuerzo, rir=e.rir;
+      aplicarEjCatalogo(e,x);
+      if(esf){ e.esfuerzo=esf; e.rir=rir; }
+      const kbA=kbBuscar(antes), zona=ctx.les.filter(l=>((kbA&&kbA.ev)||[]).includes(l)).map(l=>LES[l]||l).join(' y ');
+      e.tip='Sustituye a '+antes+' para cuidar tu '+(zona||'lesión')+'. '+(e.tip||'');
+      return true;
+    });
+    // Parejas que quedaron sin compañero (superserie, biserie, pre-agotamiento…): se deshacen
+    const cuenta={}; d.ejercicios.forEach(e=>{ if(e.grupo) cuenta[e.grupo.charAt(0)]=(cuenta[e.grupo.charAt(0)]||0)+1; });
+    d.ejercicios.forEach(e=>{ if(e.grupo && cuenta[e.grupo.charAt(0)]<2){ delete e.grupo; if(e.metodo && KB_METODOS[e.metodo.id] && KB_METODOS[e.metodo.id].pareja) delete e.metodo; } });
+  });
+  return cambios;
 }
 function descansoPara(e,ctx,d){
   if(e.descanso) return e.descanso;
@@ -464,7 +527,7 @@ function enriquecerDia(ejs, ctx, seed){
     if(!valido('emom') || ejs.some(e=>e.metodo&&e.metodo.id==='emom')) return false;
     const i=ejs.findIndex((e,j)=>!e.metodo && !esEjCardio(e) && !esEjMovilidad(e) && esEjMetabolico(e) && !cargaLesion(ctx,ds[j]));
     if(i<0) return false;
-    aplicarMetodo(ejs[i],'emom'); return true;
+    aplicarMetodo(ejs[i],'emom'); emomTope(ejs[i],ctx); return true;
   });
   const gruposUsados={}; ejs.forEach(e=>{ if(e.grupo) gruposUsados[e.grupo.charAt(0)]=1; });
   // orden: aleatorizado ligeramente por día para que no todas las sesiones se vean iguales
@@ -489,7 +552,7 @@ function enriquecerSemana(semana, ctx, semilla){
 // Para socios que ya existen (botón del panel staff). Solo agrega lo que falta.
 function enriquecerSocio(s){
   const ent=entRutina(s.entrenadorId);
-  const ctx=ctxDesdePerfil({nivel:s.nivel,objetivo:s.objetivo,limitaciones:s.limitaciones}, ent&&ent.filosofia);
+  const ctx=ctxDesdePerfil({nivel:s.nivel,objetivo:s.objetivo,limitaciones:s.limitaciones,edad:s.edad,peso:s.peso,estatura:s.estatura}, ent&&ent.filosofia);
   const dias=DIAS_ORDER.map(k=>s.rutina&&s.rutina[k]).filter(Boolean);
   enriquecerSemana(dias, ctx, s.code);
   return s;
