@@ -431,7 +431,7 @@ function renderNutricionTab(){
 
     <div class="macro-grid">
       <div class="macro-c" style="--mc:var(--v)">${it('flame')}<div class="mc-v">${nut.kcal}<span class="mc-u"> kcal</span></div><div class="mc-l">Calorías / día</div><div class="mc-s">${nut.ajusteTxt}</div></div>
-      <div class="macro-c" style="--mc:var(--n)">${it('dumbbell')}<div class="mc-v">${nut.prot}<span class="mc-u"> g</span></div><div class="mc-l">Proteína</div><div class="mc-s">${nut.protKg} g/kg · ${pP}% kcal · reparte en 3–4 comidas</div></div>
+      <div class="macro-c" style="--mc:var(--n)">${it('dumbbell')}<div class="mc-v">${nut.prot}<span class="mc-u"> g</span></div><div class="mc-l">Proteína</div><div class="mc-s">${nut.protKg} g/kg${(nut.pesoRef&&nut.pesoRef<nut.pesoBase-0.5)?' de '+nut.pesoRef+' kg de referencia':''} · ${pP}% kcal · reparte en 3–4 comidas</div></div>
       <div class="macro-c" style="--mc:var(--g)">${it('bolt')}<div class="mc-v">${nut.carbs}<span class="mc-u"> g</span></div><div class="mc-l">Carbohidratos</div><div class="mc-s">${cP}% kcal · prioriza pre y post entreno</div></div>
       <div class="macro-c" style="--mc:var(--p)">${it('drop')}<div class="mc-v">${nut.grasas}<span class="mc-u"> g</span></div><div class="mc-l">Grasas</div><div class="mc-s">${gP}% kcal · mínimo saludable garantizado (0.8 g/kg)</div></div>
     </div>
