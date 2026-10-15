@@ -388,9 +388,9 @@ function rutinaDesdeSemana(semana){
   keys.forEach(k=>{ if(!out[k]) out[k]={label:DIAS_NAMES[k],tipo:'DESCANSO',color:'descanso',ejercicios:[]}; });
   return out;
 }
-function rehacerPlanConEntrenador(s){
-  if(!s || MET_SIN_REHACER.includes(s.objetivo)) return false;
-  const ent=getEntrenador(s.entrenadorId); if(!ent || !metActiva(ent.filosofia)) return false;
+// Arma un plan nuevo para el socio con el método de "ent", sin guardarlo. Devuelve {rutina, metodo} o null.
+function planConMetodo(s,ent){
+  if(!s || !ent || !metActiva(ent.filosofia) || MET_SIN_REHACER.includes(s.objetivo) || s.modo==='casa') return null;
   const respaldo=JSON.parse(JSON.stringify(qAnswers));
   try{
     Object.assign(qAnswers,{nombre:s.nombre||'', objetivo:s.objetivo, nivel:s.nivel, edad:s.edad, peso:s.peso, estatura:s.estatura,
@@ -400,14 +400,45 @@ function rehacerPlanConEntrenador(s){
       clasesGrupales:(s.clasesGrupales||[]).map(c=>({clase:c.clase,dias:[...(c.dias||[])],entrenaMismoDia:!!c.entrenaMismoDia}))});
     const data=buildFallback(); data.origen='plantilla';
     procesarRutina(data);
-    s.rutina=rutinaDesdeSemana(data.semana);
-    s.origenRutina='plantilla';
-    s.metodo=data.metodo||null;
-    s.planActualizado=fechaISO(new Date());
-    dbSave(s.code);
-    return true;
-  }catch(e){ console.warn('No se pudo rehacer el plan',e); return false; }
+    return {rutina:rutinaDesdeSemana(data.semana), metodo:data.metodo||null};
+  }catch(e){ console.warn('No se pudo rehacer el plan',e); return null; }
   finally{ Object.keys(qAnswers).forEach(k=>delete qAnswers[k]); Object.assign(qAnswers,respaldo); }
+}
+function rehacerPlanConEntrenador(s){
+  const plan=planConMetodo(s, s&&getEntrenador(s.entrenadorId)); if(!plan) return false;
+  s.rutina=plan.rutina; s.origenRutina='plantilla'; s.metodo=plan.metodo;
+  s.planActualizado=fechaISO(new Date());
+  dbSave(s.code);
+  return true;
+}
+
+// ── Panel del entrenador: rehacer la rutina de un socio con su método ──
+// Se carga en el editor como "Usar esta rutina como base": se puede deshacer y no se guarda hasta "Guardar cambios".
+function staffEntMetodo(s){
+  const ent=(s&&s.entrenadorId&&getEntrenador(s.entrenadorId)) || (staffRol!=='coordinador' && staffActivoEntId && getEntrenador(staffActivoEntId));
+  return ent && metActiva(ent.filosofia) ? ent : null;
+}
+function staffBotonMetodoHTML(s){
+  if(!s || MET_SIN_REHACER.includes(s.objetivo) || s.modo==='casa') return '';
+  const ent=staffEntMetodo(s);
+  if(!ent){
+    return (staffRol!=='coordinador' && staffActivoEntId)
+      ? `<button type="button" class="sd-b" onclick="abrirMiFilosofia()" title="Llena tu filosofía para poder rehacer rutinas con tu método">🧬 Define tu método</button>` : '';
+  }
+  const propio=ent.id===staffActivoEntId;
+  return `<button type="button" class="sd-b p" onclick="staffRehacerConMetodo('${s.code}')" title="Arma de nuevo la semana con la filosofía de ${esc(ent.nombre)}: split, periodización, reps, intensidad, calentamiento, core y cardio">🧬 Rehacer con ${propio?'mi método':'el método de '+esc(metNombre(ent))}</button>`;
+}
+function staffRehacerConMetodo(code){
+  const s=getSocio(code); if(!s) return;
+  const ent=staffEntMetodo(s); if(!ent) return;
+  uiConfirm('¿Rehacer la rutina de '+tc(s.nombre||'')+' con el método de '+metNombre(ent)+'?\nReemplaza la rutina en pantalla, incluidos los ajustes manuales. No se guarda hasta que presiones Guardar cambios y puedes deshacerlo. Su historial no cambia.',()=>{
+    const plan=planConMetodo(s,ent);
+    if(!plan){ showToast('No se pudo rehacer esta rutina'); return; }
+    staffRutBackup[code]=limpio(s.rutina);
+    s.rutina=plan.rutina; s.metodo=plan.metodo; s.origenRutina='plantilla';
+    staffDirty.add(code); staffTab='rutina'; staffRenderContent(s);
+    showToast('🧬 Rutina rehecha con el método de '+metNombre(ent)+'. Revísala y presiona GUARDAR');
+  },{label:'Rehacer rutina'});
 }
 function ofrecerRehacerPlan(s){
   const ent=s&&getEntrenador(s.entrenadorId);

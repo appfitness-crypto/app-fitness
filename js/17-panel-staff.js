@@ -261,6 +261,7 @@ function staffRenderContent(s){
           ${casaBannerStaff(s)}
           <div class="rt-bar">
             <button type="button" class="sd-b p" onclick="staffEnriquecer('${s.code}')" title="Agrega métodos de intensidad y opciones por área ocupada donde falten, según tu filosofía">✨ Métodos y opciones</button>
+            ${staffBotonMetodoHTML(s)}
             ${casaBarraHTML(s)}
             ${staffRutBackup[s.code]?`<button type="button" class="sd-b" onclick="staffDeshacerBase('${s.code}')">↩ Deshacer rutina cargada</button>`:''}
           </div>
