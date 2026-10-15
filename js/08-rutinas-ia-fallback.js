@@ -739,6 +739,12 @@ function buildFallback(){
 }
 
 // ══ BUILDER: RENDIMIENTO DEPORTIVO ══
+// Días de la semana con sesión (S) o descanso (D): siempre los que marcó el socio en el cuestionario.
+// Solo si no hay días marcados (planes antiguos) se usa el patrón de respaldo.
+function patronDiasSocio(defecto){
+  const sel=(qAnswers.diasSemana||[]).filter(d=>DIAS_ORDER.includes(d));
+  return sel.length ? DIAS_ORDER.map(d=>sel.includes(d)?'S':'D') : defecto;
+}
 function buildFallbackDeporte(discId, dias, nivel){
   const dep=deporteById(discId)||DEPORTES[0];
   const entorno=qAnswers.entorno||'funcional';
@@ -778,11 +784,11 @@ function buildFallbackDeporte(discId, dias, nivel){
   };
   const nombres=nombresSesion[dias]||nombresSesion[4];
   const colores=['verde','neon','gold','hombro','red','verde'];
-  const patron={
+  const patron=patronDiasSocio({
     2:['S','D','D','S','D','D','D'], 3:['S','D','S','D','S','D','D'],
     4:['S','S','D','S','S','D','D'], 5:['S','S','S','D','S','D','S'],
     6:['S','S','S','D','S','S','S'],
-  }[dias]||['S','S','D','S','S','D','D'];
+  }[dias]||['S','S','D','S','S','D','D']);
   const diasNom=['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO','DOMINGO'];
   // Enfoque muscular por tema del día, para completar cada sesión con el catálogo general
   // y así no repetir casi los mismos 6 ejercicios del banco de la disciplina toda la semana.
@@ -1049,11 +1055,11 @@ function buildFallbackRehab(protoId, dias){
   // La rutina refleja la FASE 1 del protocolo repartida en la semana; el socio avanza fases desde el plan
   const fase=p.fases[0];
   const colores={red:'red',gold:'gold',neon:'neon'};
-  const patron={
+  const patron=patronDiasSocio({
     2:['S','D','D','S','D','D','D'], 3:['S','D','S','D','S','D','D'],
-    4:['S','D','S','D','S','D','D'], 5:['S','S','D','S','S','D','D'],
+    4:['S','S','D','S','S','D','D'], 5:['S','S','D','S','S','D','D'],
     6:['S','S','D','S','S','S','D'],
-  }[dias]||['S','D','S','D','S','D','D'];
+  }[dias]||['S','D','S','D','S','D','D']);
   const diasNom=['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO','DOMINGO'];
   const semana=patron.map((t,i)=>{
     if(t==='D') return {dia:diasNom[i], tipo:'Descanso / recuperación', color:'descanso', ejercicios:[]};
@@ -1086,7 +1092,7 @@ function buildFallbackFlex(dias){
     {nombre:'Gato-camello',ms:'Columna',tip:'Redondea y arquea la espalda lento. Moviliza toda la columna.'},
     {nombre:'Estiramiento activo de tobillo',ms:'Tobillo',tip:'Flexiona y extiende el tobillo en rango completo. Movilidad para el apoyo.'},
   ];
-  const patron={2:['S','D','D','S','D','D','D'],3:['S','D','S','D','S','D','D'],4:['S','D','S','D','S','D','D'],5:['S','S','D','S','S','D','D'],6:['S','S','D','S','S','S','D']}[dias]||['S','D','S','D','S','D','D'];
+  const patron=patronDiasSocio({2:['S','D','D','S','D','D','D'],3:['S','D','S','D','S','D','D'],4:['S','D','S','D','S','D','D'],5:['S','S','D','S','S','D','D'],6:['S','S','D','S','S','S','D']}[dias]||['S','D','S','D','S','D','D']);
   const diasNom=['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO','DOMINGO'];
   let idx=0;
   const semana=patron.map((t,i)=>{

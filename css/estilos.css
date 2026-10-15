@@ -1949,3 +1949,8 @@ html[data-theme="dark"] .en-peso-mini button{color:#0A0E13;}
 .met-l li{position:relative;padding:6px 0 6px 16px;font-size:var(--fs-sm);line-height:1.45;color:var(--tx);border-top:1px solid var(--b);}
 .met-l li:first-child{border-top:none;}
 .met-l li::before{content:"";position:absolute;left:2px;top:13px;width:6px;height:6px;border-radius:2px;background:var(--v);}
+
+/* Casillas del cuestionario (.chk) seleccionadas: la clase .ck también es la palomita redonda de los ejercicios;
+   aquí se restituye su tamaño para que el botón no se encoja a un círculo al marcarlo */
+.chk.ck{width:100%;height:auto;border-radius:var(--r-md);border-width:1px;font-size:var(--fs-md);}
+.chk.chk-compact.ck{font-size:var(--fs-xs);}
