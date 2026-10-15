@@ -444,21 +444,29 @@ function emomTope(e,ctx){
 // como "evitar" para esa lesión se SUSTITUYE por un ejercicio seguro del mismo músculo; nunca se elimina el grupo
 // muscular salvo que no exista ninguna opción segura.
 // ═════════════════════════════════════════
+// Perfil delicado: principiante con IMC ≥ 35 o 60+ años. Ahí la barra libre y los ejercicios de mucha técnica
+// o equilibrio se cambian por versiones guiadas (máquina, polea, mancuernas estables) hasta que domine el patrón.
+const EJ_TECNICOS=['bulgara','kb_swing','good_morning','pm_sumo','desplante_lateral'];
+function perfilDelicado(ctx){ return ctx && ctx.nivel===1 && ((ctx.imc||0)>=35 || (ctx.edad||0)>=60); }
+function ejTecnico(kb){ return !!kb && (kb.z==='rack' || EJ_TECNICOS.includes(kb.id) || (kb.nv||1)>=2); }
 function ejContraindicado(e,ctx){
-  const nm=e&&(e.nm||e.nombre); if(!nm||!ctx.les.length) return false;
-  const kb=kbBuscar(nm); return !!(kb && ctx.les.some(l=>(kb.ev||[]).includes(l)));
+  const nm=e&&(e.nm||e.nombre); if(!nm) return false;
+  const kb=kbBuscar(nm); if(!kb) return false;
+  if(perfilDelicado(ctx) && ejTecnico(kb)) return true;
+  return !!(ctx.les.length && ctx.les.some(l=>(kb.ev||[]).includes(l)));
 }
 function sustitutoSeguro(e,ctx,usados){
   const kb=kbBuscar(e.nm||e.nombre); const enf=(kb&&kb.enf)||e.enf; if(!enf) return null;
   const cands=KB_EJERCICIOS.filter(x=>x.enf===enf && !x.rondas && !usados.has(x.id) && (x.nv||1)<=ctx.nivel
-    && !ctx.les.some(l=>(x.ev||[]).includes(l)) && !(ctx.evitaNm||[]).some(n=>kbNorm(x.nm).includes(n)));
+    && !ctx.les.some(l=>(x.ev||[]).includes(l)) && !(ctx.evitaNm||[]).some(n=>kbNorm(x.nm).includes(n))
+    && !(perfilDelicado(ctx) && ejTecnico(x)));
   if(!cands.length) return null;
   const pts=x=>(kb&&x.t===kb.t?3:0)+(kb&&!!x.iso===!!kb.iso?2:0)+(['maquina','polea'].includes(x.z)?1:0);   // estable y guiado primero
   return cands.slice().sort((a,b)=>pts(b)-pts(a))[0];
 }
 function filtrarLesiones(semana,ctx){
   let cambios=0;
-  if(!ctx || !ctx.les.length || ctx.soloSuaves || ctx.sinMetodos) return cambios;
+  if(!ctx || (!ctx.les.length && !perfilDelicado(ctx)) || ctx.soloSuaves || ctx.sinMetodos) return cambios;
   const LES={rodilla:'rodilla',lumbar:'espalda baja',hombro:'hombro',cadera:'cadera',cuello:'cuello',cardiaca:'condición cardiaca'};
   (semana||[]).forEach(d=>{
     if(!d||!Array.isArray(d.ejercicios)) return;
@@ -474,14 +482,83 @@ function filtrarLesiones(semana,ctx){
       aplicarEjCatalogo(e,x);
       if(esf){ e.esfuerzo=esf; e.rir=rir; }
       const kbA=kbBuscar(antes), zona=ctx.les.filter(l=>((kbA&&kbA.ev)||[]).includes(l)).map(l=>LES[l]||l).join(' y ');
-      e.tip='Sustituye a '+antes+' para cuidar tu '+(zona||'lesión')+'. '+(e.tip||'');
+      e.tip=(zona?'Sustituye a '+antes+' para cuidar tu '+zona+'. ':'Versión guiada de '+antes+': más estable mientras dominas el movimiento. ')+(e.tip||'');
       return true;
     });
-    // Parejas que quedaron sin compañero (superserie, biserie, pre-agotamiento…): se deshacen
-    const cuenta={}; d.ejercicios.forEach(e=>{ if(e.grupo) cuenta[e.grupo.charAt(0)]=(cuenta[e.grupo.charAt(0)]||0)+1; });
-    d.ejercicios.forEach(e=>{ if(e.grupo && cuenta[e.grupo.charAt(0)]<2){ delete e.grupo; if(e.metodo && KB_METODOS[e.metodo.id] && KB_METODOS[e.metodo.id].pareja) delete e.metodo; } });
+    limpiarParejas(d);
   });
   return cambios;
+}
+// Parejas que quedaron sin compañero (superserie, biserie, pre-agotamiento…): se deshacen
+function limpiarParejas(d){
+  const cuenta={}; d.ejercicios.forEach(e=>{ if(e.grupo) cuenta[e.grupo.charAt(0)]=(cuenta[e.grupo.charAt(0)]||0)+1; });
+  d.ejercicios.forEach(e=>{ if(e.grupo && cuenta[e.grupo.charAt(0)]<2){ delete e.grupo; if(e.metodo && KB_METODOS[e.metodo.id] && KB_METODOS[e.metodo.id].pareja) delete e.metodo; } });
+}
+// ═════════════════════════════════════════
+// VOLUMEN — tope de series por músculo en una sesión y en la semana, según nivel (más bajo con 60+ años o IMC ≥ 35).
+// Se recortan primero las series de los accesorios (nunca del ejercicio principal ni de un método con series fijas,
+// como pirámide o escalera); si no basta, se quita el último ejercicio de aislamiento de ese músculo.
+// ═════════════════════════════════════════
+const GRUPO_VOL={cuadriceps:'cuádriceps',gluteo:'glúteo',femoral:'femoral',pecho:'pecho',pecho_sup:'pecho',dorsal:'espalda',espalda_media:'espalda',
+  deltoide:'hombro',deltoide_lat:'hombro',deltoide_post:'hombro',biceps:'bíceps',braquial:'bíceps',triceps:'tríceps',pantorrilla:'pantorrilla'};
+function topesVolumen(ctx){
+  let ses={1:8,2:10,3:12}[ctx.nivel]||10, sem={1:12,2:16,3:20}[ctx.nivel]||16;
+  if((ctx.edad||0)>=60 || (ctx.imc||0)>=35){ ses-=2; sem-=2; }
+  return {ses,sem};
+}
+function grupoVol(e){
+  if(e.fase||e.potencia||esEjCardio(e)||esEjRondas(e)||esEjMovilidad(e)||(e.metodo&&e.metodo.id==='emom')) return null;
+  return GRUPO_VOL[enfEj(e,kbBuscar(e.nm||e.nombre))]||null;
+}
+function limitarVolumen(semana,ctx){
+  if(!ctx || ctx.sinMetodos || ctx.soloSuaves) return 0;
+  const T=topesVolumen(ctx); let cambios=0;
+  const dias=(semana||[]).filter(d=>d&&Array.isArray(d.ejercicios)&&d.ejercicios.length);
+  const items=d=>{ const pr=principalesDia(d,ctx); return d.ejercicios.map((e,i)=>({d,e,g:grupoVol(e),princ:pr.has(i)})).filter(x=>x.g); };
+  // Recorte escalonado: 1) accesorios a 2 series · 2) accesorios con método de series fijas (pirámide, escalera…):
+  // se quita el método y se dejan en 2 · 3) principales a 3 series · 4) se quitan accesorios de ese músculo
+  // (aislamiento primero), sin dejar nunca al músculo sin trabajo en su día.
+  const recortar=(lista,exceso)=>{
+    const bajar=(x,min)=>{ const s=parseInt(x.e.series)||0; if(s<=min) return; const q=Math.min(s-min,exceso); x.e.series=s-q; exceso-=q; cambios++; };
+    for(let k=lista.length-1;k>=0&&exceso>0;k--){ const x=lista[k], M=x.e.metodo&&KB_METODOS[x.e.metodo.id]; if(!x.princ&&!x.borrar&&!(M&&M.series)) bajar(x,2); }
+    for(let k=lista.length-1;k>=0&&exceso>0;k--){ const x=lista[k], M=x.e.metodo&&KB_METODOS[x.e.metodo.id];
+      if(x.princ||x.borrar||!(M&&M.series)) continue;
+      delete x.e.metodo; if(x.e.grupo){ delete x.e.grupo; }
+      x.e.reps=String(x.e.reps||'').replace(/^[\d+\-\s]+(?=—)/,'10-12 reps ');
+      bajar(x,2); }
+    for(let k=lista.length-1;k>=0&&exceso>0;k--){ const x=lista[k]; if(x.princ&&!x.borrar) bajar(x,3); }
+    for(const tipo of ['a','c']) for(let k=lista.length-1;k>=0&&exceso>0;k--){
+      const x=lista[k]; if(x.princ||x.borrar) continue;
+      const kb=kbBuscar(x.e.nm||x.e.nombre); if((kb?kb.t:'c')!==tipo) continue;
+      if(x.d.ejercicios.filter(e=>!e._borrar&&grupoVol(e)===x.g).length<2) continue;
+      x.borrar=true; x.e._borrar=true; exceso-=parseInt(x.e.series)||0; cambios++;
+    }
+    return exceso;
+  };
+  const suma=l=>l.reduce((a,x)=>a+(x.borrar?0:(parseInt(x.e.series)||0)),0);
+  dias.forEach(d=>{   // por sesión
+    const it=items(d), grupos=[...new Set(it.map(x=>x.g))];
+    grupos.forEach(g=>{ const l=it.filter(x=>x.g===g), s=suma(l); if(s>T.ses) recortar(l,s-T.ses); });
+  });
+  dias.forEach(d=>{ d.ejercicios=d.ejercicios.filter(e=>!e._borrar); limpiarParejas(d); });
+  const todo=dias.flatMap(items), gruposS=[...new Set(todo.map(x=>x.g))];   // por semana
+  gruposS.forEach(g=>{ const l=todo.filter(x=>x.g===g), s=suma(l); if(s>T.sem) recortar(l,s-T.sem); });
+  dias.forEach(d=>{ d.ejercicios=d.ejercicios.filter(e=>!e._borrar); limpiarParejas(d); });
+  return cambios;
+}
+// Días "Ligero" que pone la regla de recuperación (full body el día siguiente a otra sesión): menos series y rango de resistencia
+function aligerarDias(semana){
+  (semana||[]).forEach(d=>{
+    if(!d || !/Ligero/.test(d.tipo||'') || !Array.isArray(d.ejercicios)) return;
+    d.ejercicios.forEach(e=>{
+      if(e.fase||esEjCardio(e)||esEjRondas(e)||esEjMovilidad(e)||esEjIsometrico(e)) return;
+      e.series=Math.min(parseInt(e.series)||2,2);
+      e.reps=String(e.reps||'').replace(/^[^—·]*/,'12-15 reps ').replace(/—\s*(fuerza|hipertrofia|potencia)/i,'— resistencia');
+      if(/1\s*RM/i.test(e.peso||'')) e.peso='Ligero — 40% 1RM';
+    });
+    d.ejercicios=d.ejercicios.slice(0,5);
+  });
+  return semana;
 }
 function descansoPara(e,ctx,d){
   if(e.descanso) return e.descanso;

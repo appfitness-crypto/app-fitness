@@ -120,6 +120,7 @@ function metElegir(ids,ctx,nunca,yaEnDia){
 function metFaseDia(per,tipo,i,nivel){
   const suf=((String(tipo).trim().match(/\b([ABC])$/)||[])[1]);
   const pos=suf?{A:0,B:1,C:2}[suf]:i;
+  if(/Ligero/.test(String(tipo))) return per==='ondulante'?'ligero':null;   // día ligero por recuperación
   if(per==='ondulante') return ['pesado','ligero','medio'][pos%3];
   if(per==='conjugada' && nivel>1) return ['maximo','dinamico'][pos%2];
   return null;

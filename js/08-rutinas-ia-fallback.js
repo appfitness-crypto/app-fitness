@@ -115,6 +115,7 @@ async function generarRutina(){
   qAnswers.edad = parseInt(document.getElementById('qr-edad').value);
   qAnswers.peso = parseInt(document.getElementById('qr-peso').value);
   qAnswers.estatura = parseInt(document.getElementById('qr-est').value);
+  { const c=parseInt((document.getElementById('qi-cintura')||{}).value); qAnswers.cintura=(c>=50&&c<=180)?c:0; }
   const q11sel=document.querySelector('#qq11 .opt.sel');
   if(q11sel) qAnswers.cardio=q11sel.querySelector('.ol').textContent.trim();
 
@@ -335,6 +336,7 @@ function procesarRutina(data){
     } else data.metodo=metLineas(entP&&entP.filosofia, entP, perfilP, ctxP);
     data.sustLesion=filtrarLesiones(data.semana, ctxP);   // seguridad: al final, después de plantilla, variedad, filosofía e IA
     ajustarRangosFuerza(data.semana, ctxP);              // fuerza solo en los principales con carga real
+    aligerarDias(data.semana);                           // full body ligero tras un día seguido de entrenamiento
     if(data.metodo && data.perfil){
       if(data.origen==='plantilla') data.perfil.nota='Plan armado con el método de '+data.metodo.corto+': sus ejercicios, rangos, intensidad y forma de organizar la semana.'+(data.perfil.notaExtra||'');
       if(data.metodo.horaPico) data.perfil.consejos=[...(data.perfil.consejos||[]), 'Hora pico: '+data.metodo.horaPico];
@@ -342,6 +344,7 @@ function procesarRutina(data){
     ajustarIsometricos(data.semana, ctxP);
     ajustarCardioRondas(data.semana, {edad:qAnswers.edad, objetivo:qAnswers.objetivo, nivel:qAnswers.nivel});
     enriquecerSemana(data.semana, ctxP, semillaP);
+    data.recorteVol=limitarVolumen(data.semana, ctxP);   // al final: tope de series por músculo (sesión y semana)
   }
   catch(e){ console.warn('No se pudo enriquecer la rutina',e); }
   return data;
@@ -383,7 +386,7 @@ function renderPreview(rutina){
   } else { pvCons.style.display='none'; pvCons.innerHTML=''; }
 
   // ── Preview de nutrición calculada ──
-  const tmpSocio={peso:qAnswers.peso,estatura:qAnswers.estatura,edad:qAnswers.edad,genero:qAnswers.genero,dias:qAnswers.dias,objetivo:qAnswers.objetivo,logs:{pesoCorporal:[]}};
+  const tmpSocio={peso:qAnswers.peso,estatura:qAnswers.estatura,edad:qAnswers.edad,genero:qAnswers.genero,dias:qAnswers.dias,objetivo:qAnswers.objetivo,nivel:qAnswers.nivel,cintura:qAnswers.cintura||0,logs:{pesoCorporal:[]}};
   const nut=calcNutricion(tmpSocio);
   document.getElementById('pv-nutri').innerHTML=`
     <div style="font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:0;color:var(--mu);margin-bottom:10px;display:flex;align-items:center;gap:10px;">
@@ -461,7 +464,7 @@ async function confirmarRutina(){
     code, nombre:limpiarTexto(qAnswers.nombre).toUpperCase(), id:'#'+(GYM.prefijoId||'FS')+'-'+code.slice(0,5).toUpperCase(),
     objetivo:qAnswers.objetivo, nivel:qAnswers.nivel,
     edad:qAnswers.edad, genero:qAnswers.genero,
-    peso:qAnswers.peso, estatura:qAnswers.estatura, dias:qAnswers.dias,
+    peso:qAnswers.peso, estatura:qAnswers.estatura, dias:qAnswers.dias, cintura:qAnswers.cintura||0,
     diasSemana:[...(qAnswers.diasSemana||[])],
     clasesGrupales:(qAnswers.clasesGrupales||[]).filter(c=>c.dias&&c.dias.length).map(c=>({clase:c.clase,dias:[...c.dias],entrenaMismoDia:!!c.entrenaMismoDia})),
     zonas:[...qAnswers.zonas],
@@ -503,6 +506,7 @@ async function confirmarRutina(){
   // limpiar quiz
   Object.assign(qAnswers,{nombre:'',objetivo:'',nivel:'',zonas:[],limitaciones:[],cardio:'',disciplina:'',lesionRehab:'',entorno:'',gimCuando:[],gimClases:[],gimInicioDolor:'',gimSigue:'',gimDiagnostico:'',gimDiagTexto:'',gimMedicoAutoriza:'',gimGenero:'',gimPeso:0,gimEstatura:0,gimSoloTerapia:'',entrenadorId:'',entrenadorNombre:'',diasSemana:[],tomaClases:'',clasesSel:[],clasesGrupales:[]});
   document.getElementById('qi-nom').value='';
+  { const c=document.getElementById('qi-cintura'); if(c) c.value=''; }
   document.querySelectorAll('.q-sc .opt').forEach(o=>o.classList.remove('sel'));
   document.querySelectorAll('.q-sc .chk').forEach(c=>c.classList.remove('ck'));
   ['qb2','qb3','qb6','qb11','qbT'].forEach(id=>{const b=document.getElementById(id); if(b) b.disabled=true;});
@@ -546,7 +550,10 @@ function buildFallback(){
   const nFull=deriv.puro.length;
   const entFB=entRutina(qAnswers.entrenadorId), filoFB=entFB&&entFB.filosofia;
   const splitCoach=metSplitTipos(filoFB, nFull, nivelNum(qAnswers.nivel));   // cómo organiza la semana el entrenador elegido
-  const tiposSesion=(splitCoach&&splitCoach.tipos)||TIPOS_SPLIT[nFull]||TIPOS_SPLIT[Math.max(1,Math.min(6,nFull))]||TIPOS_SPLIT[4];
+  let tiposSesion=(splitCoach&&splitCoach.tipos)||TIPOS_SPLIT[nFull]||TIPOS_SPLIT[Math.max(1,Math.min(6,nFull))]||TIPOS_SPLIT[4];
+  // Recuperación: dos sesiones de cuerpo completo en días seguidos cargan los mismos músculos sin 48 h de descanso.
+  // En cada racha de días seguidos se alterna torso / pierna (y un full body ligero si son 3).
+  tiposSesion=splitRecuperacion(deriv.puro, tiposSesion);
   const mapaDias={};
   deriv.puro.forEach((d,i)=>{ mapaDias[d]={tipo:(tiposSesion[i]||tiposSesion[tiposSesion.length-1])[0], color:(tiposSesion[i]||tiposSesion[tiposSesion.length-1])[1]}; });
   deriv.conClase.forEach(d=>{ mapaDias[d]={tipo:'Complemento — '+deriv.infoClasePorDia[d].clase, color:'hombro', complemento:deriv.infoClasePorDia[d]}; });
@@ -717,7 +724,10 @@ function buildFallback(){
     if(deriv.soloClase.length) notaClases+=` Los días de clase sin gym aparte (${deriv.soloClase.map(d=>DIAS_NAMES[d]).join(', ')}) quedan como descanso de gimnasio: la clase ya es el estímulo de ese día.`;
   }
 
-  const splitLabelBase=(splitCoach&&{full:'Full Body '+nFull+'x',torso:'Torso/Pierna',ppl:'Empuje/Jalón/Pierna',grupos:'Por grupos musculares'}[splitCoach.clave])
+  const tiposTxt=tiposSesion.map(x=>x[0]).join(' ');
+  const splitRec=/Torso|Pierna/.test(tiposTxt) && /Full Body/.test(tiposTxt) ? 'Torso/Pierna + Full Body ligero'
+    : (!/Full Body/.test(tiposTxt) && /Torso/.test(tiposTxt) && !(splitCoach&&splitCoach.clave==='torso') && nFull<=3) ? 'Torso/Pierna' : '';
+  const splitLabelBase=splitRec||(splitCoach&&{full:'Full Body '+nFull+'x',torso:'Torso/Pierna',ppl:'Empuje/Jalón/Pierna',grupos:'Por grupos musculares'}[splitCoach.clave])
     ||{1:'Full Body 1x',2:'Full Body 2x',3:'Full Body 3x',4:'Torso/Pierna',5:'Torso/Pierna + Accesorios',6:'Por grupos musculares'}[nFull]||(nFull>6?'Por grupos musculares':'Sin sesión completa esta semana');
   const splitLabel = splitLabelBase + (deriv.conClase.length?' + complemento en días de clase':'');
 
@@ -741,6 +751,20 @@ function buildFallback(){
 }
 
 // ══ BUILDER: RENDIMIENTO DEPORTIVO ══
+function splitRecuperacion(puro,tipos){
+  const t=puro.map((d,i)=>(tipos[i]||tipos[tipos.length-1]).slice());
+  if(!t.length || !t.every(x=>/full body/i.test(x[0]))) return t;
+  const idx=puro.map(d=>DIAS_ORDER.indexOf(d));
+  for(let i=0;i<idx.length;){
+    let j=i; while(j+1<idx.length && idx[j+1]-idx[j]===1) j++;
+    const n=j-i+1;
+    if(n===2){ t[i]=['Torso A','verde']; t[i+1]=['Pierna A','gold']; }
+    else if(n===3){ t[i]=['Torso A','verde']; t[i+1]=['Pierna A','gold']; t[i+2]=['Full Body Ligero','neon']; }
+    else if(n>3){ for(let k=0;k<n;k++) t[i+k]= k%2 ? ['Pierna '+(Math.floor(k/2)%2?'B':'A'),'gold'] : ['Torso '+(Math.floor(k/2)%2?'B':'A'),'verde']; }
+    i=j+1;
+  }
+  return t;
+}
 // Días de la semana con sesión (S) o descanso (D): siempre los que marcó el socio en el cuestionario.
 // Solo si no hay días marcados (planes antiguos) se usa el patrón de respaldo.
 function patronDiasSocio(defecto){
@@ -1362,6 +1386,14 @@ function abrirModalRM(){
   document.getElementById('modal-rm-perfil').classList.add('open');
 }
 function cerrarModalRM(){ document.getElementById('modal-rm-perfil').classList.remove('open'); }
+// Cintura (opcional): con ella se estima el % de grasa y la nutrición distingue músculo de grasa
+function editarCintura(){
+  const s=activeSocio; if(!s) return;
+  uiEntrada('Tu cintura en centímetros, medida a la altura del ombligo, sin apretar la cinta.','Ej. 86','Guardar',v=>{
+    const c=parseInt(v); if(!(c>=50&&c<=180)){ showToast('Escribe una medida entre 50 y 180 cm'); return; }
+    s.cintura=c; dbSave(s.code); showToast('Cintura guardada: tu plan de nutrición ya la considera'); renderPerfilTab();
+  });
+}
 function renderPerfilTab(){
   const s=activeSocio; if(!s) return;
   asegurarLogs(s);
@@ -1407,6 +1439,10 @@ function renderPerfilTab(){
     <div class="card pf-card">
       <button type="button" class="pf-row" onclick="abrirModalRM()">${it('dumbbell','sm')}<span>Tus RM (opcional)</span>${ico('chev')}</button>
     </div>`:''}
+    <div class="sec-row"><div class="sec-t">Composición</div></div>
+    <div class="card pf-card">
+      <button type="button" class="pf-row" onclick="editarCintura()">${it('target','sm')}<span>Cintura: ${s.cintura?esc(s.cintura)+' cm':'agregar (opcional)'}</span>${ico('chev')}</button>
+    </div>
     <div class="sec-row"><div class="sec-t">Cuenta</div></div>
     <div class="card pf-card">
       ${s.status==='activo'?`<button type="button" class="pf-row" onclick="generarPDFRutina()">${it('file','sm')}<span id="btn-pdf-rutina">Descargar mi rutina en PDF</span>${ico('chev')}</button>`:''}
