@@ -232,10 +232,11 @@ function renderRutinaTab(){
     ? `<div class="pend-banner">${ico('clock')}<div>Tu plan está pendiente de revisión por tu entrenador. Puedes consultarlo, pero podría tener ajustes.</div></div>` : '';
   const weeks=Array.from({length:b.semanas},(_,i)=>`<i class="${i<semA-1?'done':i===semA-1?'now':''}"></i>`).join('');
   const strip=DIAS_ORDER.map((k,i)=>{
-    const d=s.rutina[k], rest=!d||!d.ejercicios||!d.ejercicios.length, hoy=k===HOY_KEY;
-    const est=sem[i]?', entrenado':rest?', descanso':'';
-    return `<button type="button" class="en-dia${sem[i]?' done':''}${rest&&!sem[i]?' rest':''}${hoy?' hoy':''}" aria-pressed="${k===rutDia}" onclick="rutElegir('${k}')" aria-label="${EN_DIAS[i]} ${fechas[i]}${est}${hoy?', hoy':''}">
-      <small>${EN_DIAS_CORTO[i]}</small><b class="num">${fechas[i]}</b><span class="en-st">${sem[i]?ico('check'):rest?'':'<span class="en-dot"></span>'}</span></button>`;
+    const d=s.rutina[k], hoy=k===HOY_KEY, fuera=!sem[i]&&movidaDe(s,k), dentro=movidasA(s,k).some(x=>!sem[DIAS_ORDER.indexOf(x)]);
+    const rest=(!d||!d.ejercicios||!d.ejercicios.length)&&!dentro;
+    const est=sem[i]?', entrenado':fuera?', movida al '+movTxtDia(fuera):rest?', descanso':dentro?', sesión movida a este día':'';
+    return `<button type="button" class="en-dia${sem[i]?' done':''}${rest&&!sem[i]?' rest':''}${fuera?' movida':''}${hoy?' hoy':''}" aria-pressed="${k===rutDia}" onclick="rutElegir('${k}')" aria-label="${EN_DIAS[i]} ${fechas[i]}${est}${hoy?', hoy':''}">
+      <small>${EN_DIAS_CORTO[i]}</small><b class="num">${fechas[i]}</b><span class="en-st">${sem[i]?ico('check'):fuera?ico('arrow'):rest?'':'<span class="en-dot"></span>'}</span></button>`;
   }).join('');
   cont.innerHTML=`
     ${appHead('Mi plan',esc(sc(s.objetivo||'Entrenar'))+' · '+s.dias+' días por semana')}
@@ -256,14 +257,22 @@ function rutElegir(k){
   document.getElementById('en-dia').innerHTML=rutDiaHTML(s);
 }
 function rutDiaHTML(s){
-  const k=rutDia, i=DIAS_ORDER.indexOf(k), d=s.rutina[k], sem=sesionesSemana(s), fechas=fechasSemana();
-  const hoyI=DIAS_ORDER.indexOf(HOY_KEY), esHoy=k===HOY_KEY, hecho=sem[i];
-  if(!d||!d.ejercicios||!d.ejercicios.length){
-    return `<div class="en-card"><div class="en-rest"><h3>Descanso</h3><p>El músculo crece hoy. Camina 20 a 30 minutos, estira y duerme 7 u 8 horas.</p></div></div>`;
+  const k=rutDia, d=s.rutina[k], sem=sesionesSemana(s);
+  // Sesiones de otros días que el socio movió a este día (y que aún no hace)
+  const movidas=movidasA(s,k).filter(src=>!sem[DIAS_ORDER.indexOf(src)]).map(src=>rutCardHTML(s,src,k));
+  const propia=d&&d.ejercicios&&d.ejercicios.length;
+  if(!propia){
+    return movidas.join('')||`<div class="en-card"><div class="en-rest"><h3>Descanso</h3><p>El músculo crece hoy. Camina 20 a 30 minutos, estira y duerme 7 u 8 horas.</p></div></div>`;
   }
+  return movidas.join('')+rutCardHTML(s,k,k);
+}
+// Tarjeta de la sesión del día rk del plan, mostrada en el día vk de la semana (vk≠rk cuando se movió)
+function rutCardHTML(s,rk,vk){
+  const k=rk, i=DIAS_ORDER.indexOf(rk), vi=DIAS_ORDER.indexOf(vk), d=s.rutina[rk], sem=sesionesSemana(s), fechas=fechasSemana();
+  const hoyI=DIAS_ORDER.indexOf(HOY_KEY), esHoy=vk===HOY_KEY, hecho=sem[i], movida=rk!==vk, fuera=!hecho&&!movida&&movidaDe(s,rk);
   const ejs=d.ejercicios;
   const grupos=[...new Set(ejs.map(e=>sc(String(e.ms||'').split(/[·,]/)[0].trim())).filter(Boolean))].slice(0,3);
-  const estado=hecho?'Hecho':esHoy?'Hoy':i<hoyI?'Pendiente':'Próximo';
+  const estado=hecho?'Hecho':fuera?'Movida al '+movTxtDia(fuera):movida?'Sesión del '+movTxtDia(rk)+', movida':esHoy?'Hoy':vi<hoyI?'Pendiente':'Próximo';
   const enCurso=esHoy&&sesionTemp&&sesionTemp.diaKey===k&&Object.keys(sesionTemp.ej||{}).length;
   const filas=ejs.map((e,j)=>{
     const c=cargaSugerida(s,e), r=rxTexto(e,s);
@@ -274,12 +283,14 @@ function rutDiaHTML(s){
       <span class="en-ej-t"><b>${esc(e.nm)}</b><span>${esc(sub)}</span></span>
       <span class="en-carga">${der}</span></button>`;
   }).join('');
-  const cta=esHoy
-    ? `<button type="button" class="en-btn en-btn-p" onclick="iniciarSesion('${k}')">${ico('play')}${enCurso?'Continuar sesión':hecho?'Registrar otra sesión':'Empezar sesión'}</button>`
-    : `<button type="button" class="en-btn en-btn-g" onclick="openDay('${k}')">${ico('info')}Ver detalle del día</button>`;
-  return `<article class="en-card">
+  const cta=fuera
+    ? `<button type="button" class="en-btn en-btn-g" onclick="movDeshacer('${k}')">${ico('arrow')}Regresarla a su día</button>`
+    : esHoy&&!fuera
+    ? `<button type="button" class="en-btn en-btn-p" onclick="iniciarSesion('${k}')">${ico('play')}${enCurso?'Continuar sesión':hecho?'Registrar otra sesión':'Empezar sesión'}</button>${!hecho&&!movida&&!enCurso?`<button type="button" class="en-btn en-btn-g" onclick="moverSesion('${k}')">${ico('calendar')}Hoy no puedo, moverla</button>`:''}`
+    : `${!hecho?`<button type="button" class="en-btn en-btn-p" onclick="moverSesion('${k}','${HOY_KEY}')">${ico('play')}Hacerla hoy</button>`:''}<div class="en-cta-2"><button type="button" class="en-btn en-btn-g" onclick="openDay('${k}')">${ico('info')}Ver detalle</button>${!hecho&&!movida?`<button type="button" class="en-btn en-btn-g" onclick="moverSesion('${k}')">${ico('calendar')}Mover a otro día</button>`:movida?`<button type="button" class="en-btn en-btn-g" onclick="movDeshacer('${k}')">${ico('arrow')}Regresarla al ${movTxtDia(k)}</button>`:''}</div>`;
+  return `<article class="en-card${movida?' en-card-mov':''}">
     <div class="en-hero">
-      <div class="en-k">${ico(hecho?'check':'calendar')}${estado} · ${EN_DIAS[i]} ${fechas[i]}</div>
+      <div class="en-k">${ico(hecho?'check':'calendar')}${estado} · ${EN_DIAS[vi]} ${fechas[vi]}</div>
       <h3>${esc(sc(d.tipo))}</h3>
       <div class="en-meta"><span>${ico('dumbbell')}${ejs.length} ejercicios</span><span>${ico('clock')}~${minutosDia(d)} min</span>${grupos.length?`<span>${ico('target')}${esc(enListaY(grupos))}</span>`:''}</div>
     </div>
@@ -302,7 +313,8 @@ function ddVolver(){ go('s-dash'); refreshDash(); dashTab('rutina'); }
 function ddFecha(i){ const d=inicioSemana(new Date()); d.setDate(d.getDate()+i); return d; }
 function ddHTML(s,k){
   const i=DIAS_ORDER.indexOf(k), d=s.rutina[k], ejs=(d&&d.ejercicios)||[], esHoy=k===HOY_KEY;
-  const f=ddFecha(i), fISO=fechaISO(f), reg=(s.logs&&s.logs.sesiones||[]).filter(x=>x&&x.fecha===fISO).pop();
+  const f=ddFecha(i), fISO=fechaISO(f), iniS=fechaISO(ddFecha(0)), finS=fechaISO(ddFecha(6));
+  const reg=(s.logs&&s.logs.sesiones||[]).filter(x=>x&&(x.diaKey?(x.diaKey===k&&x.fecha>=iniS&&x.fecha<=finS):x.fecha===fISO)).pop();
   const enCurso=esHoy&&sesionTemp&&sesionTemp.diaKey===k&&Object.keys(sesionTemp.ej||{}).length;
   const cuando=EN_DIAS[i].charAt(0).toUpperCase()+EN_DIAS[i].slice(1)+' '+f.getDate()+(esHoy?' · hoy':'');
   const top=`<div class="dd-top"><button type="button" class="en-icon-btn dd-back" onclick="ddVolver()" aria-label="Volver a Mi plan">${ico('chevl')}</button></div>`;
@@ -329,7 +341,8 @@ function ddHTML(s,k){
       <span class="dd-ej-t"><b>${esc(e.nm)}</b><span>${esc(sub)}</span></span>
       <span class="en-carga">${der}</span></button></li>`;
   }).join('');
-  const cta=esHoy?`<div class="dd-cta"><button type="button" class="en-btn en-btn-p" onclick="iniciarSesion('${k}')">${ico('play')}${enCurso?'Continuar sesión':reg?'Registrar otra sesión':'Empezar sesión'}</button></div>`:'';
+  const cta=esHoy&&!movidaDe(s,k)?`<div class="dd-cta"><button type="button" class="en-btn en-btn-p" onclick="iniciarSesion('${k}')">${ico('play')}${enCurso?'Continuar sesión':reg?'Registrar otra sesión':'Empezar sesión'}</button></div>`
+    : !reg?`<div class="dd-cta"><button type="button" class="en-btn en-btn-p" onclick="moverSesion('${k}','${HOY_KEY}')">${ico('play')}Hacerla hoy</button></div>`:'';
   return `${top}
   <section class="dd-hero">${pic(basesSesion(d.tipo),iconoTipo(d.tipo),'fill')}
     <div class="dd-hero-tx"><p>${reg?ico('check')+'Hecho · ':''}${esc(cuando)}</p><h1>${esc(sc(d.tipo))}</h1></div></section>
@@ -381,6 +394,8 @@ function iniciarSesion(k){
   normalizarEmomRutina(s.rutina);
   const nueva=!sesionTemp||sesionTemp.diaKey!==k;
   if(nueva) sesionTemp={diaKey:k, ej:{}};
+  actualizarHoy();
+  if(k!==HOY_KEY){ const m=movSemana(s)[k]; sesionTemp.movida={de:k, a:HOY_KEY, motivo:(m&&m.motivo)||''}; } else delete sesionTemp.movida;   // sesión de otro día hecha hoy
   if(!sesionTemp.t0) sesionTemp.t0=Date.now();
   if(!sesionTemp.aj) sesionTemp.aj=ajusteSesion(s,sesionTemp.hoy);
   // "¿Cómo llegas hoy?" una vez por sesión, si el entrenador definió qué hacer cuando llegas cansado
@@ -751,7 +766,7 @@ function renderProgresoTab(){
         const ejTxt=x.ejPlan?`${x.ejercicios||0} de ${x.ejPlan} ejercicios`:`${x.ejercicios||0} ejercicios`;
         return `<div class="en-h-row" role="button" tabindex="0" onclick="sesBorrarPreg(${+x.ts||0},'${esc(x.fecha||'')}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-label="${esc(sc(x.tipo||'Sesión'))}, ${ok?f.getDate()+' de '+EN_MESES[f.getMonth()]:''}, ${EN_EST_TXT[est]}. Toca para borrarla">
         <div class="en-h-d"><b class="num">${ok?f.getDate():'—'}</b><small>${ok?EN_MESES[f.getMonth()].toUpperCase():''}</small></div>
-        <div class="en-h-t"><b>${esc(sc(x.tipo||'Sesión'))}</b><span>${ejTxt} · <em class="en-est ${est}">${EN_EST_TXT[est]}</em>${x.sensacion?' · '+esc(x.sensacion):''}</span></div>
+        <div class="en-h-t"><b>${esc(sc(x.tipo||'Sesión'))}</b><span>${ejTxt} · <em class="en-est ${est}">${EN_EST_TXT[est]}</em>${x.sensacion?' · '+esc(x.sensacion):''}${x.movida?' · '+esc(movEtiqueta(x)):''}</span></div>
         <div class="en-h-v num">${v.v}${v.u?`<small>${v.u}</small>`:''}</div></div>`; }).join('')}</div>
       ${sesRev.some(x=>sesEstado(x)==='incompleta')?'<p class="en-h-nota">Las sesiones incompletas (menos de la mitad de las series) guardan tus pesos, pero no cuentan para tu meta de la semana, tu racha ni tu constancia.</p>':''}`
       :'<div class="empty-msg">Aún no hay sesiones registradas.<br>Al terminar tu primera sesión aparecerá aquí.</div>'}</section>

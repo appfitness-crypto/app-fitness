@@ -1301,7 +1301,23 @@ function refreshDash(){
 
   const diaTxt=sc(DIAS_NAMES[HOY_KEY]).toLowerCase();
   let titulo,detalle,cta,icoT='dumbbell';
-  if(esDescanso){
+  // Sesiones movidas (js/43-mover-sesion.js): la de otro día que se hace hoy, la de hoy que se movió y las que faltaron
+  const semM=sesionesSemana(s), hoyI=DIAS_ORDER.indexOf(HOY_KEY);
+  const movHoy=movidasA(s,HOY_KEY).filter(k=>!semM[DIAS_ORDER.indexOf(k)]);
+  const hoyFuera=!esDescanso && !semM[hoyI] && movidaDe(s,HOY_KEY);
+  const faltan=movPendientesPasados(s);
+  if(movHoy.length){
+    const k=movHoy[0], d=s.rutina[k];
+    titulo=esc(sc(d.tipo)); detalle='Sesión del '+movTxtDia(k)+', movida a hoy · '+d.ejercicios.length+' ejercicios'; icoT=iconoTipo(d.tipo);
+    cta=`<button type="button" class="btn-go" onclick="iniciarSesion('${k}')">${ico('play')}Iniciar entrenamiento</button>`;
+  } else if(hoyFuera){
+    titulo='Sesión movida'; detalle='Tu '+esc(sc(hoy.tipo))+' de hoy se movió al '+movTxtDia(hoyFuera)+'.'; icoT='calendar';
+    cta=`<button type="button" class="btn-go soft" onclick="movDeshacer('${HOY_KEY}')">Mejor la hago hoy</button>`;
+  } else if((esDescanso||hechoHoy) && faltan.length){
+    const k=faltan[faltan.length-1], d=s.rutina[k];
+    titulo=esc(sc(d.tipo)); detalle='Te faltó la sesión del '+movTxtDia(k)+'. Si puedes, hazla hoy y cuenta para tu semana.'; icoT=iconoTipo(d.tipo);
+    cta=`<button type="button" class="btn-go" onclick="moverSesion('${k}','${HOY_KEY}')">${ico('play')}Hacer la del ${movTxtDia(k)} hoy</button>`;
+  } else if(esDescanso){
     titulo='Día de recuperación'; detalle='El músculo crece cuando descansa.'; icoT='moon';
     cta=`<button type="button" class="btn-go soft" onclick="dashTab('progreso')">Ver mi progreso</button>`;
   } else if(hechoHoy){
@@ -1309,7 +1325,7 @@ function refreshDash(){
     cta=`<button type="button" class="btn-go soft" onclick="dashTab('progreso')">Ver resumen</button>`;
   } else {
     titulo=esc(sc(hoy.tipo)); detalle=hoy.ejercicios.length+' ejercicios · '+esc(sc(s.nivel)); icoT=iconoTipo(hoy.tipo);
-    cta=`<button type="button" class="btn-go" onclick="iniciarSesion('${HOY_KEY}')">${ico('play')}Iniciar entrenamiento</button>`;
+    cta=`<button type="button" class="btn-go" onclick="iniciarSesion('${HOY_KEY}')">${ico('play')}Iniciar entrenamiento</button><button type="button" class="btn-go soft btn-mov" onclick="moverSesion('${HOY_KEY}')">Hoy no puedo, moverla</button>`;
   }
   const semana=DIAS_ORDER.map((k,i)=>{
     const d=s.rutina[k]; const rest=!d||!d.ejercicios||!d.ejercicios.length;

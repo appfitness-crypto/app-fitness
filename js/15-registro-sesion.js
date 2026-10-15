@@ -375,13 +375,13 @@ function finalizarSesionConfirmada(reemplazar){
     const idxs=Object.keys(sesionTemp.ej);
     const hechos=idxs.filter(i=>sesionTemp.ej[i].done || (sesionTemp.ej[i].sets||[]).some(x=>x&&(x.ok||x.kg||x.seg||x.fc))).length;
     const hoy=fechaISO(new Date());
-    const previa=s.logs.sesiones.find(x=>x.fecha===hoy);
+    const previa=s.logs.sesiones.find(x=>x.fecha===hoy && (!x.diaKey || x.diaKey===sesionTemp.diaKey));
     if(previa && !reemplazar){
       uiConfirm('Ya registraste una sesión hoy ('+(previa.tipo||'tu rutina')+'). ¿Quieres reemplazarla con lo que acabas de registrar? Tus récords y pesos calculados se actualizarán con estos datos nuevos.',
         ()=>finalizarSesionConfirmada(true), {label:'Reemplazar sesión de hoy'});
       return;
     }
-    if(previa) s.logs.sesiones=s.logs.sesiones.filter(x=>x.fecha!==hoy);
+    if(previa) s.logs.sesiones=s.logs.sesiones.filter(x=>x!==previa);
 
     // Volumen y PRs
     let volumen=0, tutSes=0, cardioMinSes=0; const cambios=[], detalle=[], nuevosPR={};
@@ -450,6 +450,7 @@ function finalizarSesionConfirmada(reemplazar){
       hora:new Date().toTimeString().substring(0,5), cambios, detalle
     };
     if(sesionTemp.hoy) reg.hoy=sesionTemp.hoy;
+    if(sesionTemp.movida) reg.movida=sesionTemp.movida;   // sesión de otro día del plan hecha hoy (js/43-mover-sesion.js)
     if(sesionTemp.aj&&sesionTemp.aj.descarga) reg.descarga=sesionTemp.aj.descarga;
     s.logs.sesiones.push(reg);
     dbSave(s.code);
