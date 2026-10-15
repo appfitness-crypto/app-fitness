@@ -76,6 +76,16 @@
     "apariencia_prev": {
       ".read": "auth != null && root.child('roles').child(auth.uid).val() === 'coordinador'",
       ".write": "auth != null && root.child('roles').child(auth.uid).val() === 'coordinador'"
+    },
+    "huellas": {
+      ".read": "auth != null",
+      ".indexOn": [
+        "k"
+      ],
+      "$uid": {
+        ".write": "auth != null && (auth.uid === $uid || root.child('roles').child(auth.uid).val() === 'coordinador' || (root.child('roles').child(auth.uid).val() === 'entrenador' && root.child('socios').child($uid).child('entrenadorId').val() === auth.uid))",
+        ".validate": "!newData.exists() || (newData.child('k').isString() && newData.child('h').isString() && newData.child('h').val().length <= 600)"
+      }
     }
   }
 }

@@ -37,6 +37,7 @@ function idxDeSocio(s){
     p1:ses.length?ses[0].fecha:null,
     x:est, u:Date.now()
   };
+  if(typeof huellaRutina==='function' && s.rutina){ o.k=unicaSegmento(s.objetivo,s.nivel); o.h=huellaRutina(s.rutina); }   // rutina única (js/42)
   if(m.vence||m.ancla||m.suspendido) o.m={v:m.vence||null, a:m.ancla||null, su:m.suspendido||null};
   return limpio(o);
 }
@@ -67,6 +68,7 @@ function sociosParaStaff(){
 function idxEscribir(code, s){
   if(!fbListo || !fbDB || !code) return Promise.resolve();
   const v=s?idxDeSocio(s):null;
+  if(typeof huellaEscribir==='function') huellaEscribir(code,s);
   return fbDB.ref('/indice/'+code).set(v).then(()=>{
     if(fbEsStaff){ if(v) IDX[code]=v; else delete IDX[code]; delete IDX_LITE[code]; idxGuardarLocal(); }
   }).catch(e=>{

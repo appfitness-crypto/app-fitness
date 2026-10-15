@@ -370,8 +370,10 @@ function procesarRutina(data){
 function mostrarPreview(data){
   procesarRutina(data);
   window._rutinaTemp = data;
-  renderPreview(data);
-  go('s-preview');
+  // Rutina única: se compara con las huellas de los socios del mismo objetivo y nivel (js/42-rutina-unica.js)
+  huellasSegmento(unicaSegmento(qAnswers.objetivo,qAnswers.nivel)).then(l=>{
+    try{ data.unica=rutinaUnicaAjustar(data.semana, ctxQuiz(), l); }catch(e){ console.warn('rutina única',e); }
+  }).finally(()=>{ if(window._rutinaTemp!==data) return; renderPreview(data); go('s-preview'); });
 }
 
 function renderPreview(rutina){
@@ -596,7 +598,9 @@ function buildFallback(){
     // Variante A/B/C del mismo tipo de sesión (ej. "Full Body A" vs "Full Body B") → usamos un
     // ejercicio distinto por hueco muscular en cada una, para que la semana no se sienta repetida.
     const variante = metPocaVariedad(filoFB) ? 0 : ({A:0,B:1,C:2}[(tipo.trim().match(/([ABC])$/)||[])[1]] ?? 0);   // poca variedad: A, B y C repiten sus ejercicios base
-    function elegir(v,i){ return v[(i+varSeed) % v.length]; }
+    // Cada hueco rota con su propio desfase: con una sola semilla para todos, las listas de 3 opciones daban
+    // solo 3 rutinas posibles por sesión y dos socios del mismo perfil coincidían muy seguido.
+    function elegir(v,i){ const k=String(Array.isArray(v[0])?v[0][0]:v[0]); let h=varSeed; for(const c of k) h=(h*31+c.charCodeAt(0))%9973; return v[(i+h) % v.length]; }
 
     if(t.includes('full body')||t.includes('funcional')){
       if(lesRodilla) add('Prensa de Piernas (rango parcial)',3,repsBase,'Moderado — 50% 1RM','Cuádriceps · Glúteo','Rango donde no haya molestia: siente el muslo cargando, nunca la rodilla.');

@@ -296,6 +296,11 @@ function staffDelEj(code,k,ei){
 function staffAddEj(code,k){ staffDiasAbiertos.add(code+'|'+k); epAbrir(code,k,null); }
 function staffAprobar(code){
   const s=getSocio(code); if(!s) return;
+  rutinaUnicaSocio(s).catch(()=>[]).then(c=>staffAprobarFinal(code,c));
+}
+function staffAprobarFinal(code,unica){
+  const s=getSocio(code); if(!s) return;
+  if(unica&&unica.length) setTimeout(()=>showToast(unicaAviso(unica)),2600);
   s.status='activo';
   if(s.asignado==='—') s.asignado=document.getElementById('staff-nombre').textContent||'Staff';
   dbSaveStaff(s.code); staffRenderList(); staffRenderContent(s);
