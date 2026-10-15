@@ -159,9 +159,11 @@ function radarChartSVG(stats, opts){
 function sesionesSemana(s){
   const ses = sesValidas(s);
   const ini = inicioSemana(new Date());
+  const iniT=ini.getTime(), finT=iniT+7*86400000;
+  // Cada día del plan queda hecho con su propia sesión, aunque se haya hecho otro día de la semana (ver js/43-mover-sesion.js)
   return DIAS_ORDER.map((k,i)=>{
     const dIni = new Date(ini); dIni.setDate(ini.getDate()+i);
     const dFin = new Date(dIni); dFin.setDate(dIni.getDate()+1);
-    return ses.some(x=>x.ts>=dIni.getTime() && x.ts<dFin.getTime());
+    return ses.some(x=>x.diaKey ? (x.diaKey===k && x.ts>=iniT && x.ts<finT) : (x.ts>=dIni.getTime() && x.ts<dFin.getTime()));
   });
 }
