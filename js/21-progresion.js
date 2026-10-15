@@ -35,7 +35,8 @@ function pqBloque(s){
   const b=s.bloque||{};
   const primera=comoArray(s.logs&&s.logs.sesiones).map(x=>x&&x.fecha).filter(Boolean).sort()[0];
   const def=(typeof progSocio==='function'&&progSocio(s).semanas)||4;   // duración de bloque del entrenador
-  return {n:+b.n||1, desde:b.desde||s.fechaRegistro||primera||fechaISO(new Date()), semanas:+b.semanas||def};
+  const ad=(!(+b.n>1) && typeof adaptSocio==='function')?adaptSocio(s):0;   // el primer bloque de un principiante dura su fase de adaptación
+  return {n:+b.n||1, desde:b.desde||s.fechaRegistro||primera||fechaISO(new Date()), semanas:+b.semanas||ad||def};
 }
 function pqSemanaActual(s){ const d=diasDesde(pqBloque(s).desde)||0; return Math.floor(Math.max(0,d)/7)+1; }
 function pqEstado(s){ return (s.progresion&&s.progresion.estado)||''; }
@@ -145,6 +146,7 @@ function pqMotor(s,r,variante){
   if(suave) res.push(obj==='FLEXIBILIDAD'?'Flexibilidad: se progresa tiempo y repeticiones, no peso.':'Rehabilitación: solo sube repeticiones/tiempo. El avance de fase se decide en el protocolo.');
   if((r.avance==='igual'||r.avance==='atras') && paso>0) res.push('Siente poco avance: considera también cambiar el estímulo (método, tempo o ángulo).');
   if(r.disponibilidad==='mas'||r.disponibilidad==='menos') res.push('⚠ Cambió su disponibilidad ('+(r.disponibilidad==='mas'?'puede más días':'puede menos días')+'): ajusta los días a mano.');
+  if(b.n===1 && typeof adaptSocio==='function' && adaptSocio(s)) res.push('Terminó su fase de adaptación: usa "Rehacer con mi método" para pasar a su plan completo (split, rangos de fuerza y métodos).');
   if(r.comentario) res.push('Comentario del socio: “'+limpiarTexto(r.comentario)+'”');
 
   const rnd=prng(s.code+'|'+b.n+'|'+(r.enfoque||'')+'|'+variante);
@@ -392,6 +394,7 @@ function analisisSocio(s){
 // Semáforo para la lista de socios: 'r' foco urgente, 'y' atención, 'g' va bien, null sin evaluar (pendiente de aprobar).
 function semaforoSocio(s){
   if(s.status==='pendiente') return null;
+  if(s.alertaDolor) return 'r';   // reportó dolor con síntomas que su entrenador deriva
   const a=analisisSocio(s);
   if(a.diasSin===null || a.diasSin>7) return 'r';
   const ev=calcEvolucion(s);

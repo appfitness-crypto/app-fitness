@@ -46,7 +46,7 @@ function ctxDesdePerfil(p, filo){
   const f=filo||{};
   const m=f.metodos||{};
   const est=(parseFloat(p.estatura)||0)/100, imc=(est>0&&parseFloat(p.peso))?parseFloat(p.peso)/(est*est):0;
-  return {
+  const ctx={
     edad:parseInt(p.edad)||0, imc:Math.round(imc*10)/10,
     dosisH:(f.dosis&&f.dosis.hipertrofia)||'', metodoInt:(f.structure&&f.structure.method)||'',
     evitaNm:[...String((f.seleccion&&f.seleccion.nunca)||'').split(/[,;\n]+/).map(kbNorm).filter(x=>x.length>2), ...evitaSeleccion(f.seleccion,nivelNum(p.nivel),p.objetivo)],   // lo que el entrenador nunca programa
@@ -61,6 +61,14 @@ function ctxDesdePerfil(p, filo){
     sinMetodos: p.objetivo==='FLEXIBILIDAD',
     soloSuaves: p.objetivo==='REHABILITACIÓN',
   };
+  // Poblaciones especiales y lesiones del entrenador (js/41-evaluacion-cuidado.js)
+  if(typeof ctxCuidado==='function' && f.tagline){
+    Object.assign(ctx, ctxCuidado(f,ctx.nivel,ctx.edad,ctx.imc,ctx.objetivo));
+    ctx.evitaNm=[...new Set([...ctx.evitaNm, ...ctx.evitaPob])];
+    // Fase de adaptación: sin métodos de intensidad y con 3-4 reps en reserva
+    if(ctx.adaptacion){ ctx.principiantes='no'; ctx.rirT=Object.assign({},ctx.rirT,{1:'3-4'}); }
+  }
+  return ctx;
 }
 function metodosPermitidos(ctx){
   if(ctx.sinMetodos) return [];
@@ -473,22 +481,24 @@ function perfilDelicado(ctx){ return ctx && ctx.nivel===1 && ((ctx.imc||0)>=35 |
 function ejTecnico(kb){ return !!kb && (kb.z==='rack' || EJ_TECNICOS.includes(kb.id) || (kb.nv||1)>=2); }
 function ejContraindicado(e,ctx){
   const nm=e&&(e.nm||e.nombre); if(!nm) return false;
+  if((ctx.evitaPob||[]).some(n=>kbNorm(nm).includes(n))) return true;   // bajo impacto / sin saltos (poblaciones)
   const kb=kbBuscar(nm); if(!kb) return false;
-  if(perfilDelicado(ctx) && ejTecnico(kb)) return true;
+  if((ctx.evitaPob||[]).some(n=>kbNorm(kb.nm).includes(n))) return true;
+  if((perfilDelicado(ctx)||ctx.guiado) && ejTecnico(kb)) return true;
   return !!(ctx.les.length && ctx.les.some(l=>(kb.ev||[]).includes(l)));
 }
 function sustitutoSeguro(e,ctx,usados){
   const kb=kbBuscar(e.nm||e.nombre); const enf=(kb&&kb.enf)||e.enf; if(!enf) return null;
   const cands=KB_EJERCICIOS.filter(x=>x.enf===enf && !x.rondas && !usados.has(x.id) && (x.nv||1)<=ctx.nivel
     && !ctx.les.some(l=>(x.ev||[]).includes(l)) && !(ctx.evitaNm||[]).some(n=>kbNorm(x.nm).includes(n))
-    && !(perfilDelicado(ctx) && ejTecnico(x)));
+    && !((perfilDelicado(ctx)||ctx.guiado) && ejTecnico(x)));
   if(!cands.length) return null;
   const pts=x=>(kb&&x.t===kb.t?3:0)+(kb&&!!x.iso===!!kb.iso?2:0)+(['maquina','polea'].includes(x.z)?1:0);   // estable y guiado primero
   return cands.slice().sort((a,b)=>pts(b)-pts(a))[0];
 }
 function filtrarLesiones(semana,ctx){
   let cambios=0;
-  if(!ctx || (!ctx.les.length && !perfilDelicado(ctx)) || ctx.soloSuaves || ctx.sinMetodos) return cambios;
+  if(!ctx || (!ctx.les.length && !perfilDelicado(ctx) && !ctx.guiado && !(ctx.evitaPob||[]).length) || ctx.soloSuaves || ctx.sinMetodos) return cambios;
   const LES={rodilla:'rodilla',lumbar:'espalda baja',hombro:'hombro',cadera:'cadera',cuello:'cuello',cardiaca:'condición cardiaca'};
   (semana||[]).forEach(d=>{
     if(!d||!Array.isArray(d.ejercicios)) return;
@@ -504,7 +514,8 @@ function filtrarLesiones(semana,ctx){
       aplicarEjCatalogo(e,x);
       if(esf){ e.esfuerzo=esf; e.rir=rir; }
       const kbA=kbBuscar(antes), zona=ctx.les.filter(l=>((kbA&&kbA.ev)||[]).includes(l)).map(l=>LES[l]||l).join(' y ');
-      e.tip=(zona?'Sustituye a '+antes+' para cuidar tu '+zona+'. ':'Versión guiada de '+antes+': más estable mientras dominas el movimiento. ')+(e.tip||'');
+      const bajoImp=!zona && (ctx.evitaPob||[]).some(n=>kbNorm(antes).includes(n));
+      e.tip=(zona?'Sustituye a '+antes+' para cuidar tu '+zona+'. ':bajoImp?'Sustituye a '+antes+': opción de bajo impacto. ':'Versión guiada de '+antes+': más estable mientras dominas el movimiento. ')+(e.tip||'');
       return true;
     });
     limpiarParejas(d,ctx);

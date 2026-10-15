@@ -28,7 +28,7 @@ function svgRadarFilosofia(ph, size){
 }
 
 // ═════════════════════════════════════════
-// MI FILOSOFÍA — quiz del entrenador (12 pasos)
+// MI FILOSOFÍA — quiz del entrenador (15 pasos, ver FILO_PASOS)
 // Se guarda en DB.entrenadores[id].filosofia y de ahí
 // alimenta el prompt de IA y el selector de coach del socio.
 // ═════════════════════════════════════════
@@ -62,6 +62,9 @@ function filoBase(){
     metodos:{favoritos:[],evita:[],frecuencia:3,principiantes:'basicos'},
     seleccion:{libreVsMaquina:3,unilateral:3,firma:'',nunca:'',patrones:[],halterofilia:'',pliometria:''},
     sesion:{calentamiento:'',orden:'',tempo:'',core:'',cardio:'',duracion:'',ejercicios:'',seguidos:''},
+    evaluacion:{inicio:[],ref:[],reevalua:''},          // bloque 2 (js/41-evaluacion-cuidado.js)
+    poblaciones:{adaptacion:'',libre:'',mayores:[],obesidad:[]},
+    lesiones:{zona:'',dolor:'',derivar:[]},
     horaPico:{sustitucion:'maquina',nota:''},
     sampleRoutineNote:'',adjustmentPhilosophy:'',
     rutinasModelo:{}};   // hasta 3 rutinas reales del entrenador: fuerza · grasa · rendimiento (ver js/32-filosofia-modelos.js)
@@ -74,7 +77,8 @@ function filoMezclar(base,obj){
   });
   return out;
 }
-const FILO_TOTAL=12;
+const FILO_PASOS=['identidad','evaluacion','estructura','progreso','dosis','intensidad','metodos','seleccion','anatomia','corecardio','poblaciones','lesiones','horapico','sello','modelos'];
+const FILO_TOTAL=FILO_PASOS.length;
 let filoEditId=null; // a quién se le está editando la filosofía (coordinador puede editar la de otros)
 function abrirMiFilosofia(idAjeno){
   const id = idAjeno || staffActivoEntId;
@@ -154,6 +158,17 @@ function filoTablaDosis(F){
     ${FILO_DOSIS.map(([L,k,nm,s,r,ds,pc])=>`<span class="fd-nm">${nm}</span>${filoIn('dosis.series.'+L,d.series[L],s)}${filoIn('dosis.'+k,d[k],r)}${filoIn('dosis.desc.'+L,d.desc[L],ds)}${filoIn('dosis.pct.'+L,d.pct[L],pc)}`).join('')}
   </div>`;
 }
+function filoChips(path,ops,sel,max){
+  sel=comoArray(sel);
+  return `<div class="filo-chips">${ops.map(([id,nm])=>`<div class="filo-chip ${sel.includes(id)?'fav':''}" onclick="filoToggleLista('${path}','${id}',this,${max||0})">${nm}</div>`).join('')}</div>`;
+}
+function filoToggleLista(path,id,el,max){
+  const [a,b]=path.split('.'); const o=filoDraft[a]||(filoDraft[a]={});
+  const l=o[b]=comoArray(o[b]).slice(); const i=l.indexOf(id);
+  if(i>=0) l.splice(i,1);
+  else { if(max && l.length>=max){ showToast('Máximo '+max); return; } l.push(id); }
+  el.className='filo-chip '+(l.includes(id)?'fav':'');
+}
 function filoTogglePatron(id,el){
   const l=filoDraft.seleccion.patrones||(filoDraft.seleccion.patrones=[]);
   const i=l.indexOf(id); if(i>=0) l.splice(i,1); else l.push(id);
@@ -170,10 +185,11 @@ function renderFiloStep(){
   document.getElementById('filo-prog').style.width=(filoStep/FILO_TOTAL*100)+'%';
   const c=document.getElementById('filo-body');
   const F=filoDraft;
-  const paso=`<div style="font-size:var(--fs-2xs);color:var(--mu);margin-bottom:6px">Paso ${filoStep} de ${FILO_TOTAL}</div>`;
-  let html=paso;
+  const pasoTxt=`<div style="font-size:var(--fs-2xs);color:var(--mu);margin-bottom:6px">Paso ${filoStep} de ${FILO_TOTAL}</div>`;
+  let html=pasoTxt;
+  const paso=FILO_PASOS[filoStep-1];
   const T=t=>`<div class="q-title" style="font-size:var(--fs-2xl)">${t}</div>`;
-  if(filoStep===1){
+  if(paso==='identidad'){
     html+=`${T('En una frase, ¿cuál es tu método?')}
       ${filoSub('Es lo primero que lee el socio cuando te elige.')}
       ${filoText('tagline','Ej. Construyo fuerza real antes que estética.')}
@@ -183,7 +199,41 @@ function renderFiloStep(){
       ${filoSliderRow('Movilidad y prevención', F.priorities.movilidad, 'priorities.movilidad')}
       ${filoSliderRow('Rendimiento deportivo', F.priorities.rendimiento, 'priorities.rendimiento')}
       ${filoSliderRow('Entrenamiento funcional', F.priorities.funcional, 'priorities.funcional')}`;
-  } else if(filoStep===2){
+  } else if(paso==='evaluacion'){
+    const E=F.evaluacion||(F.evaluacion={inicio:[],ref:[]});
+    html+=`${T('Evaluación')}
+      ${filoSub('¿Qué evalúas al inicio?')}
+      ${filoChips('evaluacion.inicio',[['peso_cintura','Peso y cintura'],['grasa','% de grasa'],['rm','Fuerza en ejercicios de referencia'],['saltos','Saltos (potencia)'],['movilidad','Movilidad'],['cardio','Prueba cardiovascular'],['fotos','Fotos de progreso'],['salud','Cuestionario de salud y lesiones']],E.inicio)}
+      ${filoSub('¿Con qué ejercicios mides la fuerza? (hasta 4)')}
+      ${filoChips('evaluacion.ref',[['sentadilla','Sentadilla'],['peso_muerto','Peso muerto'],['banca','Press de banca'],['jalon','Jalón o dominada'],['militar','Press militar'],['hip_thrust','Hip thrust'],['prensa','Prensa']],E.ref,4)}
+      ${filoSub('¿Cada cuándo reevalúas?')}
+      ${filoChoiceGroup('evaluacion.reevalua',[{value:'bloque',label:'Al final de cada bloque',sub:'Sugerido'},{value:'cada2',label:'Cada 2 bloques'},{value:'anual',label:'2 a 4 veces al año',sub:'Cada 3 meses'},{value:'inicio',label:'Solo al inicio'}], E.reevalua)}
+      ${filoSub('¿Qué decide si un socio progresa?')}
+      ${filoChoiceGroup('progressStyle',[{value:'numeros',label:'Por números (peso, reps, cargas)'},{value:'calidad',label:'Por calidad de movimiento'},{value:'mixto',label:'Ambos, según la persona',sub:'Sugerido'}], F.progressStyle)}`;
+  } else if(paso==='poblaciones'){
+    const P=F.poblaciones||(F.poblaciones={mayores:[],obesidad:[]});
+    html+=`${T('Principiantes y poblaciones especiales')}
+      ${filoSub('¿Cuánto dura la fase de adaptación de un principiante?')}
+      ${filoChoiceGroup('poblaciones.adaptacion',[{value:'2',label:'2 semanas'},{value:'4',label:'4 semanas',sub:'Sugerido. Cuerpo completo, cargas ligeras (RIR 3-4) y técnica'},{value:'6',label:'6 semanas'},{value:'0',label:'Sin fase de adaptación'}], String(P.adaptacion||''))}
+      ${filoSub('¿Cuándo pasa de máquina a peso libre?')}
+      ${filoChoiceGroup('poblaciones.libre',[{value:'inicio',label:'Desde el inicio'},{value:'adaptacion',label:'Después de la fase de adaptación',sub:'Sugerido'},{value:'yo',label:'Cuando yo lo decida',sub:'Mientras, máquinas y versiones guiadas'}], P.libre)}
+      ${filoSub('Con adultos mayores (60+), prioriza…')}
+      ${filoChips('poblaciones.mayores',[['equilibrio','Equilibrio'],['fuerzaFuncional','Fuerza funcional'],['potencia','Potencia ligera'],['caidas','Prevenir caídas'],['sinSaltos','Sin saltos']],P.mayores)}
+      <div class="q-sub" style="margin:-6px 0 12px;font-size:var(--fs-xs)">Regla fija: un principiante de 60+ o con IMC de 35+ empieza sin barra libre ni ejercicios técnicos.</div>
+      ${filoSub('Con obesidad (IMC 35+), prioriza…')}
+      ${filoChips('poblaciones.obesidad',[['impacto','Bajo impacto'],['maquinas','Máquinas'],['circuitos','Circuitos'],['caminata','Caminata y bici como cardio']],P.obesidad)}`;
+  } else if(paso==='lesiones'){
+    const Le=F.lesiones||(F.lesiones={derivar:[]});
+    html+=`${T('Lesiones y dolor')}
+      <div class="filo-fija"><b>Regla del sistema</b>Lo que el catálogo marca como contraindicado para una lesión nunca se programa: por ejemplo, ningún peso muerto ni buenos días con molestia lumbar. El socio entrena solo la mayor parte del tiempo y nadie revisa su técnica ni cuánto peso carga.</div>
+      ${filoSub('En la zona lesionada, lo que sí se puede hacer va…')}
+      ${filoChoiceGroup('lesiones.zona',[{value:'ligera',label:'Siempre con carga ligera y rango cómodo',sub:'Sugerido. RIR 4, 12-15 repeticiones'},{value:'normal',label:'Con carga normal'}], Le.zona)}
+      ${filoSub('¿Cuánto dolor toleras durante el ejercicio?')}
+      ${filoChoiceGroup('lesiones.dolor',[{value:'nada',label:'Nada de dolor'},{value:'3',label:'Hasta 3 de 10, si no empeora al día siguiente',sub:'Sugerido'},{value:'fisio',label:'Lo que indique el fisioterapeuta'}], Le.dolor)}
+      ${filoSub('¿Cuándo derivas a fisioterapia o al médico? Sin marcar = los 4 primeros.')}
+      ${filoChips('lesiones.derivar',[['agudo','Dolor agudo o punzante'],['inflamacion','Inflamación'],['hormigueo','Adormecimiento u hormigueo'],['empeora','Dolor que empeora con los días'],['nocede','No cede en 2 semanas']],Le.derivar)}
+      <div class="q-sub" style="margin:-6px 0 12px;font-size:var(--fs-xs)">El socio reporta su dolor al terminar cada sesión; si marca uno de estos síntomas te llega una alerta.</div>`;
+  } else if(paso==='estructura'){
     html+=`${T('Estructura semanal')}
       ${filoSub('¿Cómo organizas la semana según los días que entrena el socio?')}
       ${filoTablaSplit(F)}
@@ -195,11 +245,9 @@ function renderFiloStep(){
       ${filoChoiceGroup('sesion.seguidos',[{value:'nunca',label:'Nunca el mismo músculo dos días seguidos'},{value:'ligero',label:'Se permite, con el segundo día ligero'},{value:'si',label:'Sí, sin problema'}], F.sesion.seguidos)}
       ${filoSub('Notas sobre tu estructura (opcional)')}
       ${filoText('structure.split','Ej. Full body para principiantes los primeros 2 meses.')}`;
-  } else if(filoStep===3){
+  } else if(paso==='progreso'){
     const P=F.progresion||(F.progresion={rir:{}});
     html+=`${T('Progreso y periodización')}
-      ${filoSub('¿Cómo defines el progreso?')}
-      ${filoChoiceGroup('progressStyle',[{value:'numeros',label:'Por números (peso, reps, cargas)'},{value:'calidad',label:'Por calidad de movimiento'},{value:'mixto',label:'Ambos, según la persona'}], F.progressStyle)}
       ${filoSub('Tu modelo general de periodización')}
       ${filoChoiceGroup('structure.periodization',[
         {value:'lineal',label:'Lineal',sub:'Subo carga poco a poco, bloque tras bloque'},
@@ -215,7 +263,7 @@ function renderFiloStep(){
       ${filoChoiceGroup('progresion.descarga',[{value:'ultima',label:'Última semana de cada bloque',sub:'Sugerido'},{value:'cada2',label:'Cada 2 bloques'},{value:'fatiga',label:'Solo con señales de fatiga',sub:'Si el socio llega cansado 2 de sus últimas 3 sesiones'},{value:'no',label:'No programo descargas'}], P.descarga)}
       ${filoSub('¿Cómo es tu descarga?')}
       ${filoChoiceGroup('progresion.tipoDescarga',[{value:'volumen',label:'Bajo el volumen 40-50 % y mantengo la carga',sub:'Sugerido'},{value:'intensidad',label:'Bajo la intensidad (15 % menos de peso)'},{value:'activa',label:'Semana libre o activa'}], P.tipoDescarga)}`;
-  } else if(filoStep===4){
+  } else if(paso==='dosis'){
     html+=`${T('Dosis por objetivo')}
       ${filoSub('Tu tabla de trabajo. Deja vacío lo que quieras que el sistema decida (el gris es el valor sugerido).')}
       ${filoTablaDosis(F)}
@@ -225,7 +273,7 @@ function renderFiloStep(){
       </div>
       ${filoSub('Ejercicios por sesión')}
       ${filoChoiceGroup('sesion.ejercicios',[{value:'4-5',label:'4-5',sub:'Pocos y bien hechos'},{value:'6-7',label:'6-7'},{value:'8+',label:'8 o más'}], F.sesion.ejercicios)}`;
-  } else if(filoStep===5){
+  } else if(paso==='intensidad'){
     const P=F.progresion||(F.progresion={rir:{}}); if(!P.rir) P.rir={};
     html+=`${T('Intensidad y autorregulación')}
       ${filoSub('¿Con qué dosificas la intensidad?')}
@@ -243,14 +291,14 @@ function renderFiloStep(){
       ${filoSub('Descanso entre series')}
       ${filoChoiceGroup('exerciseStyle.restStyle',[{value:'fijo',label:'Tiempo fijo'},{value:'autorregulado',label:'Autorregulado'}], F.exerciseStyle.restStyle)}
       ${filoSliderRow('Variedad de ejercicios', F.exerciseStyle.variety, 'exerciseStyle.variety',['Pocos y dominados','Mucha variedad'])}`;
-  } else if(filoStep===6){
+  } else if(paso==='metodos'){
     html+=`${T('Tus métodos de intensidad')}
       ${filoSub('Toca una vez = lo uso seguido (verde). Dos veces = no lo uso (rojo). Tres = neutral.')}
       <div class="filo-chips">${Object.entries(KB_METODOS).map(([id,M])=>`<div class="filo-chip ${F.metodos.favoritos.includes(id)?'fav':F.metodos.evita.includes(id)?'no':''}" title="${esc(M.como)}" onclick="filoCycleMetodo('${id}',this)">${M.nm}</div>`).join('')}</div>
       ${filoSliderRow('¿Qué tanto los usas?', F.metodos.frecuencia, 'metodos.frecuencia',['Rutinas limpias','Casi cada ejercicio'])}
       ${filoSub('Con principiantes...')}
       ${filoChoiceGroup('metodos.principiantes',[{value:'no',label:'Nada de métodos: técnica primero'},{value:'basicos',label:'Solo básicos (tempo, pausas, superserie antagonista)'},{value:'si',label:'También intermedios si la técnica lo permite'}], F.metodos.principiantes)}`;
-  } else if(filoStep===7){
+  } else if(paso==='seleccion'){
     const pat=F.seleccion.patrones||[];
     html+=`${T('Cómo eliges ejercicios')}
       ${filoSub('Patrones que no pueden faltar en la semana. Marca solo los indispensables: con pocos días cada uno ocupa un lugar en la sesión.')}
@@ -265,7 +313,7 @@ function renderFiloStep(){
       ${filoText('seleccion.firma','Ej. Hip thrust con pausa, jalón unilateral, sentadilla búlgara.')}
       ${filoSub('Ejercicios que nunca programas y por qué')}
       ${filoText('seleccion.nunca','Ej. Press tras nuca (riesgo de hombro), peso muerto en principiantes.')}`;
-  } else if(filoStep===8){
+  } else if(paso==='anatomia'){
     html+=`${T('Anatomía de tu sesión')}
       ${filoSub('Calentamiento')}
       ${filoChoiceGroup('sesion.calentamiento',[{value:'movilidad',label:'Movilidad general + activación'},{value:'aproximacion',label:'Series de aproximación del primer ejercicio'},{value:'especifico',label:'Activación específica del músculo del día'}], F.sesion.calentamiento)}
@@ -273,19 +321,19 @@ function renderFiloStep(){
       ${filoChoiceGroup('sesion.orden',[{value:'compuesto',label:'Compuesto pesado primero, aislamiento al final'},{value:'preagot',label:'A veces pre-agoto antes del compuesto'},{value:'prioridad',label:'Primero lo que el socio más necesita'}], F.sesion.orden)}
       ${filoSub('Tempo')}
       ${filoChoiceGroup('sesion.tempo',[{value:'controlado',label:'Controlado siempre (bajada lenta)'},{value:'explosivo',label:'Bajada controlada, subida explosiva'},{value:'fase',label:'Depende de la fase'}], F.sesion.tempo)}`;
-  } else if(filoStep===9){
+  } else if(paso==='corecardio'){
     html+=`${T('Core y cardio')}
       ${filoSub('Core')}
       ${filoChoiceGroup('sesion.core',[{value:'diario',label:'Algo de core en cada sesión'},{value:'semanal',label:'2-3 bloques a la semana'},{value:'integrado',label:'Integrado en los compuestos, casi sin aislado'}], F.sesion.core)}
       ${filoSub('Cardio')}
       ${filoChoiceGroup('sesion.cardio',[{value:'dias',label:'Días propios de cardio'},{value:'final',label:'Bloque corto al final (zona 2)'},{value:'intervalos',label:'Intervalos / circuitos metabólicos'},{value:'objetivo',label:'Según el objetivo del socio'}], F.sesion.cardio)}`;
-  } else if(filoStep===10){
+  } else if(paso==='horapico'){
     html+=`${T('Hora pico')}
       ${filoSub('Si el área está ocupada, ¿qué opción prefieres darle al socio?')}
       ${filoChoiceGroup('horaPico.sustitucion',[{value:'maquina',label:'Máquina o polea con el mismo enfoque'},{value:'mancuernas',label:'Mancuernas o zona funcional'},{value:'corporal',label:'Peso corporal / bandas'},{value:'metodo',label:'Cambiar el método (p. ej. superserie con lo disponible)'}], F.horaPico.sustitucion)}
       ${filoSub('Mensaje para tus socios en hora pico')}
       ${filoText('horaPico.nota','Ej. No esperes más de 3 minutos: usa la opción y mantén el tempo.')}`;
-  } else if(filoStep===11){
+  } else if(paso==='sello'){
     html+=`${T('Tu sello final')}
       ${filoSub('Describe una sesión típica tuya, como se la explicarías a otro coach. Es lo que más ayuda a que la IA escriba como tú.')}
       ${filoText('sampleRoutineNote','Ej. Pierna: calentamiento de cadera, sentadilla en pirámide 12-10-8-6, búlgara + extensión en biserie, curl femoral con drop set, cierro con pantorrilla en tempo 3-1-1.',4)}
@@ -295,7 +343,7 @@ function renderFiloStep(){
         ${svgRadarFilosofia(F,110)}
         <div style="font-size:var(--fs-xs);color:var(--mu);line-height:1.7">Así se ve tu huella; esto verá el socio al elegirte.</div>
       </div>`;
-  } else if(filoStep===12){
+  } else if(paso==='modelos'){
     html+=filoPasoModelos();
   }
   c.innerHTML=html;
