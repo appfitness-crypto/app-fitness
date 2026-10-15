@@ -421,7 +421,13 @@
         <input type="range" id="qr-dias" aria-label="Días de entrenamiento por semana" min="2" max="6" value="4" oninput="document.getElementById('dias-v').textContent=this.value">
         <div class="s-labels"><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span></div>
       </div>
-      <div class="nav-row"><div class="btn-prev" onclick="qPrev(4)">←</div><button class="btn-next" onclick="qNext(4)">Continuar</button></div>
+      <div class="q-sub" style="margin-top:20px">¿Cómo es tu trabajo o tu día fuera del gym? Cambia cuántas calorías gastas.</div>
+      <div class="opts" style="grid-template-columns:1fr;gap:8px">
+        <div class="opt" onclick="qSel(this,'actividadLbl');qAnswers.actividad='sentado'"><div class="ol">Sentado la mayor parte del día</div><div class="os">Oficina, escuela, manejar</div></div>
+        <div class="opt" onclick="qSel(this,'actividadLbl');qAnswers.actividad='depie'"><div class="ol">De pie o caminando</div><div class="os">Comercio, docencia, mesero, enfermería</div></div>
+        <div class="opt" onclick="qSel(this,'actividadLbl');qAnswers.actividad='fisico'"><div class="ol">Trabajo físico</div><div class="os">Cargar, construcción, campo, almacén</div></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="qPrev(4)">←</div><button class="btn-next" id="qb4" disabled onclick="qNext(4)">Continuar</button></div>
     </div>
 
     <!-- Q4b ¿qué días específicos de la semana? -->
