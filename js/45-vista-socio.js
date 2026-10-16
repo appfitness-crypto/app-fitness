@@ -32,9 +32,12 @@ function verPerfilBtnHTML(s){
 
 // ── Entrar y salir ──
 function verComoSocio(code){
-  const s0=getSocio(code); if(!s0){ showToast('No se encontró ese socio'); return; }
-  const cargar=(typeof idxCargarSocio==='function' && fbListo && s0._lite) ? idxCargarSocio(code) : Promise.resolve(s0);
-  if(s0._lite) showToast('Abriendo la app de '+tc(s0.nombre).split(' ')[0]+'…');
+  // En la lista el staff solo tiene el índice ligero; el expediente completo se descarga al abrirlo
+  const s0=getSocio(code)||(typeof idxLite==='function'?idxLite(code):null);
+  if(!s0){ showToast('No se encontró ese socio'); return; }
+  const falta=!idxCompleto(getSocio(code));
+  const cargar=(falta && typeof idxCargarSocio==='function' && fbListo) ? idxCargarSocio(code) : Promise.resolve(getSocio(code));
+  if(falta) showToast('Abriendo la app de '+tc(s0.nombre).split(' ')[0]+'…');
   cargar.then(s=>{
     s=s||getSocio(code);
     if(!s || s._lite){ showToast('No se pudo cargar este socio. Revisa tu conexión.'); return; }

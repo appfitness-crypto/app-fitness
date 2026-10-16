@@ -2035,3 +2035,12 @@ body.vista-socio #s-dash{padding-top:84px;}
   -webkit-mask-image:linear-gradient(to top,#000 55%,transparent);mask-image:linear-gradient(to top,#000 55%,transparent);}
 @media(min-width:1025px){ .bnav-fade{height:120px;} }
 @media (prefers-reduced-transparency:reduce){ .bnav-fade{-webkit-backdrop-filter:none;backdrop-filter:none;} }
+
+/* Aviso compacto de evaluación en Inicio */
+.ev-mini{display:flex;align-items:center;gap:10px;}
+.ev-mini-tx{flex:1;min-width:0;}
+.ev-mini-m{font-size:var(--fs-sm);color:var(--mu);line-height:1.4;margin-top:2px;}
+.ev-mini-b{flex:0 0 auto !important;height:38px;padding:0 14px;font-size:var(--fs-sm);white-space:nowrap;}
+.ev-mini-x{flex-shrink:0;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;border:none;background:none;color:var(--mu);cursor:pointer;}
+.ev-mini-x .ico{width:18px;height:18px;}
+@media(max-width:380px){ .ev-mini{flex-wrap:wrap;} .ev-mini-b{order:3;} }

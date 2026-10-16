@@ -176,12 +176,12 @@ function evalEstado(s){
     if(desde) return id==='rm' && evalRmHecho(s,C.ref,desde);
     if(id==='peso_cintura') return !!(+s.peso && +s.cintura);
     if(id==='grasa') return !!(+s.cintura);
-    if(id==='salud') return Array.isArray(s.limitaciones) && s.limitaciones.length>0;
+    if(id==='salud') return Array.isArray(s.limitaciones) || !!s.fechaRegistro;   // se contesta en el registro (vacío = sin limitaciones)
     if(id==='rm') return evalRmHecho(s,C.ref,'');
     return false;
   };
   const items=C.inicio.filter(id=>EVAL_ITEMS[id]).map(id=>({id, nm:EVAL_ITEMS[id], ok:hecho(id), auto:EVAL_AUTO.includes(id)}));
-  return {toca, inicial:!ult, items, ref:C.ref, pendientes:items.filter(x=>!x.ok).length, reevalua:C.reevalua};
+  return {toca, inicial:!ult, desde, items, ref:C.ref, pendientes:items.filter(x=>!x.ok).length, reevalua:C.reevalua};
 }
 function evalRmHecho(s,ref,desde){
   if(!ref.length) return comoArray(s.logs&&s.logs.sesiones).some(x=>x&&x.fecha>=desde&&comoArray(x.detalle).some(d=>+d.kg>0));
@@ -196,9 +196,35 @@ function evalCardSocio(s){
   if(!s || s.status!=='activo') return '';
   const E=evalEstado(s); if(!E || !E.pendientes) return '';
   if(E.inicial && (diasDesde(s.fechaRegistro)||0)>28) return '';
+  if((s.avisosVistos||{}).eval===evalAvisoClave(E)) return '';
+  const listos=E.items.length-E.pendientes;
+  return `<div class="pg-home soft ev-card ev-mini">
+    <div class="ev-mini-tx"><div class="pg-home-k">${E.inicial?'Tu evaluación inicial':'Toca reevaluarte'}</div>
+      <div class="ev-mini-m">${listos} de ${E.items.length} listos · tu entrenador te guía en lo que falta</div></div>
+    <button type="button" class="sd-b ev-mini-b" onclick="evalVerSocio()">Ver qué falta</button>
+    <button type="button" class="ev-mini-x" onclick="evalAvisoCerrar()" aria-label="Ocultar aviso">${ico('x')}</button></div>`;
+}
+// Aviso de evaluación: el socio lo oculta y no vuelve hasta la siguiente reevaluación
+function evalAvisoClave(E){ return E.inicial?'inicial':'re-'+(E.desde||''); }
+function evalAvisoCerrar(){
+  const s=activeSocio; if(!s) return; const E=evalEstado(s); if(!E) return;
+  s.avisosVistos=Object.assign({},s.avisosVistos,{eval:evalAvisoClave(E)}); dbSave(s.code);
+  showToast('Listo. Tu evaluación sigue en Perfil.'); refreshDash();
+}
+function evalVerSocio(){
+  const s=activeSocio; if(!s) return; const E=evalEstado(s); if(!E) return;
   const refTxt=E.ref.map(k=>EVAL_REF[k][0]).join(', ');
-  return `<div class="pg-home soft ev-card"><div class="pg-home-k">${E.inicial?'Tu evaluación inicial':'Toca reevaluarte'}</div>
-    <ul class="ev-l">${E.items.map(x=>`<li class="${x.ok?'ok':''}"><b>${x.ok?'✓ ':''}${esc(x.nm)}</b>${x.ok?'':`<span>${esc(EVAL_PISTA[x.id]+(x.id==='rm'?(refTxt||'tus ejercicios principales')+'.':''))}</span>`}</li>`).join('')}</ul></div>`;
+  let m=document.getElementById('modal-eval'); if(!m){ m=document.createElement('div'); m.className='modal'; m.id='modal-eval'; m.onclick=e=>{ if(e.target===m) m.classList.remove('open'); }; document.body.appendChild(m); }
+  m.innerHTML=`<div class="mbox" style="max-width:460px" role="dialog" aria-modal="true">
+    <div class="pg-home-k">${E.inicial?'Tu evaluación inicial':'Toca reevaluarte'}</div>
+    <div style="font-size:var(--fs-md);color:var(--mu);line-height:1.5;margin:6px 0 12px">Sirve para medir tu punto de partida y ajustar tu plan. Lo que se hace en piso lo marca tu entrenador.</div>
+    <ul class="ev-l">${E.items.map(x=>`<li class="${x.ok?'ok':''}"><b>${x.ok?'✓ ':''}${esc(x.nm)}</b>${x.ok?'':`<span>${esc(EVAL_PISTA[x.id]+(x.id==='rm'?(refTxt||'tus ejercicios principales')+'.':''))}</span>`}</li>`).join('')}</ul>
+    <button type="button" class="sd-pri" style="width:100%;margin-top:16px" onclick="document.getElementById('modal-eval').classList.remove('open')">Entendido</button></div>`;
+  m.classList.add('open');
+}
+function evalFilaPerfilHTML(s){
+  if(!s || s.status!=='activo') return ''; const E=evalEstado(s); if(!E || !E.pendientes) return '';
+  return `<button type="button" class="pf-row" onclick="evalVerSocio()">${it('clipboard','sm')}<span>${E.inicial?'Mi evaluación inicial':'Mi reevaluación'}: faltan ${E.pendientes}</span>${ico('chev')}</button>`;
 }
 function evalStaffHTML(s){
   const E=evalEstado(s); if(!E) return '';
