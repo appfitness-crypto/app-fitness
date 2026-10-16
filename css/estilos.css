@@ -2105,3 +2105,25 @@ button.pf-t:active{transform:scale(.98);}
   .pf-col:last-child>.sec-row:first-child{margin-top:8px;}
 }
 @media (prefers-reduced-motion:reduce){ button.pf-t,.pf-met>summary>.ico:last-child{transition:none;} }
+
+/* ── Detalle del día (reacomodo) ── */
+.dd-hero-tx h1{font-size:clamp(28px,7.4vw,38px);}
+.dd-body{gap:18px;padding-bottom:110px;}
+.dd-resumen{display:grid;gap:10px;padding:14px 16px;border-radius:var(--r-lg);background:var(--gl);border:1px solid var(--b);}
+.dd-res-f{display:flex;align-items:center;gap:12px;}
+.dd-res-f small{display:block;font-size:var(--fs-xs);font-weight:700;color:var(--mu);}
+.dd-res-f b{display:block;font-size:var(--fs-md);font-weight:700;line-height:1.35;}
+.dd-res-f b i{font-style:normal;color:var(--mu);font-weight:600;}
+.dd-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+.dd-h h2{margin:0;}
+.dd-h span{font-size:var(--fs-xs);color:var(--mu);}
+.dd-tag{display:inline-block;margin-top:5px;padding:2px 8px;border-radius:999px;background:var(--acc-soft);color:var(--acc-tx);font-style:normal;font-size:var(--fs-xs);font-weight:700;}
+.dd-met{padding:0;background:var(--gl);border:1px solid var(--b);}
+.dd-met>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;}
+.dd-met>summary::-webkit-details-marker{display:none;}
+.dd-met>summary b{flex:1;color:var(--tx);font-weight:700;}
+.dd-met>summary span{font-size:var(--fs-xs);color:var(--mu);}
+.dd-met>summary .ico{width:16px;height:16px;color:var(--mu);transition:transform .25s var(--ease-out);}
+.dd-met[open]>summary .ico{transform:rotate(90deg);}
+.dd-met p{margin:0;padding:0 16px 14px;font-size:var(--fs-sm);line-height:1.5;color:var(--mu);}
+@media (prefers-reduced-motion:reduce){ .dd-met>summary .ico{transition:none;} }

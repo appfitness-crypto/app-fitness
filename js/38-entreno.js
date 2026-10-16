@@ -367,15 +367,17 @@ function ddHTML(s,k){
   const hechoDe=nm=>reg&&(reg.detalle||[]).find(x=>x.n===nm);
   const filas=ejs.map((e,j)=>{
     const r=rxTexto(e,s), c=cargaSugerida(s,e), h=hechoDe(e.nm), dp=descansoPlan(e.descanso);
-    const des=dp.nada?'':dp.libre?'descanso libre'+(dp.meta?' ~'+(dp.meta<120?dp.meta+' s':Math.round(dp.meta/6)/10+' min'):''):'descanso '+(dp.seg<120?dp.seg+' s':Math.round(dp.seg/6)/10+' min');
-    const sub=[limpiarReps(r.sr).replace(/\s*[—–]\s*/g,' '), des, e.metodo&&KB_METODOS[e.metodo.id]?e.metodo.nm:''].filter(Boolean).join(' · ');
+    const t=x=>x<120?x+' s':Math.round(x/6)/10+' min';
+    const des=dp.nada?'':dp.libre?(dp.meta?'~'+t(dp.meta)+' de descanso':'descanso libre'):t(dp.seg)+' de descanso';
+    const sub=[limpiarReps(r.sr).replace(/\s*[—–]\s*/g,' '), des].filter(Boolean).join(' · ');
+    const met=e.metodo&&KB_METODOS[e.metodo.id]?ddMetCorto(KB_METODOS[e.metodo.id].nm):'';
     const der=h?`<b class="num">${h.kg?enKg(h.kg):h.seg?h.seg+' s':h.fc?h.fc+' lpm':ico('check')}</b><small>${h.s||0} de ${h.p||parseInt(e.series)||0}</small>`
       : c?`<b class="num">${enKg(c.kg)}</b><small>${c.sube>0?'+'+kgToDisplay(c.sube):'sugerido'}</small>`:'';
     const g=e.grupo?String(e.grupo):'', gSig=ejs[j+1]&&ejs[j+1].grupo&&String(ejs[j+1].grupo).charAt(0)===g.charAt(0);
     return `<li class="dd-ej${h?' hecho':''}${g&&gSig?' liga':''}"><button type="button" onclick="verComoDia('${k}',${j})" aria-label="${esc(e.nm)}: ver cómo se hace">
       <span class="dd-n num" aria-hidden="true">${esc(g||String(j+1))}</span>
       <span class="en-th">${pic(basesEjercicioMini(e),'dumbbell','thumb')}</span>
-      <span class="dd-ej-t"><b>${esc(e.nm)}</b><span>${esc(sub)}</span></span>
+      <span class="dd-ej-t"><b>${esc(e.nm)}</b><span>${esc(sub)}</span>${met?`<em class="dd-tag">${esc(met)}</em>`:''}</span>
       <span class="en-carga">${der}</span></button></li>`;
   }).join('');
   const cta=esHoy&&!movidaDe(s,k)?`<div class="dd-cta"><button type="button" class="en-btn en-btn-p" onclick="iniciarSesion('${k}')">${ico('play')}${enCurso?'Continuar sesión':reg?'Registrar otra sesión':'Empezar sesión'}</button></div>`
@@ -385,13 +387,17 @@ function ddHTML(s,k){
     <div class="dd-hero-tx"><p>${reg?ico('check')+'Hecho · ':''}${esc(cuando)}</p><h1>${esc(sc(d.tipo))}</h1></div></section>
   <div class="dd-body">
     <p class="dd-facts num"><span><b>~${minutosDia(d)}</b> min</span><span><b>${ejs.length}</b> ejercicios</span><span><b>${series}</b> series</span>${reg&&reg.volumen?`<span><b>${Math.round(reg.volumen).toLocaleString('es-MX')}</b> kg movidos</span>`:''}</p>
-    ${musc.length?`<section class="dd-sec"><h2>Qué trabajas</h2><p class="dd-chips">${musc.map(([m,v])=>`<span class="${v>=mMax*.75?'p':''}">${esc(m)}</span>`).join('')}</p></section>`:''}
-    ${zonas.length?`<section class="dd-sec"><h2>Necesitas</h2><p class="dd-chips">${zonas.map(z=>`<span>${esc(z)}</span>`).join('')}</p></section>`:''}
-    ${mets.length?`<section class="dd-sec"><h2>${mets.length===1?'Método de hoy':'Métodos de hoy'}</h2>${mets.map(M=>`<div class="dd-met"><b>${esc(M.nm)}</b><p>${esc(sinEmoji(M.como))}</p></div>`).join('')}</section>`:''}
-    <section class="dd-sec"><h2>${reg&&ejs.some(e=>hechoDe(e.nm))?'Lo que hiciste':'Ejercicios'}</h2><ol class="dd-ejs">${filas}</ol>
-      <p class="dd-nota">Toca un ejercicio para ver cómo se hace.${esHoy?'':' Este día toca el '+EN_DIAS[i]+'.'}</p></section>
+    ${musc.length||zonas.length?`<section class="dd-resumen">
+      ${musc.length?`<div class="dd-res-f">${it('target','sm')}<div><small>Trabajas</small><b>${esc(ddFrase(musc.slice(0,3).map(x=>x[0])))}${musc.length>3?`<i> +${musc.length-3}</i>`:''}</b></div></div>`:''}
+      ${zonas.length?`<div class="dd-res-f">${it('dumbbell','sm')}<div><small>Necesitas</small><b>${esc(ddFrase(zonas))}</b></div></div>`:''}
+    </section>`:''}
+    <section class="dd-sec"><div class="dd-h"><h2>${reg&&ejs.some(e=>hechoDe(e.nm))?'Lo que hiciste':'Ejercicios'}</h2><span>Toca uno para ver cómo se hace</span></div><ol class="dd-ejs">${filas}</ol></section>
+    ${mets.length?`<section class="dd-sec"><div class="dd-h"><h2>${mets.length===1?'Método de hoy':'Métodos de hoy'}</h2></div>${mets.map(M=>`<details class="dd-met"><summary><b>${esc(ddMetCorto(M.nm))}</b><span>Cómo se hace</span>${ico('chev')}</summary><p>${esc(sinEmoji(M.como))}</p></details>`).join('')}</section>`:''}
   </div>${cta}`;
 }
+// Nombre corto del método para la etiqueta del ejercicio: "Drop set (series descendentes)" → "Drop set"
+function ddFrase(a){ const t=enListaY(a.map(x=>String(x).toLowerCase())); return t.charAt(0).toUpperCase()+t.slice(1); }
+function ddMetCorto(nm){ return String(nm||'').replace(/\s*\(.*\)\s*$/,''); }
 function verComoDia(k,j){ const s=activeSocio; const e=s&&s.rutina[k]&&s.rutina[k].ejercicios[j]; if(e) abrirFicha(e); }
 
 // ═════════════ FICHA "CÓMO SE HACE" ═════════════
