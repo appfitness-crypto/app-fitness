@@ -491,6 +491,13 @@ canvas.chart{width:100%;height:170px;display:block;}
 .mv-ol li{font-size:var(--fs-md)}
 .mv-ol li span{font-weight:700;color:var(--v2);font-size:var(--fs-sm);margin-left:4px}
 .mv-ol li div{color:var(--mu);font-size:var(--fs-sm);line-height:1.45;margin-top:1px}
+.mv-pasos{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:10px}
+.mv-pasos li{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:start;font-size:var(--fs-md)}
+.mv-th{display:block;width:64px;height:64px;border-radius:12px;overflow:hidden;background:var(--en-foto,var(--in-bg2))}
+.mv-th .pic:has(img) .pic-ph{display:none}
+.mv-th .pic img{object-position:center 30%}
+.mv-pasos em{font-style:normal;font-weight:700;color:var(--v2);font-size:var(--fs-sm);margin-left:4px}
+.mv-pasos p{margin:2px 0 0;color:var(--mu);font-size:var(--fs-sm);line-height:1.45}
 .set-r.fcr{grid-template-columns:24px 1fr 84px 40px;gap:8px;}
 .set-r.mov{grid-template-columns:26px 1fr 40px;}
 .set-r.iso{grid-template-columns:22px 1fr 58px 64px 40px;gap:6px;padding:10px 8px;}

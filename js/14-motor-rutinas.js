@@ -180,10 +180,14 @@ function movBloqueHTML(e,dia){
   h+=sec('Qué trabajas',E(i.suelta.charAt(0).toUpperCase()+i.suelta.slice(1)));
   h+=sec('Cuándo',E(i.cuando));
   if(i.pasos){
-    h+=`<div class="mv-t">${r.forma==='tiempo'?'Posturas y movimientos · ~'+r.min+' min en total':'Movimientos de cada ronda'}</div><ol class="mv-ol">`+
-       i.pasos.map(p=>`<li><b>${E(p.nm)}</b> <span>${E(p.dosis)}</span><div>${E(p.como)}</div></li>`).join('')+'</ol>';
+    h+=`<div class="mv-t">${r.forma==='tiempo'?'Posturas y movimientos · ~'+r.min+' min en total':'Movimientos de cada ronda'}</div>`+movPasosHTML(i.pasos);
   }
   return h;
+}
+// Pasos de una rutina de movilidad, cada uno con su foto (img/ejercicios/mini-<paso>, vía EJ_ALIAS)
+function movPasosHTML(pasos){
+  const E=esc;
+  return '<ol class="mv-pasos">'+pasos.map(p=>`<li><span class="mv-th">${pic(basesEjercicioMini({nm:p.nm}),'stretch','thumb')}</span><div><b>${E(p.nm)}</b> <em>${E(p.dosis)}</em><p>${E(p.como)}</p></div></li>`).join('')+'</ol>';
 }
 const FC_ZONA_CONT ={PERDER:[65,75],RESIST:[70,82],MASA:[60,70],DEF:[60,70]};
 const FC_ZONA_RONDA={PERDER:[75,88],RESIST:[78,90],MASA:[70,85],DEF:[65,80]};

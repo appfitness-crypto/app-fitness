@@ -1213,7 +1213,33 @@ const EJ_ALIAS={
   'prensa-de-piernas-rango-parcial':'prensa-de-piernas',
   'press-pallof-anti-rotacion':'press-pallof',
   'rotacion-externa-con-banda-codo-fijo':'rotacion-externa-con-banda',
-  'movilidad-de-columna-gato-camello':'gato-camello'
+  'movilidad-de-columna-gato-camello':'gato-camello',
+  // Movilidad y estiramiento: rutinas completas (portada) y sus pasos
+  'movilidad-articular-dinamica':'circulos-de-hombro',
+  'movilidad-de-cadera-y-hombro':'movilidad-de-cadera',
+  'movilidad-y-estiramiento':'estiramiento-de-flexores-de-cadera-con-brazo-arriba',
+  'rotacion-de-espalda-alta-en-cuatro-apoyos':'movilidad-de-columna-toracica',
+  'rotacion-toracica-en-cuadrupedia':'movilidad-de-columna-toracica',
+  'gato-camello-suave':'gato-camello',
+  'circulos-de-cadera-hidrante':'fire-hydrant-en-cuadrupedia',
+  'sentadilla-profunda-con-pausa':'sentadilla-profunda',
+  'circulos-de-tobillo':'estiramiento-activo-de-tobillo',
+  'movilidad-de-tobillo-en-pared-dorsiflexion':'movilidad-de-tobillo-en-rodilla',
+  'cadera-90-90':'movilidad-de-cadera',
+  'movilidad-de-cadera-90-90':'movilidad-de-cadera',
+  'movilidad-de-cadera-activa':'movilidad-de-cadera',
+  'zancada-baja-con-rotacion-de-torso':'estocada-con-rotacion-toracica',
+  'flexor-de-cadera-en-media-rodilla':'estiramiento-de-flexores-de-cadera',
+  'estiramiento-suave-de-flexor-de-cadera':'estiramiento-de-flexores-de-cadera',
+  'flexor-de-cadera-en-zancada-baja':'estiramiento-de-flexores-de-cadera-con-brazo-arriba',
+  'paso-de-banda-o-palo-sobre-la-cabeza':'movilidad-de-hombro-con-banda',
+  'deslizamiento-en-pared':'deslizamientos-en-pared',
+  'postura-del-nino-con-brazos-al-frente':'postura-del-nino',
+  'isquiotibiales-sentado':'estiramiento-de-isquiotibiales',
+  'aductores-en-mariposa':'estiramiento-mariposa',
+  'estiramiento-activo-de-aductores':'estiramiento-de-aductores',
+  'apertura-de-pecho-en-marco-de-puerta':'estiramiento-de-pecho-en-marco-de-puerta',
+  'torsion-acostado':'rotacion-de-columna-acostado'
 };
 function slugEj(nm){ const n=slugImg(nm); return EJ_ALIAS[n]||n; }
 function basesEjercicio(ej){ const n=slugEj(ej.nm), g=slugImg(ej.ms||''), g1=g.split('-')[0]; return ['ejercicios/'+n,'grupos/'+g,'grupos/'+g1]; }

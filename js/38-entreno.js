@@ -360,7 +360,7 @@ function verComoDia(k,j){ const s=activeSocio; const e=s&&s.rutina[k]&&s.rutina[
 // ═════════════ FICHA "CÓMO SE HACE" ═════════════
 function abrirFicha(ej){
   const dlg=document.getElementById('en-ficha'); if(!dlg||!ej) return;
-  const f=fichaEj(ej);
+  const f=fichaEj(ej), mv=movInfo(ej).kb;
   dlg.innerHTML=`<div class="en-f-in">
     <div class="en-f-top"><span class="en-grab" aria-hidden="true"></span><button type="button" class="en-btn-sm" onclick="cerrarFicha()">Cerrar</button></div>
     <div class="en-f-fig">${pic(basesEjercicio(ej),'dumbbell','thumb')}${videoEjHTML(ej)}</div>
@@ -368,6 +368,7 @@ function abrirFicha(ej){
     ${f.eq?`<div class="en-f-eq">${ico('dumbbell')}<span>${esc(f.eq)}</span></div>`:''}
     ${f.ms.length?`<div class="en-f-sec"><b>Músculos que trabaja</b><div class="en-musc">${f.ms.map((m,i)=>`<span class="${i?'':'p'}"><i></i>${esc(m)}${i?'':' · principal'}</span>`).join('')}</div></div>`:''}
     ${f.pasos?`<div class="en-f-sec"><b>Cómo se hace</b><ol class="en-pasos">${f.pasos.map(p=>`<li>${esc(p)}</li>`).join('')}</ol></div>`:''}
+    ${!f.pasos&&mv&&mv.pasos?`<div class="en-f-sec"><b>Cómo se hace</b>${movPasosHTML(mv.pasos)}</div>`:''}
     ${ej.tip?`<div class="en-f-sec"><b>Nota de tu entrenador</b><p>${esc(sinEmoji(ej.tip))}</p></div>`:''}
     ${f.evita?`<div class="en-evita">${ico('info')}<span><b>Evita:</b> ${esc(f.evita)}</span></div>`:''}
     <button type="button" class="en-btn en-btn-p" onclick="cerrarFicha()">Entendido</button></div>`;
