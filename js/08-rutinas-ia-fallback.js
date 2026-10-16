@@ -1484,52 +1484,58 @@ function renderPerfilTab(){
     {i:'star',t:'Disciplina',s:ev.total+' sesiones',on:ev.total>=10},
     {i:'target',t:'Adherencia',s:ev.adherencia+'%',on:ev.adherencia>=80},
   ];
+  const ent=getEntrenador(s.entrenadorId);
+  const act=ACTIVIDAD_TRABAJO[s.actividad];
+  // Datos en mosaico: los editables llevan lápiz y abren su ajuste
   const datos=[
-    ['Objetivo',sc(s.objetivo)],['Nivel',sc(s.nivel)],['Edad',s.edad+' años'],['Estatura',s.estatura+' cm'],
-    ['Peso actual',pesoActual(s)+' kg'],['Frecuencia',s.dias+' días por semana'],['Entrenador',s.asignado||'Sin asignar'],
+    {k:'Objetivo',v:sc(s.objetivo),ancho:1},
+    {k:'Nivel',v:sc(s.nivel)},{k:'Frecuencia',v:s.dias+' días/sem'},
+    {k:'Peso actual',v:pesoActual(s)+' kg'},{k:'Estatura',v:s.estatura+' cm'},
+    {k:'Edad',v:s.edad+' años'},
+    {k:'Cintura',v:s.cintura?s.cintura+' cm':'Agregar',ed:'editarCintura()',vacio:!s.cintura},
+    {k:'Fuera del gym',v:act?act.lbl:'Indícalo',ed:'editarActividad()',vacio:!act,ancho:1},
   ];
   const pend=s.status==='pendiente';
   const rmLista=rmListaSocio(s);
+  const est=membEstado(s).estado;
+  const m=(()=>{ const e=entRutina(s.entrenadorId); return (e&&metLineas(e.filosofia,e,s))||s.metodo; })();
+  const fila=(on,ic,txt,cls)=>`<button type="button" class="pf-row${cls?' '+cls:''}" onclick="${on}">${it(ic,'sm')}<span class="pf-row-t">${txt}</span>${ico('chev')}</button>`;
   document.getElementById('dsec-perfil').innerHTML=`
+    <div class="pf-cols"><div class="pf-col">
     <div class="pf-h">
       <div class="pf-av">${esc(iniciales(s.nombre))}</div>
-      <div><div class="app-t">${esc(tc(s.nombre))}</div><div class="app-sub">Tu progreso, nuestra meta.</div></div>
+      <div class="pf-h-tx"><div class="app-t">${esc(tc(s.nombre))}</div><div class="app-sub">Socio ${esc(s.id||'')}</div></div>
       <div class="pf-logo">${logoMiniHTML()}</div>
     </div>
     <div class="memb-c">
       ${it('shield')}
-      <div class="memb-tx"><div class="memb-k">Mi plan · ${esc(s.id)}${(s.membresia&&s.membresia.vence)?' · renueva '+esc(fmtFC(s.membresia.vence)):''}</div><div class="memb-t">${s.entrenadorId&&getEntrenador(s.entrenadorId)?'Con '+esc(getEntrenador(s.entrenadorId).nombre):'Plan de la app'}</div></div>
-      <span class="sl-st ${pend?'pend':(membEstado(s).estado==='tolerancia'?'tol':'ok')}">${pend?'En revisión':(membEstado(s).estado==='tolerancia'?'Por renovar':'Activa')}</span>
+      <div class="memb-tx"><div class="memb-k">Mi plan${(s.membresia&&s.membresia.vence)?' · renueva '+esc(fmtFC(s.membresia.vence)):''}</div><div class="memb-t">${ent?'Con '+esc(tc(ent.nombre)):'Plan de la app'}</div></div>
+      <span class="sl-st ${pend?'pend':(est==='tolerancia'?'tol':'ok')}">${pend?'En revisión':(est==='tolerancia'?'Por renovar':'Activa')}</span>
     </div>
     <div class="stats3 flat">
       <div class="st"><div class="st-l">Sesiones</div><div class="st-v">${ev.total}</div></div>
       <div class="st"><div class="st-l">Racha</div><div class="st-v">${ev.racha}<small> sem</small></div></div>
       <div class="st"><div class="st-l">Adherencia</div><div class="st-v">${ev.adherencia}<small>%</small></div></div>
     </div>
-    ${(()=>{ const ent=entRutina(s.entrenadorId); const m=(ent&&metLineas(ent.filosofia,ent,s))||s.metodo; return m&&m.tagline?`<div class="sec-row"><div class="sec-t">${m.sistema?'El método de tu plan':'El método de tu entrenador'}</div></div>${metodoHTML(m)}`:''; })()}
-    <div class="sec-row"><div class="sec-t">Logros</div></div>
+    <div class="sec-row"><div class="sec-t">Logros</div><span class="card-t-r">${logros.filter(l=>l.on).length} de ${logros.length}</span></div>
     <div class="logros">${logros.map(l=>`<div class="lg${l.on?' on':''}">${it(l.i)}<b>${l.t}</b><span>${esc(l.s)}</span></div>`).join('')}</div>
-    <div class="sec-row"><div class="sec-t">Apariencia</div></div>
-    <div class="card pf-card">${temaSegHTML()}</div>
+    ${m&&m.tagline?`<details class="card pf-met"><summary>${it('dna','sm')}<span class="pf-met-t"><small>${m.sistema?'El método de tu plan':'El método de tu entrenador'}</small>«${esc(m.tagline)}»</span>${ico('chev')}</summary>${(m.lineas||[]).length?`<ul class="met-l">${m.lineas.map(l=>`<li>${esc(l)}</li>`).join('')}</ul>`:''}</details>`:''}
+    </div><div class="pf-col">
     <div class="sec-row"><div class="sec-t">Mis datos</div></div>
-    <div class="card pf-card">${datos.map(([k,v])=>`<div class="pf-dato"><span>${k}</span><b>${esc(v)}</b></div>`).join('')}</div>
-    ${rmLista.length?`<div class="sec-row"><div class="sec-t">Rendimiento</div></div>
-    <div class="card pf-card">
-      <button type="button" class="pf-row" onclick="abrirModalRM()">${it('dumbbell','sm')}<span>Tus RM (opcional)</span>${ico('chev')}</button>
-    </div>`:''}
-    <div class="sec-row"><div class="sec-t">Composición</div></div>
-    <div class="card pf-card">
-      <button type="button" class="pf-row" onclick="editarCintura()">${it('target','sm')}<span>Cintura: ${s.cintura?esc(s.cintura)+' cm':'agregar (opcional)'}</span>${ico('chev')}</button>
-      <button type="button" class="pf-row" onclick="editarActividad()">${it('star','sm')}<span>Tu día fuera del gym: ${ACTIVIDAD_TRABAJO[s.actividad]?esc(ACTIVIDAD_TRABAJO[s.actividad].lbl.toLowerCase()):'indícalo'}</span>${ico('chev')}</button>
-    </div>
-    <div class="sec-row"><div class="sec-t">Cuenta</div></div>
+    <div class="pf-grid">${datos.map(d=>{
+      const inner=`<span class="pf-k">${d.k}</span><b class="pf-v${d.vacio?' vacio':''}">${esc(d.v)}</b>${d.ed?ico('pencil'):''}`;
+      return d.ed?`<button type="button" class="pf-t ed${d.ancho?' ancho':''}" onclick="${d.ed}" aria-label="Editar ${d.k.toLowerCase()}">${inner}</button>`:`<div class="pf-t${d.ancho?' ancho':''}">${inner}</div>`; }).join('')}</div>
+    <div class="sec-row"><div class="sec-t">Tu cuenta</div></div>
     <div class="card pf-card">
       ${typeof evalFilaPerfilHTML==='function'?evalFilaPerfilHTML(s):''}
+      ${rmLista.length?fila('abrirModalRM()','dumbbell','Tus RM <small>opcional</small>'):''}
+      ${s.status==='activo'?fila('generarPDFRutina()','file','<span id="btn-pdf-rutina">Descargar mi rutina en PDF</span>'):''}
       ${typeof instFilaPerfilHTML==='function'?instFilaPerfilHTML():''}
-      ${s.status==='activo'?`<button type="button" class="pf-row" onclick="generarPDFRutina()">${it('file','sm')}<span id="btn-pdf-rutina">Descargar mi rutina en PDF</span>${ico('chev')}</button>`:''}
-      ${s.entrenadorId?'':`<button type="button" class="pf-row" onclick="vincularEntrenador()">${it('key','sm')}<span>Tengo código de entrenador</span>${ico('chev')}</button>`}
-      <button type="button" class="pf-row danger" onclick="logoutSocio()">${it('logout','sm')}<span>Cerrar sesión</span>${ico('chev')}</button>
+      ${s.entrenadorId?'':fila('vincularEntrenador()','key','Tengo código de entrenador')}
+      <div class="pf-row pf-tema">${it(temaActual()==='dark'?'moon':'sun','sm')}<span class="pf-row-t">Apariencia</span>${temaSegHTML()}</div>
     </div>
-    <button type="button" class="btn-back-link" style="margin:18px auto 8px;display:block;color:var(--mu)" onclick="eliminarMiCuenta()">Eliminar mi cuenta</button>`;
+    <div class="card pf-card">${fila('logoutSocio()','logout','Cerrar sesión','danger')}</div>
+    <button type="button" class="btn-back-link pf-del" onclick="eliminarMiCuenta()">Eliminar mi cuenta</button>
+    </div></div>`;
   pintarSelectorTema();
 }
