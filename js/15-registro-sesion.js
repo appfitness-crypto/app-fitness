@@ -267,7 +267,9 @@ function openModal(idx){
   if(esEjMovilidad(ej)){
     if(head) head.style.display='none';
     const mr=movRx(ej,d), mi=movInfo(ej,d);
-    const mv=document.getElementById('m-mov'); mv.innerHTML=movBloqueHTML(ej,d); mv.style.display='block';
+    // La imagen va arriba: en movilidad la explicación es larga y al final ya no se veía
+    const mu=document.getElementById('m-musculo'), fig=mu.innerHTML; mu.innerHTML='';
+    const mv=document.getElementById('m-mov'); mv.innerHTML=fig+movBloqueHTML(ej,d); mv.style.display='block';
     const lab=mi.kb
       ? (mr.forma==='tiempo' ? 'Secuencia completa · ~'+mr.min+' min' : 'Ronda completa · '+mr.np+' movimientos')
       : (limpiarReps(ej.reps)||'30 seg');

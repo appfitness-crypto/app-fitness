@@ -181,7 +181,7 @@ function movBloqueHTML(e,dia){
   h+=sec('Cuándo',E(i.cuando));
   if(i.pasos){
     h+=`<div class="mv-t">${r.forma==='tiempo'?'Posturas y movimientos · ~'+r.min+' min en total':'Movimientos de cada ronda'}</div><ol class="mv-ol">`+
-       i.pasos.map(p=>`<li><b>${E(p.nm)}</b> <span>${E(p.dosis)}</span><div>${E(p.como)}</div></li>`).join('')+'</ol>';
+       i.pasos.map(p=>`<li>${typeof pic==='function'?`<span class="mv-th">${pic(basesEjercicioMini({nm:p.nm,ms:''}),'stretch','thumb')}</span>`:''}<p><b>${E(p.nm)}</b> <span>${E(p.dosis)}</span></p><div>${E(p.como)}</div></li>`).join('')+'</ol>';
   }
   return h;
 }
