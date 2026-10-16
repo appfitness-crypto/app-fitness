@@ -2127,3 +2127,7 @@ button.pf-t:active{transform:scale(.98);}
 .dd-met[open]>summary .ico{transform:rotate(90deg);}
 .dd-met p{margin:0;padding:0 16px 14px;font-size:var(--fs-sm);line-height:1.5;color:var(--mu);}
 @media (prefers-reduced-motion:reduce){ .dd-met>summary .ico{transition:none;} }
+
+/* Progreso: últimas sesiones recortadas a 3 */
+.en-hist.corta>.en-h-row:nth-child(n+4){display:none;}
+.en-h-mas{display:block;width:100%;margin-top:8px;min-height:44px;border-radius:999px;border:1px solid var(--b2);background:var(--gl);color:var(--tx);font-family:inherit;font-weight:700;font-size:var(--fs-sm);cursor:pointer;}

@@ -805,12 +805,13 @@ function renderProgresoTab(){
       <div class="en-list">${prKeys.map(nm=>`<div class="en-li"><span>${esc(nm)}</span><b class="num">${enKg(prs[nm].kg)}</b><small>${fmtFecha(prs[nm].fecha)}</small></div>`).join('')}</div></section>`:''}
 
     <section class="en-sec"><div class="en-sec-h"><h3>Últimas sesiones</h3>${sesRev.length?'<span>Toca una para borrarla</span>':''}</div>
-      ${sesRev.length?`<div class="en-hist">${sesRev.map(x=>{ const f=new Date((x.fecha||'')+'T12:00:00'); const ok=!isNaN(f), est=sesEstado(x), v=enSesMedida(x);
+      ${sesRev.length?`<div class="en-hist${sesRev.length>3?' corta':''}" id="en-hist">${sesRev.map(x=>{ const f=new Date((x.fecha||'')+'T12:00:00'); const ok=!isNaN(f), est=sesEstado(x), v=enSesMedida(x);
         const ejTxt=x.ejPlan?`${x.ejercicios||0} de ${x.ejPlan} ejercicios`:`${x.ejercicios||0} ejercicios`;
         return `<div class="en-h-row" role="button" tabindex="0" onclick="sesBorrarPreg(${+x.ts||0},'${esc(x.fecha||'')}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-label="${esc(sc(x.tipo||'Sesión'))}, ${ok?f.getDate()+' de '+EN_MESES[f.getMonth()]:''}, ${EN_EST_TXT[est]}. Toca para borrarla">
         <div class="en-h-d"><b class="num">${ok?f.getDate():'—'}</b><small>${ok?EN_MESES[f.getMonth()].toUpperCase():''}</small></div>
         <div class="en-h-t"><b>${esc(sc(x.tipo||'Sesión'))}</b><span>${ejTxt} · <em class="en-est ${est}">${EN_EST_TXT[est]}</em>${x.sensacion?' · '+esc(x.sensacion):''}${x.movida?' · '+esc(movEtiqueta(x)):''}</span></div>
         <div class="en-h-v num">${v.v}${v.u?`<small>${v.u}</small>`:''}</div></div>`; }).join('')}</div>
+      ${sesRev.length>3?`<button type="button" class="en-h-mas" onclick="const h=document.getElementById('en-hist');h.classList.toggle('corta');this.textContent=h.classList.contains('corta')?'Ver las ${sesRev.length}':'Ver menos'">Ver las ${sesRev.length}</button>`:''}
       ${sesRev.some(x=>sesEstado(x)==='incompleta')?'<p class="en-h-nota">Las sesiones incompletas (menos de la mitad de las series) guardan tus pesos, pero no cuentan para tu meta de la semana, tu racha ni tu constancia.</p>':''}`
       :'<div class="empty-msg">Aún no hay sesiones registradas.<br>Al terminar tu primera sesión aparecerá aquí.</div>'}</section>
 
