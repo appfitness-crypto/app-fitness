@@ -1231,7 +1231,11 @@ const EJ_ALIAS={
   'aductores-en-mariposa':'estiramiento-mariposa',
   'apertura-de-pecho-en-marco-de-puerta':'estiramiento-de-pecho-en-marco-de-puerta',
   'torsion-acostado':'rotacion-de-columna-acostado',
-  'caminata-inclinada-eliptica':'eliptica'
+  'caminata-inclinada-eliptica':'eliptica',
+  'curl-barra-z':'curl-con-barra-z',
+  'curl-femoral-en-maquina':'curl-femoral-sentado',
+  'curl-femoral':'curl-femoral-acostado',
+  'aperturas-en-cable':'cruce-de-poleas'
 };
 function slugEj(nm){ const n=slugImg(nm); return EJ_ALIAS[n]||n; }
 function basesEjercicio(ej){ const n=slugEj(ej.nm), g=slugImg(ej.ms||''), g1=g.split('-')[0]; return ['ejercicios/'+n,'grupos/'+g,'grupos/'+g1]; }
