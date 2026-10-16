@@ -1524,6 +1524,7 @@ function renderPerfilTab(){
     </div>
     <div class="sec-row"><div class="sec-t">Cuenta</div></div>
     <div class="card pf-card">
+      ${typeof evalFilaPerfilHTML==='function'?evalFilaPerfilHTML(s):''}
       ${typeof instFilaPerfilHTML==='function'?instFilaPerfilHTML():''}
       ${s.status==='activo'?`<button type="button" class="pf-row" onclick="generarPDFRutina()">${it('file','sm')}<span id="btn-pdf-rutina">Descargar mi rutina en PDF</span>${ico('chev')}</button>`:''}
       ${s.entrenadorId?'':`<button type="button" class="pf-row" onclick="vincularEntrenador()">${it('key','sm')}<span>Tengo código de entrenador</span>${ico('chev')}</button>`}
