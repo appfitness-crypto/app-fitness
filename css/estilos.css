@@ -2131,3 +2131,38 @@ button.pf-t:active{transform:scale(.98);}
 /* Progreso: últimas sesiones recortadas a 3 */
 .en-hist.corta>.en-h-row:nth-child(n+4){display:none;}
 .en-h-mas{display:block;width:100%;margin-top:8px;min-height:44px;border-radius:999px;border:1px solid var(--b2);background:var(--gl);color:var(--tx);font-family:inherit;font-weight:700;font-size:var(--fs-sm);cursor:pointer;}
+
+/* ═══ Estilo híbrido: vidrio (glassmorphism) solo en lo que se ve de un vistazo ═══
+   Barra inferior, tarjeta de hoy, indicadores, Mi plan, Bloque y ventanas llevan vidrio con borde azul hielo.
+   Lo que se lee con atención (ejercicios, datos, listas) queda sólido con un borde azul hielo tenue. */
+:root,html[data-theme="light"]{--gx-a:rgba(200,242,58,.30);--gx-b:rgba(56,189,248,.24);--gx-c:rgba(251,146,60,.16);
+  --gx-glass:rgba(255,255,255,.60);--gx-glass2:rgba(255,255,255,.74);--gx-modal:rgba(255,255,255,.88);
+  --gx-line:rgba(110,190,235,.75);--gx-hi:rgba(225,245,255,.95);--gx-sh:0 10px 30px -14px rgba(30,50,70,.25);}
+html[data-theme="dark"]{--gx-a:rgba(200,242,58,.20);--gx-b:rgba(34,211,238,.22);--gx-c:rgba(249,115,22,.18);
+  --gx-glass:rgba(255,255,255,.055);--gx-glass2:rgba(255,255,255,.085);--gx-modal:rgba(15,21,28,.86);
+  --gx-line:rgba(165,225,255,.42);--gx-hi:rgba(200,238,255,.22);--gx-sh:0 14px 34px -16px rgba(0,0,0,.8);}
+html[data-theme="light2"]{--gx-a:rgba(168,110,255,.26);--gx-b:rgba(255,90,31,.16);--gx-c:rgba(56,189,248,.16);
+  --gx-glass:rgba(255,255,255,.58);--gx-glass2:rgba(255,255,255,.72);--gx-modal:rgba(255,255,255,.88);
+  --gx-line:rgba(120,195,240,.75);--gx-hi:rgba(230,246,255,.95);--gx-sh:0 10px 30px -14px rgba(60,30,110,.25);}
+/* Fondo con luces suaves detrás de la app del socio (el vidrio necesita color detrás para notarse) */
+body:has(#s-dash.on)::before,body:has(#s-det.on)::before{inset:-10%;
+  background:radial-gradient(36% 26% at 10% 12%,var(--gx-a),transparent 70%),radial-gradient(40% 30% at 94% 34%,var(--gx-b),transparent 70%),radial-gradient(38% 28% at 24% 86%,var(--gx-c),transparent 70%),var(--mesh);filter:blur(10px);}
+#s-dash.on,#s-dash .dash-section{background:transparent;}
+.bnav,#s-dash .today-c,#s-dash .st,.memb-c,.pg-plan{
+  background:linear-gradient(160deg,var(--gx-glass2),var(--gx-glass));
+  border:1px solid var(--gx-line);
+  -webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);
+  box-shadow:inset 0 1px 0 var(--gx-hi),var(--gx-sh);}
+.mbox{background:var(--gx-modal);border-color:var(--gx-line);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);box-shadow:inset 0 1px 0 var(--gx-hi),0 -20px 60px -20px rgba(0,0,0,.5);}
+.hero-card{border:1px solid var(--gx-line);box-shadow:inset 0 1px 0 var(--gx-hi),var(--gx-sh);}
+.hero-card::after{display:none;}
+.hero-card img{object-position:60% 22%;}
+#s-dash .card,#s-dash .en-card,#s-dash .en-dia,#s-dash .lg,#s-dash .pf-t,#s-dash .pf-met,#s-dash .en-hist,#s-dash .day-row,#s-dash .pg-home,.dd-ejs,.dd-resumen,.dd-met{border-color:color-mix(in srgb,var(--gx-line) 45%,var(--b));}
+html[data-theme="light"] .st-l,html[data-theme="light"] .memb-k{color:#4A5866;}
+@media (prefers-reduced-transparency:reduce){
+  .bnav,#s-dash .today-c,#s-dash .st,.memb-c,.pg-plan,.mbox{-webkit-backdrop-filter:none;backdrop-filter:none;}
+  .bnav,#s-dash .today-c,#s-dash .st,.memb-c,.pg-plan{background:var(--gl);}
+}
+/* Campo de las ventanas de confirmación (cintura, código, etc.): mismo estilo que los demás campos */
+#uic-input{min-height:52px;padding:0 16px;background:var(--in-bg);border:1.5px solid var(--gx-line,var(--b));border-radius:var(--r-md);font-family:var(--fb);font-size:var(--fs-lg);font-weight:500;color:var(--tx);outline:none;caret-color:var(--v);transition:border-color .2s,box-shadow .2s;}
+#uic-input:focus{border-color:var(--v2);box-shadow:0 0 0 4px color-mix(in srgb,var(--v2) 20%,transparent);}
