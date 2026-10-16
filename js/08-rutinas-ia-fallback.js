@@ -1371,6 +1371,7 @@ function refreshDash(){
     ${asist?`<div class="asist-w">${asist}</div>`:''}
     ${pqCardSocio(s)}
     ${evalCardSocio(s)}
+    ${typeof instTarjetaHTML==='function'?instTarjetaHTML():''}
     ${rmAvisoHTML(s)}
 
     <div class="hero-card">
@@ -1523,6 +1524,7 @@ function renderPerfilTab(){
     </div>
     <div class="sec-row"><div class="sec-t">Cuenta</div></div>
     <div class="card pf-card">
+      ${typeof instFilaPerfilHTML==='function'?instFilaPerfilHTML():''}
       ${s.status==='activo'?`<button type="button" class="pf-row" onclick="generarPDFRutina()">${it('file','sm')}<span id="btn-pdf-rutina">Descargar mi rutina en PDF</span>${ico('chev')}</button>`:''}
       ${s.entrenadorId?'':`<button type="button" class="pf-row" onclick="vincularEntrenador()">${it('key','sm')}<span>Tengo código de entrenador</span>${ico('chev')}</button>`}
       <button type="button" class="pf-row danger" onclick="logoutSocio()">${it('logout','sm')}<span>Cerrar sesión</span>${ico('chev')}</button>
