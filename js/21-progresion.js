@@ -470,11 +470,12 @@ function pqCardSocio(s){
       <button type="button" class="btn-go" onclick="pqVerProgreso(true)">Ver qué cambió</button></div>`;
   return '';
 }
-function pqPlanChip(s){
+// weeks: barras de avance del bloque (Rutina las pasa para tener una sola tarjeta)
+function pqPlanChip(s,weeks){
   if(!s || s.status!=='activo') return '';
   const b=pqBloque(s), sem=Math.min(pqSemanaActual(s),b.semanas);
   const dl=typeof semanaDescarga==='function'&&semanaDescarga(s);
-  return `<button type="button" class="pg-plan" onclick="pqVerProgreso()"><div><b>Bloque ${esc(b.n)}</b><span>Semana ${sem} de ${b.semanas}${dl?' · descarga':''}</span></div><em>Mi progresión ${ico('chev')}</em></button>`;
+  return `<button type="button" class="pg-plan" onclick="pqVerProgreso()"><div class="pg-plan-l"><b>Bloque ${esc(b.n)}</b><span>Semana ${sem} de ${b.semanas}${dl?' · descarga':''}</span>${weeks?`<div class="en-weeks" style="grid-template-columns:repeat(${b.semanas},1fr)" aria-hidden="true">${weeks}</div>`:''}</div><em>Mi progresión ${ico('chev')}</em></button>`;
 }
 function pqVerProgreso(marcarVisto){
   const s=activeSocio; if(!s) return;
