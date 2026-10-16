@@ -279,12 +279,11 @@ function renderRutinaTab(){
   cont.innerHTML=`
     ${appHead('Mi plan',esc(sc(s.objetivo||'Entrenar'))+' · '+s.dias+' días por semana')}
     ${pend}
-    ${pqPlanChip(s)}
-    ${casaChipSocio(s)}
-    <div class="en-block">
+    ${pqPlanChip(s,weeks)||`<div class="en-block">
       <div class="en-block-t"><b>Semana ${semA} de ${b.semanas}</b><span>Bloque ${b.n}${s.asignado?' · '+esc(tc(String(s.asignado)).split(' ')[0]):''}</span></div>
       <div class="en-weeks" style="grid-template-columns:repeat(${b.semanas},1fr)" aria-hidden="true">${weeks}</div>
-    </div>
+    </div>`}
+    ${casaChipSocio(s)}
     <div class="en-strip" role="group" aria-label="Días de esta semana">${strip}</div>
     <div id="en-dia">${rutDiaHTML(s)}</div>
     <div class="en-tip">${ico('spark')}<span>Toca un ejercicio para ver cómo se hace. El peso sugerido sale de tu última sesión: si completaste todas las series, subes un poco; si no, repites el peso.</span></div>`;

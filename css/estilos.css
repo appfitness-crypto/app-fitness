@@ -2044,3 +2044,8 @@ body.vista-socio #s-dash{padding-top:84px;}
 .ev-mini-x{flex-shrink:0;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;border:none;background:none;color:var(--mu);cursor:pointer;}
 .ev-mini-x .ico{width:18px;height:18px;}
 @media(max-width:380px){ .ev-mini{flex-wrap:wrap;} .ev-mini-b{order:3;} }
+
+/* Bloque y avance de semanas en una sola tarjeta (Rutina) */
+.pg-plan-l{flex:1;min-width:0;}
+.pg-plan-l span{display:block;}
+.pg-plan .en-weeks{margin-top:10px;max-width:420px;}
