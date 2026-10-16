@@ -115,9 +115,9 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 182 | En el estilo nuevo: 3 ejercicios con imagen y video (sentadilla goblet, peso muerto rumano con mancuernas y sentadilla libre) y 179 con imagen. |
+| **Listo** | 183 | En el estilo nuevo: 3 ejercicios con imagen y video (sentadilla goblet, peso muerto rumano con mancuernas y sentadilla libre) y 180 con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
-| **Falta** | 44 | No tienen imagen. |
+| **Falta** | 43 | No tienen imagen. |
 
 Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
@@ -331,7 +331,7 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
-| Caminata inclinada | `caminata-inclinada` | Cardiovascular | Falta |
+| Caminata inclinada | `caminata-inclinada` | Cardiovascular | **Listo** (imagen) |
 | Elíptica | `eliptica` | Cardiovascular | **Listo** (imagen) |
 | Bicicleta estática | `bicicleta-estatica` | Cardiovascular | **Listo** (imagen) |
 | Remo ergómetro | `remo-ergometro` | Cardiovascular · Espalda | **Listo** (imagen) |
