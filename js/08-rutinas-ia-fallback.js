@@ -1231,7 +1231,7 @@ const EJ_ALIAS={
   'aductores-en-mariposa':'estiramiento-mariposa',
   'apertura-de-pecho-en-marco-de-puerta':'estiramiento-de-pecho-en-marco-de-puerta',
   'torsion-acostado':'rotacion-de-columna-acostado',
-  'caminata-inclinada-eliptica':'eliptica',
+  'caminata-inclinada-eliptica':'caminata-inclinada',
   'curl-barra-z':'curl-con-barra-z',
   'curl-femoral-en-maquina':'curl-femoral-sentado',
   'curl-femoral':'curl-femoral-acostado',
