@@ -115,9 +115,9 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 168 | En el estilo nuevo: 3 ejercicios con imagen y video (sentadilla goblet, peso muerto rumano con mancuernas y sentadilla libre) y 165 con imagen. |
+| **Listo** | 182 | En el estilo nuevo: 3 ejercicios con imagen y video (sentadilla goblet, peso muerto rumano con mancuernas y sentadilla libre) y 179 con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
-| **Falta** | 58 | No tienen imagen. |
+| **Falta** | 44 | No tienen imagen. |
 
 Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
@@ -169,13 +169,13 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Pantorrilla a una pierna con mancuerna | `pantorrilla-a-una-pierna-con-mancuerna` | Gemelos | **Listo** (imagen) |
 | Press declinado con mancuernas | `press-declinado-con-mancuernas` | Pecho (porción baja) | **Listo** (imagen) |
 | Press en el suelo con mancuernas | `press-en-el-suelo-con-mancuernas` | Pecho mayor · Tríceps | Falta |
-| Aperturas inclinadas con mancuernas | `aperturas-inclinadas-con-mancuernas` | Pecho superior | Falta |
-| Remo al mentón agarre ancho | `remo-al-menton-agarre-ancho` | Deltoide lateral · Trapecio | Falta |
+| Aperturas inclinadas con mancuernas | `aperturas-inclinadas-con-mancuernas` | Pecho superior | **Listo** (imagen) |
+| Remo al mentón agarre ancho | `remo-al-menton-agarre-ancho` | Deltoide lateral · Trapecio | **Listo** (imagen) |
 | Aguante lateral isométrico con mancuernas | `aguante-lateral-isometrico-con-mancuernas` | Deltoide lateral | Falta |
-| Rotación externa acostado con mancuerna | `rotacion-externa-acostado-con-mancuerna` | Manguito rotador | Falta |
+| Rotación externa acostado con mancuerna | `rotacion-externa-acostado-con-mancuerna` | Manguito rotador | **Listo** (imagen) |
 | Encogimientos con mancuernas | `encogimientos-con-mancuernas` | Trapecio superior | **Listo** (imagen) |
-| Curl inclinado con mancuernas | `curl-inclinado-con-mancuernas` | Bíceps (cabeza larga) | Falta |
-| Curl concentrado | `curl-concentrado` | Bíceps | Falta |
+| Curl inclinado con mancuernas | `curl-inclinado-con-mancuernas` | Bíceps (cabeza larga) | **Listo** (imagen) |
+| Curl concentrado | `curl-concentrado` | Bíceps | **Listo** (imagen) |
 | Curl isométrico a 90° | `curl-isometrico-a-90` | Bíceps · Braquial | Falta |
 | Patada de tríceps con mancuerna | `patada-de-triceps-con-mancuerna` | Tríceps | **Listo** (imagen) |
 | Press francés con mancuernas | `press-frances-con-mancuernas` | Tríceps | **Listo** (imagen) |
@@ -304,28 +304,28 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 |---|---|---|---|
 | Patada de glúteo en polea | `patada-de-gluteo-en-polea` | Glúteo mayor | **Listo** (imagen) |
 | Cruce de poleas | `cruce-de-poleas` | Pecho (porción media) | **Listo** (imagen) |
-| Cruce de poleas de abajo hacia arriba | `cruce-de-poleas-de-abajo-hacia-arriba` | Pecho superior | Falta |
+| Cruce de poleas de abajo hacia arriba | `cruce-de-poleas-de-abajo-hacia-arriba` | Pecho superior | **Listo** (imagen) |
 | Cruce de poleas de arriba hacia abajo | `cruce-de-poleas-de-arriba-hacia-abajo` | Pecho inferior | **Listo** (imagen) |
 | Jalón al pecho | `jalon-al-pecho` | Dorsal ancho | **Listo** (imagen) |
-| Jalón unilateral en polea | `jalon-unilateral-en-polea` | Dorsal ancho | Falta |
+| Jalón unilateral en polea | `jalon-unilateral-en-polea` | Dorsal ancho | **Listo** (imagen) |
 | Pullover en polea alta | `pullover-en-polea-alta` | Dorsal ancho | **Listo** (imagen) |
 | Remo en polea baja | `remo-en-polea-baja` | Dorsal · Romboides | **Listo** (imagen) |
 | Face pull | `face-pull` | Deltoides posterior · Manguito | **Listo** (imagen) |
 | Elevación lateral en polea | `elevacion-lateral-en-polea` | Deltoides lateral | **Listo** (imagen) |
-| Elevación frontal en polea | `elevacion-frontal-en-polea` | Deltoides anterior | Falta |
+| Elevación frontal en polea | `elevacion-frontal-en-polea` | Deltoides anterior | **Listo** (imagen) |
 | Rotación externa en polea | `rotacion-externa-en-polea` | Manguito rotador | Falta |
 | Curl en polea baja | `curl-en-polea-baja` | Bíceps | **Listo** (imagen) |
-| Curl martillo en polea con cuerda | `curl-martillo-en-polea-con-cuerda` | Braquial | Falta |
+| Curl martillo en polea con cuerda | `curl-martillo-en-polea-con-cuerda` | Braquial | **Listo** (imagen) |
 | Extensión de tríceps en polea | `extension-de-triceps-en-polea` | Tríceps | **Listo** (imagen) |
 | Press Pallof | `press-pallof` | Core antirrotación | **Listo** (imagen) |
-| Crunch en polea | `crunch-en-polea` | Recto abdominal | Falta |
-| Abducción de cadera en polea | `abduccion-de-cadera-en-polea` | Glúteo medio | Falta |
-| Pull-through en polea | `pull-through-en-polea` | Glúteo · Femorales | Falta |
-| Curl femoral en polea con tobillera | `curl-femoral-en-polea-con-tobillera` | Femorales | Falta |
+| Crunch en polea | `crunch-en-polea` | Recto abdominal | **Listo** (imagen) |
+| Abducción de cadera en polea | `abduccion-de-cadera-en-polea` | Glúteo medio | **Listo** (imagen) |
+| Pull-through en polea | `pull-through-en-polea` | Glúteo · Femorales | **Listo** (imagen) |
+| Curl femoral en polea con tobillera | `curl-femoral-en-polea-con-tobillera` | Femorales | **Listo** (imagen) |
 | Jalón agarre neutro | `jalon-agarre-neutro` | Dorsal · Bíceps | **Listo** (imagen) |
 | Extensión de tríceps con cuerda | `extension-de-triceps-con-cuerda` | Tríceps | **Listo** (imagen) |
 | Pallof isométrico (sostén al frente) | `pallof-isometrico-sosten-al-frente` | Core · Oblicuos | **Listo** (imagen) |
-| Leñador en polea | `lenador-en-polea` | Oblicuos · Core | Falta |
+| Leñador en polea | `lenador-en-polea` | Oblicuos · Core | **Listo** (imagen) |
 
 ### Cardio
 
