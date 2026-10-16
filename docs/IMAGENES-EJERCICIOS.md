@@ -115,9 +115,9 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 148 | En el estilo nuevo: 3 ejercicios con imagen y video (sentadilla goblet, peso muerto rumano con mancuernas y sentadilla libre) y 145 con imagen. |
+| **Listo** | 168 | En el estilo nuevo: 3 ejercicios con imagen y video (sentadilla goblet, peso muerto rumano con mancuernas y sentadilla libre) y 165 con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
-| **Falta** | 78 | No tienen imagen. |
+| **Falta** | 58 | No tienen imagen. |
 
 Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
@@ -332,41 +332,41 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
 | Caminata inclinada | `caminata-inclinada` | Cardiovascular | Falta |
-| Elíptica | `eliptica` | Cardiovascular | Falta |
-| Bicicleta estática | `bicicleta-estatica` | Cardiovascular | Falta |
-| Remo ergómetro | `remo-ergometro` | Cardiovascular · Espalda | Falta |
-| Trote en caminadora | `trote-en-caminadora` | Sistema cardiovascular | Falta |
-| Bicicleta de aire | `bicicleta-de-aire` | Sistema cardiovascular | Falta |
+| Elíptica | `eliptica` | Cardiovascular | **Listo** (imagen) |
+| Bicicleta estática | `bicicleta-estatica` | Cardiovascular | **Listo** (imagen) |
+| Remo ergómetro | `remo-ergometro` | Cardiovascular · Espalda | **Listo** (imagen) |
+| Trote en caminadora | `trote-en-caminadora` | Sistema cardiovascular | **Listo** (imagen) |
+| Bicicleta de aire | `bicicleta-de-aire` | Sistema cardiovascular | **Listo** (imagen) |
 | Escaladora (stair climber) | `escaladora-stair-climber` | Sistema cardiovascular · Glúteo | Falta |
-| Esquiadora (ski erg) | `esquiadora-ski-erg` | Sistema cardiovascular · Dorsal | Falta |
+| Esquiadora (ski erg) | `esquiadora-ski-erg` | Sistema cardiovascular · Dorsal | **Listo** (imagen) |
 
 ### Discos / landmine
 
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
-| Sentadilla con disco al pecho | `sentadilla-con-disco-al-pecho` | Cuádriceps · Glúteo | Falta |
-| Sentadilla landmine | `sentadilla-landmine` | Cuádriceps · Core | Falta |
-| Hip thrust con disco | `hip-thrust-con-disco` | Glúteo mayor | Falta |
-| Curl femoral deslizando con discos | `curl-femoral-deslizando-con-discos` | Femorales · Glúteo | Falta |
+| Sentadilla con disco al pecho | `sentadilla-con-disco-al-pecho` | Cuádriceps · Glúteo | **Listo** (imagen) |
+| Sentadilla landmine | `sentadilla-landmine` | Cuádriceps · Core | **Listo** (imagen) |
+| Hip thrust con disco | `hip-thrust-con-disco` | Glúteo mayor | **Listo** (imagen) |
+| Curl femoral deslizando con discos | `curl-femoral-deslizando-con-discos` | Femorales · Glúteo | **Listo** (imagen) |
 | Press de pecho con disco (squeeze press) | `press-de-pecho-con-disco-squeeze-press` | Pecho mayor | Falta |
-| Remo T con barra (landmine) | `remo-t-con-barra-landmine` | Espalda media · Dorsal | Falta |
-| Press landmine a una mano | `press-landmine-a-una-mano` | Deltoide anterior · Pecho superior | Falta |
+| Remo T con barra (landmine) | `remo-t-con-barra-landmine` | Espalda media · Dorsal | **Listo** (imagen) |
+| Press landmine a una mano | `press-landmine-a-una-mano` | Deltoide anterior · Pecho superior | **Listo** (imagen) |
 | Elevación frontal con disco | `elevacion-frontal-con-disco` | Deltoide anterior | Falta |
 | Aguante frontal con disco | `aguante-frontal-con-disco` | Deltoide anterior · Core | Falta |
-| Encogimientos con disco | `encogimientos-con-disco` | Trapecio superior | Falta |
-| Curl con disco | `curl-con-disco` | Braquial · Bíceps | Falta |
-| Extensión de tríceps con disco sobre la cabeza | `extension-de-triceps-con-disco-sobre-la-cabeza` | Tríceps | Falta |
-| Plancha con disco en la espalda | `plancha-con-disco-en-la-espalda` | Core | Falta |
-| Giro ruso con disco | `giro-ruso-con-disco` | Oblicuos | Falta |
-| Caminata con disco sobre la cabeza | `caminata-con-disco-sobre-la-cabeza` | Core · Hombro | Falta |
+| Encogimientos con disco | `encogimientos-con-disco` | Trapecio superior | **Listo** (imagen) |
+| Curl con disco | `curl-con-disco` | Braquial · Bíceps | **Listo** (imagen) |
+| Extensión de tríceps con disco sobre la cabeza | `extension-de-triceps-con-disco-sobre-la-cabeza` | Tríceps | **Listo** (imagen) |
+| Plancha con disco en la espalda | `plancha-con-disco-en-la-espalda` | Core | **Listo** (imagen) |
+| Giro ruso con disco | `giro-ruso-con-disco` | Oblicuos | **Listo** (imagen) |
+| Caminata con disco sobre la cabeza | `caminata-con-disco-sobre-la-cabeza` | Core · Hombro | **Listo** (imagen) |
 
 ### TRX
 
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
-| Sentadilla asistida en TRX | `sentadilla-asistida-en-trx` | Cuádriceps · Glúteo | Falta |
+| Sentadilla asistida en TRX | `sentadilla-asistida-en-trx` | Cuádriceps · Glúteo | **Listo** (imagen) |
 | Sentadilla a una pierna asistida en TRX | `sentadilla-a-una-pierna-asistida-en-trx` | Cuádriceps · Glúteo | Falta |
-| Zancada con pie en TRX | `zancada-con-pie-en-trx` | Glúteo · Cuádriceps | Falta |
+| Zancada con pie en TRX | `zancada-con-pie-en-trx` | Glúteo · Cuádriceps | **Listo** (imagen) |
 | Curl femoral en TRX | `curl-femoral-en-trx` | Femorales · Glúteo | Falta |
 | Lagartijas en TRX | `lagartijas-en-trx` | Pecho · Core · Hombro | Falta |
 | Aperturas en TRX | `aperturas-en-trx` | Pecho mayor | Falta |

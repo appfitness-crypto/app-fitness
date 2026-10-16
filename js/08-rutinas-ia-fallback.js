@@ -1230,7 +1230,8 @@ const EJ_ALIAS={
   'isquiotibiales-sentado':'estiramiento-de-isquiotibiales',
   'aductores-en-mariposa':'estiramiento-mariposa',
   'apertura-de-pecho-en-marco-de-puerta':'estiramiento-de-pecho-en-marco-de-puerta',
-  'torsion-acostado':'rotacion-de-columna-acostado'
+  'torsion-acostado':'rotacion-de-columna-acostado',
+  'caminata-inclinada-eliptica':'eliptica'
 };
 function slugEj(nm){ const n=slugImg(nm); return EJ_ALIAS[n]||n; }
 function basesEjercicio(ej){ const n=slugEj(ej.nm), g=slugImg(ej.ms||''), g1=g.split('-')[0]; return ['ejercicios/'+n,'grupos/'+g,'grupos/'+g1]; }
