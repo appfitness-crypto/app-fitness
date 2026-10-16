@@ -2027,3 +2027,11 @@ html[data-theme="dark"] .en-peso-mini button{color:#0A0E13;}
 .vb-btn .ico{width:15px;height:15px;}
 body.vista-socio #s-dash{padding-top:84px;}
 .vb-tx b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* Desvanecido detrás de la barra inferior: el contenido se pierde al pasar por debajo, sin bloque sólido */
+.bnav-fade{position:fixed;left:0;right:0;bottom:0;height:calc(128px + var(--safe-b));z-index:119;pointer-events:none;
+  background:linear-gradient(to top,var(--dk) 0%,var(--dk) 42%,color-mix(in srgb,var(--dk) 82%,transparent) 62%,color-mix(in srgb,var(--dk) 40%,transparent) 82%,transparent 100%);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  -webkit-mask-image:linear-gradient(to top,#000 55%,transparent);mask-image:linear-gradient(to top,#000 55%,transparent);}
+@media(min-width:1025px){ .bnav-fade{height:120px;} }
+@media (prefers-reduced-transparency:reduce){ .bnav-fade{-webkit-backdrop-filter:none;backdrop-filter:none;} }
