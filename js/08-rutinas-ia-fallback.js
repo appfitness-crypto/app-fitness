@@ -1424,10 +1424,10 @@ function temaSegHTML(){
 function rmAvisoHTML(s){
   if(s.avisoRMVisto || s.status!=='activo') return '';
   if(!rmListaSocio(s).length) return '';
-  return `<div class="pg-home soft" style="cursor:pointer" onclick="dashTab('perfil');abrirModalRM()">
-    <div class="pg-home-m">💪 <b>¿Ya conoces tu peso máximo en algún ejercicio?</b> Anótalo en tu Perfil → Tus RM, y tu peso de entrenamiento se calcula desde hoy en vez de esperar a que se vaya calculando solo.
-    <span style="display:block;margin-top:6px;color:var(--v);font-weight:700">Ir a Tus RM →</span></div>
-  </div>`;
+  return `<div class="pg-home soft ev-mini">
+    <div class="ev-mini-tx"><div class="pg-home-k">Tu peso máximo</div><div class="ev-mini-m">Si ya lo conoces, tu peso sugerido se calcula desde hoy</div></div>
+    <button type="button" class="sd-b ev-mini-b" onclick="dashTab('perfil');abrirModalRM()">Anotarlo</button>
+    <button type="button" class="ev-mini-x" onclick="activeSocio.avisoRMVisto=true;dbSave(activeSocio.code);refreshDash()" aria-label="Ocultar aviso">${ico('x')}</button></div>`;
 }
 function rmListaSocio(s){
   const vistos=new Set(), lista=[];
