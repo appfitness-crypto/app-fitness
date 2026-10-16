@@ -469,19 +469,28 @@ function renderNutricionTab(){
       ${menu.map(m=>`<div class="nut-detail" style="align-items:flex-start"><span style="flex:0 0 auto;font-weight:700;color:var(--tx)">${esc(m.nombre)}</span><b style="text-align:right;font-weight:500;color:var(--mu)">${esc(m.detalle)}</b></div>`).join('')}
     </div>`:''}
 
-    <div class="card">
-      <div class="card-t">${it('info','sm')}${nut.manual?'Cálculo automático (referencia)':'Cómo se calculó (datos reales)'}</div>
+    <div class="flota" data-flota>
+      <div class="flota-k">${ico('star')}Guía de tu ${nut.manual?'nutriólogo':'entrenador'}</div>
+      <div class="flota-t">${nut.manual&&s.nutricion.nota?esc(s.nutricion.nota):base.nota}</div>
+      <div class="flota-n">Es una guía${nut.manual?' personalizada':' con fórmulas estándar'}. Si tienes alguna condición médica, coméntala con tu médico o nutriólogo.</div>
+    </div>
+
+    <details class="card nut-calc">
+      <summary class="card-t">${it('info','sm')}<span class="nc-t">${nut.manual?'Cálculo automático (referencia)':'Cómo se calculó'}<small>Toca para ver los datos</small></span>${ico('chev')}</summary>
       <div class="nut-detail"><span>Metabolismo basal (Mifflin-St Jeor)</span><b>${base.bmr} kcal</b></div>
       <div class="nut-detail"><span>Factor de actividad (${s.dias} días/sem)</span><b>× ${base.factor}</b></div>
       <div class="nut-detail"><span>Gasto total diario (TDEE)</span><b>${base.tdee} kcal</b></div>
       <div class="nut-detail"><span>Ajuste por objetivo</span><b>${base.kcal} kcal</b></div>
       <div class="nut-detail"><span>Agua recomendada (35 ml/kg)</span><b>${base.agua} L/día + 0.5 L por sesión</b></div>
-    </div>
-
-    <div class="card">
-      <div class="card-t">${it('star','sm')}Guía de tu ${nut.manual?'nutriólogo':'entrenador'}</div>
-      <div style="font-size:11px;color:var(--n);font-family:var(--fb);line-height:1.8">${nut.manual&&s.nutricion.nota?esc(s.nutricion.nota):base.nota}</div>
-    </div>
-
-    <div style="font-size:11.5px;color:var(--mu);font-family:var(--fb);line-height:1.7;padding:0 4px;">⚕ Estos valores son una guía${nut.manual?' personalizada por tu nutriólogo o entrenador':' calculada con fórmulas estándar'}. Coméntalos con tu entrenador y, si tienes alguna condición médica, con tu médico o nutriólogo.</div>`;
+    </details>`;
+  flotaObservar(document.getElementById('dsec-nutricion'));
+}
+// Tarjetas "flotantes": aparecen al pasar por la mitad de la pantalla y se desvanecen al seguir bajando o subir
+let FLOTA_OBS=null;
+function flotaObservar(root){
+  const els=root?root.querySelectorAll('[data-flota]'):[];
+  if(!els.length) return;
+  if(!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches){ els.forEach(e=>e.classList.add('vis')); return; }
+  if(!FLOTA_OBS) FLOTA_OBS=new IntersectionObserver(ents=>ents.forEach(en=>en.target.classList.toggle('vis',en.isIntersecting)),{rootMargin:'-10% 0px -22% 0px',threshold:0.15});
+  els.forEach(e=>FLOTA_OBS.observe(e));
 }
