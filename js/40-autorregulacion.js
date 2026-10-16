@@ -72,7 +72,7 @@ function cargaHoy(c,aj){
 function progPreguntaHoy(s){ const r=progSocio(s).hoy; return !!r && r!=='mantener' && !progSuave(s); }
 function preguntarComoLlegas(s,listo){
   uiOpciones('¿Cómo llegas hoy?',[
-    {value:'bien',label:'Con energía',sub:'Dormí bien y tengo ganas'},
+    {value:'bien',label:'Con energía',sub:'Quiero entrenar'},
     {value:'normal',label:'Normal'},
     {value:'mal',label:'Cansado o dormí mal',sub:'Tu entrenador ajusta la sesión de hoy'}],
     v=>{
