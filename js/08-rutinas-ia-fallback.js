@@ -1213,7 +1213,24 @@ const EJ_ALIAS={
   'prensa-de-piernas-rango-parcial':'prensa-de-piernas',
   'press-pallof-anti-rotacion':'press-pallof',
   'rotacion-externa-con-banda-codo-fijo':'rotacion-externa-con-banda',
-  'movilidad-de-columna-gato-camello':'gato-camello'
+  'movilidad-de-columna-gato-camello':'gato-camello',
+  // Movilidad y estiramiento: rutinas completas y sus movimientos usan la imagen de su postura principal
+  'movilidad-articular-dinamica':'sentadilla-profunda',
+  'sentadilla-profunda-con-pausa':'sentadilla-profunda',
+  'movilidad-de-cadera-y-hombro':'estocada-con-rotacion-toracica',
+  'zancada-baja-con-rotacion-de-torso':'estocada-con-rotacion-toracica',
+  'movilidad-y-estiramiento':'estiramiento-de-flexores-de-cadera-con-brazo-arriba',
+  'flexor-de-cadera-en-zancada-baja':'estiramiento-de-flexores-de-cadera-con-brazo-arriba',
+  'flexor-de-cadera-en-media-rodilla':'estiramiento-de-flexores-de-cadera',
+  'circulos-de-cadera-hidrante':'fire-hydrant-en-cuadrupedia',
+  'rotacion-de-espalda-alta-en-cuatro-apoyos':'movilidad-de-columna-toracica',
+  'paso-de-banda-o-palo-sobre-la-cabeza':'movilidad-de-hombro-con-banda',
+  'deslizamiento-en-pared':'deslizamientos-en-pared',
+  'postura-del-nino-con-brazos-al-frente':'postura-del-nino',
+  'isquiotibiales-sentado':'estiramiento-de-isquiotibiales',
+  'aductores-en-mariposa':'estiramiento-mariposa',
+  'apertura-de-pecho-en-marco-de-puerta':'estiramiento-de-pecho-en-marco-de-puerta',
+  'torsion-acostado':'rotacion-de-columna-acostado'
 };
 function slugEj(nm){ const n=slugImg(nm); return EJ_ALIAS[n]||n; }
 function basesEjercicio(ej){ const n=slugEj(ej.nm), g=slugImg(ej.ms||''), g1=g.split('-')[0]; return ['ejercicios/'+n,'grupos/'+g,'grupos/'+g1]; }
