@@ -75,6 +75,10 @@ function staffMenu(){
       return `<button type="button" class="sm-row${cls}" onclick="staffMenuIr('${b.id}')"><span class="sm-ic">${ic}</span><span>${esc(lb)}</span></button>`;
     }).join('');
   });
+  if(typeof verPerfilActivo==='function'){
+    const on=verPerfilActivo();
+    html=html.replace('<div class="sm-g">Cuenta</div>',`<div class="sm-g">Herramientas</div><button type="button" class="sm-row" role="switch" aria-checked="${on}" onclick="verPerfilAlternar();staffMenu()"><span class="sm-ic">${ico('user')}</span><span style="flex:1">Botón "Ver su perfil"<small class="sm-sub">Entra a la app del socio para explicarle cómo funciona</small></span><span class="sm-sw${on?' on':''}" aria-hidden="true"></span></button><div class="sm-g">Cuenta</div>`);
+  }
   document.getElementById('staff-menu-title').textContent='Menú';
   document.getElementById('staff-menu-body').innerHTML=html;
   document.getElementById('modal-staff-menu').classList.add('open');
@@ -125,7 +129,7 @@ function staffRenderList(){
     return `<div class="sl-item${staffActivoId===s.code?' sel':''}"${semStyle} onclick="staffOpenSocio('${esc(s.code)}')" role="button" tabindex="0">
       <div class="sl-ini">${esc(ini)}</div>
       <div class="sl-tx"><div class="sl-nm">${esc(tc(s.nombre))}</div><div class="sl-sub">${esc(s.id)} · ${esc(sc(s.objetivo))}${esc(pqBadgeLista(s))}</div></div>
-      <span class="sl-st ${membBadgeCls(me)}">${membBadgeTxt(me)}</span>
+      <div class="sl-der"><span class="sl-st ${membBadgeCls(me)}">${membBadgeTxt(me)}</span>${typeof verPerfilBtnHTML==='function'?verPerfilBtnHTML(s):''}</div>
     </div>`;
   }).join('') : `<div class="empty-msg">${q?'Ningún socio coincide con tu búsqueda.':'Aún no hay socios en esta lista.'}</div>`;
 }

@@ -32,7 +32,7 @@ function instPlataforma(){
   return {ios, android, movil:ios||android, dentroDe, nav};
 }
 // ¿Tiene sentido ofrecerla? En PC solo si el navegador la puede instalar
-function instDisponible(){ if(instInstalada()) return false; const p=instPlataforma(); return p.movil || !!INST_AVISO; }
+function instDisponible(){ if(instInstalada() || (typeof vistaSocioActiva==='function' && vistaSocioActiva())) return false; const p=instPlataforma(); return p.movil || !!INST_AVISO; }
 
 const INST_POSP='fsp-inst-pospuesta';
 function instPospuesta(){ try{ const t=+localStorage.getItem(INST_POSP)||0; return t && Date.now()-t<7*864e5; }catch(_){ return false; } }

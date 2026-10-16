@@ -1301,7 +1301,7 @@ function fechasSemana(){
 function refreshDash(){
   actualizarHoy();
   const s=activeSocio; if(!s) return;
-  if(membBloqueoSocio(s)){ logoutSocio(); showToast(MEMB_MSG_INACTIVO); return; }
+  if(!(typeof vistaSocioActiva==='function' && vistaSocioActiva()) && membBloqueoSocio(s)){ logoutSocio(); showToast(MEMB_MSG_INACTIVO); return; }
   { const av=document.getElementById('memb-aviso-socio'); if(av) av.innerHTML=membAvisoSocioHTML(s); }
   asegurarLogs(s);
   const cont=document.getElementById('dsec-inicio');

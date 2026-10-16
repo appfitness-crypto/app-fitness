@@ -272,6 +272,7 @@ function uiEntrada(msg,placeholder,label,onOk,opts){
 // y pasan a seguir la filosofía del plan de la app.
 // ═════════════════════════════════════════
 function eliminarMiCuenta(){
+  if(typeof vistaSocioActiva==='function' && vistaSocioActiva()){ showToast('Desde la vista del socio no se puede eliminar su cuenta.'); return; }   // la sesión abierta es la del staff
   const u=fbAuth&&fbAuth.currentUser;
   if(!u || u.isAnonymous){ showToast('Entra a tu cuenta para eliminarla.'); return; }
   if(fbRolDB==='coordinador'){ showToast('La cuenta del director no se elimina desde la app. Quítale el rol en la consola de Firebase primero.'); return; }

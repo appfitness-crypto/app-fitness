@@ -153,6 +153,9 @@ function idxAplicarSocio(code, raw){
   const local=DB.socios[code];
   if(staffDirty.has(code) && idxCompleto(local)){ s.rutina=local.rutina; s.status=local.status; s.asignado=local.asignado; }
   DB.socios[code]=asegurarLogs(s);
+  if(typeof activeSocio!=='undefined' && activeSocio && activeSocio.code===code && activeSocio!==DB.socios[code]){   // staff viendo la app del socio
+    DB.socios[code]._asistHoy=activeSocio._asistHoy; DB.socios[code]._yaRegistrado=activeSocio._yaRegistrado; activeSocio=DB.socios[code];
+  }
   guardarLocal();
 }
 function idxCargarSocio(code){
