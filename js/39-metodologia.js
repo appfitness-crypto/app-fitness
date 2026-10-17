@@ -117,7 +117,7 @@ function metEsfuerzo(metodo,letra,nivel,pctT,rirT){
   return {txt:'Termina sintiendo que podías hacer '+rt+' reps más',rir};
 }
 // Modelo de periodización para el objetivo del socio (cuestionario) o el modelo general del entrenador
-const MET_OBJ_PER={'FUERZA PURA':'F','GANAR MÚSCULO':'H','PERDER PESO':'G','RESISTENCIA':'R','RENDIMIENTO DEPORTIVO':'D'};
+const MET_OBJ_PER={'FUERZA PURA':'F','GANAR MÚSCULO':'H','RECOMPOSICIÓN CORPORAL':'H','PERDER PESO':'G','RESISTENCIA':'R','RENDIMIENTO DEPORTIVO':'D'};
 function metPeriodizacion(ph,objetivo){
   const st=(ph&&ph.structure)||{}, k=MET_OBJ_PER[objetivo];
   return (k && st.perObjetivo && st.perObjetivo[k]) || st.periodization || '';

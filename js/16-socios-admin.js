@@ -4,7 +4,7 @@
 // ═════════════════════════════════════════
 // SOCIOS — editar datos y eliminar (solo coordinador)
 // ═════════════════════════════════════════
-const OBJETIVOS_LISTA=['GANAR MÚSCULO','PERDER PESO','FUERZA PURA','RESISTENCIA','FLEXIBILIDAD','RENDIMIENTO DEPORTIVO','REHABILITACIÓN'];
+const OBJETIVOS_LISTA=['GANAR MÚSCULO','PERDER PESO','RECOMPOSICIÓN CORPORAL','FUERZA PURA','RESISTENCIA','FLEXIBILIDAD','RENDIMIENTO DEPORTIVO','REHABILITACIÓN'];
 function opcionesSel(arr,actual){
   const lista=arr.includes(actual)||!actual?arr:[actual,...arr];
   return lista.map(v=>`<option value="${esc(v)}" ${v===actual?'selected':''}>${esc(sc(v))}</option>`).join('');

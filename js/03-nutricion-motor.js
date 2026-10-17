@@ -59,6 +59,13 @@ function calcNutricion(s){
       protKg = 2.0;
       nota = 'El déficit se genera aumentando tu actividad total, no con restricción extrema. Proteína alta (2.0 g/kg) para preservar masa muscular. Sentirás más hambre: contrólala con volumen de verduras y proteína en cada comida.';
       break;
+    case 'RECOMPOSICIÓN CORPORAL':
+      kcal = Math.round(tdee * 0.93); // ligeramente por debajo del mantenimiento
+      if(kcal < bmr) kcal = bmr;
+      ajusteTxt = 'Recomposición (−7% del gasto total)';
+      protKg = 2.2;
+      nota = 'Comes un poco por debajo de tu gasto con proteína alta (2.2 g/kg) para bajar grasa mientras construyes músculo. Tu peso cambia despacio: mide tu avance con tu cintura, tu fuerza y cómo te queda la ropa.';
+      break;
     case 'GANAR MÚSCULO':
       if(comp.grasaAlta){   // IMC alto por grasa: recomposición (ganar músculo y bajar grasa a la vez), sin superávit
         kcal = Math.round(tdee * 0.95);

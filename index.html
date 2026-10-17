@@ -241,17 +241,31 @@
     <div class="q-sc" id="qq2">
       <div class="q-tag">Paso 02 / 11</div>
       <div class="q-title">¿Cuál es<br>tu objetivo?</div>
-      <div class="q-sub">Define la estructura de tu rutina y tu plan de nutrición.</div>
-      <div class="opts">
-        <div class="opt" onclick="qSelObjetivo(this,'GANAR MÚSCULO')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-dumbbell"/></svg></div><div class="ol">Ganar músculo</div><div class="os">Hipertrofia y fuerza</div></div>
-        <div class="opt" onclick="qSelObjetivo(this,'PERDER PESO')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-flame"/></svg></div><div class="ol">Perder peso</div><div class="os">Recomposición corporal</div></div>
-        <div class="opt" onclick="qSelObjetivo(this,'FUERZA PURA')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-bolt"/></svg></div><div class="ol">Fuerza pura</div><div class="os">Fuerza máxima</div></div>
-        <div class="opt" onclick="qSelObjetivo(this,'RESISTENCIA')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-pulse"/></svg></div><div class="ol">Resistencia</div><div class="os">Cardio y aguante</div></div>
-        <div class="opt" onclick="qSelObjetivo(this,'FLEXIBILIDAD')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-stretch"/></svg></div><div class="ol">Flexibilidad</div><div class="os">Movilidad y elasticidad</div></div>
-        <div class="opt" onclick="qSelObjetivo(this,'RENDIMIENTO DEPORTIVO')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></div><div class="ol">Rendimiento deportivo</div><div class="os">Para tu disciplina del club</div></div>
-        <div class="opt" onclick="qSelObjetivo(this,'REHABILITACIÓN')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-medical"/></svg></div><div class="ol">Rehabilitación</div><div class="os">Recuperar una lesión</div></div>
+      <div class="q-sub">Elige uno. Al tocarlo te explicamos de qué se trata.</div>
+      <div class="opts s1 obj-opts">
+        <div class="opt" onclick="qSelObjetivo(this,'GANAR MÚSCULO')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-dumbbell"/></svg></div><div class="ol">Incremento de masa muscular</div><div class="os">Ganar músculo y fuerza</div></div>
+        <div class="opt" onclick="qSelObjetivo(this,'PERDER PESO')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-flame"/></svg></div><div class="ol">Bajar porcentaje de grasa</div><div class="os">Perder grasa sin perder músculo</div></div>
+        <div class="opt" onclick="qSelObjetivo(this,'RECOMPOSICIÓN CORPORAL')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-refresh"/></svg></div><div class="ol">Recomposición corporal</div><div class="os">Bajar grasa y ganar músculo a la vez</div></div>
+        <div class="opt" onclick="qSelObjetivo(this,'RENDIMIENTO')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></div><div class="ol">Rendimiento deportivo</div><div class="os">Deporte, resistencia, flexibilidad o rehabilitación</div></div>
       </div>
+      <div class="obj-desc" id="obj-desc" aria-live="polite"></div>
       <div class="nav-row"><div class="btn-prev" onclick="qPrev(2)">←</div><button class="btn-next" disabled id="qb2" onclick="qNext(2)">Continuar</button></div>
+    </div>
+
+    <!-- Q2r RENDIMIENTO: qué quiere mejorar -->
+    <div class="q-sc" id="qq2r">
+      <div class="q-tag">Rendimiento deportivo</div>
+      <div class="q-title">¿Qué quieres<br>mejorar?</div>
+      <div class="q-sub">Elige el enfoque. Al tocarlo te explicamos de qué se trata.</div>
+      <div class="opts s1 obj-opts">
+        <div class="opt" onclick="qSelRend(this,'RENDIMIENTO DEPORTIVO')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-ball"/></svg></div><div class="ol">Deporte</div><div class="os">Prepárate para tu disciplina</div></div>
+        <div class="opt" onclick="qSelRend(this,'RESISTENCIA')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-pulse"/></svg></div><div class="ol">Resistencia</div><div class="os">Cardio y aguante</div></div>
+        <div class="opt" onclick="qSelRend(this,'FLEXIBILIDAD')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-stretch"/></svg></div><div class="ol">Flexibilidad</div><div class="os">Movilidad y elasticidad</div></div>
+        <div class="opt" onclick="qSelRend(this,'REHABILITACIÓN')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-medical"/></svg></div><div class="ol">Rehabilitación</div><div class="os">Recuperar una lesión</div></div>
+        <div class="opt" onclick="qSelRend(this,'FUERZA PURA')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-bolt"/></svg></div><div class="ol">Fuerza máxima</div><div class="os">Levantar más peso</div></div>
+      </div>
+      <div class="obj-desc" id="rend-desc" aria-live="polite"></div>
+      <div class="nav-row"><div class="btn-prev" onclick="mostrarSub('qq2')">←</div><button class="btn-next" disabled id="qb2r" onclick="qNext2r()">Continuar</button></div>
     </div>
 
     <!-- Q2b DISCIPLINA (solo rendimiento deportivo) -->
@@ -270,7 +284,8 @@
       <div class="q-sub">Adaptamos los ejercicios al equipo que tengas disponible.</div>
       <div class="opts" style="grid-template-columns:1fr">
         <div class="opt" onclick="qSelEntorno(this,'gimnasio')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-dumbbell"/></svg></div><div class="ol">Gimnasio</div><div class="os">Con aparatos, pesas y máquinas</div></div>
-        <div class="opt" onclick="qSelEntorno(this,'funcional')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-stretch"/></svg></div><div class="ol">Funcional / salón</div><div class="os">Sin equipo — peso corporal y bandas</div></div>
+        <div class="opt" onclick="qSelEntorno(this,'funcional')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-stretch"/></svg></div><div class="ol">Funcional / salón</div><div class="os">Peso corporal y bandas</div></div>
+        <div class="opt" onclick="qSelEntorno(this,'casa')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-home"/></svg></div><div class="ol">Casa</div><div class="os">Con lo que tengas en casa</div></div>
       </div>
       <div class="nav-row"><div class="btn-prev" onclick="mostrarSub('qq2b')">←</div><button class="btn-next" disabled id="qb2b2" onclick="qNext2b2()">Continuar</button></div>
     </div>
@@ -284,6 +299,28 @@
       <div class="nav-row"><div class="btn-prev" onclick="qPrev2c()">←</div><button class="btn-next" disabled id="qb2c" onclick="qNext2c()">Continuar</button></div>
     </div>
 
+    <!-- Q2c2 ENTORNO de la rehabilitación -->
+    <div class="q-sc" id="qq2c2">
+      <div class="q-tag">Rehabilitación · entorno</div>
+      <div class="q-title">¿Dónde harás<br>tu rehabilitación?</div>
+      <div class="q-sub">Adaptamos los ejercicios al lugar y al equipo que tengas.</div>
+      <div class="opts" style="grid-template-columns:1fr">
+        <div class="opt" onclick="qSelEntornoRehab(this,'gimnasio')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-dumbbell"/></svg></div><div class="ol">Gimnasio</div><div class="os">Con aparatos, poleas y máquinas</div></div>
+        <div class="opt" onclick="qSelEntornoRehab(this,'funcional')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-stretch"/></svg></div><div class="ol">Funcional / salón</div><div class="os">Peso corporal y bandas</div></div>
+        <div class="opt" onclick="qSelEntornoRehab(this,'casa')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-home"/></svg></div><div class="ol">Casa</div><div class="os">Con lo que tengas en casa</div></div>
+      </div>
+      <div class="nav-row"><div class="btn-prev" onclick="mostrarSub('qq2c')">←</div><button class="btn-next" disabled id="qb2c2" onclick="qNext2c2()">Continuar</button></div>
+    </div>
+
+    <!-- QCASA: equipo en casa (deporte o rehabilitación en casa) -->
+    <div class="q-sc" id="qqCasa">
+      <div class="q-tag">En casa</div>
+      <div class="q-title">¿Qué tienes<br>en casa?</div>
+      <div class="q-sub">Tu rutina en casa se arma solo con lo que tengas. Si no tienes nada, también se puede.</div>
+      <div class="opts s1" id="casa-eq-opts"></div>
+      <div class="nav-row"><div class="btn-prev" onclick="qPrevCasa()">←</div><button class="btn-next" disabled id="qbCasa" onclick="qNextCasa()">Continuar</button></div>
+    </div>
+
     <!-- G1 edad -->
     <div class="q-sc" id="qqg1">
       <div class="q-tag">Rehabilitación · edad</div>
@@ -294,7 +331,7 @@
         <input type="range" id="qr-gedad" aria-label="Edad" min="6" max="80" value="30" oninput="document.getElementById('gedad-v').textContent=this.value">
         <div class="s-labels"><span>6</span><span>20</span><span>40</span><span>60</span><span>80</span></div>
       </div>
-      <div class="nav-row"><div class="btn-prev" onclick="mostrarSub('qq2c')">←</div><button class="btn-next" onclick="gNext(1)">Continuar</button></div>
+      <div class="nav-row"><div class="btn-prev" onclick="qPrevG1()">←</div><button class="btn-next" onclick="gNext(1)">Continuar</button></div>
     </div>
 
     <!-- G1b datos para el cálculo de nutrición -->
@@ -539,6 +576,7 @@
         <div class="chk" onclick="qChk(this)"><div class="chk-box">✓</div>Condición cardíaca</div>
         <div class="chk chk-none" onclick="qNone(this)"><div class="chk-box">✓</div>✅ Sin limitaciones</div>
       </div>
+      <div class="les-prio" id="les-prio" hidden></div>
       <div class="nav-row"><div class="btn-prev" onclick="qPrev(10)">←</div><button class="btn-next" onclick="qNext(10)">Continuar</button></div>
     </div>
 
@@ -595,7 +633,7 @@
   <div class="tb" style="position:sticky;top:0;z-index:100;">
     <div class="tb-logo"><div class="lm"><video autoplay muted loop playsinline disablepictureinpicture poster="icons/icon-192.png" data-gym-label aria-label="Gimnasio"><source src="video/logo-animado.mp4" type="video/mp4"><source src="video/logo-animado.webm" type="video/webm"></video></div><div class="ln">Tu plan</div></div>
     <div class="tb-r">
-      <div class="tb-btn" style="color:var(--v);border-color:color-mix(in srgb, var(--v) 30%, transparent);background:var(--gl2)" onclick="if(privCasilleroOk())confirmarRutina()" class="tb-btn priv-btn">Confirmar y guardar ✓</div>
+      <div class="tb-btn" style="color:var(--v);border-color:color-mix(in srgb, var(--v) 30%, transparent);background:var(--gl2)" onclick="pvConfirmar()" class="tb-btn priv-btn">Confirmar y guardar ✓</div>
     </div>
   </div>
   <div style="max-width:680px;margin:0 auto;padding:24px 20px 80px;width:100%;">
@@ -624,13 +662,23 @@
         Tu entrenador revisará este plan y hará ajustes personalizados antes de activarlo.
       </div>
     </div>
+    <div class="pv-ajuste" id="pv-ajuste">
+      <div class="pv-aj-t">¿Este plan va con lo que tenías en mente?</div>
+      <div class="pv-aj-s">Revisa tu semana. Si no es lo que buscabas, regresamos a tu objetivo y lo armamos de nuevo con tus mismas respuestas.</div>
+      <div class="pv-aj-b">
+        <button type="button" class="sd-pri" onclick="pvAjusteSi()">Sí, es lo que busco</button>
+        <button type="button" class="sd-b" onclick="pvAjusteNo()">No, quiero cambiarlo</button>
+      </div>
+    </div>
+    <div id="pv-confirmar" hidden>
     <div id="priv-box" style="margin:0 0 14px;padding:14px 16px;border:1px solid var(--b2);border-radius:14px;background:var(--gl)">
       <label style="display:flex;gap:12px;align-items:flex-start;cursor:pointer;font-family:var(--fb);font-size:var(--fs-sm);line-height:1.55;color:var(--tx)">
         <input type="checkbox" id="priv-chk" onchange="privCasilleroCambio()" style="width:24px;height:24px;flex:none;margin-top:1px;accent-color:var(--v2)">
         <span>He leído el <a href="#" onclick="abrirAvisoPrivacidad('lectura');return false" style="color:var(--v);font-weight:700;text-decoration:underline">Aviso de Privacidad</a> y doy mi <b>consentimiento expreso</b> para el tratamiento de mis datos personales, incluidos mis datos de salud. Si soy menor de edad, lo acepta mi madre, padre o tutor.</span>
       </label>
     </div>
-    <button class="priv-btn" onclick="if(privCasilleroOk())confirmarRutina()" style="width:100%;height:50px;background:var(--grad);border:none;border-radius:11px;font-family:var(--fd);font-size:var(--fs-2xl);letter-spacing:.02em;color:var(--btn-tx);cursor:pointer;">CONFIRMAR MI PLAN →</button>
+    <button class="priv-btn" onclick="pvConfirmar()" style="width:100%;height:50px;background:var(--grad);border:none;border-radius:11px;font-family:var(--fd);font-size:var(--fs-2xl);letter-spacing:.02em;color:var(--btn-tx);cursor:pointer;">CONFIRMAR MI PLAN →</button>
+    </div>
   </div>
 </div>
 
@@ -848,6 +896,7 @@
 <script src="js/43-mover-sesion.js"></script>
 <script src="js/44-instalar-app.js"></script>
 <script src="js/45-vista-socio.js"></script>
+<script src="js/46-registro-objetivo.js"></script>
 <script src="js/99-arranque.js"></script>
 
 <!-- ═══ MODAL AVISO DE PRIVACIDAD ═══ -->
