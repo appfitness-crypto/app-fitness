@@ -26,7 +26,8 @@ function qSelObjetivo(el,objetivo){
   el.classList.add('sel');
   qAnswers.objetivo=objetivo;
   // limpiar ramas previas
-  qAnswers.disciplina=''; qAnswers.lesionRehab='';
+  qAnswers.disciplina=''; qAnswers.lesionRehab=''; qAnswers.entorno='';
+  objDescMostrar('obj-desc',objetivo);   // explicación del objetivo (js/46-registro-objetivo.js)
   document.getElementById('qb2').disabled=false;
 }
 function qNext(step){
@@ -37,6 +38,9 @@ function qNext(step){
   }
   // Rama tras el objetivo
   if(step===2){
+    if(!qAnswers.objetivo) return;
+    // Rendimiento deportivo abre su propia pantalla: deporte, resistencia, flexibilidad, rehabilitación o fuerza
+    if(qAnswers.objetivo==='RENDIMIENTO'){ rendAbrir(); mostrarSub('qq2r'); return; }
     if(qAnswers.objetivo==='RENDIMIENTO DEPORTIVO'){ abrirDisciplinas(); mostrarSub('qq2b'); return; }
     if(qAnswers.objetivo==='REHABILITACIÓN'){ abrirLesiones(); mostrarSub('qq2c'); return; }
   }
@@ -52,6 +56,7 @@ function qNext(step){
 }
 function qPrev(step){
   if(step===5){ mostrarSub('qq4c'); window.scrollTo(0,0); return; }
+  if(step===3 && qPrev3()) return;   // regresa a la sub-pantalla de donde vino (js/46-registro-objetivo.js)
   showQStep(step-1); window.scrollTo(0,0);
 }
 function quizBack(){ if(qStep>1) qPrev(qStep); else go('s-inicio'); }
@@ -165,23 +170,27 @@ function qSelDisc(el,id){
   document.getElementById('qb2b').disabled=false;
 }
 function qNext2b(){ if(!qAnswers.disciplina) return; mostrarSub('qq2b2'); window.scrollTo(0,0); }
-function qPrev2b(){ mostrarSub('qq2'); }
+function qPrev2b(){ mostrarSub('qq2r'); }
 function qSelEntorno(el,val){
   el.parentElement.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));
   el.classList.add('sel');
   qAnswers.entorno=val;
   document.getElementById('qb2b2').disabled=false;
 }
-function qNext2b2(){ if(!qAnswers.entorno) return; showQStep(3); window.scrollTo(0,0); }
+function qNext2b2(){ if(!qAnswers.entorno) return; if(qAnswers.entorno==='casa'){ casaEqAbrir('qq2b2'); return; } showQStep(3); window.scrollTo(0,0); }
 
 function qNext2c(){
   if(!qAnswers.lesionRehab) return;
+  rehabEntornoAbrir();   // primero: ¿dónde harás tu rehabilitación? (js/46-registro-objetivo.js)
+}
+// Cuestionario clínico de rehabilitación (edad, dolor, diagnóstico…)
+function rehabIniciarClinico(){
   abrirGimCuando();
   abrirGimClases();
   mostrarSub('qqg1');
   window.scrollTo(0,0);
 }
-function qPrev2c(){ mostrarSub('qq2'); }
+function qPrev2c(){ mostrarSub('qq2r'); }
 
 // ══ CUESTIONARIO ESPECIALIZADO GIMNASIA (infantil) ══
 qAnswers.gimEdad=10; qAnswers.gimInicioDolor=''; qAnswers.gimCuando=[];
@@ -304,9 +313,11 @@ function qChk(el){
   qAnswers.limitaciones=qAnswers.limitaciones.filter(l=>l!=='Sin limitaciones');
   if(el.classList.contains('ck')){ if(!qAnswers.limitaciones.includes(label)) qAnswers.limitaciones.push(label); }
   else qAnswers.limitaciones=qAnswers.limitaciones.filter(l=>l!==label);
+  lesPrioridadRender();
 }
 function qNone(el){
   document.querySelectorAll('.chk').forEach(c=>c.classList.remove('ck'));
   el.classList.add('ck');
   qAnswers.limitaciones=['Sin limitaciones'];
+  lesPrioridadRender();
 }

@@ -2166,3 +2166,26 @@ html[data-theme="light"] .st-l,html[data-theme="light"] .memb-k{color:#4A5866;}
 /* Campo de las ventanas de confirmación (cintura, código, etc.): mismo estilo que los demás campos */
 #uic-input{min-height:52px;padding:0 16px;background:var(--in-bg);border:1.5px solid var(--gx-line,var(--b));border-radius:var(--r-md);font-family:var(--fb);font-size:var(--fs-lg);font-weight:500;color:var(--tx);outline:none;caret-color:var(--v);transition:border-color .2s,box-shadow .2s;}
 #uic-input:focus{border-color:var(--v2);box-shadow:0 0 0 4px color-mix(in srgb,var(--v2) 20%,transparent);}
+
+/* ── Registro: explicación del objetivo, lesión primero y "¿este plan va contigo?" ── */
+.obj-desc{display:none;margin:12px 0 4px;padding:14px 16px;border-radius:var(--r-lg);background:color-mix(in srgb,var(--v2) 10%,var(--gl));border:1px solid color-mix(in srgb,var(--v2) 40%,transparent);animation:fi .2s var(--ease-out);}
+.obj-desc.on{display:block;}
+.obj-desc b{display:block;font-family:var(--fd);font-weight:800;font-size:var(--fs-lg);margin-bottom:4px;}
+.obj-desc p{margin:0;font-size:var(--fs-md);line-height:1.5;color:var(--tx);}
+.obj-desc small{display:block;margin-top:6px;font-size:var(--fs-sm);color:var(--mu);line-height:1.45;}
+.les-prio{margin-top:16px;padding-top:14px;border-top:1px solid var(--b);}
+.les-prio-t{font-family:var(--fd);font-weight:800;font-size:var(--fs-xl);margin-bottom:10px;}
+.les-prio-t.sm{font-size:var(--fs-base);margin:14px 0 8px;}
+.les-prio .opts{max-height:none;}
+.les-prio-ch{display:flex;flex-wrap:wrap;gap:8px;}
+.les-prio-ch button{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--b2);background:var(--gl);color:var(--tx);font-family:inherit;font-weight:700;font-size:var(--fs-sm);cursor:pointer;}
+.les-prio-ch button.on{background:var(--gl2);border-color:var(--v2);color:var(--v);}
+.pv-ajuste{margin:0 0 14px;padding:16px;border-radius:var(--r-lg);background:var(--gl);border:1px solid var(--gx-line,var(--b2));transition:border-color .2s,box-shadow .2s;}
+.pv-ajuste.aviso{border-color:var(--v2);box-shadow:0 0 0 4px color-mix(in srgb,var(--v2) 22%,transparent);}
+.pv-aj-t{font-family:var(--fd);font-weight:800;font-size:var(--fs-xl);line-height:1.2;}
+.pv-aj-s{margin:6px 0 12px;font-size:var(--fs-sm);color:var(--mu);line-height:1.5;}
+.pv-aj-b{display:flex;gap:8px;flex-wrap:wrap;}
+.pv-aj-b .sd-pri{flex:1 1 180px;height:46px;font-size:var(--fs-lg);}
+.pv-aj-b .sd-b{flex:1 1 160px;}
+.pv-ajuste.ok .pv-aj-b{display:none;}
+.pv-ajuste.ok .pv-aj-s{margin-bottom:0;}

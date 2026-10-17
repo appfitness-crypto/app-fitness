@@ -9,7 +9,7 @@
    Flexibilidad y rehabilitación no usan modelo (la seguridad manda). Es opcional: sin modelos todo funciona como antes. ═══ */
 
 const FILO_MODELOS = {
-  fuerza:      {ic:'💪', nm:'Fuerza / hipertrofia',      objs:['GANAR MÚSCULO','FUERZA PURA'],
+  fuerza:      {ic:'💪', nm:'Fuerza / hipertrofia',      objs:['GANAR MÚSCULO','RECOMPOSICIÓN CORPORAL','FUERZA PURA'],
                 ph:'Ej.\nLunes · Torso A\nPress de banca con barra 4x6-8\nRemo con barra 4x8\nPress militar 3x8-10\nJalón al pecho 3x10\nCurl con barra 3x12\nExtensión de tríceps en polea 3x12'},
   grasa:       {ic:'🔥', nm:'Pérdida de grasa / peso',   objs:['PERDER PESO','RESISTENCIA'],
                 ph:'Ej.\nMartes · Circuito metabólico\nSentadilla goblet 3x15\nRemo con mancuerna 3x12\nPress de hombro 3x12\nZancadas 3x12\nPlancha 3x40 seg\nCardio intervalos 15 min'},

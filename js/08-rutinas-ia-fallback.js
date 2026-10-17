@@ -132,8 +132,15 @@ async function generarRutina(){
   { const c=parseInt((document.getElementById('qi-cintura')||{}).value); qAnswers.cintura=(c>=50&&c<=180)?c:0; }
   const q11sel=document.querySelector('#qq11 .opt.sel');
   if(q11sel) qAnswers.cardio=q11sel.querySelector('.ol').textContent.trim();
+  registroPrepararGeneracion();   // lesión primero → plan de rehabilitación (js/46-registro-objetivo.js)
 
   go('s-loading');
+
+  // Deporte en casa: rutina con el motor de casa y el equipo que tiene
+  if(qAnswers.objetivo==='RENDIMIENTO DEPORTIVO' && qAnswers.entorno==='casa'){
+    setTimeout(()=>mostrarPreview(planCasaRegistro()||buildFallback()), 600);
+    return;
+  }
 
   // Rehabilitación, rendimiento deportivo y flexibilidad usan planes estructurados
   // (no dependen del modelo de IA para garantizar la base clínica/deportiva)
@@ -173,6 +180,8 @@ async function generarRutina(){
       faseInicial='FASE INICIAL — HIPERTROFIA CON BASE DE FUERZA: Socio joven sin lesiones. Tendones y articulaciones en buen estado. Puede entrar directamente a rangos de hipertrofia (8-12 reps) combinando con trabajo de fuerza (4-6 reps en ejercicios compuestos). Recuperación rápida permite mayor volumen. Nutrición: superávit calórico natural, sin restricción, aumentar ingesta conforme aumente el gasto.';
     } else if(objetivo==='GANAR MÚSCULO' && !tieneEdadJoven){
       faseInicial='FASE INICIAL — FUERZA PRIMERO: Socio adulto (+35 años). Las fibras musculares existen pero están subutilizadas. Empezar con rangos de fuerza (5-6 reps, peso moderado-alto, buena técnica) para activar fibras sin sobrecargar articulaciones. Progresar a resistencia y luego hipertrofia. Recuperación más lenta: respetar descansos entre sesiones.';
+    } else if(objetivo==='RECOMPOSICIÓN CORPORAL'){
+      faseInicial='FASE INICIAL — RECOMPOSICIÓN: Bajar grasa y ganar músculo a la vez. Entrenamiento de fuerza e hipertrofia como base (compuestos 6-10 reps, accesorios 10-15), cardio moderado 2-3 veces por semana. Calorías cerca del mantenimiento con proteína alta. El progreso se mide en fuerza, medidas y fotos más que en la báscula.';
     } else if(objetivo==='PERDER PESO'){
       faseInicial='FASE INICIAL — FUERZA Y ACTIVIDAD: El cardio NO es para quemar calorías al final: es trabajo cardiovascular-respiratorio. El déficit calórico se genera incrementando la actividad física total. Aumentar el gasto calórico progresivamente mediante el entrenamiento. Indicar al socio que sentirá más hambre: debe controlarla sin restricción extrema. Empezar con fuerza base y resistencia muscular para preservar masa magra.';
     } else if(objetivo==='FUERZA PURA'){
@@ -368,16 +377,17 @@ function procesarRutina(data){
   return data;
 }
 function mostrarPreview(data){
-  procesarRutina(data);
+  if(!data.casa) procesarRutina(data);   // la rutina en casa ya sale lista de su motor
   window._rutinaTemp = data;
+  pvAjusteReset();
   // Rutina única: se compara con las huellas de los socios del mismo objetivo y nivel (js/42-rutina-unica.js)
   huellasSegmento(unicaSegmento(qAnswers.objetivo,qAnswers.nivel)).then(l=>{
-    try{ data.unica=rutinaUnicaAjustar(data.semana, ctxQuiz(), l); }catch(e){ console.warn('rutina única',e); }
+    try{ if(!data.casa) data.unica=rutinaUnicaAjustar(data.semana, ctxQuiz(), l); }catch(e){ console.warn('rutina única',e); }
   }).finally(()=>{ if(window._rutinaTemp!==data) return; renderPreview(data); go('s-preview'); });
 }
 
 function renderPreview(rutina){
-  const iconMap={'GANAR MÚSCULO':'💪','PERDER PESO':'🔥','FUERZA PURA':'⚡','RESISTENCIA':'🏃','FLEXIBILIDAD':'🧘','RENDIMIENTO DEPORTIVO':'🏅','REHABILITACIÓN':'🏥'};
+  const iconMap={'GANAR MÚSCULO':'💪','PERDER PESO':'🔥','RECOMPOSICIÓN CORPORAL':'🔄','FUERZA PURA':'⚡','RESISTENCIA':'🏃','FLEXIBILIDAD':'🧘','RENDIMIENTO DEPORTIVO':'🏅','REHABILITACIÓN':'🏥'};
   document.getElementById('pv-icon').textContent=iconMap[qAnswers.objetivo]||'🏋️';
   document.getElementById('pv-nombre').textContent=qAnswers.nombre.toUpperCase();
   document.getElementById('pv-meta').textContent=`${rutina.perfil.nivel} · ${qAnswers.edad} años · ${qAnswers.peso} kg · ${qAnswers.dias} días/sem · ${rutina.perfil.split}`;
@@ -390,7 +400,7 @@ function renderPreview(rutina){
   };
   const bc=badgeColors[qAnswers.objetivo]||badgeColors['GANAR MÚSCULO'];
   document.getElementById('pv-badges').innerHTML=`
-    <div class="badge" style="${bc}">${qAnswers.objetivo}</div>
+    <div class="badge" style="${bc}">${esc(objNombre(qAnswers.objetivo))}</div>${qAnswers.objetivoMeta?`<div class="badge bn">Después: ${esc(objNombre(qAnswers.objetivoMeta))}</div>`:''}
     <div class="badge bn">${rutina.perfil.nivel}</div>
     <div class="badge" style="color:var(--mu);border-color:color-mix(in srgb,var(--tx) 10%,transparent)">${rutina.perfil.fase||rutina.perfil.split}</div>
   `;
@@ -515,6 +525,9 @@ async function confirmarRutina(){
     nuevo.logs.lesiones.push({protoId:qAnswers.lesionRehab, faseActual:faseIni, fechaInicio:fechaISO(new Date()),
       historial: qAnswers.gimDolor ? [{fecha:fechaISO(new Date()), dolor: qAnswers.gimDolor<=2?1:qAnswers.gimDolor<=5?2:3}] : []});
   }
+  if(qAnswers.objetivoMeta) nuevo.objetivoMeta=qAnswers.objetivoMeta;   // tratar la lesión primero: su objetivo queda para después
+  if(qAnswers.entorno==='casa') nuevo.casa={equipo:[...(qAnswers.casaEquipo||[])], dias:[...(qAnswers.diasSemana||[])], duracion:45, fecha:fechaISO(new Date()), por:'Registro'};
+  if(rutina.casa) nuevo.modo='casa';
   DB.socios[code]=nuevo;
   dbSave(code);
   planRecienCreado=code;
@@ -524,7 +537,7 @@ async function confirmarRutina(){
 
   window._rutinaTemp=null;
   // limpiar quiz
-  Object.assign(qAnswers,{nombre:'',objetivo:'',nivel:'',zonas:[],limitaciones:[],cardio:'',disciplina:'',lesionRehab:'',entorno:'',gimCuando:[],gimClases:[],gimInicioDolor:'',gimSigue:'',gimDiagnostico:'',gimDiagTexto:'',gimMedicoAutoriza:'',gimGenero:'',gimPeso:0,gimEstatura:0,gimSoloTerapia:'',entrenadorId:'',entrenadorNombre:'',diasSemana:[],tomaClases:'',clasesSel:[],clasesGrupales:[]});
+  Object.assign(qAnswers,{nombre:'',objetivo:'',nivel:'',zonas:[],limitaciones:[],cardio:'',disciplina:'',lesionRehab:'',entorno:'',gimCuando:[],gimClases:[],gimInicioDolor:'',gimSigue:'',gimDiagnostico:'',gimDiagTexto:'',gimMedicoAutoriza:'',gimGenero:'',gimPeso:0,gimEstatura:0,gimSoloTerapia:'',entrenadorId:'',entrenadorNombre:'',diasSemana:[],tomaClases:'',clasesSel:[],clasesGrupales:[],objetivoMeta:'',lesionPrimero:'',lesionPrimeroId:'',casaEquipo:[],casaPaquete:''});
   document.getElementById('qi-nom').value='';
   { const c=document.getElementById('qi-cintura'); if(c) c.value=''; }
   document.querySelectorAll('.q-sc .opt').forEach(o=>o.classList.remove('sel'));
@@ -737,6 +750,7 @@ function buildFallback(){
     : objetivo==='GANAR MÚSCULO' && joven ? 'Hipertrofia con base de fuerza'
     : objetivo==='GANAR MÚSCULO' ? 'Fuerza primero (+35)'
     : objetivo==='PERDER PESO' ? 'Fuerza y actividad total'
+    : objetivo==='RECOMPOSICIÓN CORPORAL' ? 'Recomposición: fuerza e hipertrofia'
     : objetivo==='FUERZA PURA' ? 'Fuerza máxima' : 'Resistencia y base funcional';
 
   const clasesLista=(qAnswers.clasesGrupales||[]).filter(c=>c.dias&&c.dias.length);
@@ -1371,6 +1385,7 @@ function refreshDash(){
     ${asist?`<div class="asist-w">${asist}</div>`:''}
     ${pqCardSocio(s)}
     ${evalCardSocio(s)}
+    ${typeof objMetaCardHTML==='function'?objMetaCardHTML(s):''}
     ${typeof instTarjetaHTML==='function'?instTarjetaHTML():''}
     ${rmAvisoHTML(s)}
 

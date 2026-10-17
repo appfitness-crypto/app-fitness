@@ -253,7 +253,7 @@ function staffRenderContent(s){
           <div class="kpi" style="--kc:var(--g)"><div class="kpi-v">${ev.adherencia}%</div><div class="kpi-l">Adherencia, 4 sem</div></div>
           <div class="kpi" style="--kc:var(--p)"><div class="kpi-v">${ev.deltaPeso===null?'—':(ev.deltaPeso>0?'+':'')+ev.deltaPeso+' kg'}</div><div class="kpi-l">Cambio de peso</div></div>
         </div>
-        ${dolorStaffHTML(s)}${evalStaffHTML(s)}
+        ${dolorStaffHTML(s)}${typeof objMetaStaffHTML==='function'?objMetaStaffHTML(s):''}${evalStaffHTML(s)}
         ${bloqueAnalisisStaff(s)}
         ${recHTML}`)}
 
