@@ -215,19 +215,19 @@ function miCodigoEntrenador(){ const e=staffActivoEntId && DB.entrenadores[staff
 function mostrarMiCodigo(codigo, bienvenida){
   codigo=codigo||miCodigoEntrenador();
   if(!codigo){ showToast('Aún no tienes código. Cierra sesión y vuelve a entrar.'); return; }
-  const txt='Descarga la app '+(GYM.nombreCorto||GYM.nombre)+', crea tu cuenta y escribe mi código de entrenador: '+codigo;
   const msg=(bienvenida?'<p style="margin:0 0 10px">¡Listo! Ya tienes tu cuenta de entrenador.</p>':'')+
-    '<p style="margin:0 0 6px;color:var(--mu)">Tu código para clientes:</p>'+
-    '<div style="font-family:var(--fd);font-size:2.2rem;letter-spacing:.08em;color:var(--v);text-align:center;margin:6px 0 12px">'+esc(codigo)+'</div>'+
-    '<p style="margin:0 0 12px;font-size:var(--fs-xs);color:var(--mu)">Tu cliente lo escribe al final de su evaluación. Su plan sale con tu filosofía y aparece en tu lista para que lo ajustes.</p>'+
-    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
-      '<button class="tb-btn" onclick="copiarTexto(\''+esc(codigo)+'\')">Copiar código</button>'+
-      '<a class="tb-btn" target="_blank" rel="noopener" href="https://wa.me/?text='+encodeURIComponent(txt)+'">Enviar por WhatsApp</a>'+
-      (bienvenida?'<button class="tb-btn" onclick="staffMenuCerrar();abrirMiFilosofia()">Definir mi filosofía</button>':'')+
+    '<div class="qr-wrap"><img id="qr-vista" class="qr-vista" alt="Tarjeta con el QR de la app y tu código '+esc(codigo)+'"></div>'+
+    '<p style="margin:0 0 12px;font-size:var(--fs-xs);color:var(--mu)">Tu cliente escanea el QR, crea su cuenta y escribe tu código al final de su evaluación. Su plan sale con tu filosofía y aparece en tu lista.</p>'+
+    '<button type="button" class="sd-pri qr-wa" onclick="qrEnviarWhatsApp(\''+esc(codigo)+'\')">'+ico('share')+'Enviar QR por WhatsApp</button>'+
+    '<div class="qr-acts">'+
+      '<button type="button" class="tb-btn" onclick="qrDescargar(\''+esc(codigo)+'\')">'+ico('download')+'Descargar imagen</button>'+
+      '<button type="button" class="tb-btn" onclick="copiarTexto(\''+esc(codigo)+'\')">Copiar código</button>'+
+      (bienvenida?'<button type="button" class="tb-btn" onclick="staffMenuCerrar();abrirMiFilosofia()">Definir mi filosofía</button>':'')+
     '</div>';
   document.getElementById('staff-menu-title').textContent='Tu código';
   document.getElementById('staff-menu-body').innerHTML=msg;
   document.getElementById('modal-staff-menu').classList.add('open');
+  qrPintarVista(codigo);
 }
 function copiarTexto(t){
   try{ navigator.clipboard.writeText(t).then(()=>showToast('Copiado: '+t)); }

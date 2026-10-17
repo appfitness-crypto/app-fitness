@@ -2238,3 +2238,11 @@ html[data-theme="light"] .st-l,html[data-theme="light"] .memb-k{color:#4A5866;}
   #s-inicio .inicio-wrap{margin:0 0 0 7vw;max-width:460px;padding-top:50vh;}
   #s-inicio .inicio-cards{display:grid;grid-template-columns:1fr;gap:12px;}
 }
+
+/* Tarjeta QR del entrenador (modal "Tu código") */
+.qr-wrap{display:flex;justify-content:center;margin:0 0 12px;}
+.qr-vista{width:100%;max-width:300px;aspect-ratio:4/5;border-radius:16px;background:var(--gl2);border:1px solid var(--b2);opacity:0;transition:opacity .25s ease;}
+.qr-vista.on{opacity:1;}
+.qr-wa{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;}
+.qr-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.qr-acts .tb-btn{flex:1;justify-content:center;display:inline-flex;align-items:center;gap:6px;}
