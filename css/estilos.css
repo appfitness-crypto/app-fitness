@@ -182,11 +182,15 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:none;}
 .ic:active{transform:scale(.985);}
 .ic-icon{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:var(--gl2);color:var(--v);flex-shrink:0;}
 .ic-icon .ico{width:24px;height:24px;}
+/* Bienvenida: íconos de línea sin caja, trazo fino */
+#s-inicio .ic-icon{width:34px;height:34px;background:transparent;border-radius:0;}
+#s-inicio .ic-icon .ico{width:26px;height:26px;stroke-width:1.6;}
 .ic-label{font-family:var(--fd);font-weight:800;font-size:var(--fs-3xl);letter-spacing:-.02em;line-height:1.1;}
 .ic-sub{font-size:var(--fs-md);color:var(--mu);margin-top:3px;line-height:1.4;}
 .ic-arrow{margin-left:auto;color:var(--mu);}
 .ic-ya{background:var(--grad);border-color:transparent;box-shadow:var(--glow);color:var(--btn-tx);-webkit-backdrop-filter:none;backdrop-filter:none;}
 .ic-ya .ic-icon{background:rgba(255,255,255,.22);color:var(--btn-tx);}
+#s-inicio .ic-ya .ic-icon{background:transparent;}
 .ic-ya .ic-sub,.ic-ya .ic-arrow{color:color-mix(in srgb,var(--btn-tx) 78%,transparent);}
 .inicio-footer{display:flex;gap:8px;align-items:center;margin-top:16px;flex-wrap:wrap;}
 .if-pill{padding:7px 14px;background:var(--gl);border:1px solid var(--b);border-radius:999px;font-size:var(--fs-sm);font-weight:600;color:var(--mu);display:flex;align-items:center;gap:7px;}
