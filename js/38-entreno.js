@@ -214,6 +214,36 @@ const EN_DIAS_CORTO=['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
 const EN_DIAS=['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
 const EN_MESES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 
+// ── Técnica "Así sí / Así no": video de la técnica correcta (líneas verdes) y del error común (líneas rojas) ──
+// Archivos en img/ejercicios/tecnica/<slug>-si|no.(webm|mp4|jpg). Los ejercicios sin entrada aquí siguen con imagen, pasos y error.
+const EJ_TECNICA={
+  'peso-muerto-convencional':{
+    si:['Pies al ancho de la cadera y la barra sobre la mitad del pie.','Espalda recta de la cabeza a la cadera durante todo el movimiento.','La barra sube en línea recta, pegada a las piernas.','Cadera y hombros suben al mismo tiempo; termina de pie, cadera extendida.'],
+    no:['Espalda redonda: toda la carga se va a la zona lumbar.','La cadera sube antes que los hombros y el pecho se queda abajo.','La barra se aleja de las piernas.']},
+};
+function tecnicaDe(ej){ const kb=kbBuscar(ej&&ej.nm); const s=[slugEj(ej&&ej.nm), kb&&slugEj(kb.nm)].find(x=>x&&EJ_TECNICA[x]); return s?{slug:s,...EJ_TECNICA[s]}:null; }
+function tecnicaVideo(slug,v){
+  const b=IMG_BASE+'ejercicios/tecnica/'+slug+'-'+v, quieto=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return `<video muted loop playsinline ${quieto?'controls':'autoplay'} preload="auto" poster="${b}.jpg" disablepictureinpicture aria-label="${v==='si'?'Técnica correcta':'Error común'}"><source src="${b}.webm" type="video/webm"><source src="${b}.mp4" type="video/mp4"></video>`;
+}
+function tecnicaHTML(t){
+  const li=a=>a.map(x=>`<li>${esc(x)}</li>`).join('');
+  return `<div class="tec" data-v="si" data-slug="${t.slug}">
+    <div class="tec-seg" role="tablist" aria-label="Técnica">
+      <button type="button" class="si" role="tab" aria-selected="true" onclick="tecnicaVer(this,'si')"><span class="m" aria-hidden="true">✓</span>Así sí</button>
+      <button type="button" class="no" role="tab" aria-selected="false" onclick="tecnicaVer(this,'no')"><span class="m" aria-hidden="true">✕</span>Así no</button>
+    </div>
+    <div class="tec-vid">${tecnicaVideo(t.slug,'si')}<span class="tec-tag">Técnica correcta</span></div>
+    <ul class="tec-l si">${li(t.si)}</ul><ul class="tec-l no">${li(t.no)}</ul></div>`;
+}
+function tecnicaVer(btn,v){
+  const t=btn.closest('.tec'); if(!t||t.dataset.v===v) return;
+  t.dataset.v=v;
+  t.querySelectorAll('.tec-seg button').forEach(b=>b.setAttribute('aria-selected',String(b.classList.contains(v))));
+  const box=t.querySelector('.tec-vid'), old=box.querySelector('video'); if(old) old.pause();
+  box.innerHTML=tecnicaVideo(t.dataset.slug,v)+`<span class="tec-tag">${v==='si'?'Técnica correcta':'Error común'}</span>`;
+}
+
 function enEspecial(e){ return esEjCardio(e)||esEjRondas(e)||esEjMovilidad(e)||esEjIsometrico(e); }
 function enListaY(a){ return a.length<2?a.join(''):a.slice(0,-1).join(', ')+' y '+a[a.length-1]; }
 function enKg(kg){ return kgToDisplay(kg)+' '+unidadPeso; }
@@ -403,16 +433,17 @@ function verComoDia(k,j){ const s=activeSocio; const e=s&&s.rutina[k]&&s.rutina[
 // ═════════════ FICHA "CÓMO SE HACE" ═════════════
 function abrirFicha(ej){
   const dlg=document.getElementById('en-ficha'); if(!dlg||!ej) return;
-  const f=fichaEj(ej);
+  const f=fichaEj(ej), tec=tecnicaDe(ej);
   dlg.innerHTML=`<div class="en-f-in">
     <div class="en-f-top"><span class="en-grab" aria-hidden="true"></span><button type="button" class="en-btn-sm" onclick="cerrarFicha()">Cerrar</button></div>
-    <div class="en-f-fig">${pic(basesEjercicio(ej),'dumbbell','thumb')}${videoEjHTML(ej)}</div>
+    ${tec?'':`<div class="en-f-fig">${pic(basesEjercicio(ej),'dumbbell','thumb')}${videoEjHTML(ej)}</div>`}
     <h3 id="en-f-t">${esc(ej.nm)}</h3>
     ${f.eq?`<div class="en-f-eq">${ico('dumbbell')}<span>${esc(f.eq)}</span></div>`:''}
+    ${tec?tecnicaHTML(tec):''}
     ${f.ms.length?`<div class="en-f-sec"><b>Músculos que trabaja</b><div class="en-musc">${f.ms.map((m,i)=>`<span class="${i?'':'p'}"><i></i>${esc(m)}${i?'':' · principal'}</span>`).join('')}</div></div>`:''}
-    ${f.pasos?`<div class="en-f-sec"><b>Cómo se hace</b><ol class="en-pasos">${f.pasos.map(p=>`<li>${esc(p)}</li>`).join('')}</ol></div>`:''}
+    ${f.pasos&&!tec?`<div class="en-f-sec"><b>Cómo se hace</b><ol class="en-pasos">${f.pasos.map(p=>`<li>${esc(p)}</li>`).join('')}</ol></div>`:''}
     ${ej.tip?`<div class="en-f-sec"><b>Nota de tu entrenador</b><p>${esc(sinEmoji(ej.tip))}</p></div>`:''}
-    ${f.evita?`<div class="en-evita">${ico('info')}<span><b>Evita:</b> ${esc(f.evita)}</span></div>`:''}
+    ${f.evita&&!tec?`<div class="en-evita">${ico('info')}<span><b>Evita:</b> ${esc(f.evita)}</span></div>`:''}
     <button type="button" class="en-btn en-btn-p" onclick="cerrarFicha()">Entendido</button></div>`;
   dlg.setAttribute('aria-labelledby','en-f-t');
   dlg.classList.remove('cerrando');
