@@ -19,286 +19,199 @@ function cargarJsPDF(){
   return _jsPDFPromise;
 }
 
+// Logo de la app como imagen para el PDF (si falla, se usan las siglas)
+function pdfLogo(){
+  return fetch('icons/icon-192.png').then(r=>r.ok?r.blob():null).then(b=>b?new Promise(res=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=()=>res(null); fr.readAsDataURL(b); }):null).catch(()=>null);
+}
+// Texto seguro para la fuente del PDF: sin emojis, sin rayas largas ni flechas
+function pdfTxt(s){ return sinEmoji(String(s==null?'':s)).replace(/\s*[—–]\s*/g,' - ').replace(/→/g,'->').replace(/≈/g,'~').replace(/[←-⇿☀-➿]/g,'').replace(/\s{2,}/g,' ').trim(); }
+
+// Hoja de la rutina para imprimir o llevar en el celular:
+// encabezado con la marca, datos del socio, método del entrenador, un bloque por día con columnas para
+// anotar el peso de cada semana del bloque, glosario de los métodos usados y pie con página.
 async function generarPDFRutina(){
   const s=activeSocio; if(!s) return;
   const btn=document.getElementById('btn-pdf-rutina');
   const btnTxt=btn?btn.textContent:'';
-  if(btn){ btn.textContent='GENERANDO…'; btn.style.pointerEvents='none'; }
+  if(btn){ btn.textContent='Generando…'; btn.style.pointerEvents='none'; }
   try{
-    await cargarJsPDF();
+    const [_,logo]=await Promise.all([cargarJsPDF(),pdfLogo()]);
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit:'mm', format:'a4' });
 
-  const NAVY=[15,22,34], NAVY_L=[38,48,64];
-  const GREEN=[128,196,73], GREEN_D=[80,142,48];
-  const GRAY_BG=[244,247,241], GRAY_LINE=[224,229,219], GRAY_ZEBRA=[249,250,247];
-  const TXT=[26,30,24], MUTED=[125,132,118];
-  const DAY_COLORS=[GREEN_D, NAVY_L];
+    // Paleta de la app adaptada a papel: el lima va de fondo (nunca como texto sobre blanco)
+    const DARK=[10,14,19], INK=[16,22,28], LIME=[200,242,58], LIME_D=[78,112,6], LIME_S=[244,251,222],
+      ICE=[120,195,235], MUTED=[98,110,122], LINE=[224,230,236], SOFT=[245,247,250];
+    const W=210, H=297, MX=14, CW=W-MX*2, MAXY=280;
+    const hoy=new Date(), fGen=hoy.getDate()+'/'+(hoy.getMonth()+1)+'/'+hoy.getFullYear();
+    const ent=s.entrenadorId?getEntrenador(s.entrenadorId):null;
+    const entNom=ent&&ent.nombre?tc(ent.nombre):(s.asignado&&s.asignado!=='—'?tc(String(s.asignado)):'Plan de la app');
+    const b=pqBloque(s), sem=Math.min(pqSemanaActual(s),b.semanas||4), nSem=Math.max(3,Math.min(6,b.semanas||4));
+    const font=(st,sz,c)=>{ doc.setFont('helvetica',st); doc.setFontSize(sz); doc.setTextColor(...(c||INK)); };
+    let y=0;
 
-  const pageW=210, pageH=297, marginX=13, gap=6;
-  const colW=(pageW-marginX*2-gap)/2;
-  const contentW=colW-6;
-  const colX=[marginX, marginX+colW+gap];
-  const NAME_W=37, SR_W=19, PESO_W=19, NUM_W=5, NAME_WRAP_W=33;
-  const maxY=272;
-  let colY=[0,0];
-
-  const ent = s.entrenadorId ? getEntrenador(s.entrenadorId) : null;
-  const seenDayStructures = {};
-
-  function iconTarget(cx,cy,r,fg){
-    doc.setDrawColor(...fg); doc.setLineWidth(0.55);
-    doc.circle(cx,cy,r*0.72,'S'); doc.circle(cx,cy,r*0.42,'S');
-    doc.setFillColor(...fg); doc.circle(cx,cy,r*0.14,'F');
-  }
-  function iconPerson(cx,cy,r,fg){
-    doc.setFillColor(...fg);
-    doc.circle(cx,cy-r*0.32,r*0.34,'F');
-    doc.roundedRect(cx-r*0.46,cy+r*0.02,r*0.92,r*0.62,r*0.22,r*0.22,'F');
-  }
-  function iconCoach(cx,cy,r,fg){
-    doc.setDrawColor(...fg); doc.setLineWidth(0.7);
-    doc.circle(cx,cy,r*0.62,'S');
-    doc.setLineWidth(0.8);
-    doc.line(cx-r*0.28,cy+r*0.02,cx-r*0.06,cy+r*0.26);
-    doc.line(cx-r*0.06,cy+r*0.26,cx+r*0.32,cy-r*0.24);
-  }
-  function iconCalendar(cx,cy,r,fg){
-    doc.setFillColor(...fg);
-    doc.roundedRect(cx-r*0.55,cy-r*0.45,r*1.1,r*0.95,r*0.15,r*0.15,'F');
-    doc.setFillColor(255,255,255);
-    doc.rect(cx-r*0.55,cy-r*0.45,r*1.1,r*0.32,'F');
-    doc.setFillColor(...fg);
-    doc.rect(cx-r*0.32,cy-r*0.62,r*0.13,r*0.34,'F');
-    doc.rect(cx+r*0.19,cy-r*0.62,r*0.13,r*0.34,'F');
-  }
-  function iconDumbbell(cx,cy,r,fg){
-    doc.setFillColor(...fg);
-    doc.circle(cx-r*0.42,cy,r*0.26,'F'); doc.circle(cx+r*0.42,cy,r*0.26,'F');
-    doc.setDrawColor(...fg); doc.setLineWidth(1.3);
-    doc.line(cx-r*0.2,cy,cx+r*0.2,cy);
-  }
-  function iconStar(cx,cy,r,fg){
-    const pts=[]; const spikes=5;
-    for(let i=0;i<spikes*2;i++){
-      const rad = i%2===0? r*0.62 : r*0.26;
-      const ang = -Math.PI/2 + i*Math.PI/spikes;
-      pts.push([cx+rad*Math.cos(ang), cy+rad*Math.sin(ang)]);
+    function encabezado(){
+      doc.setFillColor(...DARK); doc.rect(0,0,W,40,'F');
+      doc.setFillColor(...LIME); doc.rect(0,40,W,1.2,'F');
+      if(logo){ try{ doc.addImage(logo,'PNG',MX,9,22,22); }catch(_){ } }
+      else { doc.setFillColor(...LIME); doc.roundedRect(MX,9,22,22,4,4,'F'); font('bold',12,DARK); doc.text(pdfTxt(GYM.siglas||'FS'),MX+11,22,{align:'center'}); }
+      font('bold',17,[255,255,255]); doc.text(pdfTxt(GYM.nombre),MX+28,18);
+      font('bold',9,LIME); doc.text('PLAN DE ENTRENAMIENTO',MX+28,25);
+      font('normal',8,[190,200,210]); doc.text('Generado el '+fGen,MX+28,31);
+      if(s.status==='activo'){
+        const t='Bloque '+b.n+'  ·  Semana '+sem+' de '+(b.semanas||4);
+        font('bold',8.5,DARK); const tw=doc.getTextWidth(t)+10;
+        doc.setFillColor(...LIME); doc.roundedRect(W-MX-tw,15,tw,8,4,4,'F'); doc.text(t,W-MX-tw/2,20.3,{align:'center'});
+      }
+      return 49;
     }
-    doc.setFillColor(...fg);
-    const rel=[]; for(let i=1;i<pts.length;i++) rel.push([pts[i][0]-pts[i-1][0], pts[i][1]-pts[i-1][1]]);
-    doc.lines(rel, pts[0][0], pts[0][1], [1,1], 'F', true);
-  }
+    function encabezadoCont(){
+      doc.setFillColor(...DARK); doc.rect(0,0,W,13,'F'); doc.setFillColor(...LIME); doc.rect(0,13,W,0.8,'F');
+      font('bold',9,[255,255,255]); doc.text(pdfTxt(GYM.nombre),MX,8.4);
+      font('normal',8.5,LIME); doc.text(pdfTxt(tc(s.nombre||'')),W-MX,8.4,{align:'right'});
+      return 22;
+    }
+    function nuevaPagina(){ doc.addPage(); y=encabezadoCont(); }
+    function asegurar(h){ if(y+h>MAXY){ nuevaPagina(); return true; } return false; }
 
-  function drawBanner(){
-    doc.setFillColor(...NAVY); doc.rect(0,0,pageW,34,'F');
-    doc.setFillColor(...GREEN_D); doc.triangle(148,0,pageW,0,pageW,34,'F');
-    doc.setFillColor(...GREEN); doc.triangle(170,0,pageW,0,pageW,34,'F');
-
-    const cx=24, cy=17;
-    doc.setFillColor(255,255,255); doc.circle(cx,cy,11.5,'F');
-    doc.setDrawColor(...GREEN); doc.setLineWidth(1.1); doc.circle(cx,cy,11.5,'S');
-    doc.setDrawColor(...NAVY); doc.setLineWidth(0.4); doc.circle(cx,cy,9.3,'S');
-    doc.setFont('helvetica','bold'); doc.setFontSize(11.5); doc.setTextColor(...NAVY);
-    doc.text('CC', cx, cy+1.3, {align:'center'});
-    doc.setFont('helvetica','normal'); doc.setFontSize(4.4); doc.setTextColor(...GREEN_D);
-    doc.text('AGS.', cx, cy+4.6, {align:'center'});
-
-    doc.setFont('helvetica','bold'); doc.setFontSize(15.5); doc.setTextColor(255,255,255);
-    doc.text('CLUB CAMPESTRE', 41, 13);
-    doc.text('AGUASCALIENTES', 41, 20.5);
-    doc.setFontSize(10); doc.setTextColor(...GREEN);
-    doc.text('TU RUTINA DE ENTRENAMIENTO', 41, 27.5);
-  }
-
-  function drawInfoStrip(){
-    const y=44, iconR=4.2, groupW=(pageW-marginX*2)/4;
-    const items=[
-      {icon:iconTarget, label:'OBJETIVO', val:s.objetivo||'—'},
-      {icon:iconPerson, label:'SOCIO', val:s.nombre||'—'},
-      {icon:iconCoach, label:'ENTRENADOR', val:(s.asignado&&s.asignado!=='—')?s.asignado:'Plan de la app'},
-      {icon:iconCalendar, label:'DESDE', val:fmtFecha(s.fechaRegistro)},
-    ];
-    items.forEach((it,i)=>{
-      const gx=marginX+i*groupW;
-      it.icon(gx+iconR+1, y, iconR, GREEN_D);
-      doc.setFont('helvetica','bold'); doc.setFontSize(6.8); doc.setTextColor(...MUTED);
-      doc.text(it.label, gx+iconR*2+4, y-2.2);
-      doc.setFont('helvetica','bold'); doc.setFontSize(9.2); doc.setTextColor(...TXT);
-      const valLines=doc.splitTextToSize(it.val, groupW-iconR*2-6);
-      doc.text(valLines.slice(0,2), gx+iconR*2+4, y+2.6);
-      if(i>0){ doc.setDrawColor(...GRAY_LINE); doc.setLineWidth(0.25); doc.line(gx-4,y-6,gx-4,y+6); }
+    // ── Datos del socio ──
+    y=encabezado();
+    const diasTxt=DIAS_ORDER.filter(k=>s.rutina[k]&&(s.rutina[k].ejercicios||[]).length).map(k=>EN_DIAS_CORTO[DIAS_ORDER.indexOf(k)]).map(d=>d.charAt(0)+d.slice(1).toLowerCase());
+    const datos=[['SOCIO',tc(s.nombre||'')],['OBJETIVO',sc(s.objetivo||'')+' · '+sc(s.nivel||'')],['ENTRENADOR',entNom],['FRECUENCIA',(diasTxt.length||s.dias)+' días: '+diasTxt.join(', ')]];
+    const cw=CW/4;
+    doc.setFillColor(...SOFT); doc.setDrawColor(...LINE); doc.setLineWidth(0.25); doc.roundedRect(MX,y,CW,17,3,3,'FD');
+    datos.forEach(([k,v],i)=>{
+      const x=MX+i*cw+5;
+      if(i){ doc.setDrawColor(...LINE); doc.line(MX+i*cw,y+3,MX+i*cw,y+14); }
+      font('bold',6.5,MUTED); doc.text(k,x,y+6);
+      font('bold',8.6,INK); doc.text(doc.splitTextToSize(pdfTxt(v),cw-8).slice(0,2),x,y+11);
     });
-    const bottomY=54;
-    doc.setDrawColor(...GRAY_LINE); doc.setLineWidth(0.3); doc.line(marginX,bottomY,pageW-marginX,bottomY);
-    return bottomY+8;
-  }
+    y+=23;
 
-  function drawPageContinuationHeader(){
-    doc.setFillColor(...NAVY); doc.rect(0,0,pageW,13,'F');
-    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(255,255,255);
-    doc.text('TU RUTINA', marginX, 8.3);
-    doc.setTextColor(...GREEN); doc.setFont('helvetica','normal'); doc.setFontSize(8);
-    doc.text(' · '+(s.nombre||''), marginX+22, 8.3);
-    return 20;
-  }
+    // ── Método del entrenador ──
+    const m=(()=>{ const e=entRutina(s.entrenadorId); try{ return (e&&metLineas(e.filosofia,e,s))||s.metodo; }catch(_){ return s.metodo; } })();
+    if(m&&m.tagline){
+      font('normal',7.6,INK);
+      const lin=(m.lineas||[]).slice(0,4).map(l=>doc.splitTextToSize(pdfTxt(l),CW-14));
+      const h=15+lin.reduce((a,l)=>a+l.length*3.4,0)+2;
+      doc.setFillColor(...LIME_S); doc.roundedRect(MX,y,CW,h,3,3,'F'); doc.setFillColor(...LIME); doc.roundedRect(MX,y,2.2,h,1,1,'F');
+      font('bold',6.5,LIME_D); doc.text((m.sistema?'EL MÉTODO DE TU PLAN':'EL MÉTODO DE TU ENTRENADOR'),MX+7,y+6);
+      font('bold',10,INK); doc.text(pdfTxt('"'+m.tagline+'"'),MX+7,y+11.5);
+      let ly=y+17; font('normal',7.6,INK);
+      lin.forEach(l=>{ doc.setFillColor(...LIME_D); doc.circle(MX+8,ly-1,0.6,'F'); doc.text(l,MX+11,ly); ly+=l.length*3.4; });
+      y+=h+6;
+    }
 
-  function drawPageFooter(){
-    doc.setDrawColor(...GRAY_LINE); doc.setLineWidth(0.2); doc.line(marginX,284,pageW-marginX,284);
-    doc.setFont('helvetica','normal'); doc.setFontSize(6.7); doc.setTextColor(...MUTED);
-    doc.text(GYM.nombre, marginX, 289);
-    doc.text('Pág. '+doc.internal.getCurrentPageInfo().pageNumber, pageW-marginX, 289, {align:'right'});
-  }
+    // ── Días ──
+    const descansos=DIAS_ORDER.filter(k=>!(s.rutina[k]&&(s.rutina[k].ejercicios||[]).length)).map(k=>EN_DIAS[DIAS_ORDER.indexOf(k)]);
+    const dias=DIAS_ORDER.map((k,i)=>({k,i,d:s.rutina[k]})).filter(x=>x.d&&(x.d.ejercicios||[]).length);
+    // Columnas: # | Ejercicio | Series × reps | Descanso | Peso sugerido | Semana 1..n
+    const C={n:7, ej:0, sr:25, ds:19, ps:23, wk:nSem*7.5};
+    C.ej=CW-C.n-C.sr-C.ds-C.ps-C.wk;
+    const X={n:MX, ej:MX+C.n, sr:MX+C.n+C.ej, ds:MX+C.n+C.ej+C.sr, ps:MX+C.n+C.ej+C.sr+C.ds, wk:MX+CW-C.wk};
+    const metUsados=new Map();
 
-  function newPage(){
-    drawPageFooter();
-    doc.addPage();
-    const top=drawPageContinuationHeader();
-    colY=[top,top];
-  }
+    function cabTabla(){
+      doc.setFillColor(...SOFT); doc.rect(MX,y,CW,6,'F');
+      font('bold',6.2,MUTED);
+      doc.text('EJERCICIO',X.ej+1,y+4); doc.text('SERIES × REPS',X.sr+1,y+4); doc.text('DESCANSO',X.ds+1,y+4); doc.text('PESO SUGERIDO',X.ps+1,y+4);
+      for(let w=0;w<nSem;w++) doc.text('S'+(w+1),X.wk+w*7.5+3.75,y+4,{align:'center'});
+      y+=6;
+    }
+    function cabDia(x,cont){
+      const d=x.d, nm=EN_DIAS[x.i].charAt(0).toUpperCase()+EN_DIAS[x.i].slice(1);
+      doc.setFillColor(...DARK); doc.roundedRect(MX,y,CW,9,2.5,2.5,'F');
+      doc.setFillColor(...LIME); doc.roundedRect(MX,y,30,9,2.5,2.5,'F'); doc.rect(MX+26,y,4,9,'F');
+      font('bold',9,DARK); doc.text(nm.toUpperCase(),MX+15,y+6,{align:'center'});
+      font('bold',9.5,[255,255,255]); doc.text(pdfTxt(sc(d.tipo||'Entrenamiento'))+(cont?'  (continúa)':''),MX+34,y+6);
+      font('normal',7.5,[190,200,210]); doc.text('~'+minutosDia(d)+' min  ·  '+d.ejercicios.length+' ejercicios',W-MX-3,y+6,{align:'right'});
+      y+=11; cabTabla();
+    }
 
-  drawBanner();
-  colY[0]=colY[1]=drawInfoStrip();
-
-  const dias = DIAS_ORDER.map(k=>({key:k,d:s.rutina[k]})).filter(x=>x.d);
-
-  dias.forEach((item,dayIdx)=>{
-    const d=item.d;
-    const color=DAY_COLORS[dayIdx%2];
-    const sig = (d.ejercicios||[]).map(e=>e.nm).join('|');
-    const isDup = sig && seenDayStructures[sig];
-    if(sig && !isDup) seenDayStructures[sig]={label:d.label,tipo:d.tipo};
-
-    const rows=[];
-    if(d.ejercicios && d.ejercicios.length){
-      d.ejercicios.forEach((ej,i)=>{
-        doc.setFont('helvetica','bold'); doc.setFontSize(8);
-        const nameLines=isDup?[ej.nm||'']:doc.splitTextToSize(ej.nm||'', NAME_WRAP_W);
-        doc.setFont('helvetica','normal'); doc.setFontSize(7.4);
-        const rxP=rxTexto(ej,s); const srLines=doc.splitTextToSize((esEjCardio(ej)||esEjRondas(ej)||esEjMovilidad(ej))?rxP.sr.replace(' × ','×'):`${ej.series}×${ej.reps}`, SR_W-1.5);
-        const pesoLines=doc.splitTextToSize(String((esEjCardio(ej)||esEjRondas(ej)||esEjMovilidad(ej))?rxP.carga:(ej.esfuerzo||(pct1RM(ej.peso)?'Moderado — 2 reps en reserva':(ej.peso||'—')))), PESO_W-1.5);
-        let tipLines=[];
-        if(!isDup && (ej.tip || ej.metodo || (ej.alternativas||[]).length)){
-          doc.setFont('helvetica','italic'); doc.setFontSize(7);
-          const partes=[];
-          if(ej.metodo) partes.push('Método: '+(ej.grupo?ej.grupo+' · ':'')+ej.metodo.nm+(ej.metodo.detalle?' ('+ej.metodo.detalle+')':'')+'.');
-          if(ej.descanso) partes.push('Descanso: '+String(ej.descanso).replace('→','->')+'.');
-          if(ej.tip) partes.push('Tip: '+ej.tip);
-          if((ej.alternativas||[]).length) partes.push('Si está ocupado: '+ej.alternativas.map(a=>a.nm).join(' / ')+'.');
-          tipLines=doc.splitTextToSize(partes.join('  '), contentW-2);
-        }
-        const headLines=Math.max(nameLines.length, srLines.length, pesoLines.length);
-        const rowH = Math.max(headLines*3.3, 4.2) + (tipLines.length? tipLines.length*2.85+1.3 : 0) + 1.9;
-        rows.push({ej,idx:i,nameLines,srLines,pesoLines,tipLines,rowH});
+    dias.forEach(x=>{
+      const filas=x.d.ejercicios.map((e,j)=>{
+        const r=rxTexto(e,s), c=cargaSugerida(s,e), dp=descansoPlan(e.descanso), esp=esEjCardio(e)||esEjRondas(e)||esEjMovilidad(e);
+        const t=v=>v<120?v+' s':Math.round(v/6)/10+' min';
+        const des=esp?'':dp.nada?'Sin descanso':dp.libre?(dp.meta?'~'+t(dp.meta):'Libre'):t(dp.seg);
+        let peso=c?enKg(c.kg):pdfTxt(r.carga||e.esfuerzo||'');
+        peso=peso.replace(/^Moderado\s*-\s*/i,'').replace(/^Esfuerzo moderado\s*-\s*/i,'').replace(/^FC objetivo/i,'FC'); peso=peso.charAt(0).toUpperCase()+peso.slice(1);
+        const M=e.metodo&&KB_METODOS[e.metodo.id]; if(M) metUsados.set(e.metodo.id,M);
+        const extra=[M?ddMetCorto(M.nm):'', (e.alternativas||[]).length?'Si está ocupado: '+e.alternativas[0].nm:''].filter(Boolean).join('  ·  ');
+        font('bold',8.4); const nmL=doc.splitTextToSize(pdfTxt(e.nm),C.ej-2);
+        font('normal',6.6); const exL=extra?doc.splitTextToSize(pdfTxt(extra),C.ej-2).slice(0,2):[];
+        font('normal',7.6); const srL=doc.splitTextToSize(pdfTxt(limpiarReps(r.sr)),C.sr-2), psL=doc.splitTextToSize(peso||'-',C.ps-2).slice(0,3);
+        const h=Math.max(nmL.length*3.6+exL.length*3+1.5, srL.length*3.3, psL.length*3.3, 6)+3.5;
+        return {e,j,nmL,exL,srL,psL,des,h,c};
       });
-    }
-    const refLine = isDup ? 5.5 : 0;
-    const blockH = 8 + 5 + refLine + (rows.length? rows.reduce((a,r)=>a+r.rowH,0) : 7) + 3;
-
-    let idx = colY[0]<=colY[1] ? 0 : 1;
-    if(colY[idx]+blockH>maxY){ newPage(); idx=0; }
-    const x=colX[idx]; let y=colY[idx];
-
-    doc.setFillColor(...color); doc.roundedRect(x,y,colW,8,1.4,1.4,'F');
-    const dk = color.map(c=>Math.max(0,c-25));
-    doc.setFillColor(...dk);
-    doc.triangle(x+colW-7,y, x+colW,y, x+colW,y+8,'F');
-    doc.setFillColor(255,255,255); iconDumbbell(x+6,y+4,2.9,[255,255,255]);
-    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(255,255,255);
-    doc.text(`${d.label} — ${d.tipo}`, x+11, y+5.2);
-    y+=8+2;
-
-    if(isDup){
-      doc.setFont('helvetica','italic'); doc.setFontSize(7.1); doc.setTextColor(...MUTED);
-      doc.text(`(Misma estructura que ${seenDayStructures[sig].label} — ${seenDayStructures[sig].tipo})`, x+1, y);
-      y+=5;
-    }
-
-    if(!rows.length){
-      doc.setFillColor(...GRAY_BG); doc.roundedRect(x,y,colW,7,1,1,'F');
-      doc.setFont('helvetica','italic'); doc.setFontSize(8.5); doc.setTextColor(...MUTED);
-      doc.text('Descanso / recuperación activa', x+3.5, y+4.7);
-      y+=7+3;
-    } else {
-      doc.setFillColor(...GRAY_BG); doc.rect(x,y-3.5,colW,4.8,'F');
-      doc.setFont('helvetica','bold'); doc.setFontSize(6.1); doc.setTextColor(...MUTED);
-      doc.text('EJERCICIO', x+3+NUM_W, y-0.7);
-      doc.text('SERIES×REPS', x+3+NUM_W+NAME_W, y-0.7);
-      doc.text('PESO', x+3+NUM_W+NAME_W+SR_W, y-0.7);
-      y+=2.9;
-
-      rows.forEach((r,ri)=>{
-        if(ri%2===1){
-          doc.setFillColor(...GRAY_ZEBRA);
-          doc.rect(x,y-3.1,colW,r.rowH,'F');
-        }
-        doc.setFillColor(...color); doc.roundedRect(x+3,y-2.9,4,4,0.8,0.8,'F');
-        doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(255,255,255);
-        doc.text(String(r.idx+1), x+3+2, y+0.15, {align:'center'});
-
-        doc.setFont('helvetica','bold'); doc.setFontSize(isDup?7.3:7.8); doc.setTextColor(...TXT);
-        doc.text(r.nameLines, x+3+NUM_W, y);
-        doc.setFont('helvetica','normal'); doc.setFontSize(7.3); doc.setTextColor(...MUTED);
-        doc.text(r.srLines, x+3+NUM_W+NAME_W, y);
-        doc.text(r.pesoLines, x+3+NUM_W+NAME_W+SR_W, y);
-
-        let ry = y + Math.max(r.nameLines.length,r.srLines.length,r.pesoLines.length)*3.3;
-        if(r.tipLines.length){
-          doc.setFont('helvetica','italic'); doc.setFontSize(6.9); doc.setTextColor(...GREEN_D);
-          doc.text(r.tipLines, x+3+NUM_W, ry);
-          ry += r.tipLines.length*2.85+1.3;
-        }
-        y = ry + 1.9;
+      // Un día que cabe completo en una página nueva no se parte; uno muy largo empieza aquí si caben 2 ejercicios
+      const total=11+6+filas.reduce((a,f)=>a+f.h,0), alto=11+6+filas.slice(0,2).reduce((a,f)=>a+f.h,0);
+      if(y+total>MAXY && (total<=MAXY-22 || y+alto>MAXY)) nuevaPagina();
+      cabDia(x,false);
+      filas.forEach((f,fi)=>{
+        if(y+f.h>MAXY){ nuevaPagina(); cabDia(x,true); }
+        const y0=y;
+        font('bold',8,LIME_D); doc.text(String(f.e.grupo||f.j+1),X.n+3.5,y0+4.4,{align:'center'});
+        font('bold',8.4,INK); doc.text(f.nmL,X.ej+1,y0+4.2);
+        if(f.exL.length){ font('normal',6.6,MUTED); doc.text(f.exL,X.ej+1,y0+4.2+f.nmL.length*3.6); }
+        font('normal',7.6,INK); doc.text(f.srL,X.sr+1,y0+4.2);
+        font('normal',7.6,MUTED); doc.text(f.des||'-',X.ds+1,y0+4.2);
+        font(f.c?'bold':'normal',7.6,INK); doc.text(f.psL,X.ps+1,y0+4.2);
+        doc.setDrawColor(...ICE); doc.setLineWidth(0.25);
+        for(let w=0;w<nSem;w++) doc.roundedRect(X.wk+w*7.5+0.9,y0+1.4,5.7,Math.min(f.h-2.8,6),1,1,'S');
+        y+=f.h;
+        if(fi<filas.length-1){ doc.setDrawColor(...LINE); doc.setLineWidth(0.2); doc.line(MX,y,MX+CW,y); }
       });
+      y+=7;
+    });
+
+    // ── Descanso, métodos y recordatorios ──
+    if(descansos.length){
+      asegurar(12);
+      font('bold',8,INK); doc.text('Días de descanso: ',MX,y);
+      const dw=doc.getTextWidth('Días de descanso: ');
+      font('normal',8,MUTED); doc.text(doc.splitTextToSize(pdfTxt(descansos.join(', ')+'. Camina 20 a 30 minutos, estira y duerme 7 u 8 horas.'),CW-dw),MX+dw,y);
+      y+=9;
     }
-    colY[idx]=y+2.5;
-  });
+    if(metUsados.size){
+      asegurar(26);   // el título nunca queda solo al final de la hoja
+      font('bold',10,INK); doc.text(metUsados.size===1?'Método de tu plan':'Métodos de tu plan',MX,y); y+=5;
+      metUsados.forEach(M=>{
+        font('normal',7.6); const tl=doc.splitTextToSize(pdfTxt(M.como),CW-48);
+        const h=Math.max(tl.length*3.4,4)+3.5; asegurar(h);
+        font('bold',8,LIME_D); doc.text(pdfTxt(ddMetCorto(M.nm)),MX,y+3.2);
+        font('normal',7.6,INK); doc.text(tl,MX+46,y+3.2);
+        y+=h; doc.setDrawColor(...LINE); doc.setLineWidth(0.2); doc.line(MX,y-1.2,MX+CW,y-1.2);
+      });
+      y+=4;
+    }
+    const notas=['Calienta 5 a 10 minutos antes de empezar.','Respeta el descanso indicado en cada ejercicio.','Si la técnica se rompe, baja el peso: primero la forma.','Anota en S1, S2, S3… el peso que usaste cada semana del bloque.','Hidrátate durante la sesión y duerme 7 u 8 horas.'];
+    asegurar(30);
+    font('bold',10,INK); doc.text('Recuerda',MX,y); y+=2.5;
+    const colN=CW/2-4;
+    notas.forEach((n,i)=>{ const cx=MX+(i%2)*(CW/2), cy=y+4+Math.floor(i/2)*6.2;
+      doc.setFillColor(...LIME); doc.circle(cx+1.6,cy-1.1,1.2,'F'); font('normal',7.6,INK); doc.text(doc.splitTextToSize(pdfTxt(n),colN-6)[0],cx+5,cy); });
+    y+=4+Math.ceil(notas.length/2)*6.2+4;
+    asegurar(14);
+    doc.setFillColor(...DARK); doc.roundedRect(MX,y,CW,12,3,3,'F'); doc.setFillColor(...LIME); doc.roundedRect(MX,y,3,12,1.5,1.5,'F');
+    font('bolditalic',10,[255,255,255]); doc.text('Tu esfuerzo de hoy es tu mejor inversión.',MX+CW/2,y+7.6,{align:'center'});
 
-  let ny=Math.max(colY[0],colY[1])+4;
-  const notaTrainer = (ent && ent.filosofia && ent.filosofia.adjustmentPhilosophy) ? ent.filosofia.adjustmentPhilosophy : null;
-  const notasList = [
-    'Calienta 5–10 min antes de cada sesión.',
-    'Mantén buena técnica y controla cada repetición.',
-    'Descansa 60–90 seg entre series (resistencia) y 90–120 seg en hipertrofia.',
-    'Hidrátate durante el entrenamiento.',
-    'Duerme 7–8 horas diarias y cuida tu alimentación.',
-  ];
-  if(notaTrainer) notasList.push('Criterio de tu entrenador: '+notaTrainer);
+    // ── Pie en todas las páginas ──
+    const tot=doc.getNumberOfPages();
+    for(let p=1;p<=tot;p++){
+      doc.setPage(p);
+      doc.setDrawColor(...LINE); doc.setLineWidth(0.2); doc.line(MX,H-12,W-MX,H-12);
+      font('normal',6.8,MUTED);
+      doc.text(pdfTxt(GYM.nombre+'  ·  '+tc(s.nombre||'')+'  ·  '+(s.id||'')),MX,H-7.5);
+      doc.text('Página '+p+' de '+tot,W-MX,H-7.5,{align:'right'});
+    }
 
-  doc.setFont('helvetica','normal'); doc.setFontSize(7.4);
-  const wrapped = notasList.map(t=>doc.splitTextToSize('•  '+t, pageW-marginX*2-10));
-  const boxH = 11 + wrapped.reduce((a,w)=>a+w.length*3.5,0) + 3;
-  const CLOSE_H = 22;
-  if(ny+boxH+CLOSE_H>maxY+6){ newPage(); ny=colY[0]; }
-
-  doc.setDrawColor(...GRAY_LINE); doc.setFillColor(...GRAY_BG);
-  doc.roundedRect(marginX,ny,pageW-marginX*2,boxH,2,2,'FD');
-  iconStar(marginX+8,ny+6.5,3.4,GREEN_D);
-  doc.setFont('helvetica','bold'); doc.setFontSize(9.2); doc.setTextColor(...NAVY);
-  doc.text('NOTAS IMPORTANTES', marginX+14,ny+7.8);
-  let by=ny+13.5;
-  doc.setFont('helvetica','normal'); doc.setFontSize(7.4); doc.setTextColor(...TXT);
-  wrapped.forEach(w=>{ doc.text(w, marginX+7, by); by+=w.length*3.5; });
-
-  // ── Cierre motivacional (altura fija, no estira hasta el fondo) ──
-  const closeY=ny+boxH+5;
-  doc.setFillColor(...NAVY); doc.roundedRect(marginX,closeY,pageW-marginX*2,CLOSE_H,2,2,'F');
-  doc.setFillColor(...GREEN_D);
-  doc.triangle(marginX,closeY, marginX+22,closeY, marginX,closeY+CLOSE_H,'F');
-  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(255,255,255);
-  doc.text('TU ESFUERZO DE HOY', pageW/2, closeY+CLOSE_H/2-2, {align:'center'});
-  doc.setFont('helvetica','bolditalic'); doc.setTextColor(...GREEN);
-  doc.text('ES TU MEJOR INVERSIÓN.', pageW/2, closeY+CLOSE_H/2+4.5, {align:'center'});
-
-  drawPageFooter();
-
-    doc.save(`Rutina-${(s.nombre||s.id).replace(/\s+/g,'_')}.pdf`);
-    showToast('📄 PDF descargado');
+    doc.save(`Rutina-${(tc(s.nombre||s.id||'socio')).replace(/\s+/g,'_')}.pdf`);
+    showToast('Tu rutina en PDF se descargó');
   }catch(e){
     console.error(e);
-    showToast('⚠ No se pudo generar el PDF — revisa tu conexión');
+    showToast('No se pudo generar el PDF. Revisa tu conexión.');
   }finally{
-    if(btn){ btn.textContent=btnTxt||'📄 DESCARGAR PDF'; btn.style.pointerEvents=''; }
+    if(btn){ btn.textContent=btnTxt||'Descargar mi rutina en PDF'; btn.style.pointerEvents=''; }
   }
 }
 
