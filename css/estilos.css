@@ -188,10 +188,10 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:none;}
 .ic-label{font-family:var(--fd);font-weight:800;font-size:var(--fs-3xl);letter-spacing:-.02em;line-height:1.1;}
 .ic-sub{font-size:var(--fs-md);color:var(--mu);margin-top:3px;line-height:1.4;}
 .ic-arrow{margin-left:auto;color:var(--mu);}
-.ic-ya{background:var(--grad);border-color:transparent;box-shadow:var(--glow);color:var(--btn-tx);-webkit-backdrop-filter:none;backdrop-filter:none;}
-.ic-ya .ic-icon{background:rgba(255,255,255,.22);color:var(--btn-tx);}
-#s-inicio .ic-ya .ic-icon{background:transparent;}
-.ic-ya .ic-sub,.ic-ya .ic-arrow{color:color-mix(in srgb,var(--btn-tx) 78%,transparent);}
+.ic-pri{background:var(--grad);border-color:transparent;box-shadow:var(--glow);color:var(--btn-tx);-webkit-backdrop-filter:none;backdrop-filter:none;}
+.ic-pri .ic-icon{background:rgba(255,255,255,.22);color:var(--btn-tx);}
+#s-inicio .ic-pri .ic-icon{background:transparent;}
+.ic-pri .ic-sub,.ic-pri .ic-arrow{color:color-mix(in srgb,var(--btn-tx) 78%,transparent);}
 .inicio-footer{display:flex;gap:8px;align-items:center;margin-top:16px;flex-wrap:wrap;}
 .if-pill{padding:7px 14px;background:var(--gl);border:1px solid var(--b);border-radius:999px;font-size:var(--fs-sm);font-weight:600;color:var(--mu);display:flex;align-items:center;gap:7px;}
 .staff-link{margin-top:14px;font-size:var(--fs-md);font-weight:600;color:var(--mu);cursor:pointer;padding:10px 4px;display:inline-flex;align-items:center;gap:6px;}
@@ -1407,7 +1407,7 @@ input[type=range]::-webkit-slider-thumb{background:var(--lime);border-color:var(
 /* Tarjetas y enlaces de inicio como <button> reales */
 button.ic,button.staff-link,button.btn-back-link{font:inherit;color:inherit;width:100%;-webkit-appearance:none;appearance:none;}
 button.ic{color:var(--tx);}
-button.ic.ic-ya{color:var(--btn-tx);}
+button.ic.ic-pri{color:var(--btn-tx);}
 .ic-txt{display:flex;flex-direction:column;min-width:0;}
 .ic-sub{display:block;}
 @media(hover:hover){button.ic:hover{transform:translateY(-2px);}}
@@ -1438,8 +1438,8 @@ html[data-theme="light2"]{
     radial-gradient(100% 70% at 90% 110%, rgba(255,90,31,.28), transparent 62%),
     linear-gradient(165deg,#F5F2FD 0%,#EEF2FE 45%,#F7EFFB 100%);
 }
-html[data-theme="light2"] .ic-ya .ic-sub,html[data-theme="light2"] .ic-ya .ic-arrow{color:#FFFFFF;}
-html[data-theme="light2"] .ic-ya .ic-label,html[data-theme="light2"] .ic-ya .ic-sub{text-shadow:0 1px 2px rgba(20,8,50,.35);}
+html[data-theme="light2"] .ic-pri .ic-sub,html[data-theme="light2"] .ic-pri .ic-arrow{color:#FFFFFF;}
+html[data-theme="light2"] .ic-pri .ic-label,html[data-theme="light2"] .ic-pri .ic-sub{text-shadow:0 1px 2px rgba(20,8,50,.35);}
 
 /* ═══ Apariencia (módulo del director) ═══ */
 .apar{padding:22px;max-width:760px;display:flex;flex-direction:column;gap:18px;}
@@ -2216,18 +2216,18 @@ html[data-theme="light"] .st-l,html[data-theme="light"] .memb-k{color:#4A5866;}
 .tec[data-v="si"] .tec-l.no,.tec[data-v="no"] .tec-l.si{display:none;}
 
 /* ═══ Bienvenida: la imagen es parte del fondo (sin recuadro) y los dos botones caben al abrir ═══ */
-#s-inicio{position:relative;background:#0A0E13;--wc-h:min(62vh,600px);}
+#s-inicio{position:relative;background:#0A0E13;--wc-h:min(50svh,460px);}
 #s-inicio .wc-hero{position:absolute;inset:0 0 auto 0;height:var(--wc-h);border-radius:0;background:#0A0E13;overflow:hidden;}
 #s-inicio .wc-hero::after{display:none;}
 #s-inicio .wc-pic .pic.fill img{object-fit:cover;object-position:56% 22%;}
 #s-inicio .wc-ov{background:linear-gradient(0deg,#0A0E13 0%,#0A0E13 6%,rgba(10,14,19,.72) 26%,rgba(10,14,19,.12) 50%,rgba(10,14,19,0) 72%,rgba(10,14,19,.45) 100%);}
-#s-inicio .wc-gym{display:none;}
+#s-inicio .wc-gym,#s-inicio .wc-fecha{display:none;}
 #s-inicio .wc-top{justify-content:flex-end;}
 #s-inicio .wc-tx{bottom:14px;}
 #s-inicio .wc-tx h1{text-shadow:0 2px 18px rgba(0,0,0,.6);}
 #s-inicio .inicio-wrap{position:relative;z-index:2;margin-top:var(--wc-h);padding-top:14px;}
 #s-inicio .ic{border-color:rgba(165,225,255,.38);}
-@media(max-height:700px){ #s-inicio{--wc-h:58vh;} #s-inicio .wc-tx p{display:none;} }
+@media(max-height:700px){ #s-inicio{--wc-h:46svh;} #s-inicio .wc-tx p{display:none;} }
 @media(min-width:1025px){
   #s-inicio .wc-hero{position:fixed;inset:0;height:100vh;}
   #s-inicio .wc-pic{left:auto;right:0;width:62vw;-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 30%);mask-image:linear-gradient(90deg,transparent 0%,#000 30%);}
@@ -2246,3 +2246,12 @@ html[data-theme="light"] .st-l,html[data-theme="light"] .memb-k{color:#4A5866;}
 .qr-wa{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;}
 .qr-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
 .qr-acts .tb-btn{flex:1;justify-content:center;display:inline-flex;align-items:center;gap:6px;}
+
+/* Antes del login no hay selector de tema: el cliente lo cambia en Ajustes */
+.tb.tb-acceso .theme-slot{display:none;}
+
+/* Registro: volver arriba a la izquierda, sin halo decorativo */
+#s-registro .login-card::before{display:none;}
+.reg-volver{margin:-6px 0 14px -6px;}
+.reg-volver .ico{width:20px;height:20px;}
+@media(max-width:480px){ #s-registro > div{padding:16px !important;} #s-registro .login-card{padding:22px 18px;} }
