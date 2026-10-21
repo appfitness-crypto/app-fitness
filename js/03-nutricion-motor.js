@@ -92,6 +92,20 @@ function calcNutricion(s){
       nota = 'Calorías de mantenimiento con carbohidratos como combustible principal. Hidratación antes, durante y después de sesiones largas. Repón electrolitos si sudas más de 60 min.';
   }
 
+  // Seguridad: menores de 18 sin déficit, y nadie por debajo de un mínimo absoluto (salvo que su gasto total sea menor)
+  const menor = (parseInt(edad)||0) > 0 && parseInt(edad) < 18;
+  if(menor && kcal < tdee){
+    kcal = tdee;
+    ajusteTxt = 'Mantenimiento (menor de edad, sin déficit)';
+    nota += ' Eres menor de edad: tu plan no reduce calorías. Si quieres cambiar tu peso, hazlo con tu médico o nutriólogo.';
+  }
+  const piso = Math.min(tdee, esMujer ? 1200 : esHombre ? 1500 : 1350);
+  if(kcal < piso){
+    kcal = piso;
+    ajusteTxt = kcal>=tdee ? 'Mantenimiento (gasto total)' : 'Déficit limitado por seguridad (mínimo '+piso+' kcal)';
+    nota += ' Tus calorías no bajan de '+piso+' kcal al día: menos que eso solo debe hacerse con supervisión médica.';
+  }
+
   // Macros (sobre el peso de referencia: con obesidad no se calculan sobre el peso total)
   const pRef = comp.pesoRef || peso;
   const prot = Math.round(protKg * pRef);                       // g proteína

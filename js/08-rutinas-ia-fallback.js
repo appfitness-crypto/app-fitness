@@ -516,7 +516,8 @@ async function confirmarRutina(){
       clases:[...(qAnswers.gimClases||[])], sigue:qAnswers.gimSigue,
       diagnostico:qAnswers.gimDiagnostico, diagTexto:qAnswers.gimDiagTexto||'',
       medicoAutoriza:qAnswers.gimMedicoAutoriza||'',
-      rehabTotal: (window._rutinaTemp && window._rutinaTemp.rehabTotal)||false
+      rehabTotal: (window._rutinaTemp && window._rutinaTemp.rehabTotal)||false,
+      alarmas: gimAlarmas(qAnswers.gimCuando)
     };
   }
   // Si es rehabilitación, activar el protocolo por fases automáticamente
@@ -976,7 +977,7 @@ const GIM_SEGURO = {
     banco:[
       {nombre:'Plancha frontal',series:3,reps:'20-40 seg',musculo:'Core',tip:'Fortalece el core en posición neutra, sin arquear la espalda.'},
       {nombre:'Bird-dog',series:3,reps:'8 por lado',musculo:'Core · Espalda',tip:'Control de columna sin hiperextensión.'},
-      {nombre:'Puente de glúteo',series:3,reps:'12 reps',musculo:'Glúteo',tip:'Sube con el glúteo, no con la lumbar.'},
+      {nombre:'Dead bug',series:3,reps:'8 por lado',musculo:'Core',tip:'Boca arriba, la espalda baja pegada al piso todo el tiempo; sin arquear.'},
       {nombre:'Fortalecimiento de tren superior',series:3,reps:'12 reps',musculo:'Brazos · Hombros',tip:'Trabaja arriba manteniendo la espalda neutra.'},
     ]
   },
@@ -986,7 +987,7 @@ const GIM_SEGURO = {
     banco:[
       {nombre:'Sentadilla con peso corporal',series:3,reps:'12 reps',musculo:'Piernas',tip:'Fortalece piernas sin cargar el hombro.'},
       {nombre:'Puente de glúteo',series:3,reps:'12 reps',musculo:'Glúteo',tip:'Trabaja cadera y piernas mientras el hombro descansa.'},
-      {nombre:'Plancha frontal',series:3,reps:'20-30 seg',musculo:'Core',tip:'Apoyo en antebrazos, no en la muñeca ni el hombro extendido.'},
+      {nombre:'Dead bug',series:3,reps:'8 por lado',musculo:'Core',tip:'Boca arriba, mueve solo las piernas si subir el brazo molesta el hombro. Core sin cargar el hombro.'},
       {nombre:'Zancadas',series:3,reps:'10 por lado',musculo:'Piernas',tip:'Sin cargar mancuernas si eso irrita el hombro; usa solo tu peso.'},
     ]
   },
@@ -1001,6 +1002,22 @@ const GIM_SEGURO = {
     ]
   },
 };
+
+// Señales de alarma entre lo que le molesta: no se entrena la zona hasta una valoración médica
+function gimAlarmas(cuando){ return (cuando||[]).filter(c=>/hormigueo|dolor de cabeza/i.test(c)); }
+// Ajuste por edad: menores sin carga externa; mayores sin ejercicios de equilibrio exigente
+const REHAB_MAYOR={
+  'Zancadas':{nombre:'Sentarse y pararse de una silla',tip:'Baja despacio hasta tocar la silla y levántate sin impulso; apóyate si lo necesitas.'},
+  'Sentadilla con peso corporal':{nombre:'Sentadilla a una silla',tip:'Toca la silla con la cadera y sube; ten una pared cerca para equilibrarte.'},
+  'Split activo':{nombre:'Elevación de talones con apoyo',tip:'Sujétate de una silla o pared; sube y baja despacio.'},
+};
+function rehabPorEdad(semana,edad){
+  (semana||[]).forEach(d=>(d.ejercicios||[]).forEach(e=>{
+    if(!e.nombre || e.series==='—') return;
+    if(edad<15){ e.peso='Solo su peso corporal'; e.tip=(e.tip||'')+' Sin pesas ni ligas pesadas; con un adulto supervisando.'; }
+    else if(edad>=60 && REHAB_MAYOR[e.nombre]) Object.assign(e,REHAB_MAYOR[e.nombre]);
+  }));
+}
 
 // ══ GENERADOR DE PLAN DE REHABILITACIÓN (cualquier socio, no solo gimnastas) ══
 function generarRutinaGim(){
@@ -1023,7 +1040,8 @@ function generarRutinaGim(){
     const sinDiag = qAnswers.gimDiagnostico==='no';
     const medicoPausa = qAnswers.gimDiagnostico==='si' && qAnswers.gimMedicoAutoriza==='No, indicó pausa';
     const conDolor = qAnswers.gimDolor>=3;
-    const rehabTotal = (sinDiag && conDolor) || medicoPausa;
+    const alarmas = gimAlarmas(qAnswers.gimCuando);   // hormigueo, dolor de cabeza: siempre requieren valoración médica
+    const rehabTotal = (sinDiag && conDolor) || medicoPausa || alarmas.length>0;
 
     let semana;
     if(rehabTotal){
@@ -1084,12 +1102,16 @@ function generarRutinaGim(){
       }
     }
 
+    rehabPorEdad(semana, qAnswers.gimEdad);
+
     const cuandoTxt=qAnswers.gimCuando.length?qAnswers.gimCuando.join(', '):'No especificado';
     let nota;
     if(rehabTotal){
       nota=`${p.emoji} ${p.nombre} · Socio de ${qAnswers.gimEdad} años. Dolor ${qAnswers.gimDolor}/10, ${qAnswers.gimInicioDolor.toLowerCase()}. Le molesta: ${cuandoTxt}. `+
         `🚫 MODO REHABILITACIÓN TOTAL: `+
-        (medicoPausa
+        (alarmas.length
+          ? `hay una señal de alarma, así que el entrenamiento queda en pausa hasta la valoración médica. `
+          : medicoPausa
           ? `el médico indicó pausar el entrenamiento. `
           : `no hay diagnóstico médico y hay dolor, por lo que se pausa el entrenamiento hasta que un doctor o fisioterapeuta lo valore. Entrenar con dolor sin diagnóstico puede empeorar la lesión. `)+
         `El plan se enfoca solo en recuperar la zona y en fortalecimiento muy suave de lo que NO duele. `+
@@ -1104,6 +1126,9 @@ function generarRutinaGim(){
         `⚠️ Guía de apoyo, NO diagnóstico médico. Todo SIN dolor. `+
         (qAnswers.gimDolor>=6 ? 'Con este nivel de dolor, vigila de cerca y consulta si no mejora.' : 'Si el dolor aumenta o no mejora en 2-3 semanas, acude al médico.');
     }
+    if(alarmas.length) nota=`🚨 SEÑAL DE ALARMA (${alarmas.join(', ').toLowerCase()}): acude al médico antes de entrenar esa zona. `+nota;
+    if(qAnswers.gimEdad<15) nota+=' 👦 Menor de 15 años: todo con su propio peso, sin cargas externas y con un adulto o entrenador supervisando.';
+    else if(qAnswers.gimEdad>=60) nota+=' 🧓 60 años o más: ejercicios con apoyo y bajo impacto; ten una silla o pared cerca para equilibrarte.';
 
     const plan={
       perfil:{
@@ -1114,7 +1139,7 @@ function generarRutinaGim(){
         nota
       },
       semana,
-      esRehab:true, protoId:p.id, rehabTotal,
+      esRehab:true, protoId:p.id, rehabTotal, alarmas,
       gimSeguro:seguro
     };
     mostrarPreview(plan);

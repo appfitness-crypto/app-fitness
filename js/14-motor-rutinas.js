@@ -479,10 +479,22 @@ function emomTope(e,ctx){
 const EJ_TECNICOS=['bulgara','kb_swing','good_morning','pm_sumo','desplante_lateral'];
 function perfilDelicado(ctx){ return ctx && ctx.nivel===1 && ((ctx.imc||0)>=35 || (ctx.edad||0)>=60); }
 function ejTecnico(kb){ return !!kb && (kb.z==='rack' || EJ_TECNICOS.includes(kb.id) || (kb.nv||1)>=2); }
+// Ejercicios que no están en el catálogo (IA, ediciones del staff): con lesión, el nombre decide si es de riesgo para esa zona
+const LES_RIESGO_NM={
+  rodilla:/sentadilla|zancada|desplante|salto|brinco|pliometr|prensa|extension de (rodilla|cuadriceps)|step|sissy|pistol|burpee|correr|trote|sprint/,
+  lumbar:/peso muerto|buenos dias|remo con barra|hiperextension|good morning|swing|clean|arranque|snatch|sentadilla con barra|rumano/,
+  hombro:/press|militar|arnold|elevacion|fondos|dips|dominada|jalon|pull ?over|lagartija|push ?up|snatch|arranque|landmine/,
+  cadera:/sentadilla profunda|zancada|desplante|sumo|patada|abduccion|aduccion|split|salto/,
+  cuello:/encogimiento|shrug|press militar|press tras nuca|nuca|puente de luchador|parado de cabeza/,
+  cardiaca:/sprint|hiit|tabata|maximo|al fallo|burpee/
+};
+const _ejSinCat=new Set();
+function ejSinCatalogo(nm,riesgo){ if(!_ejSinCat.has(nm)){ _ejSinCat.add(nm); console.warn('Ejercicio fuera del catálogo'+(riesgo?' (se sustituye por la lesión)':'')+':',nm); } return riesgo; }
 function ejContraindicado(e,ctx){
   const nm=e&&(e.nm||e.nombre); if(!nm) return false;
   if((ctx.evitaPob||[]).some(n=>kbNorm(nm).includes(n))) return true;   // bajo impacto / sin saltos (poblaciones)
-  const kb=kbBuscar(nm); if(!kb) return false;
+  const kb=kbBuscar(nm);
+  if(!kb) return (ctx.les||[]).some(l=>LES_RIESGO_NM[l] && LES_RIESGO_NM[l].test(kbNorm(nm))) ? ejSinCatalogo(nm,true) : ejSinCatalogo(nm,false);
   if((ctx.evitaPob||[]).some(n=>kbNorm(kb.nm).includes(n))) return true;
   if((perfilDelicado(ctx)||ctx.guiado) && ejTecnico(kb)) return true;
   return !!(ctx.les.length && ctx.les.some(l=>(kb.ev||[]).includes(l)));
