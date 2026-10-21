@@ -115,9 +115,9 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 183 | En el estilo nuevo: 3 ejercicios con imagen y video (sentadilla goblet, peso muerto rumano con mancuernas y sentadilla libre) y 180 con imagen. |
+| **Listo** | 225 | En el estilo nuevo: 3 ejercicios con imagen y video (sentadilla goblet, peso muerto rumano con mancuernas y sentadilla libre) y 222 con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
-| **Falta** | 43 | No tienen imagen. |
+| **Falta** | 1 | No tienen imagen. Su prompt está en el seguimiento: https://claude.ai/artifact/8T3tLZ5wPq8SatEBvDFt4s |
 
 Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
@@ -168,15 +168,15 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Peso muerto piernas rígidas con mancuernas | `peso-muerto-piernas-rigidas-con-mancuernas` | Femorales | **Listo** (imagen) |
 | Pantorrilla a una pierna con mancuerna | `pantorrilla-a-una-pierna-con-mancuerna` | Gemelos | **Listo** (imagen) |
 | Press declinado con mancuernas | `press-declinado-con-mancuernas` | Pecho (porción baja) | **Listo** (imagen) |
-| Press en el suelo con mancuernas | `press-en-el-suelo-con-mancuernas` | Pecho mayor · Tríceps | Falta |
+| Press en el suelo con mancuernas | `press-en-el-suelo-con-mancuernas` | Pecho mayor · Tríceps | **Listo** (imagen) |
 | Aperturas inclinadas con mancuernas | `aperturas-inclinadas-con-mancuernas` | Pecho superior | **Listo** (imagen) |
 | Remo al mentón agarre ancho | `remo-al-menton-agarre-ancho` | Deltoide lateral · Trapecio | **Listo** (imagen) |
-| Aguante lateral isométrico con mancuernas | `aguante-lateral-isometrico-con-mancuernas` | Deltoide lateral | Falta |
+| Aguante lateral isométrico con mancuernas | `aguante-lateral-isometrico-con-mancuernas` | Deltoide lateral | **Listo** (imagen) |
 | Rotación externa acostado con mancuerna | `rotacion-externa-acostado-con-mancuerna` | Manguito rotador | **Listo** (imagen) |
 | Encogimientos con mancuernas | `encogimientos-con-mancuernas` | Trapecio superior | **Listo** (imagen) |
 | Curl inclinado con mancuernas | `curl-inclinado-con-mancuernas` | Bíceps (cabeza larga) | **Listo** (imagen) |
 | Curl concentrado | `curl-concentrado` | Bíceps | **Listo** (imagen) |
-| Curl isométrico a 90° | `curl-isometrico-a-90` | Bíceps · Braquial | Falta |
+| Curl isométrico a 90° | `curl-isometrico-a-90` | Bíceps · Braquial | **Listo** (imagen) |
 | Patada de tríceps con mancuerna | `patada-de-triceps-con-mancuerna` | Tríceps | **Listo** (imagen) |
 | Press francés con mancuernas | `press-frances-con-mancuernas` | Tríceps | **Listo** (imagen) |
 
@@ -249,7 +249,7 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Caminata lateral con banda | `caminata-lateral-con-banda` | Glúteo medio | **Listo** (imagen) |
 | Curl femoral en fitball | `curl-femoral-en-fitball` | Femorales | **Listo** (imagen) |
 | Curl nórdico asistido | `curl-nordico-asistido` | Femorales | **Listo** (imagen) |
-| Pantorrilla unilateral en escalón | `pantorrilla-unilateral-en-escalon` | Gemelos | Falta |
+| Pantorrilla unilateral en escalón | `pantorrilla-unilateral-en-escalon` | Gemelos | **Listo** (imagen) |
 | Lagartijas | `lagartijas` | Pecho · Tríceps · Core | **Listo** (imagen) |
 | Rotación externa con banda | `rotacion-externa-con-banda` | Manguito rotador | **Listo** (imagen) |
 | Fondos en banco | `fondos-en-banco` | Tríceps | **Listo** (imagen) |
@@ -289,11 +289,11 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
 | Hip thrust | `hip-thrust` | Glúteo mayor | **Listo** (imagen) |
-| Hiperextensión 45° | `hiperextension-45` | Erectores · Glúteo | Falta |
+| Hiperextensión 45° | `hiperextension-45` | Erectores · Glúteo | **Listo** (imagen) |
 | Press banca plano | `press-banca-plano` | Pecho mayor · Tríceps | **Listo** (imagen) |
-| Press inclinado con barra | `press-inclinado-con-barra` | Pecho superior | Falta |
+| Press inclinado con barra | `press-inclinado-con-barra` | Pecho superior | **Listo** (imagen) |
 | Press francés con barra Z | `press-frances-con-barra-z` | Tríceps (porción larga) | **Listo** (imagen) |
-| Press banca agarre cerrado | `press-banca-agarre-cerrado` | Tríceps · Pecho | Falta |
+| Press banca agarre cerrado | `press-banca-agarre-cerrado` | Tríceps · Pecho | **Listo** (imagen) |
 | Hip thrust a una pierna | `hip-thrust-a-una-pierna` | Glúteo mayor | **Listo** (imagen) |
 | Remo con mancuernas pecho apoyado | `remo-con-mancuernas-pecho-apoyado` | Espalda media · Dorsal | **Listo** (imagen) |
 | Curl Scott con barra Z | `curl-scott-con-barra-z` | Bíceps | **Listo** (imagen) |
@@ -313,7 +313,7 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Face pull | `face-pull` | Deltoides posterior · Manguito | **Listo** (imagen) |
 | Elevación lateral en polea | `elevacion-lateral-en-polea` | Deltoides lateral | **Listo** (imagen) |
 | Elevación frontal en polea | `elevacion-frontal-en-polea` | Deltoides anterior | **Listo** (imagen) |
-| Rotación externa en polea | `rotacion-externa-en-polea` | Manguito rotador | Falta |
+| Rotación externa en polea | `rotacion-externa-en-polea` | Manguito rotador | **Listo** (imagen) |
 | Curl en polea baja | `curl-en-polea-baja` | Bíceps | **Listo** (imagen) |
 | Curl martillo en polea con cuerda | `curl-martillo-en-polea-con-cuerda` | Braquial | **Listo** (imagen) |
 | Extensión de tríceps en polea | `extension-de-triceps-en-polea` | Tríceps | **Listo** (imagen) |
@@ -337,7 +337,7 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Remo ergómetro | `remo-ergometro` | Cardiovascular · Espalda | **Listo** (imagen) |
 | Trote en caminadora | `trote-en-caminadora` | Sistema cardiovascular | **Listo** (imagen) |
 | Bicicleta de aire | `bicicleta-de-aire` | Sistema cardiovascular | **Listo** (imagen) |
-| Escaladora (stair climber) | `escaladora-stair-climber` | Sistema cardiovascular · Glúteo | Falta |
+| Escaladora (stair climber) | `escaladora-stair-climber` | Sistema cardiovascular · Glúteo | **Listo** (imagen) |
 | Esquiadora (ski erg) | `esquiadora-ski-erg` | Sistema cardiovascular · Dorsal | **Listo** (imagen) |
 
 ### Discos / landmine
@@ -348,11 +348,11 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Sentadilla landmine | `sentadilla-landmine` | Cuádriceps · Core | **Listo** (imagen) |
 | Hip thrust con disco | `hip-thrust-con-disco` | Glúteo mayor | **Listo** (imagen) |
 | Curl femoral deslizando con discos | `curl-femoral-deslizando-con-discos` | Femorales · Glúteo | **Listo** (imagen) |
-| Press de pecho con disco (squeeze press) | `press-de-pecho-con-disco-squeeze-press` | Pecho mayor | Falta |
+| Press de pecho con disco (squeeze press) | `press-de-pecho-con-disco-squeeze-press` | Pecho mayor | **Listo** (imagen) |
 | Remo T con barra (landmine) | `remo-t-con-barra-landmine` | Espalda media · Dorsal | **Listo** (imagen) |
 | Press landmine a una mano | `press-landmine-a-una-mano` | Deltoide anterior · Pecho superior | **Listo** (imagen) |
-| Elevación frontal con disco | `elevacion-frontal-con-disco` | Deltoide anterior | Falta |
-| Aguante frontal con disco | `aguante-frontal-con-disco` | Deltoide anterior · Core | Falta |
+| Elevación frontal con disco | `elevacion-frontal-con-disco` | Deltoide anterior | **Listo** (imagen) |
+| Aguante frontal con disco | `aguante-frontal-con-disco` | Deltoide anterior · Core | **Listo** (imagen) |
 | Encogimientos con disco | `encogimientos-con-disco` | Trapecio superior | **Listo** (imagen) |
 | Curl con disco | `curl-con-disco` | Braquial · Bíceps | **Listo** (imagen) |
 | Extensión de tríceps con disco sobre la cabeza | `extension-de-triceps-con-disco-sobre-la-cabeza` | Tríceps | **Listo** (imagen) |
@@ -365,39 +365,39 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
 | Sentadilla asistida en TRX | `sentadilla-asistida-en-trx` | Cuádriceps · Glúteo | **Listo** (imagen) |
-| Sentadilla a una pierna asistida en TRX | `sentadilla-a-una-pierna-asistida-en-trx` | Cuádriceps · Glúteo | Falta |
+| Sentadilla a una pierna asistida en TRX | `sentadilla-a-una-pierna-asistida-en-trx` | Cuádriceps · Glúteo | **Listo** (imagen) |
 | Zancada con pie en TRX | `zancada-con-pie-en-trx` | Glúteo · Cuádriceps | **Listo** (imagen) |
-| Curl femoral en TRX | `curl-femoral-en-trx` | Femorales · Glúteo | Falta |
-| Lagartijas en TRX | `lagartijas-en-trx` | Pecho · Core · Hombro | Falta |
-| Aperturas en TRX | `aperturas-en-trx` | Pecho mayor | Falta |
-| Aperturas posteriores en TRX (T) | `aperturas-posteriores-en-trx-t` | Deltoide posterior · Espalda media | Falta |
-| Curl en TRX | `curl-en-trx` | Bíceps | Falta |
-| Extensión de tríceps en TRX | `extension-de-triceps-en-trx` | Tríceps | Falta |
-| Plancha en TRX | `plancha-en-trx` | Core · Hombro | Falta |
-| Plancha lateral en TRX | `plancha-lateral-en-trx` | Oblicuos · Core | Falta |
-| Rodillas al pecho en TRX | `rodillas-al-pecho-en-trx` | Abdomen · Core | Falta |
-| Fallout en TRX | `fallout-en-trx` | Abdomen · Core | Falta |
+| Curl femoral en TRX | `curl-femoral-en-trx` | Femorales · Glúteo | **Listo** (imagen) |
+| Lagartijas en TRX | `lagartijas-en-trx` | Pecho · Core · Hombro | **Listo** (imagen) |
+| Aperturas en TRX | `aperturas-en-trx` | Pecho mayor | **Listo** (imagen) |
+| Aperturas posteriores en TRX (T) | `aperturas-posteriores-en-trx-t` | Deltoide posterior · Espalda media | **Listo** (imagen) |
+| Curl en TRX | `curl-en-trx` | Bíceps | **Listo** (imagen) |
+| Extensión de tríceps en TRX | `extension-de-triceps-en-trx` | Tríceps | **Listo** (imagen) |
+| Plancha en TRX | `plancha-en-trx` | Core · Hombro | **Listo** (imagen) |
+| Plancha lateral en TRX | `plancha-lateral-en-trx` | Oblicuos · Core | **Listo** (imagen) |
+| Rodillas al pecho en TRX | `rodillas-al-pecho-en-trx` | Abdomen · Core | **Listo** (imagen) |
+| Fallout en TRX | `fallout-en-trx` | Abdomen · Core | **Listo** (imagen) |
 
 ### Ligas
 
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
-| Sentadilla con banda en rodillas | `sentadilla-con-banda-en-rodillas` | Cuádriceps · Glúteo | Falta |
-| Extensión de rodilla con banda | `extension-de-rodilla-con-banda` | Cuádriceps | Falta |
-| Puente de glúteo con banda | `puente-de-gluteo-con-banda` | Glúteo | Falta |
-| Patada de glúteo con banda | `patada-de-gluteo-con-banda` | Glúteo mayor | Falta |
-| Almeja con banda | `almeja-con-banda` | Glúteo medio | Falta |
-| Curl femoral con banda | `curl-femoral-con-banda` | Femorales | Falta |
-| Flexión plantar con banda | `flexion-plantar-con-banda` | Gemelos · Sóleo | Falta |
-| Lagartijas con banda | `lagartijas-con-banda` | Pecho · Tríceps | Falta |
-| Press de pecho con banda | `press-de-pecho-con-banda` | Pecho mayor | Falta |
-| Aperturas con banda | `aperturas-con-banda` | Pecho mayor | Falta |
-| Jalón con banda | `jalon-con-banda` | Dorsal | Falta |
-| Remo sentado con banda | `remo-sentado-con-banda` | Espalda media | Falta |
-| Face pull con banda | `face-pull-con-banda` | Deltoide posterior · Manguito | Falta |
-| Elevación lateral con banda | `elevacion-lateral-con-banda` | Deltoide lateral | Falta |
-| Rotación interna con banda | `rotacion-interna-con-banda` | Manguito rotador | Falta |
-| Curl con banda | `curl-con-banda` | Bíceps | Falta |
-| Extensión de tríceps con banda | `extension-de-triceps-con-banda` | Tríceps | Falta |
-| Press Pallof con banda | `press-pallof-con-banda` | Core · Oblicuos | Falta |
-| Leñador con banda | `lenador-con-banda` | Oblicuos · Core | Falta |
+| Sentadilla con banda en rodillas | `sentadilla-con-banda-en-rodillas` | Cuádriceps · Glúteo | **Listo** (imagen) |
+| Extensión de rodilla con banda | `extension-de-rodilla-con-banda` | Cuádriceps | **Listo** (imagen) |
+| Puente de glúteo con banda | `puente-de-gluteo-con-banda` | Glúteo | **Listo** (imagen) |
+| Patada de glúteo con banda | `patada-de-gluteo-con-banda` | Glúteo mayor | **Listo** (imagen) |
+| Almeja con banda | `almeja-con-banda` | Glúteo medio | **Listo** (imagen) |
+| Curl femoral con banda | `curl-femoral-con-banda` | Femorales | **Listo** (imagen) |
+| Flexión plantar con banda | `flexion-plantar-con-banda` | Gemelos · Sóleo | **Listo** (imagen) |
+| Lagartijas con banda | `lagartijas-con-banda` | Pecho · Tríceps | **Listo** (imagen) |
+| Press de pecho con banda | `press-de-pecho-con-banda` | Pecho mayor | **Listo** (imagen) |
+| Aperturas con banda | `aperturas-con-banda` | Pecho mayor | **Listo** (imagen) |
+| Jalón con banda | `jalon-con-banda` | Dorsal | **Listo** (imagen) |
+| Remo sentado con banda | `remo-sentado-con-banda` | Espalda media | **Listo** (imagen) |
+| Face pull con banda | `face-pull-con-banda` | Deltoide posterior · Manguito | **Listo** (imagen) |
+| Elevación lateral con banda | `elevacion-lateral-con-banda` | Deltoide lateral | **Listo** (imagen) |
+| Rotación interna con banda | `rotacion-interna-con-banda` | Manguito rotador | **Listo** (imagen) |
+| Curl con banda | `curl-con-banda` | Bíceps | **Listo** (imagen) |
+| Extensión de tríceps con banda | `extension-de-triceps-con-banda` | Tríceps | **Listo** (imagen) |
+| Press Pallof con banda | `press-pallof-con-banda` | Core · Oblicuos | **Listo** (imagen) |
+| Leñador con banda | `lenador-con-banda` | Oblicuos · Core | **Listo** (imagen) |
