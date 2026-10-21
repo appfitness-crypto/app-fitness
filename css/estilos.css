@@ -2255,3 +2255,14 @@ html[data-theme="light"] .st-l,html[data-theme="light"] .memb-k{color:#4A5866;}
 .reg-volver{margin:-6px 0 14px -6px;}
 .reg-volver .ico{width:20px;height:20px;}
 @media(max-width:480px){ #s-registro > div{padding:16px !important;} #s-registro .login-card{padding:22px 18px;} }
+
+/* La bienvenida siempre es oscura: el enlace del entrenador se ve también con el tema claro guardado */
+#s-inicio button.staff-link{color:rgba(255,255,255,.72);}
+/* Anillo semanal de Inicio: "esta semana" se acomoda en dos líneas dentro del círculo */
+.today-c .ring-c span{max-width:66px;}
+/* Mi cuerpo sin visor 3D (sin conexión o error): el bloque se encoge y quedan el aviso y las medidas */
+.c3d-in.c3d-sin3d{height:auto;min-height:0;}
+.c3d-sin3d .c3d-arriba,.c3d-sin3d .c3d-cargando,.c3d-sin3d .c3d-abajo{position:relative;inset:auto;}
+.c3d-sin3d .c3d-arriba{padding-bottom:0;}
+.c3d-sin3d .c3d-cargando{padding:22px 24px;}
+.c3d-sin3d .c3d-abajo{padding-top:0;}

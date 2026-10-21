@@ -532,6 +532,7 @@ async function confirmarRutina(){
   DB.socios[code]=nuevo;
   dbSave(code);
   planRecienCreado=code;
+  quizBorrarGuardado();   // el plan ya existe: no hay evaluación que retomar
   document.getElementById('pend-sub').textContent = nuevo.entrenadorId
     ? 'Quedó guardado en tu cuenta y '+nuevo.asignado+' ya lo puede ver para ajustarlo. Entra con tu correo desde cualquier celular.'
     : 'Quedó guardado en tu cuenta. La app llevará tu planificación y tu progreso. Entra con tu correo desde cualquier celular.';

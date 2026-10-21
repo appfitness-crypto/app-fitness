@@ -224,7 +224,7 @@
       <div class="lm lm-q"><video autoplay muted loop playsinline disablepictureinpicture poster="icons/icon-192.png" data-gym-label aria-label="Gimnasio"><source src="video/logo-animado.mp4" type="video/mp4"><source src="video/logo-animado.webm" type="video/webm"></video></div>
       <div class="quiz-step">Paso <span id="qstep">1</span> de 11</div>
     </div>
-    <div style="display:flex;align-items:center;gap:8px"><span class="theme-slot"></span><div class="tb-btn danger" onclick="go('s-inicio')">Cancelar</div></div>
+    <div style="display:flex;align-items:center;gap:8px"><button type="button" class="tb-btn danger" onclick="quizCancelar()">Cancelar</button></div>
   </div>
   <div class="prog-track"><div class="prog-fill" id="qprog" style="width:9%"></div></div>
 
@@ -248,7 +248,8 @@
         <div class="opt" onclick="qSelObjetivo(this,'GANAR MÚSCULO')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-dumbbell"/></svg></div><div class="ol">Incremento de masa muscular</div><div class="os">Ganar músculo y fuerza</div></div>
         <div class="opt" onclick="qSelObjetivo(this,'PERDER PESO')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-flame"/></svg></div><div class="ol">Bajar porcentaje de grasa</div><div class="os">Perder grasa sin perder músculo</div></div>
         <div class="opt" onclick="qSelObjetivo(this,'RECOMPOSICIÓN CORPORAL')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-refresh"/></svg></div><div class="ol">Recomposición corporal</div><div class="os">Bajar grasa y ganar músculo a la vez</div></div>
-        <div class="opt" onclick="qSelObjetivo(this,'RENDIMIENTO')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></div><div class="ol">Rendimiento deportivo</div><div class="os">Deporte, resistencia, flexibilidad o rehabilitación</div></div>
+        <div class="opt" onclick="qSelObjetivo(this,'RENDIMIENTO')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></div><div class="ol">Rendimiento deportivo</div><div class="os">Deporte, resistencia o flexibilidad</div></div>
+        <div class="opt" onclick="qSelObjetivo(this,'REHABILITACIÓN')"><div class="oi"><svg class="ico" aria-hidden="true"><use href="#i-medical"/></svg></div><div class="ol">Tengo una lesión o dolor</div><div class="os">Plan de rehabilitación por fases, sin dolor</div></div>
       </div>
       <div class="obj-desc" id="obj-desc" aria-live="polite"></div>
       <div class="nav-row"><div class="btn-prev" onclick="qPrev(2)">←</div><button class="btn-next" disabled id="qb2" onclick="qNext(2)">Continuar</button></div>
