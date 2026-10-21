@@ -1,3 +1,11 @@
+# Cambios — Lista de socios retráctil en tablet y computadora
+- El botón junto a "Socios" oculta la lista para trabajar la ficha (sobre todo la rutina) a pantalla completa. Queda una franja con las iniciales y el punto de color de cada socio: tocar una inicial abre a ese socio.
+- También con gestos, con el dedo o el lápiz: deslizar hacia la izquierda sobre la lista la oculta; deslizar sobre la franja, o desde el borde izquierdo de la ficha hacia la derecha, la vuelve a mostrar.
+- La app recuerda en cada dispositivo si dejaste la lista oculta. En celular no cambia nada.
+- Service worker: `fitnesspro-v124`.
+
+---
+
 # Cambios — Panel del entrenador más claro (lista por prioridad, ficha en 4 pestañas y editor de rutina compacto)
 - **Lista de socios:** arriba hay tres contadores, Urgente, Atención y Al día, que también filtran. Cada socio dice en palabras por qué está en rojo o amarillo ("9 días sin entrenar", "Reportó dolor de rodilla", "2 de 4 sesiones esta semana") y cuándo fue su última sesión. Se ordena por prioridad. La mensualidad solo aparece si hay que actuar (pendiente, tolerancia o inactivo). Renglones más compactos y sin bordes de colores brillantes.
 - **Ficha del socio en 4 pestañas:** Resumen, Rutina, Nutrición y Progresión. Resumen junta los datos y la evolución: alertas primero (el aviso de dolor trae "Ajustar rutina"), la semana día por día, los datos, la gráfica de peso, qué cargas suben o se estancaron y las últimas sesiones. En celular el encabezado del panel se reduce dentro de la ficha.
