@@ -115,9 +115,9 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 183 | En el estilo nuevo: 3 ejercicios con imagen y video (sentadilla goblet, peso muerto rumano con mancuernas y sentadilla libre) y 180 con imagen. |
+| **Listo** | 210 | En el estilo nuevo: 3 ejercicios con imagen y video (sentadilla goblet, peso muerto rumano con mancuernas y sentadilla libre) y 207 con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
-| **Falta** | 43 | No tienen imagen. |
+| **Falta** | 16 | No tienen imagen. Su prompt está en el seguimiento: https://claude.ai/artifact/8T3tLZ5wPq8SatEBvDFt4s |
 
 Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
@@ -365,39 +365,39 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
 | Sentadilla asistida en TRX | `sentadilla-asistida-en-trx` | Cuádriceps · Glúteo | **Listo** (imagen) |
-| Sentadilla a una pierna asistida en TRX | `sentadilla-a-una-pierna-asistida-en-trx` | Cuádriceps · Glúteo | Falta |
+| Sentadilla a una pierna asistida en TRX | `sentadilla-a-una-pierna-asistida-en-trx` | Cuádriceps · Glúteo | **Listo** (imagen) |
 | Zancada con pie en TRX | `zancada-con-pie-en-trx` | Glúteo · Cuádriceps | **Listo** (imagen) |
-| Curl femoral en TRX | `curl-femoral-en-trx` | Femorales · Glúteo | Falta |
-| Lagartijas en TRX | `lagartijas-en-trx` | Pecho · Core · Hombro | Falta |
-| Aperturas en TRX | `aperturas-en-trx` | Pecho mayor | Falta |
-| Aperturas posteriores en TRX (T) | `aperturas-posteriores-en-trx-t` | Deltoide posterior · Espalda media | Falta |
-| Curl en TRX | `curl-en-trx` | Bíceps | Falta |
-| Extensión de tríceps en TRX | `extension-de-triceps-en-trx` | Tríceps | Falta |
-| Plancha en TRX | `plancha-en-trx` | Core · Hombro | Falta |
-| Plancha lateral en TRX | `plancha-lateral-en-trx` | Oblicuos · Core | Falta |
-| Rodillas al pecho en TRX | `rodillas-al-pecho-en-trx` | Abdomen · Core | Falta |
-| Fallout en TRX | `fallout-en-trx` | Abdomen · Core | Falta |
+| Curl femoral en TRX | `curl-femoral-en-trx` | Femorales · Glúteo | **Listo** (imagen) |
+| Lagartijas en TRX | `lagartijas-en-trx` | Pecho · Core · Hombro | **Listo** (imagen) |
+| Aperturas en TRX | `aperturas-en-trx` | Pecho mayor | **Listo** (imagen) |
+| Aperturas posteriores en TRX (T) | `aperturas-posteriores-en-trx-t` | Deltoide posterior · Espalda media | **Listo** (imagen) |
+| Curl en TRX | `curl-en-trx` | Bíceps | **Listo** (imagen) |
+| Extensión de tríceps en TRX | `extension-de-triceps-en-trx` | Tríceps | **Listo** (imagen) |
+| Plancha en TRX | `plancha-en-trx` | Core · Hombro | **Listo** (imagen) |
+| Plancha lateral en TRX | `plancha-lateral-en-trx` | Oblicuos · Core | **Listo** (imagen) |
+| Rodillas al pecho en TRX | `rodillas-al-pecho-en-trx` | Abdomen · Core | **Listo** (imagen) |
+| Fallout en TRX | `fallout-en-trx` | Abdomen · Core | **Listo** (imagen) |
 
 ### Ligas
 
 | Ejercicio | Archivo | Músculos | Estado |
 |---|---|---|---|
-| Sentadilla con banda en rodillas | `sentadilla-con-banda-en-rodillas` | Cuádriceps · Glúteo | Falta |
-| Extensión de rodilla con banda | `extension-de-rodilla-con-banda` | Cuádriceps | Falta |
+| Sentadilla con banda en rodillas | `sentadilla-con-banda-en-rodillas` | Cuádriceps · Glúteo | **Listo** (imagen) |
+| Extensión de rodilla con banda | `extension-de-rodilla-con-banda` | Cuádriceps | **Listo** (imagen) |
 | Puente de glúteo con banda | `puente-de-gluteo-con-banda` | Glúteo | Falta |
-| Patada de glúteo con banda | `patada-de-gluteo-con-banda` | Glúteo mayor | Falta |
-| Almeja con banda | `almeja-con-banda` | Glúteo medio | Falta |
+| Patada de glúteo con banda | `patada-de-gluteo-con-banda` | Glúteo mayor | **Listo** (imagen) |
+| Almeja con banda | `almeja-con-banda` | Glúteo medio | **Listo** (imagen) |
 | Curl femoral con banda | `curl-femoral-con-banda` | Femorales | Falta |
-| Flexión plantar con banda | `flexion-plantar-con-banda` | Gemelos · Sóleo | Falta |
-| Lagartijas con banda | `lagartijas-con-banda` | Pecho · Tríceps | Falta |
-| Press de pecho con banda | `press-de-pecho-con-banda` | Pecho mayor | Falta |
-| Aperturas con banda | `aperturas-con-banda` | Pecho mayor | Falta |
-| Jalón con banda | `jalon-con-banda` | Dorsal | Falta |
-| Remo sentado con banda | `remo-sentado-con-banda` | Espalda media | Falta |
-| Face pull con banda | `face-pull-con-banda` | Deltoide posterior · Manguito | Falta |
-| Elevación lateral con banda | `elevacion-lateral-con-banda` | Deltoide lateral | Falta |
-| Rotación interna con banda | `rotacion-interna-con-banda` | Manguito rotador | Falta |
-| Curl con banda | `curl-con-banda` | Bíceps | Falta |
+| Flexión plantar con banda | `flexion-plantar-con-banda` | Gemelos · Sóleo | **Listo** (imagen) |
+| Lagartijas con banda | `lagartijas-con-banda` | Pecho · Tríceps | **Listo** (imagen) |
+| Press de pecho con banda | `press-de-pecho-con-banda` | Pecho mayor | **Listo** (imagen) |
+| Aperturas con banda | `aperturas-con-banda` | Pecho mayor | **Listo** (imagen) |
+| Jalón con banda | `jalon-con-banda` | Dorsal | **Listo** (imagen) |
+| Remo sentado con banda | `remo-sentado-con-banda` | Espalda media | **Listo** (imagen) |
+| Face pull con banda | `face-pull-con-banda` | Deltoide posterior · Manguito | **Listo** (imagen) |
+| Elevación lateral con banda | `elevacion-lateral-con-banda` | Deltoide lateral | **Listo** (imagen) |
+| Rotación interna con banda | `rotacion-interna-con-banda` | Manguito rotador | **Listo** (imagen) |
+| Curl con banda | `curl-con-banda` | Bíceps | **Listo** (imagen) |
 | Extensión de tríceps con banda | `extension-de-triceps-con-banda` | Tríceps | Falta |
-| Press Pallof con banda | `press-pallof-con-banda` | Core · Oblicuos | Falta |
-| Leñador con banda | `lenador-con-banda` | Oblicuos · Core | Falta |
+| Press Pallof con banda | `press-pallof-con-banda` | Core · Oblicuos | **Listo** (imagen) |
+| Leñador con banda | `lenador-con-banda` | Oblicuos · Core | **Listo** (imagen) |
