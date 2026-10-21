@@ -1,3 +1,14 @@
+# Cambios — Auditoría de octubre 2026 (lotes 1 a 5)
+- **Salud:** mínimo de calorías (1200 mujer, 1500 hombre, 1350 sin dato; o el gasto total si es menor) y sin déficit en menores de 18. En rehabilitación, el hormigueo o el dolor de cabeza activan la rehabilitación total con aviso al socio y al entrenador; el plan cambia según la edad (menores de 15 y 60+). Bancos "seguros" de espalda y hombro corregidos. El filtro de lesiones ya no deja pasar ejercicios fuera del catálogo con nombre de riesgo.
+- **Reglas de Firebase** (`firebase-rules.json`): el rol de entrenador no permite cambiar el status ni la membresía del propio expediente; asignarse a un entrenador exige su código (`codigoEnt`); la sesión anónima ya no lee `/entrenadores`. Se eliminó `firebase-rules-ANTERIOR.json`. **Publicar las reglas junto con esta versión de la app** (la app guarda `codigoEnt`).
+- **Datos:** los macros que escribe el entrenador deben sumar sus calorías (±5 %); la cintura que no cuadra con estatura y peso no se usa; rangos del cuestionario ampliados (edad hasta 90, peso hasta 220 kg); sin edad o estatura el cálculo es aproximado y lo avisa.
+- **Cuestionario e interfaz:** el avance se guarda y se retoma; "Cancelar" pide confirmación; opción visible "Tengo una lesión o dolor"; ajustes visuales (enlace del entrenador en tema claro, anillo semanal, bloque 3D sin conexión, textos del plato).
+- **Infraestructura:** todos los módulos con `defer` y el arranque ya no espera a fotos y videos; el service worker sirve los js/css del mismo lado (red o copia) que el HTML de la pestaña; "Restaurar respaldo" para dirección (no recrea socios eliminados); fotos de grupo sin peticiones fallidas.
+- **Proxy de IA** (`servidor/worker-ia.js`): dominios correctos, exige el token de Firebase de una cuenta con correo y limita 6 rutinas por hora por usuario. La app manda el token y toma el endpoint de `js/config.js` (`aiEndpoint`).
+- Service worker: `fitnesspro-v118`.
+
+---
+
 # Cambios — v8.4 · Configuración por gimnasio (base del alta de clientes)
 - Nuevo `js/config.js`: nombre, nombre corto, título, siglas, prefijo de ID, texto del PDF, color principal, ubicación, Firebase y endpoint de IA de cada gimnasio. Es el único archivo de código que cambia entre clientes.
 - Se quitaron las referencias fijas al Club Campestre de `index.html`, PDF, resumen del director, prompt de IA, geocerca, IDs de socio y conexión a Firebase. Los valores actuales del Club quedaron como configuración por defecto: la app del Club se ve y funciona igual.

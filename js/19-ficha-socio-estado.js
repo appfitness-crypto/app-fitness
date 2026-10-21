@@ -70,7 +70,7 @@ function bloqueRecordatorioFilosofia(){
   return `<div style="margin:12px 22px 0;padding:11px 14px;background:color-mix(in srgb, var(--p) 5%, transparent);border:1px solid color-mix(in srgb, var(--p) 20%, transparent);border-radius:9px;display:flex;gap:10px;align-items:flex-start">
     <div style="font-size:16px">🧬</div>
     <div style="font-size:10.5px;color:var(--mu);font-family:var(--fb);line-height:1.7">
-      <span style="color:var(--p)">TU FILOSOFÍA</span> — "${ph.tagline}"${ph.adjustmentPhilosophy?'<br>Ante estancamiento: '+ph.adjustmentPhilosophy:''}
+      <span style="color:var(--p)">TU FILOSOFÍA</span> — "${esc(ph.tagline)}"${ph.adjustmentPhilosophy?'<br>Ante estancamiento: '+esc(ph.adjustmentPhilosophy):''}
     </div>
   </div>`;
 }

@@ -122,7 +122,7 @@ ${detalleFilosofiaAvanzada(ph,qAnswers.objetivo)||'   (sin detalle adicional)'}
 }
 
 // ── Endpoint del proxy de IA (Cloudflare Worker). Vacío = usar plantillas. ──
-const AI_ENDPOINT = ''; // p.ej. 'https://rutinas-ia.TU-CUENTA.workers.dev'
+const AI_ENDPOINT = (typeof GYM!=='undefined' && GYM.aiEndpoint) || '';   // se configura en js/config.js (aiEndpoint)
 
 async function generarRutina(){
   qAnswers.dias = parseInt(document.getElementById('qr-dias').value);
@@ -293,9 +293,12 @@ La rutina NO debe verse genérica: varía los métodos entre días, usa los favo
     // La API de Anthropic NO se puede llamar directo desde el navegador en GitHub Pages
     // (requiere API key secreta). Se usa un proxy propio (ver worker-ia.js).
     if(!AI_ENDPOINT) throw new Error('sin-endpoint');
+    const usuario = fbAuth && fbAuth.currentUser;
+    if(!usuario || usuario.isAnonymous) throw new Error('sin-cuenta');   // el proxy solo atiende cuentas con correo
+    const token = await usuario.getIdToken();
     const ctrl = new AbortController(); const to=setTimeout(()=>ctrl.abort(), 45000);
     const res = await fetch(AI_ENDPOINT,{
-      method:'POST',headers:{'Content-Type':'application/json'}, signal:ctrl.signal,
+      method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, signal:ctrl.signal,
       body:JSON.stringify({prompt})
     });
     clearTimeout(to);
@@ -1275,10 +1278,20 @@ const EJ_ALIAS={
   'curl-barra-z':'curl-con-barra-z',
   'curl-femoral-en-maquina':'curl-femoral-sentado',
   'curl-femoral':'curl-femoral-acostado',
-  'aperturas-en-cable':'cruce-de-poleas'
+  'aperturas-en-cable':'cruce-de-poleas',
+  'curl-femoral-tumbado':'curl-femoral-acostado',
+  'hip-thrust-con-barra':'hip-thrust',
+  'elevacion-de-talones':'elevacion-de-talones-de-pie'
 };
 function slugEj(nm){ const n=slugImg(nm); return EJ_ALIAS[n]||n; }
-function basesEjercicio(ej){ const n=slugEj(ej.nm), g=slugImg(ej.ms||''), g1=g.split('-')[0]; return ['ejercicios/'+n,'grupos/'+g,'grupos/'+g1]; }
+// Fotos que hay en img/grupos (si subes una nueva con otro nombre, agrégala aquí; mientras, se intenta por su nombre)
+const GRUPOS_IMG=new Set(['abdomen','biceps','braquial','cardiovascular','core','cuadriceps','deltoides','dorsal','erectores','espalda','femorales','gemelos','gluteo','manguito','oblicuos','pecho','recto','trapecio','triceps']);
+const GRUPO_ALIAS={pantorrillas:'gemelos',pantorrilla:'gemelos',soleo:'gemelos',gluteos:'gluteo',isquiotibiales:'femorales',hombro:'deltoides',hombros:'deltoides',lumbar:'erectores'};
+function basesEjercicio(ej){
+  const n=slugEj(ej.nm), g=slugImg(ej.ms||''), g1=g.split('-')[0];
+  const conocidos=[...new Set([g,g1,GRUPO_ALIAS[g],GRUPO_ALIAS[g1]].filter(x=>x && GRUPOS_IMG.has(x)))];
+  return ['ejercicios/'+n, ...(conocidos.length?conocidos:[g,g1]).map(x=>'grupos/'+x)];   // evita pedir fotos de grupo que no existen
+}
 // Miniatura de la lista: si subes 'ejercicios/mini-<nombre>' la usa ahí; si no existe,
 // usa la misma foto grande del ejercicio (y si tampoco existe, la del grupo muscular).
 function basesEjercicioMini(ej){ const n=slugEj(ej.nm); return ['ejercicios/mini-'+n, ...basesEjercicio(ej)]; }

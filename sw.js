@@ -8,7 +8,7 @@
    → Los datos de Firebase NUNCA pasan por aquí (van directo).
    → Al desplegar cambios, sube CACHE_VERSION.
    ════════════════════════════════════════════════════════ */
-const CACHE_VERSION = 'fitnesspro-v117';
+const CACHE_VERSION = 'fitnesspro-v118';
 const PRECACHE_LOCAL = [
   './',
   './index.html',
@@ -137,6 +137,10 @@ self.addEventListener('activate', (e) => {
   );
 });
 
+// De dónde salió el HTML de cada pestaña ('red' o 'cache'): sus js/css salen del mismo lado, para no mezclar versiones
+const origenPagina = new Map();
+function marcarPagina(e, origen){ if(e.resultingClientId){ origenPagina.set(e.resultingClientId, origen); if(origenPagina.size>20) origenPagina.delete(origenPagina.keys().next().value); } }
+
 function guardable(res){ return res && (res.status === 200) && (res.type === 'basic' || res.type === 'cors'); }
 function guardar(req, res){ if(guardable(res)){ const copy = res.clone(); caches.open(CACHE_VERSION).then((c) => c.put(req, copy)); } return res; }
 
@@ -155,22 +159,34 @@ self.addEventListener('fetch', (e) => {
       let listo = false;
       const usarCache = () => caches.match('./').then((r) => r || caches.match('./index.html')).then((r) => r || Response.error());
       const timer = setTimeout(() => {
-        usarCache().then((r) => { if (!listo && r.type !== 'error') { listo = true; resolve(r); } });
+        usarCache().then((r) => { if (!listo && r.type !== 'error') { listo = true; marcarPagina(e, 'cache'); resolve(r); } });
       }, 4000);
       fetch(req).then((res) => {
         if (res && res.ok) { const copy = res.clone(); caches.open(CACHE_VERSION).then((c) => c.put('./', copy)); }
-        if (!listo) { listo = true; clearTimeout(timer); resolve(res); }
+        if (!listo) { listo = true; clearTimeout(timer); marcarPagina(e, 'red'); resolve(res); }
       }).catch(() => {
         clearTimeout(timer);
-        usarCache().then((r) => { if (!listo) { listo = true; resolve(r); } });
+        usarCache().then((r) => { if (!listo) { listo = true; marcarPagina(e, 'cache'); resolve(r); } });
       });
     }));
     return;
   }
 
-  // 2) El código de la app (js/ y css/): red primero (máx. 4 s) y si no hay internet, la copia guardada.
-  //    Así los módulos siempre salen de la misma versión que index.html (nunca mezcla versiones).
+  // 2) El código de la app (js/ y css/): sale del mismo lado que el HTML de esa pestaña (red o copia guardada),
+  //    así nunca se mezcla un index.html nuevo con módulos viejos. Si no se sabe (el SW se reinició): red primero
+  //    (máx. 4 s) y si no hay internet, la copia guardada.
   if (propio && /\.(js|css)$/.test(url.pathname)) {
+    const origen = origenPagina.get(e.clientId);
+    // Página abierta desde la copia guardada: sus módulos también (misma versión)
+    if (origen === 'cache') {
+      e.respondWith(caches.match(req).then((r) => r || fetch(req).then((res) => guardar(req, res))));
+      return;
+    }
+    // Página que llegó de la red: sus módulos también de la red, aunque tarden (la copia solo si no hay internet)
+    if (origen === 'red') {
+      e.respondWith(fetch(req).then((res) => guardar(req, res)).catch(() => caches.match(req).then((r) => r || Response.error())));
+      return;
+    }
     e.respondWith(new Promise((resolve) => {
       let listo = false;
       const timer = setTimeout(() => {
