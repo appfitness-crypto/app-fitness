@@ -99,6 +99,7 @@ function fbArrancar(){
     await fbCargarRol(u);
     if(!fbEsStaff) fbDetenerStaff();
     fbEscuchar();                       // /config y /entrenadores (una sola vez)
+    fbEscucharEntrenadores();           // al pasar de sesión anónima a cuenta con correo
     if(fbEsStaff) fbEscucharStaff();    // todos los socios, solo para el staff
     const w=fbWaiters; fbWaiters=[]; w.forEach(f=>f(true));
     if(fbPrimerResolver){ fbPrimerResolver({user:u,rol:fbRolDB}); fbPrimerResolver=null; }
@@ -116,13 +117,25 @@ function fbEscuchar(){
   });
   fbDB.ref('/config').on('value', snap=>{ DB.config=aplicarPendientes('/config', snap.val()||{}); kbAplicarExtra(); guardarLocal(); if(document.getElementById('s-panel')?.classList.contains('on') && document.querySelector('#staff-content')) { /* sin refrescar la ficha abierta */ } actualizarContadorSocios(); }, ()=>{});
 
+  fbEscucharEntrenadores();
+  vaciarBandeja();   // subir lo que quedó pendiente de antes (aunque se haya cerrado la app)
+}
+
+// La lista de entrenadores solo la leen cuentas con correo (no la sesión anónima de la bienvenida)
+let fbEntEscuchando=false;
+function fbEscucharEntrenadores(){
+  const u=fbAuth&&fbAuth.currentUser;
+  if(!fbListo || fbEntEscuchando || !u || u.isAnonymous) return;
+  fbEntEscuchando=true;
   fbDB.ref('/entrenadores').on('value', snap=>{
     const raw=snap.val();
     const data=aplicarPendientes('/entrenadores', raw||{});
     DB.entrenadores=data;
     guardarLocal();
-  }, ()=>{});
-  vaciarBandeja();   // subir lo que quedó pendiente de antes (aunque se haya cerrado la app)
+    // Su entrenador eliminó su cuenta: el socio queda sin entrenador en lugar de apuntar a uno que ya no existe (en cuentas antiguas la llave no es el uid)
+    const s=activeSocio;
+    if(raw && s && s.entrenadorId && fbAuth.currentUser && s.code===fbAuth.currentUser.uid && !raw[s.entrenadorId] && !Object.values(raw).some(e=>e && e.uid===s.entrenadorId)){ s.entrenadorId=''; s.asignado='Plan de la app'; s.codigoEnt=''; dbSave(s.code); }
+  }, ()=>{ fbEntEscuchando=false; });
 }
 
 // ── Staff: escucha TODA la lista de socios ──

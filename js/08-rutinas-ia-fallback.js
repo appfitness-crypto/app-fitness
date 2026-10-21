@@ -502,7 +502,7 @@ async function confirmarRutina(){
     cardio:qAnswers.cardio,
     disciplina:qAnswers.disciplina||'', lesionRehab:qAnswers.lesionRehab||'', entorno:qAnswers.entorno||'',
     origenRutina:(rutina.origen||'plantilla'),
-    status:'activo', asignado:qAnswers.entrenadorNombre||'Plan de la app', entrenadorId:qAnswers.entrenadorId||'', fechaRegistro:fechaISO(new Date()),
+    status:'activo', asignado:qAnswers.entrenadorNombre||'Plan de la app', entrenadorId:qAnswers.entrenadorId||'', codigoEnt:qAnswers.entrenadorCodigo||(DB.socios[code]&&DB.socios[code].codigoEnt)||'', fechaRegistro:fechaISO(new Date()),
     consentimiento:consentimientoNuevo('registro'),
     rutina:rutinaConvertida,
     metodo:rutina.metodo||null,
@@ -538,7 +538,7 @@ async function confirmarRutina(){
 
   window._rutinaTemp=null;
   // limpiar quiz
-  Object.assign(qAnswers,{nombre:'',objetivo:'',nivel:'',zonas:[],limitaciones:[],cardio:'',disciplina:'',lesionRehab:'',entorno:'',gimCuando:[],gimClases:[],gimInicioDolor:'',gimSigue:'',gimDiagnostico:'',gimDiagTexto:'',gimMedicoAutoriza:'',gimGenero:'',gimPeso:0,gimEstatura:0,gimSoloTerapia:'',entrenadorId:'',entrenadorNombre:'',diasSemana:[],tomaClases:'',clasesSel:[],clasesGrupales:[],objetivoMeta:'',lesionPrimero:'',lesionPrimeroId:'',casaEquipo:[],casaPaquete:''});
+  Object.assign(qAnswers,{nombre:'',objetivo:'',nivel:'',zonas:[],limitaciones:[],cardio:'',disciplina:'',lesionRehab:'',entorno:'',gimCuando:[],gimClases:[],gimInicioDolor:'',gimSigue:'',gimDiagnostico:'',gimDiagTexto:'',gimMedicoAutoriza:'',gimGenero:'',gimPeso:0,gimEstatura:0,gimSoloTerapia:'',entrenadorId:'',entrenadorNombre:'',entrenadorCodigo:'',diasSemana:[],tomaClases:'',clasesSel:[],clasesGrupales:[],objetivoMeta:'',lesionPrimero:'',lesionPrimeroId:'',casaEquipo:[],casaPaquete:''});
   document.getElementById('qi-nom').value='';
   { const c=document.getElementById('qi-cintura'); if(c) c.value=''; }
   document.querySelectorAll('.q-sc .opt').forEach(o=>o.classList.remove('sel'));

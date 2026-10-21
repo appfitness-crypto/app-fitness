@@ -122,7 +122,7 @@ async function entPorCodigo(texto){
   const uid=sn.val(); if(!uid) return null;
   let ent=DB.entrenadores[uid];
   if(!ent){ const e=await fbDB.ref('/entrenadores/'+uid).once('value'); ent=e.val(); if(ent){ DB.entrenadores[uid]=ent; guardarLocal(); } }
-  return (ent && ent.rol!=='coordinador') ? Object.assign({id:uid}, ent) : null;
+  return (ent && ent.rol!=='coordinador') ? Object.assign({id:uid}, ent, {codigoUsado:c}) : null;   // las reglas piden el código para asignarse
 }
 
 // ── Entrar (cliente o entrenador, mismo formulario) ──
@@ -236,7 +236,7 @@ async function vincularEntrenador(){
     try{
       const ent=await entPorCodigo(v);
       if(!ent){ showToast('No encontramos ese código. Revísalo con tu entrenador.'); return; }
-      s.entrenadorId=ent.id; s.asignado=ent.nombre;
+      s.entrenadorId=ent.id; s.asignado=ent.nombre; s.codigoEnt=ent.codigoUsado;
       dbSave(s.code);
       showToast('✓ Ahora entrenas con '+ent.nombre+'. Verá tu plan y podrá ajustarlo.');
       refreshDash();
@@ -301,6 +301,7 @@ async function cuentaBorrar(pw){
       OUTBOX=OUTBOX.filter(x=>!(x.path===p || x.path.indexOf(p+'/')===0)); outGuardar();   // que nada pendiente lo vuelva a crear
       delete DB.socios[uid]; delete BASE[uid]; baseGuardar();
       await fbDB.ref('/indice/'+uid).remove();
+      await fbDB.ref('/huellas/'+uid).remove();
       await fbDB.ref(p).remove();
     }
     guardarLocal();
