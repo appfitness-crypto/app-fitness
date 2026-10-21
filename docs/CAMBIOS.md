@@ -1,3 +1,11 @@
+# Cambios — Pantallas que se adaptan a tablet
+- **Bienvenida:** en pantallas verticales (tablet y celulares altos) la foto crece hasta llenar la pantalla y los botones quedan abajo, sin el espacio vacío que quedaba debajo. En tablet vertical los textos y las tarjetas son más grandes.
+- **App del socio en tablet vertical:** la foto de Inicio, las tarjetas de números y los días de la semana son más grandes para aprovechar el alto.
+- **Panel del entrenador:** la lista y la ficha lado a lado aparecen desde 1024 px (tablet horizontal y computadora). En tablet vertical se ve una a la vez, como en celular, con la ficha a todo lo ancho: ya no se cortan los días de la rutina ni las pestañas.
+- Service worker: `fitnesspro-v125`.
+
+---
+
 # Cambios — Lista de socios retráctil en tablet y computadora
 - El botón junto a "Socios" oculta la lista para trabajar la ficha (sobre todo la rutina) a pantalla completa. Queda una franja con las iniciales y el punto de color de cada socio: tocar una inicial abre a ese socio.
 - También con gestos, con el dedo o el lápiz: deslizar hacia la izquierda sobre la lista la oculta; deslizar sobre la franja, o desde el borde izquierdo de la ficha hacia la derecha, la vuelve a mostrar.

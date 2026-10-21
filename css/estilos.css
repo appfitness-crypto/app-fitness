@@ -800,7 +800,7 @@ select.ti{padding-right:34px;background-image:linear-gradient(45deg,transparent 
 #s-panel #staff-content{overflow:visible !important;display:block !important;}
 #s-panel[data-vista="detalle"] .staff-side{display:none !important;}
 #s-panel:not([data-vista="detalle"]) #staff-content{display:none !important;}
-@media(min-width:760px){
+@media(min-width:1024px){
   #s-panel .staff-grid{display:grid !important;grid-template-columns:340px 1fr !important;align-items:start;}
   #s-panel[data-vista] .staff-side{display:block !important;position:sticky;top:96px;max-height:calc(100vh - 110px) !important;overflow-y:auto;border-right:1px solid var(--b) !important;}
   #s-panel[data-vista] #staff-content{display:block !important;min-width:0;}
@@ -2453,7 +2453,7 @@ html[data-theme="light"] .st-l,html[data-theme="light"] .memb-k{color:#4A5866;}
 @media(prefers-reduced-motion:reduce){ .rt-ed,.rt-scrim,.rt-wd{transition:none;} }
 
 /* En celular, dentro de la ficha, el encabezado del panel se reduce para dejar espacio al trabajo */
-@media(max-width:759px){
+@media(max-width:1023px){
   #s-panel[data-vista="detalle"] .staff-meta{display:none;}
   #s-panel[data-vista="detalle"] .staff-topbar .ln{display:none;}
 }
@@ -2530,7 +2530,7 @@ html[data-theme="light"] .st-l,html[data-theme="light"] .memb-k{color:#4A5866;}
 .sl-top .sl-title{margin-bottom:0;}
 .sl-toggle{display:none;place-items:center;width:40px;height:40px;flex:none;border-radius:50%;border:1px solid var(--b);background:var(--gl);color:var(--tx);cursor:pointer;}
 .sl-toggle .ico{width:18px;height:18px;}
-@media(min-width:760px){
+@media(min-width:1024px){
   .sl-toggle{display:inline-grid;}
   #s-panel .staff-grid{transition:grid-template-columns .25s cubic-bezier(.2,.8,.2,1);}
   #s-panel[data-vista] .staff-side{touch-action:pan-y;}
@@ -2545,3 +2545,34 @@ html[data-theme="light"] .st-l,html[data-theme="light"] .memb-k{color:#4A5866;}
   #s-panel.side-min .empty-msg{display:none;}
 }
 @media(prefers-reduced-motion:reduce){ #s-panel .staff-grid{transition:none;} }
+
+/* ═══ Bienvenida en pantallas verticales (celular alto y tablet): la foto crece hasta llenar
+   la pantalla y los botones quedan abajo, sin espacio vacío ═══ */
+@media(max-width:1024px) and (orientation:portrait){
+  #s-inicio{min-height:calc(100svh - var(--tb-h,72px));}
+  #s-inicio .wc-hero{position:relative;inset:auto;height:auto;flex:1 1 auto;min-height:var(--wc-h);}
+  #s-inicio .inicio-wrap{margin-top:0;flex:none;}
+}
+@media(min-width:600px) and (max-width:1024px) and (orientation:portrait){
+  #s-inicio .wc-tx{left:40px;right:40px;bottom:28px;}
+  #s-inicio .wc-tx h1{font-size:clamp(48px,7.4vw,72px);}
+  #s-inicio .wc-tx p{font-size:var(--fs-xl);max-width:32ch;}
+  #s-inicio .wc-pic .pic.fill img{object-position:60% 30%;}
+  #s-inicio .inicio-wrap{max-width:none;padding:24px 40px calc(36px + env(safe-area-inset-bottom,0px));gap:22px;}
+  #s-inicio .inicio-cards{grid-template-columns:1fr 1fr;gap:18px;}
+  #s-inicio .ic{padding:26px 26px;min-height:150px;}
+  #s-inicio .ic-label{font-size:var(--fs-4xl);}
+  #s-inicio .ic-sub{font-size:var(--fs-lg);}
+}
+
+/* App del socio en tablet vertical: tarjetas y textos más grandes para aprovechar el alto de la pantalla */
+@media(min-width:700px) and (orientation:portrait){
+  .hero-card{height:clamp(240px,28svh,400px);}
+  .hero-tx{left:28px;bottom:28px;right:170px;font-size:var(--fs-6xl);}
+  .today-c{padding:26px 24px 22px;}
+  .st{padding:18px 16px;}
+  .st-v{font-size:var(--fs-6xl);}
+  .wk{padding:16px 0 12px;border-radius:18px;}
+  .wk-d{font-size:var(--fs-sm);}
+  .wk-n{font-size:var(--fs-3xl);}
+}
