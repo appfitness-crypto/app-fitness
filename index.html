@@ -826,7 +826,10 @@
   <div class="staff-grid" style="display:grid;grid-template-columns:270px 1fr;flex:1;overflow:hidden;min-height:calc(100vh - 57px);">
     <div class="staff-side">
       <div class="sl-head">
-        <div class="sl-title">Socios <span id="sl-count"></span></div>
+        <div class="sl-top">
+          <div class="sl-title">Socios <span id="sl-count"></span></div>
+          <button type="button" class="sl-toggle" id="sl-toggle" onclick="staffSideAlt()" aria-label="Ocultar la lista de socios" aria-expanded="true"><svg class="ico" aria-hidden="true"><use href="#i-chevl"/></svg></button>
+        </div>
         <label class="sl-search"><span aria-hidden="true">&#128269;</span>
           <input type="search" id="staff-search" placeholder="Buscar por nombre" aria-label="Buscar cliente por nombre" oninput="staffFilterSocios(this.value)" autocomplete="off">
         </label>

@@ -135,13 +135,41 @@ function staffRenderList(){
     const ini=tc(s.nombre).split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
     const me=membEstado(s), m=mot[s.code];
     const badge=me.estado==='activo'?'':`<span class="sl-st ${membBadgeCls(me)}">${membBadgeTxt(me)}</span>`;
-    return `<div class="sl-item${staffActivoId===s.code?' sel':''}${me.estado==='inactivo'?' off':''}" onclick="staffOpenSocio('${esc(s.code)}')" role="button" tabindex="0">
+    return `<div class="sl-item${staffActivoId===s.code?' sel':''}${me.estado==='inactivo'?' off':''}" onclick="staffOpenSocio('${esc(s.code)}')" role="button" tabindex="0" title="${esc(tc(s.nombre))}${m.txt?': '+esc(m.txt):''}">
       <div class="sl-ini">${esc(ini)}${m.c!=='n'?`<i class="sl-dot ${m.c}"></i>`:''}</div>
       <div class="sl-tx"><div class="sl-nm">${esc(tc(s.nombre))}</div>${m.txt?`<div class="sl-why ${m.c}">${esc(m.txt)}</div>`:''}<div class="sl-sub">${esc(sc(s.objetivo))}${esc(pqBadgeLista(s))}</div></div>
       <div class="sl-der">${badge}<span class="sl-ult">${esc(ultimaSesionTxt(s))}</span>${typeof verPerfilBtnHTML==='function'?verPerfilBtnHTML(s):''}</div>
     </div>`;
   }).join('') : `<div class="empty-msg">${q?'Ningún socio coincide con tu búsqueda.':'Aún no hay socios en esta lista.'}</div>`;
 }
+// ── Lista retráctil (tablet y computadora): la ficha queda a pantalla completa y la lista
+// se reduce a una franja con las iniciales. Se abre o se cierra con el botón o deslizando el dedo o el lápiz.
+function staffSideMin(on){
+  const p=document.getElementById('s-panel'); if(!p) return;
+  p.classList.toggle('side-min',!!on);
+  const b=document.getElementById('sl-toggle');
+  if(b){ b.setAttribute('aria-expanded',String(!on)); b.setAttribute('aria-label',on?'Mostrar la lista de socios':'Ocultar la lista de socios'); b.innerHTML=ico(on?'chev':'chevl'); }
+  try{ localStorage.setItem('fp_lista_min',on?'1':''); }catch(e){}
+}
+function staffSideAlt(){ const p=document.getElementById('s-panel'); staffSideMin(!(p&&p.classList.contains('side-min'))); }
+(function(){
+  try{ if(localStorage.getItem('fp_lista_min')==='1') staffSideMin(true); }catch(e){}
+  let ini=null;
+  document.addEventListener('touchstart',ev=>{
+    const p=document.getElementById('s-panel'); if(!p||!p.classList.contains('on')||!matchMedia('(min-width:760px)').matches||ev.touches.length!==1){ ini=null; return; }
+    const t=ev.touches[0], side=ev.target.closest&&ev.target.closest('.staff-side'), cont=document.getElementById('staff-content');
+    let zona=side?'lista':null;
+    if(!zona&&cont&&cont.contains(ev.target)&&t.clientX-cont.getBoundingClientRect().left<36) zona='borde';
+    ini=zona?{x:t.clientX,y:t.clientY,zona}:null;
+  },{passive:true});
+  document.addEventListener('touchend',ev=>{
+    if(!ini) return; const t=ev.changedTouches[0], dx=t.clientX-ini.x, dy=t.clientY-ini.y, z=ini.zona; ini=null;
+    if(Math.abs(dx)<60||Math.abs(dx)<Math.abs(dy)*2) return;
+    const min=document.getElementById('s-panel').classList.contains('side-min');
+    if(z==='lista') staffSideMin(min?false:dx<0);
+    else if(min&&dx>0) staffSideMin(false);
+  },{passive:true});
+})();
 function staffFiltroSem(k){ staffSemVal=staffSemVal===k?null:k; staffRenderList(); }
 function staffFiltroDirecto(val){
   const btn=[...document.querySelectorAll('#staff-filters .sl-f')].find(b=>(b.getAttribute('onclick')||'').includes("'"+val+"'"));
