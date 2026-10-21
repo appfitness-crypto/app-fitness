@@ -72,7 +72,9 @@ function registrarAsistencia(s){
   return { registro, yaRegistrado };
 }
 
-window.addEventListener('load', ()=>{
+// Arranque de la app: después de DOMContentLoaded (y de los demás que lo escuchan), sin esperar a fotos y videos
+function alDomListo(fn){ const f=()=>setTimeout(fn,0); if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',f); else f(); }
+alDomListo(()=>{
   { const c=document.getElementById('staff-content'); if(c) STAFF_CONTENT_VACIO=c.innerHTML; }
   // ── Cargar caché local de inmediato (offline-first) ──
   const localInicial = lsLoad();

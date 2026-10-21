@@ -23,13 +23,13 @@ function renderTrainerPicker(){
 }
 function qtElegir(modo){
   qtModo=modo;
-  if(modo==='sin'){ qAnswers.entrenadorId=''; qAnswers.entrenadorNombre=''; }
-  else if(qtValidado){ qAnswers.entrenadorId=qtValidado.id; qAnswers.entrenadorNombre=qtValidado.nombre; }
+  if(modo==='sin'){ qAnswers.entrenadorId=''; qAnswers.entrenadorNombre=''; qAnswers.entrenadorCodigo=''; }
+  else if(qtValidado){ qAnswers.entrenadorId=qtValidado.id; qAnswers.entrenadorNombre=qtValidado.nombre; qAnswers.entrenadorCodigo=qtValidado.codigoUsado||''; }
   renderTrainerPicker();
   if(modo==='con') setTimeout(()=>document.getElementById('qt-codigo')?.focus(),100);
 }
 function qtCodigoCambio(){
-  qtValidado=null; qAnswers.entrenadorId=''; qAnswers.entrenadorNombre='';
+  qtValidado=null; qAnswers.entrenadorId=''; qAnswers.entrenadorNombre=''; qAnswers.entrenadorCodigo='';
   document.getElementById('qt-codigo-res').textContent='';
   renderTrainerPicker();
 }
@@ -41,7 +41,7 @@ async function qtValidarCodigo(){
   try{
     const ent=await entPorCodigo(v);
     if(!ent){ res.style.color='var(--r)'; res.textContent='No encontramos ese código. Revísalo con tu entrenador.'; return; }
-    qtValidado=ent; qAnswers.entrenadorId=ent.id; qAnswers.entrenadorNombre=ent.nombre;
+    qtValidado=ent; qAnswers.entrenadorId=ent.id; qAnswers.entrenadorNombre=ent.nombre; qAnswers.entrenadorCodigo=ent.codigoUsado||'';
     res.style.color='var(--v)';
     res.textContent='✓ Entrenarás con '+ent.nombre+(ent.filosofia&&ent.filosofia.tagline?' — "'+ent.filosofia.tagline+'"':'');
     renderTrainerPicker();

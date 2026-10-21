@@ -133,8 +133,7 @@ function burbujaInitDrag(){
     if(!burbuja.moved && !e.target.classList.contains('rb-x')) burbujaTap();
   });
 }
-document.addEventListener('DOMContentLoaded',burbujaInitDrag);
-if(document.readyState!=='loading') burbujaInitDrag();
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',burbujaInitDrag); else burbujaInitDrag();
 
 // Detecta si el peso está dado como % de 1RM (ej. "Moderado — 55% 1RM" o "50-60% 1RM")
 function pct1RM(pesoTxt){

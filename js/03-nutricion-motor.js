@@ -13,11 +13,19 @@ const ACTIVIDAD_TRABAJO={
 };
 // Composición corporal estimada: IMC y, si hay cintura, % de grasa con la fórmula RFM (Relative Fat Mass):
 // RFM = 64 − 20 × estatura / cintura (+12 en mujeres). Con eso se distingue un IMC alto por músculo de uno por grasa.
+// Una cintura que no cuadra con la estatura y el peso (error de captura) no se usa para el cálculo
+function cinturaValida(c,est,imc){
+  c=+c||0; est=+est||0; if(!(c>=50 && c<=180) || !est) return 0;
+  const r=c/est;
+  if(r<0.38 || r>0.95) return 0;
+  if((imc||0)>=35 && r<0.45) return 0;
+  return c;
+}
 function composicionCorporal(s,peso){
   const est=+s.estatura||0, m=est/100, imc=m?peso/(m*m):0;
   const g=(s.genero||'').toUpperCase(), mujer=g.includes('MUJER')||g.includes('FEMENINO');
-  const cin=+s.cintura||0;
-  const grasa=(cin>=50 && est) ? Math.max(5,Math.min(60,64-20*est/cin+(mujer?12:0))) : null;
+  const cin=cinturaValida(s.cintura,est,imc)||0;
+  const grasa=(cin && est) ? Math.max(5,Math.min(60,64-20*est/cin+(mujer?12:0))) : null;
   const grasaAlta=grasa!=null ? grasa>=(mujer?35:28) : (imc>=30 && !/AVAN/i.test(s.nivel||''));
   const muscular=grasa!=null ? (imc>=27 && grasa<(mujer?28:20)) : (imc>=27 && /AVAN/i.test(s.nivel||''));
   // Peso de referencia para proteína y grasas: masa magra si se conoce; con IMC ≥ 30 sin cintura, peso ajustado
@@ -28,8 +36,9 @@ function composicionCorporal(s,peso){
   return {imc:Math.round(imc*10)/10, grasa:grasa!=null?Math.round(grasa):null, grasaAlta, muscular, pesoRef:Math.round(Math.min(peso,ref)*10)/10, mujer};
 }
 function calcNutricion(s){
-  const peso = pesoActual(s);
-  const est = s.estatura, edad = s.edad;
+  const peso = +pesoActual(s) || 70;
+  const faltan = [!(+s.edad>0)&&'edad', !(+s.estatura>0)&&'estatura', !(+pesoActual(s)>0)&&'peso'].filter(Boolean);
+  const est = +s.estatura || 170, edad = +s.edad || 30;
   // BMR Mifflin-St Jeor
   const bmrH = 10*peso + 6.25*est - 5*edad + 5;
   const bmrM = 10*peso + 6.25*est - 5*edad - 161;
@@ -92,6 +101,20 @@ function calcNutricion(s){
       nota = 'Calorías de mantenimiento con carbohidratos como combustible principal. Hidratación antes, durante y después de sesiones largas. Repón electrolitos si sudas más de 60 min.';
   }
 
+  // Seguridad: menores de 18 sin déficit, y nadie por debajo de un mínimo absoluto (salvo que su gasto total sea menor)
+  const menor = (parseInt(edad)||0) > 0 && parseInt(edad) < 18;
+  if(menor && kcal < tdee){
+    kcal = tdee;
+    ajusteTxt = 'Mantenimiento (menor de edad, sin déficit)';
+    nota += ' Eres menor de edad: tu plan no reduce calorías. Si quieres cambiar tu peso, hazlo con tu médico o nutriólogo.';
+  }
+  const piso = Math.min(tdee, esMujer ? 1200 : esHombre ? 1500 : 1350);
+  if(kcal < piso){
+    kcal = piso;
+    ajusteTxt = kcal>=tdee ? 'Mantenimiento (gasto total)' : 'Déficit limitado por seguridad (mínimo '+piso+' kcal)';
+    nota += ' Tus calorías no bajan de '+piso+' kcal al día: menos que eso solo debe hacerse con supervisión médica.';
+  }
+
   // Macros (sobre el peso de referencia: con obesidad no se calculan sobre el peso total)
   const pRef = comp.pesoRef || peso;
   const prot = Math.round(protKg * pRef);                       // g proteína
@@ -102,6 +125,7 @@ function calcNutricion(s){
 
   if(pRef<peso-0.5) nota += ' Proteína y grasas calculadas sobre '+pRef+' kg (peso de referencia por tu composición corporal), no sobre tu peso total.';
   if(comp.imc>=30 && comp.grasa==null) nota += ' Agrega tu medida de cintura en tu perfil para afinar este cálculo.';
+  if(faltan.length) nota += ' Falta tu '+faltan.join(' y ')+' en tu perfil: este cálculo es aproximado hasta que lo completes.';
   return { bmr, factor, tdee, kcal, prot, protKg, grasas, carbs, agua, ajusteTxt, nota, pesoBase: peso, imc:comp.imc, grasaPct:comp.grasa, pesoRef:pRef };
 }
 const MEAL_TEMPLATES={

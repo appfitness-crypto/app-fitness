@@ -369,12 +369,12 @@ function renderNutricionTab(){
       <div class="comida-sel">${[3,4,5,6].map(n=>`<button type="button" class="${n===nComidas?'on':''}" onclick="nutElegirComidas(${n})">${n}</button>`).join('')}</div>
       <div class="comida-list">
         ${reparto.map(m=>`<div class="comida-it">
-          <div class="comida-it-h"><span class="comida-tag ${m.tag}">${esc(m.tag==='ligera'?'Colación':m.tag==='fuerte'?'Fuerte':'Media')}</span><b>${esc(m.nombre)}</b><span class="comida-kcal">~${m.kcal} kcal</span></div>
-          ${m.plato?`<div class="comida-plato">${m.plato.verduras}% verduras · ${m.plato.prot}% proteína · ${m.plato.carb}% carbohidratos${m.plato.grasa?` · ${m.plato.grasa}% grasas`:''}</div>`
+          <div class="comida-it-h"><span class="comida-tag ${m.tag}">${esc(m.tag==='ligera'?'Colación':m.tag==='fuerte'?'Comida fuerte':'Comida media')}</span><b>${esc(m.nombre)}</b><span class="comida-kcal">~${m.kcal} kcal</span></div>
+          ${m.plato?`<div class="comida-plato">Tu plato: ${m.plato.verduras}% verduras · ${m.plato.prot}% proteína · ${m.plato.carb}% carbohidratos${m.plato.grasa?` · ${m.plato.grasa}% grasas saludables`:''}</div>`
             :`<div class="comida-plato ligera">🥜 Snack: proteína + grasa saludable — evita cargarlo de carbohidratos simples</div>`}
         </div>`).join('')}
       </div>
-      <div class="f-nota" style="margin-top:10px">Guía general para armar tu plato — no es una receta ni un menú fijo. Ajusta las porciones a tu ojo con estas proporciones como referencia.</div>
+      <div class="f-nota" style="margin-top:10px">Guía general para armar tu plato — no es una receta ni un menú fijo. Los porcentajes del plato son cuánto espacio ocupa cada grupo al servir, no calorías; ajusta las porciones a tu ojo.</div>
     </div>
 
     ${menu.length?`<div class="card">

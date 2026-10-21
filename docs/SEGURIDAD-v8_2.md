@@ -6,7 +6,7 @@
 3. **Sube la v8.2 a GitHub** (todos los archivos, incluida la carpeta `video`). Espera 1-2 minutos.
 4. **Prueba antes de las reglas:** abre la app, entra al panel con `coordinador1` y tu contraseña nueva, y entra como socio con un código.
 5. **Publica las reglas:** Realtime Database → Reglas → pega `firebase-rules.json` completo → Publicar.
-6. **Vuelve a probar** (panel y socio). Si algo falla: pega `firebase-rules-ANTERIOR.json` y publícalo para regresar.
+6. **Vuelve a probar** (panel y socio). Si algo falla: publica la versión anterior de `firebase-rules.json` desde el historial de GitHub.
 7. Entrenadores existentes: Entrenadores → Editar → contraseña nueva (mín. 6). Cada uno entra con su usuario.
 
 Importante: no publiques las reglas antes del paso 3, o la versión vieja de la app dejará de funcionar.

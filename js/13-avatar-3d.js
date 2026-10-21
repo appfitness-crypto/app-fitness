@@ -121,7 +121,7 @@ function c3dMontar(root, full){
     });
   }).catch(()=>{
     const c=document.getElementById('c3d-cargando');
-    if(c) c.innerHTML='No se pudo cargar el cuerpo 3D. Revisa tu conexión e inténtalo de nuevo.';
+    if(c){ c.innerHTML='No se pudo cargar el cuerpo 3D. Revisa tu conexión e inténtalo de nuevo.'; c.closest('.c3d')?.classList.add('c3d-sin3d'); }   // sin visor: el bloque se encoge y quedan las medidas
   });
 }
 // Dentro de Progreso (se llama al pintar la sección de cuerpo)
@@ -159,7 +159,7 @@ function c3dVer(modo,inmediato){
   if(cu) cu.textContent = !nMed ? 'Toca una medida para guardar tu punto de partida'
     : modo==='inicio' ? 'Tu punto de partida · '+fmtFecha(av3d.desde.fecha)
     : nMed<2 ? 'Primera medición: aquí empieza tu evolución'
-    : 'Hoy · '+fmtFecha(av3d.todas[av3d.todas.length-1].fecha);
+    : (av3d.todas[av3d.todas.length-1].fecha===fechaISO(new Date())?'Hoy':'Última medición')+' · '+fmtFecha(av3d.todas[av3d.todas.length-1].fecha);
   if(V){ V.resaltar(null); V.ponerMedidas(modo==='hoy'?hoy:ref, inmediato?0:900); V.verCrecimiento(modo==='hoy' && nMed>=2); }
   const f=document.getElementById('c3d-ficha'); if(f) f.hidden=true;
   document.getElementById('c3d-chips')?.removeAttribute('hidden');

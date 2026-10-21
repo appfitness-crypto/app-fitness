@@ -10,7 +10,47 @@ const qAnswers = {nombre:'',objetivo:'',nivel:'',dias:4,edad:35,genero:'',peso:7
 
 function startQuiz(){
   if(typeof qtReiniciar==='function') qtReiniciar();
-  qStep=1; showQStep(1); go('s-quiz');
+  if(quizRetomar()) return;
+  const n=qAnswers.nombre ? 2 : 1;   // el nombre ya viene del registro: se puede corregir con ←
+  qStep=n; showQStep(n); go('s-quiz');
+}
+
+// ── Avance guardado en el celular: si se cierra la app o se sale a medias, se retoma en el mismo paso ──
+const LS_QUIZ='fsp_quiz_v1';
+function quizGuardar(){
+  const uid=typeof cuentaUid==='function' && cuentaUid(); if(!uid) return;
+  try{ localStorage.setItem(LS_QUIZ,JSON.stringify({uid,step:qStep,a:qAnswers,ts:Date.now()})); }catch(e){}
+}
+function quizBorrarGuardado(){ try{ localStorage.removeItem(LS_QUIZ); }catch(e){} }
+function quizRetomar(){
+  let g=null; try{ g=JSON.parse(localStorage.getItem(LS_QUIZ)); }catch(e){}
+  const uid=typeof cuentaUid==='function' && cuentaUid();
+  if(!g || !g.a || g.uid!==uid || !(g.step>=3 && g.step<=Q_TOTAL) || Date.now()-(g.ts||0)>30*864e5) return false;
+  Object.assign(qAnswers,g.a);
+  quizPintarRespuestas();
+  showQStep(g.step); go('s-quiz');
+  showToast('Seguimos donde te quedaste');
+  return true;
+}
+// Vuelve a marcar en pantalla lo que ya se había contestado (opciones, casillas, deslizadores)
+function quizPintarRespuestas(){
+  const fija=(id,v,lbl)=>{ const i=document.getElementById(id); if(i && v!=null && v!==''){ i.value=v; const t=lbl&&document.getElementById(lbl); if(t) t.textContent=v; } };
+  fija('qi-nom',qAnswers.nombre); fija('qr-dias',qAnswers.dias,'dias-v'); fija('qr-edad',qAnswers.edad,'edad-v');
+  fija('qr-peso',qAnswers.peso,'peso-v'); fija('qr-est',qAnswers.estatura,'est-v'); if(qAnswers.cintura) fija('qi-cintura',qAnswers.cintura);
+  document.querySelectorAll('#s-quiz .q-sc [onclick]').forEach(el=>{
+    const oc=el.getAttribute('onclick'), lbl=((el.querySelector('.ol')||el).textContent||'').replace('✓','').trim();
+    let on=false, m;
+    if((m=oc.match(/^qSelObjetivo\(this,'([^']+)'\)/))) on=qAnswers.objetivo===m[1];
+    else if((m=oc.match(/^qSel\(this,'([^']+)'\)/))) on=qAnswers[m[1]]===lbl;
+    else if(oc.indexOf('qMulti(')===0) on=(qAnswers.zonas||[]).includes(lbl);
+    else if(oc.indexOf('qChk(')===0) on=(qAnswers.limitaciones||[]).includes(lbl);
+    else return;
+    el.classList.toggle(el.classList.contains('chk')?'ck':'sel', on);
+    if(on){ const b=document.getElementById('qb'+el.closest('.q-sc').id.replace('qq','')); if(b) b.disabled=false; }
+  });
+}
+function quizCancelar(){
+  uiConfirm('¿Salir de la evaluación? Tus respuestas quedan guardadas en este celular y puedes seguir después.',()=>go('s-inicio'),{label:'Salir',cancel:'Seguir aquí'});
 }
 function showQStep(n){
   qStep=n;
@@ -18,6 +58,7 @@ function showQStep(n){
   document.getElementById('qq'+n).classList.add('on');
   document.getElementById('qstep').textContent=n;
   document.getElementById('qprog').style.width=Math.round(n/Q_TOTAL*100)+'%';
+  quizGuardar();
 }
 
 // ── Selección de objetivo: puede abrir sub-pasos ──
@@ -42,7 +83,7 @@ function qNext(step){
     // Rendimiento deportivo abre su propia pantalla: deporte, resistencia, flexibilidad, rehabilitación o fuerza
     if(qAnswers.objetivo==='RENDIMIENTO'){ rendAbrir(); mostrarSub('qq2r'); return; }
     if(qAnswers.objetivo==='RENDIMIENTO DEPORTIVO'){ abrirDisciplinas(); mostrarSub('qq2b'); return; }
-    if(qAnswers.objetivo==='REHABILITACIÓN'){ abrirLesiones(); mostrarSub('qq2c'); return; }
+    if(qAnswers.objetivo==='REHABILITACIÓN'){ rehabDesdePaso2=true; abrirLesiones(); mostrarSub('qq2c'); return; }
   }
   // Tras elegir cuántos días: pedir CUÁLES días y si toma clases grupales
   if(step===4){
@@ -59,7 +100,7 @@ function qPrev(step){
   if(step===3 && qPrev3()) return;   // regresa a la sub-pantalla de donde vino (js/46-registro-objetivo.js)
   showQStep(step-1); window.scrollTo(0,0);
 }
-function quizBack(){ if(qStep>1) qPrev(qStep); else go('s-inicio'); }
+function quizBack(){ if(qStep>1) qPrev(qStep); else quizCancelar(); }
 
 // ── Q4b: días específicos de la semana (no solo cuántos) ──
 function abrirDiasSemana(){
@@ -190,7 +231,8 @@ function rehabIniciarClinico(){
   mostrarSub('qqg1');
   window.scrollTo(0,0);
 }
-function qPrev2c(){ mostrarSub('qq2r'); }
+let rehabDesdePaso2=false;   // "Tengo una lesión o dolor" en el paso 2: ← regresa ahí, no a Rendimiento
+function qPrev2c(){ if(rehabDesdePaso2){ rehabDesdePaso2=false; showQStep(2); } else mostrarSub('qq2r'); }
 
 // ══ CUESTIONARIO ESPECIALIZADO GIMNASIA (infantil) ══
 qAnswers.gimEdad=10; qAnswers.gimInicioDolor=''; qAnswers.gimCuando=[];

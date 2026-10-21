@@ -106,7 +106,7 @@ function abrirResumen(){
 
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:24px">
       <button class="tb-btn" onclick="exportarCSV()" style="padding:9px 14px">⬇ Exportar socios (CSV)</button>
-      ${staffRol==='coordinador'?'<button class="tb-btn" onclick="descargarRespaldo()" style="padding:9px 14px">💾 Respaldo completo (JSON)</button>':''}
+      ${staffRol==='coordinador'?'<button class="tb-btn" onclick="descargarRespaldo()" style="padding:9px 14px">💾 Respaldo completo (JSON)</button><button class="tb-btn" onclick="restaurarRespaldo()" style="padding:9px 14px">↩ Restaurar respaldo</button>':''}
     </div>
   </div>`;
 }
@@ -126,6 +126,41 @@ function exportarCSV(){
   });
   descargarArchivo('socios_'+fechaISO(new Date())+'.csv','\ufeff'+cols.join(',')+'\n'+rows.join('\n'),'text/csv;charset=utf-8');
   showToast('⬇ CSV descargado ('+rows.length+' socios)');
+}
+// ── Restaurar un respaldo (solo dirección) ──
+// Repara expedientes que siguen en la base con la versión del respaldo. El historial (sesiones, pesos, medidas…)
+// se combina: no se pierde lo registrado después del respaldo. Los socios que ya no están en la base NO se
+// recrean: pudieron eliminar su cuenta y su decisión se respeta.
+function restaurarRespaldo(){
+  if(staffRol!=='coordinador'){ showToast('Solo dirección'); return; }
+  if(!navigator.onLine || !fbListo){ showToast('Necesitas conexión a internet para restaurar.'); return; }
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='application/json,.json';
+  inp.onchange=()=>{ const f=inp.files&&inp.files[0]; if(!f) return;
+    const lector=new FileReader();
+    lector.onload=async()=>{
+      let datos=null; try{ datos=JSON.parse(lector.result); }catch(e){}
+      if(!datos || typeof datos.socios!=='object' || !datos.socios){ showToast('Ese archivo no es un respaldo de la app.'); return; }
+      if(typeof idxCargarTodos==='function' && !idxTodosCargados) await idxCargarTodos();
+      if(typeof idxTodosCargados!=='undefined' && !idxTodosCargados){ showToast('No se pudieron cargar los expedientes actuales. Intenta de nuevo.'); return; }
+      const validos=Object.entries(datos.socios).filter(([c,s])=>s && s.code===c && s.nombre && s.objetivo);
+      const aplicar=validos.filter(([c])=>DB.socios[c]), faltan=validos.length-aplicar.length;
+      if(!aplicar.length){ showToast('Ninguno de los socios del respaldo sigue en la base: no hay nada que restaurar.'); return; }
+      const fecha=datos.exportado?fmtFC(String(datos.exportado).slice(0,10)):'fecha desconocida';
+      uiPrompt('Respaldo del '+fecha+': se restaurarán '+aplicar.length+' expediente(s) a como estaban ese día (rutina, datos, nutrición, estado). Su historial de entrenamientos se combina, no se pierde.'+(faltan?' '+faltan+' socio(s) que ya no están en la base no se recrean.':'')+' Escribe RESTAURAR para continuar.','RESTAURAR',()=>{
+        aplicar.forEach(([c,s])=>{
+          const actual=DB.socios[c];
+          const nuevo=asegurarLogs(Object.assign({},limpio(s),{logs:unirLogs((actual&&actual.logs)||{},s.logs||{})}));
+          DB.socios[c]=nuevo;
+          fbEncolar('/socios/'+c,'set',limpio(nuevo));
+        });
+        guardarLocal();
+        if(typeof staffRenderList==='function') staffRenderList();
+        showToast('↩ '+aplicar.length+' expediente(s) restaurados. Se sincronizan en segundo plano.');
+      },{label:'Restaurar'});
+    };
+    lector.readAsText(f);
+  };
+  inp.click();
 }
 function descargarRespaldo(){
   if(staffRol!=='coordinador'){ showToast('Solo dirección'); return; }

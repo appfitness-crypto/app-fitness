@@ -122,14 +122,14 @@ ${detalleFilosofiaAvanzada(ph,qAnswers.objetivo)||'   (sin detalle adicional)'}
 }
 
 // ── Endpoint del proxy de IA (Cloudflare Worker). Vacío = usar plantillas. ──
-const AI_ENDPOINT = ''; // p.ej. 'https://rutinas-ia.TU-CUENTA.workers.dev'
+const AI_ENDPOINT = (typeof GYM!=='undefined' && GYM.aiEndpoint) || '';   // se configura en js/config.js (aiEndpoint)
 
 async function generarRutina(){
   qAnswers.dias = parseInt(document.getElementById('qr-dias').value);
   qAnswers.edad = parseInt(document.getElementById('qr-edad').value);
   qAnswers.peso = parseInt(document.getElementById('qr-peso').value);
   qAnswers.estatura = parseInt(document.getElementById('qr-est').value);
-  { const c=parseInt((document.getElementById('qi-cintura')||{}).value); qAnswers.cintura=(c>=50&&c<=180)?c:0; }
+  { const c=parseInt((document.getElementById('qi-cintura')||{}).value), m=qAnswers.estatura/100; qAnswers.cintura=cinturaValida(c,qAnswers.estatura,m?qAnswers.peso/(m*m):0); }
   const q11sel=document.querySelector('#qq11 .opt.sel');
   if(q11sel) qAnswers.cardio=q11sel.querySelector('.ol').textContent.trim();
   registroPrepararGeneracion();   // lesión primero → plan de rehabilitación (js/46-registro-objetivo.js)
@@ -293,9 +293,12 @@ La rutina NO debe verse genérica: varía los métodos entre días, usa los favo
     // La API de Anthropic NO se puede llamar directo desde el navegador en GitHub Pages
     // (requiere API key secreta). Se usa un proxy propio (ver worker-ia.js).
     if(!AI_ENDPOINT) throw new Error('sin-endpoint');
+    const usuario = fbAuth && fbAuth.currentUser;
+    if(!usuario || usuario.isAnonymous) throw new Error('sin-cuenta');   // el proxy solo atiende cuentas con correo
+    const token = await usuario.getIdToken();
     const ctrl = new AbortController(); const to=setTimeout(()=>ctrl.abort(), 45000);
     const res = await fetch(AI_ENDPOINT,{
-      method:'POST',headers:{'Content-Type':'application/json'}, signal:ctrl.signal,
+      method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, signal:ctrl.signal,
       body:JSON.stringify({prompt})
     });
     clearTimeout(to);
@@ -502,7 +505,7 @@ async function confirmarRutina(){
     cardio:qAnswers.cardio,
     disciplina:qAnswers.disciplina||'', lesionRehab:qAnswers.lesionRehab||'', entorno:qAnswers.entorno||'',
     origenRutina:(rutina.origen||'plantilla'),
-    status:'activo', asignado:qAnswers.entrenadorNombre||'Plan de la app', entrenadorId:qAnswers.entrenadorId||'', fechaRegistro:fechaISO(new Date()),
+    status:'activo', asignado:qAnswers.entrenadorNombre||'Plan de la app', entrenadorId:qAnswers.entrenadorId||'', codigoEnt:qAnswers.entrenadorCodigo||(DB.socios[code]&&DB.socios[code].codigoEnt)||'', fechaRegistro:fechaISO(new Date()),
     consentimiento:consentimientoNuevo('registro'),
     rutina:rutinaConvertida,
     metodo:rutina.metodo||null,
@@ -516,7 +519,8 @@ async function confirmarRutina(){
       clases:[...(qAnswers.gimClases||[])], sigue:qAnswers.gimSigue,
       diagnostico:qAnswers.gimDiagnostico, diagTexto:qAnswers.gimDiagTexto||'',
       medicoAutoriza:qAnswers.gimMedicoAutoriza||'',
-      rehabTotal: (window._rutinaTemp && window._rutinaTemp.rehabTotal)||false
+      rehabTotal: (window._rutinaTemp && window._rutinaTemp.rehabTotal)||false,
+      alarmas: gimAlarmas(qAnswers.gimCuando)
     };
   }
   // Si es rehabilitación, activar el protocolo por fases automáticamente
@@ -531,13 +535,14 @@ async function confirmarRutina(){
   DB.socios[code]=nuevo;
   dbSave(code);
   planRecienCreado=code;
+  quizBorrarGuardado();   // el plan ya existe: no hay evaluación que retomar
   document.getElementById('pend-sub').textContent = nuevo.entrenadorId
     ? 'Quedó guardado en tu cuenta y '+nuevo.asignado+' ya lo puede ver para ajustarlo. Entra con tu correo desde cualquier celular.'
     : 'Quedó guardado en tu cuenta. La app llevará tu planificación y tu progreso. Entra con tu correo desde cualquier celular.';
 
   window._rutinaTemp=null;
   // limpiar quiz
-  Object.assign(qAnswers,{nombre:'',objetivo:'',nivel:'',zonas:[],limitaciones:[],cardio:'',disciplina:'',lesionRehab:'',entorno:'',gimCuando:[],gimClases:[],gimInicioDolor:'',gimSigue:'',gimDiagnostico:'',gimDiagTexto:'',gimMedicoAutoriza:'',gimGenero:'',gimPeso:0,gimEstatura:0,gimSoloTerapia:'',entrenadorId:'',entrenadorNombre:'',diasSemana:[],tomaClases:'',clasesSel:[],clasesGrupales:[],objetivoMeta:'',lesionPrimero:'',lesionPrimeroId:'',casaEquipo:[],casaPaquete:''});
+  Object.assign(qAnswers,{nombre:'',objetivo:'',nivel:'',zonas:[],limitaciones:[],cardio:'',disciplina:'',lesionRehab:'',entorno:'',gimCuando:[],gimClases:[],gimInicioDolor:'',gimSigue:'',gimDiagnostico:'',gimDiagTexto:'',gimMedicoAutoriza:'',gimGenero:'',gimPeso:0,gimEstatura:0,gimSoloTerapia:'',entrenadorId:'',entrenadorNombre:'',entrenadorCodigo:'',diasSemana:[],tomaClases:'',clasesSel:[],clasesGrupales:[],objetivoMeta:'',lesionPrimero:'',lesionPrimeroId:'',casaEquipo:[],casaPaquete:''});
   document.getElementById('qi-nom').value='';
   { const c=document.getElementById('qi-cintura'); if(c) c.value=''; }
   document.querySelectorAll('.q-sc .opt').forEach(o=>o.classList.remove('sel'));
@@ -976,7 +981,7 @@ const GIM_SEGURO = {
     banco:[
       {nombre:'Plancha frontal',series:3,reps:'20-40 seg',musculo:'Core',tip:'Fortalece el core en posición neutra, sin arquear la espalda.'},
       {nombre:'Bird-dog',series:3,reps:'8 por lado',musculo:'Core · Espalda',tip:'Control de columna sin hiperextensión.'},
-      {nombre:'Puente de glúteo',series:3,reps:'12 reps',musculo:'Glúteo',tip:'Sube con el glúteo, no con la lumbar.'},
+      {nombre:'Dead bug',series:3,reps:'8 por lado',musculo:'Core',tip:'Boca arriba, la espalda baja pegada al piso todo el tiempo; sin arquear.'},
       {nombre:'Fortalecimiento de tren superior',series:3,reps:'12 reps',musculo:'Brazos · Hombros',tip:'Trabaja arriba manteniendo la espalda neutra.'},
     ]
   },
@@ -986,7 +991,7 @@ const GIM_SEGURO = {
     banco:[
       {nombre:'Sentadilla con peso corporal',series:3,reps:'12 reps',musculo:'Piernas',tip:'Fortalece piernas sin cargar el hombro.'},
       {nombre:'Puente de glúteo',series:3,reps:'12 reps',musculo:'Glúteo',tip:'Trabaja cadera y piernas mientras el hombro descansa.'},
-      {nombre:'Plancha frontal',series:3,reps:'20-30 seg',musculo:'Core',tip:'Apoyo en antebrazos, no en la muñeca ni el hombro extendido.'},
+      {nombre:'Dead bug',series:3,reps:'8 por lado',musculo:'Core',tip:'Boca arriba, mueve solo las piernas si subir el brazo molesta el hombro. Core sin cargar el hombro.'},
       {nombre:'Zancadas',series:3,reps:'10 por lado',musculo:'Piernas',tip:'Sin cargar mancuernas si eso irrita el hombro; usa solo tu peso.'},
     ]
   },
@@ -1001,6 +1006,22 @@ const GIM_SEGURO = {
     ]
   },
 };
+
+// Señales de alarma entre lo que le molesta: no se entrena la zona hasta una valoración médica
+function gimAlarmas(cuando){ return (cuando||[]).filter(c=>/hormigueo|dolor de cabeza/i.test(c)); }
+// Ajuste por edad: menores sin carga externa; mayores sin ejercicios de equilibrio exigente
+const REHAB_MAYOR={
+  'Zancadas':{nombre:'Sentarse y pararse de una silla',tip:'Baja despacio hasta tocar la silla y levántate sin impulso; apóyate si lo necesitas.'},
+  'Sentadilla con peso corporal':{nombre:'Sentadilla a una silla',tip:'Toca la silla con la cadera y sube; ten una pared cerca para equilibrarte.'},
+  'Split activo':{nombre:'Elevación de talones con apoyo',tip:'Sujétate de una silla o pared; sube y baja despacio.'},
+};
+function rehabPorEdad(semana,edad){
+  (semana||[]).forEach(d=>(d.ejercicios||[]).forEach(e=>{
+    if(!e.nombre || e.series==='—') return;
+    if(edad<15){ e.peso='Solo su peso corporal'; e.tip=(e.tip||'')+' Sin pesas ni ligas pesadas; con un adulto supervisando.'; }
+    else if(edad>=60 && REHAB_MAYOR[e.nombre]) Object.assign(e,REHAB_MAYOR[e.nombre]);
+  }));
+}
 
 // ══ GENERADOR DE PLAN DE REHABILITACIÓN (cualquier socio, no solo gimnastas) ══
 function generarRutinaGim(){
@@ -1023,7 +1044,8 @@ function generarRutinaGim(){
     const sinDiag = qAnswers.gimDiagnostico==='no';
     const medicoPausa = qAnswers.gimDiagnostico==='si' && qAnswers.gimMedicoAutoriza==='No, indicó pausa';
     const conDolor = qAnswers.gimDolor>=3;
-    const rehabTotal = (sinDiag && conDolor) || medicoPausa;
+    const alarmas = gimAlarmas(qAnswers.gimCuando);   // hormigueo, dolor de cabeza: siempre requieren valoración médica
+    const rehabTotal = (sinDiag && conDolor) || medicoPausa || alarmas.length>0;
 
     let semana;
     if(rehabTotal){
@@ -1084,12 +1106,16 @@ function generarRutinaGim(){
       }
     }
 
+    rehabPorEdad(semana, qAnswers.gimEdad);
+
     const cuandoTxt=qAnswers.gimCuando.length?qAnswers.gimCuando.join(', '):'No especificado';
     let nota;
     if(rehabTotal){
       nota=`${p.emoji} ${p.nombre} · Socio de ${qAnswers.gimEdad} años. Dolor ${qAnswers.gimDolor}/10, ${qAnswers.gimInicioDolor.toLowerCase()}. Le molesta: ${cuandoTxt}. `+
         `🚫 MODO REHABILITACIÓN TOTAL: `+
-        (medicoPausa
+        (alarmas.length
+          ? `hay una señal de alarma, así que el entrenamiento queda en pausa hasta la valoración médica. `
+          : medicoPausa
           ? `el médico indicó pausar el entrenamiento. `
           : `no hay diagnóstico médico y hay dolor, por lo que se pausa el entrenamiento hasta que un doctor o fisioterapeuta lo valore. Entrenar con dolor sin diagnóstico puede empeorar la lesión. `)+
         `El plan se enfoca solo en recuperar la zona y en fortalecimiento muy suave de lo que NO duele. `+
@@ -1104,6 +1130,9 @@ function generarRutinaGim(){
         `⚠️ Guía de apoyo, NO diagnóstico médico. Todo SIN dolor. `+
         (qAnswers.gimDolor>=6 ? 'Con este nivel de dolor, vigila de cerca y consulta si no mejora.' : 'Si el dolor aumenta o no mejora en 2-3 semanas, acude al médico.');
     }
+    if(alarmas.length) nota=`🚨 SEÑAL DE ALARMA (${alarmas.join(', ').toLowerCase()}): acude al médico antes de entrenar esa zona. `+nota;
+    if(qAnswers.gimEdad<15) nota+=' 👦 Menor de 15 años: todo con su propio peso, sin cargas externas y con un adulto o entrenador supervisando.';
+    else if(qAnswers.gimEdad>=60) nota+=' 🧓 60 años o más: ejercicios con apoyo y bajo impacto; ten una silla o pared cerca para equilibrarte.';
 
     const plan={
       perfil:{
@@ -1114,7 +1143,7 @@ function generarRutinaGim(){
         nota
       },
       semana,
-      esRehab:true, protoId:p.id, rehabTotal,
+      esRehab:true, protoId:p.id, rehabTotal, alarmas,
       gimSeguro:seguro
     };
     mostrarPreview(plan);
@@ -1249,10 +1278,20 @@ const EJ_ALIAS={
   'curl-barra-z':'curl-con-barra-z',
   'curl-femoral-en-maquina':'curl-femoral-sentado',
   'curl-femoral':'curl-femoral-acostado',
-  'aperturas-en-cable':'cruce-de-poleas'
+  'aperturas-en-cable':'cruce-de-poleas',
+  'curl-femoral-tumbado':'curl-femoral-acostado',
+  'hip-thrust-con-barra':'hip-thrust',
+  'elevacion-de-talones':'elevacion-de-talones-de-pie'
 };
 function slugEj(nm){ const n=slugImg(nm); return EJ_ALIAS[n]||n; }
-function basesEjercicio(ej){ const n=slugEj(ej.nm), g=slugImg(ej.ms||''), g1=g.split('-')[0]; return ['ejercicios/'+n,'grupos/'+g,'grupos/'+g1]; }
+// Fotos que hay en img/grupos (si subes una nueva con otro nombre, agrégala aquí; mientras, se intenta por su nombre)
+const GRUPOS_IMG=new Set(['abdomen','biceps','braquial','cardiovascular','core','cuadriceps','deltoides','dorsal','erectores','espalda','femorales','gemelos','gluteo','manguito','oblicuos','pecho','recto','trapecio','triceps']);
+const GRUPO_ALIAS={pantorrillas:'gemelos',pantorrilla:'gemelos',soleo:'gemelos',gluteos:'gluteo',isquiotibiales:'femorales',hombro:'deltoides',hombros:'deltoides',lumbar:'erectores'};
+function basesEjercicio(ej){
+  const n=slugEj(ej.nm), g=slugImg(ej.ms||''), g1=g.split('-')[0];
+  const conocidos=[...new Set([g,g1,GRUPO_ALIAS[g],GRUPO_ALIAS[g1]].filter(x=>x && GRUPOS_IMG.has(x)))];
+  return ['ejercicios/'+n, ...(conocidos.length?conocidos:[g,g1]).map(x=>'grupos/'+x)];   // evita pedir fotos de grupo que no existen
+}
 // Miniatura de la lista: si subes 'ejercicios/mini-<nombre>' la usa ahí; si no existe,
 // usa la misma foto grande del ejercicio (y si tampoco existe, la del grupo muscular).
 function basesEjercicioMini(ej){ const n=slugEj(ej.nm); return ['ejercicios/mini-'+n, ...basesEjercicio(ej)]; }
@@ -1478,6 +1517,8 @@ function editarCintura(){
   const s=activeSocio; if(!s) return;
   uiEntrada('Tu cintura en centímetros, medida a la altura del ombligo, sin apretar la cinta.','Ej. 86','Guardar',v=>{
     const c=parseInt(v); if(!(c>=50&&c<=180)){ showToast('Escribe una medida entre 50 y 180 cm'); return; }
+    const m=(+s.estatura||0)/100;
+    if(!cinturaValida(c,s.estatura,m?pesoActual(s)/(m*m):0)){ showToast('Esa medida no cuadra con tu estatura y peso. Revísala: a la altura del ombligo, sin apretar.'); return; }
     s.cintura=c; dbSave(s.code); showToast('Cintura guardada: tu plan de nutrición ya la considera'); renderPerfilTab();
   });
 }
