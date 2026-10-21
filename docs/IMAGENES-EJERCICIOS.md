@@ -115,9 +115,9 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 222 | En el estilo nuevo: 3 ejercicios con imagen y video (sentadilla goblet, peso muerto rumano con mancuernas y sentadilla libre) y 219 con imagen. |
+| **Listo** | 225 | En el estilo nuevo: 3 ejercicios con imagen y video (sentadilla goblet, peso muerto rumano con mancuernas y sentadilla libre) y 222 con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
-| **Falta** | 4 | No tienen imagen. Su prompt está en el seguimiento: https://claude.ai/artifact/8T3tLZ5wPq8SatEBvDFt4s |
+| **Falta** | 1 | No tienen imagen. Su prompt está en el seguimiento: https://claude.ai/artifact/8T3tLZ5wPq8SatEBvDFt4s |
 
 Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
@@ -384,10 +384,10 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 |---|---|---|---|
 | Sentadilla con banda en rodillas | `sentadilla-con-banda-en-rodillas` | Cuádriceps · Glúteo | **Listo** (imagen) |
 | Extensión de rodilla con banda | `extension-de-rodilla-con-banda` | Cuádriceps | **Listo** (imagen) |
-| Puente de glúteo con banda | `puente-de-gluteo-con-banda` | Glúteo | Falta |
+| Puente de glúteo con banda | `puente-de-gluteo-con-banda` | Glúteo | **Listo** (imagen) |
 | Patada de glúteo con banda | `patada-de-gluteo-con-banda` | Glúteo mayor | **Listo** (imagen) |
 | Almeja con banda | `almeja-con-banda` | Glúteo medio | **Listo** (imagen) |
-| Curl femoral con banda | `curl-femoral-con-banda` | Femorales | Falta |
+| Curl femoral con banda | `curl-femoral-con-banda` | Femorales | **Listo** (imagen) |
 | Flexión plantar con banda | `flexion-plantar-con-banda` | Gemelos · Sóleo | **Listo** (imagen) |
 | Lagartijas con banda | `lagartijas-con-banda` | Pecho · Tríceps | **Listo** (imagen) |
 | Press de pecho con banda | `press-de-pecho-con-banda` | Pecho mayor | **Listo** (imagen) |
@@ -398,6 +398,6 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Elevación lateral con banda | `elevacion-lateral-con-banda` | Deltoide lateral | **Listo** (imagen) |
 | Rotación interna con banda | `rotacion-interna-con-banda` | Manguito rotador | **Listo** (imagen) |
 | Curl con banda | `curl-con-banda` | Bíceps | **Listo** (imagen) |
-| Extensión de tríceps con banda | `extension-de-triceps-con-banda` | Tríceps | Falta |
+| Extensión de tríceps con banda | `extension-de-triceps-con-banda` | Tríceps | **Listo** (imagen) |
 | Press Pallof con banda | `press-pallof-con-banda` | Core · Oblicuos | **Listo** (imagen) |
 | Leñador con banda | `lenador-con-banda` | Oblicuos · Core | **Listo** (imagen) |
