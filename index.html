@@ -146,7 +146,7 @@
 </div>
 
 <!-- ═══ TOPBAR GLOBAL ═══ -->
-<div class="tb tb-bienvenida" id="global-tb">
+<div class="tb tb-bienvenida tb-acceso" id="global-tb">
   <div class="tb-logo">
     <div class="lm lm-bv"><video autoplay muted loop playsinline disablepictureinpicture poster="icons/logo-inicio.webp" data-gym-label aria-label="Gimnasio"><source src="video/logo-inicio.webm" type="video/webm"><source src="video/logo-inicio.mp4" type="video/mp4"></video></div>
     <div class="lm"><video autoplay muted loop playsinline disablepictureinpicture poster="icons/icon-192.png" data-gym-label aria-label="Gimnasio"><source src="video/logo-animado.mp4" type="video/mp4"><source src="video/logo-animado.webm" type="video/webm"></video></div>
@@ -176,7 +176,7 @@
   </div>
   <div class="inicio-wrap">
     <div class="inicio-cards">
-      <button type="button" class="ic ic-nuevo" onclick="abrirRegistro('cliente')">
+      <button type="button" class="ic ic-nuevo ic-pri" onclick="abrirRegistro('cliente')">
         <div class="ic-icon"><svg class="ico" aria-hidden="true"><use href="#i-user-plus"/></svg></div>
         <span class="ic-txt"><span class="ic-label">Soy nuevo</span><span class="ic-sub">Crea tu cuenta, responde la evaluación y la app arma tu plan.</span></span>
         <span class="ic-arrow"><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></span>
@@ -767,8 +767,8 @@
 <div class="sc" id="s-registro">
   <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px;">
     <div class="login-card" style="max-width:400px;">
-      <div class="lc-tag" id="reg-tag">Soy nuevo</div>
-      <div class="lc-title" id="reg-title">Crea tu<br>cuenta</div>
+      <button type="button" class="btn-bk reg-volver" onclick="go('s-inicio')" aria-label="Volver al inicio"><svg class="ico" aria-hidden="true"><use href="#i-chevl"/></svg></button>
+      <div class="lc-title" id="reg-title">Crea tu cuenta</div>
       <div class="lc-sub" id="reg-sub"></div>
       <div style="margin-bottom:10px;">
         <label for="reg-nombre" style="display:block;font-family:var(--fb);font-size:var(--fs-xs);letter-spacing:.02em;color:var(--mu);margin-bottom:5px;">NOMBRE</label>
@@ -784,9 +784,7 @@
       </div>
       <button class="btn-main" id="reg-btn" style="background:var(--grad)" onclick="crearCuenta()">Crear cuenta</button>
       <div class="login-err" id="reg-err"></div>
-      <button type="button" class="btn-back-link" id="reg-cambiar" onclick="registroCambiarTipo()"></button>
-      <button type="button" class="btn-back-link" onclick="go('s-login')"><span>Ya tengo cuenta</span></button>
-      <button type="button" class="btn-back-link" onclick="go('s-inicio')">← <span>Volver al inicio</span></button>
+      <button type="button" class="btn-back-link" onclick="go('s-login')">¿Ya tienes cuenta? <span>Entra</span></button>
     </div>
   </div>
 </div>
