@@ -156,7 +156,7 @@ function staffSideAlt(){ const p=document.getElementById('s-panel'); staffSideMi
   try{ if(localStorage.getItem('fp_lista_min')==='1') staffSideMin(true); }catch(e){}
   let ini=null;
   document.addEventListener('touchstart',ev=>{
-    const p=document.getElementById('s-panel'); if(!p||!p.classList.contains('on')||!matchMedia('(min-width:760px)').matches||ev.touches.length!==1){ ini=null; return; }
+    const p=document.getElementById('s-panel'); if(!p||!p.classList.contains('on')||!matchMedia('(min-width:1024px)').matches||ev.touches.length!==1){ ini=null; return; }
     const t=ev.touches[0], side=ev.target.closest&&ev.target.closest('.staff-side'), cont=document.getElementById('staff-content');
     let zona=side?'lista':null;
     if(!zona&&cont&&cont.contains(ev.target)&&t.clientX-cont.getBoundingClientRect().left<36) zona='borde';
