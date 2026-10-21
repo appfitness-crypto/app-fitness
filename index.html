@@ -84,6 +84,9 @@
     <symbol id="i-food" viewBox="0 0 24 24"><path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0z"/><path d="M9 11.5c0-3 1.5-5.5 4-6.5M13.5 11.5c.3-2.2 1.6-3.8 3.5-4.5M7.5 11.5C6.8 9.6 7 8 8 6.5"/></symbol>
     <symbol id="i-dna" viewBox="0 0 24 24"><path d="M7 3c0 6 10 6 10 12s-10 6-10 6M17 3c0 6-10 6-10 12M9 6.5h6M8 17.5h8M9.5 12h5"/></symbol>
     <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
+    <symbol id="i-grip" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></symbol>
     <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3.5h11l3.5 3.5v12a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 19V5A1.5 1.5 0 0 1 5 3.5z"/><path d="M8 3.5V8h7V3.5M8 20.5v-6h8v6"/></symbol>
     <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 17.5h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V17h5v-1.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></symbol>
@@ -827,6 +830,8 @@
         <label class="sl-search"><span aria-hidden="true">&#128269;</span>
           <input type="search" id="staff-search" placeholder="Buscar por nombre" aria-label="Buscar cliente por nombre" oninput="staffFilterSocios(this.value)" autocomplete="off">
         </label>
+        <div class="sl-att" id="staff-att" role="group" aria-label="Filtrar por atención"></div>
+        <div class="sl-sem-help"><span><i class="sl-dot r"></i>Más de 7 días sin entrenar o reportó dolor</span><span><i class="sl-dot y"></i>Faltan sesiones o se estancó</span></div>
         <div class="sl-filters" id="staff-filters">
           <button type="button" class="sl-f ac" onclick="staffFilterStatus(this,'todos')">Todos <i id="slc-todos"></i></button>
           <button type="button" class="sl-f" id="slf-sinent" style="display:none" onclick="staffFilterStatus(this,'sinent')">Sin entrenador <i id="slc-sinent"></i></button>

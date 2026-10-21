@@ -402,6 +402,27 @@ function semaforoSocio(s){
   if(a.diasSin>=3 || ev.estaSemana<s.dias || nEst>=2) return 'y';
   return 'g';
 }
+// Motivo del semáforo en palabras: la lista muestra POR QUÉ un socio está en rojo o amarillo, no solo el color.
+function semaforoMotivo(s){
+  const c=semaforoSocio(s);
+  if(c===null) return {c:'n', txt:s.status==='pendiente'?'Plan por aprobar':''};
+  if(s.alertaDolor) return {c:'r', txt:'Reportó dolor'+(s.alertaDolor.tipo?' de '+String(s.alertaDolor.tipo).toLowerCase():'')};
+  const a=analisisSocio(s);
+  if(a.diasSin===null) return {c:'r', txt:'Aún no registra sesiones'};
+  if(a.diasSin>7) return {c:'r', txt:a.diasSin+' días sin entrenar'};
+  if(c==='y'){
+    const ev=calcEvolucion(s), nEst=s._lite?(s._est||0):a.estancados.length;
+    if(a.diasSin>=3) return {c, txt:a.diasSin+' días sin entrenar'};
+    if(ev.estaSemana<s.dias) return {c, txt:ev.estaSemana+' de '+s.dias+' sesiones esta semana'};
+    return {c, txt:'Sin subir peso en '+nEst+' ejercicios'};
+  }
+  return {c:'g', txt:a.subiendo.length?'Subiendo carga en '+a.subiendo.length+(a.subiendo.length===1?' ejercicio':' ejercicios'):'Va bien'};
+}
+// "hoy", "ayer", "hace 4 d": cuándo fue su última sesión
+function ultimaSesionTxt(s){
+  const a=analisisSocio(s);
+  return a.diasSin===null?'sin sesiones':a.diasSin<=0?'hoy':a.diasSin===1?'ayer':'hace '+a.diasSin+' d';
+}
 function bloqueAnalisisStaff(s){
   const a=analisisSocio(s);
   if(!a.sesiones.length) return `<div class="sd-sec">Análisis de entrenamiento</div><div class="sd-body"><p class="pg-p">Aún no hay sesiones registradas — en cuanto entrene, aquí verás su racha, volumen y si está subiendo peso.</p></div>`;
@@ -425,26 +446,32 @@ function bloqueAnalisisStaff(s){
 function bloqueProgresionStaff(s,sinHist){
   if(s.status==='pendiente') return '';
   const b=pqBloque(s), sem=pqSemanaActual(s), est=pqEstado(s), st=pqStatsBloque(s), P=s.progresion||{}, c=esc(s.code);
-  const semTxt=sem>b.semanas?`bloque terminado (semana ${sem})`:`semana ${sem} de ${b.semanas}`;
-  let cuerpo='', hot=false;
-  if(!est || est==='aprobado'){
-    hot=sem>=b.semanas;
-    cuerpo=`${est==='aprobado'&&P.bloque===b.n?`<div class="pg-ok">✓ Bloque ${b.n} activo desde ${esc(fmtFecha(b.desde))}${P.por?' · aprobado por '+esc(P.por):''}</div>`:''}
-      <p class="pg-p">${hot?'<b>Toca progresar.</b> ':''}Envía la evaluación; cuando el socio la conteste te propongo su siguiente bloque con cargas más altas.</p>
-      <div class="pg-acts"><button type="button" class="sd-b p" onclick="pqEnviar('${c}')">📋 Enviar evaluación</button><button type="button" class="sd-b" onclick="pqGenerar('${c}')">Generar sin evaluación</button></div>`;
-  } else if(est==='enviado'){
-    cuerpo=`<div class="pg-wait">⏳ Evaluación enviada el ${esc(fmtFecha(P.fechaEnvio||fechaISO(new Date())))}. Esperando sus respuestas.</div>
-      <div class="pg-acts"><button type="button" class="sd-b" onclick="pqGenerar('${c}')">Generar sin esperar</button><button type="button" class="sd-b" onclick="pqCancelar('${c}')">Cancelar envío</button></div>`;
-  } else if(est==='respondido'){
-    hot=true;
-    cuerpo=`<div class="pg-k">Respuestas del socio · ${esc(fmtFecha(P.fechaResp||fechaISO(new Date())))}</div>${pqRespuestasHTML(P.respuestas)}
-      <button type="button" class="sd-pri" style="width:100%;margin-top:12px" onclick="pqGenerar('${c}')">✨ Generar propuesta de progresión</button>`;
-  } else if(est==='propuesta' && P.propuesta){
-    hot=true;
-    cuerpo=`${P.respuestas?`<details class="pg-h"><summary><b>Respuestas del socio</b><span>${esc(fmtFecha(P.fechaResp||''))}</span></summary>${pqRespuestasHTML(P.respuestas)}</details>`:''}${pqPropuestaHTML(s,P.propuesta)}`;
-  }
-  return `<div class="sd-sec" id="pg-sec">Progresión <small>Bloque ${b.n} · ${semTxt} · ${st.sesiones} sesiones (${st.adherencia}%)</small></div>
-    <div class="sd-body"><div class="pg-card${hot?' hot':''}">${cuerpo}</div>${sinHist?'':pqHistorialHTML(s)}</div>`;
+  const termino=sem>b.semanas, hot=pqNecesitaAccion(s);
+  // El proceso completo a la vista: en qué paso va y qué sigue
+  const paso=(!est||est==='aprobado')?1:est==='enviado'?2:3;
+  const cls=n=>n<paso?'done':n===paso?'cur':'';
+  const accion1=(!est||est==='aprobado')?`<div class="fx-acts"><button type="button" class="sd-b p" onclick="pqEnviar('${c}')">Enviar evaluación</button><button type="button" class="sd-b" onclick="pqGenerar('${c}')">Generar sin evaluación</button></div>`:'';
+  const accion2=est==='enviado'?`<div class="fx-acts"><button type="button" class="sd-b" onclick="pqGenerar('${c}')">Generar sin esperar</button><button type="button" class="sd-b" onclick="pqCancelar('${c}')">Cancelar envío</button></div>`:'';
+  let detalle='';
+  if(est==='respondido') detalle=`<div class="pg-k">Respuestas del socio, ${esc(fmtFecha(P.fechaResp||fechaISO(new Date())))}</div>${pqRespuestasHTML(P.respuestas)}
+      <button type="button" class="sd-pri" style="width:100%;margin-top:12px" onclick="pqGenerar('${c}')">Generar propuesta de progresión</button>`;
+  else if(est==='propuesta' && P.propuesta) detalle=`${P.respuestas?`<details class="pg-h"><summary><b>Respuestas del socio</b><span>${esc(fmtFecha(P.fechaResp||''))}</span></summary>${pqRespuestasHTML(P.respuestas)}</details>`:''}${pqPropuestaHTML(s,P.propuesta)}`;
+  const pips=Array.from({length:b.semanas},(_,i)=>`<i class="${i<Math.min(sem,b.semanas)?'on':''}"></i>`).join('');
+  return `<section class="fx-sec" id="pg-sec"><h3>Bloque ${b.n} <small>desde el ${esc(fmtFecha(b.desde))}</small></h3><div class="fx-panel${hot?' pg-hot':''}">
+    <div class="pg-semana"><b>${termino?'Bloque terminado (semana '+sem+')':'Semana '+sem+' de '+b.semanas}</b><span>${st.sesiones} sesiones, ${st.adherencia}% de asistencia</span></div>
+    <div class="pg-pips" style="grid-template-columns:repeat(${b.semanas},1fr)" aria-hidden="true">${pips}</div>
+    ${est==='aprobado'&&P.bloque===b.n?`<div class="pg-ok">Bloque ${b.n} activo desde ${esc(fmtFecha(b.desde))}${P.por?', aprobado por '+esc(P.por):''}</div>`:''}
+    <ol class="pg-flow">
+      <li class="${cls(1)}"><span class="n">${paso>1?ico('check'):'1'}</span><div><b>${hot&&paso===1?'Toca progresar':'Evaluación de progreso'}</b>
+        <span>${paso===1?(hot?'El bloque terminó. Envíale la evaluación para preparar el siguiente.':'Cuando termine el bloque, envíale la evaluación. También puedes hacerlo antes.'):'Enviada el '+esc(fmtFecha(P.fechaEnvio||''))+'.'}</span>${accion1}</div></li>
+      <li class="${cls(2)}"><span class="n">${paso>2?ico('check'):'2'}</span><div><b>Respuestas del socio</b>
+        <span>${est==='enviado'?'Esperando sus respuestas: energía, dolor, dificultad y lo que quiere cambiar.':paso>2?'Contestó el '+esc(fmtFecha(P.fechaResp||''))+'.':'Energía, dolor, dificultad y lo que quiere cambiar.'}</span>${accion2}</div></li>
+      <li class="${cls(3)}"><span class="n">3</span><div><b>Propuesta del bloque ${b.n+1}</b>
+        <span>${est==='propuesta'?'Lista para revisar abajo.':est==='respondido'?'Genera la propuesta con sus respuestas.':'Cargas más altas donde progresó y cambios donde se estancó.'}</span></div></li>
+      <li><span class="n">4</span><div><b>Apruebas y se activa</b><span>El socio ve su nueva rutina al instante.</span></div></li>
+    </ol>
+    ${detalle?`<div class="pg-detalle">${detalle}</div>`:''}
+  </div></section>${sinHist?'':pqHistorialHTML(s)}`;
 }
 function pqBadgeLista(s){
   const e=pqEstado(s);

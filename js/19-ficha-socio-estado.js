@@ -15,34 +15,35 @@ function pqLogros(s,desde,hasta){
 }
 function pqRutinaLogrosHTML(rut,logros){
   return DIAS_ORDER.map(k=>{ const d=rut&&rut[k]; const ej=comoArray(d&&d.ejercicios); if(!ej.length) return '';
-    return `<div class="pg-dia">${esc(sc(DIAS_NAMES[k]).substring(0,3))} · ${esc(sc(d.tipo||''))}</div>`+ej.map(e=>{
+    return `<div class="pg-dia">${esc(sc(DIAS_NAMES[k]))}${d.tipo?', '+esc(sc(d.tipo)):''}</div>`+ej.map(e=>{
       const l=logros&&logros[e.nm]; const t=l?(l.kg?'logró '+(Math.round(l.kg*10)/10)+' kg':l.fc?'FC '+l.fc+' lpm':l.seg?l.seg+' s':''):'';
-      return `<div class="pg-mini"><span>${esc(e.nm)}</span><b>${esc(pqEjTxt(e))}${t?`<span class="pg-logro">${esc(t)}</span>`:''}</b></div>`; }).join('');
-  }).join('')||'<p class="pg-p">Este bloque no tiene ejercicios registrados.</p>';
+      const rx=rtRx(e);
+      return `<div class="pg-lg"><span>${esc(e.nm)}</span><em>${esc(rx.big)}${rx.sm?'<small>'+esc(rx.sm)+'</small>':''}</em>${t?`<b>${esc(t)}</b>`:'<b></b>'}</div>`; }).join('');
+  }).join('')||'<p class="fx-vacio">Este bloque no tiene ejercicios registrados.</p>';
 }
 function staffProgElegir(code,n){ staffProgSel=(n==='actual')?'actual':+n; const s=getSocio(code); if(s) staffRenderContent(s); }
 function bloqueProgresionTab(s){
-  if(s.status==='pendiente') return `<div class="sd-sec">Progresión</div><div class="sd-body"><p class="pg-p">Disponible en cuanto apruebes el plan inicial del socio.</p></div>`;
+  if(s.status==='pendiente') return `<div class="fx-grid"><section class="fx-sec"><h3>Progresión</h3><div class="fx-panel"><p class="fx-vacio">Disponible en cuanto apruebes el plan inicial del socio.</p></div></section></div>`;
   const hist=comoArray(s.historialRutinas).filter(Boolean).slice().sort((a,b)=>(+a.n||0)-(+b.n||0));
   const b=pqBloque(s), c=esc(s.code);
   if(staffProgSel!=='actual' && !hist.find(x=>+x.n===+staffProgSel)) staffProgSel='actual';
-  const chips=hist.map(x=>`<button type="button" class="ch${staffProgSel===+x.n?' on':''}" onclick="staffProgElegir('${c}','${+x.n}')">Progresión ${esc(x.n)}</button>`).join('')+
-    `<button type="button" class="ch${staffProgSel==='actual'?' on':''}" onclick="staffProgElegir('${c}','actual')">Progresión ${esc(b.n)} · actual</button>`;
+  const chips=hist.map(x=>`<button type="button" class="ch${staffProgSel===+x.n?' on':''}" onclick="staffProgElegir('${c}','${+x.n}')">Bloque ${esc(x.n)}</button>`).join('')+
+    `<button type="button" class="ch${staffProgSel==='actual'?' on':''}" onclick="staffProgElegir('${c}','actual')">Bloque ${esc(b.n)}, actual</button>`;
   let cuerpo='';
   if(staffProgSel==='actual'){
     const logros=pqLogros(s,b.desde,null);
-    cuerpo=bloqueProgresionStaff(s,true)+`<details class="pg-h" style="margin:12px 16px 0" open><summary><b>Rutina del bloque ${esc(b.n)}</b><span>lo que lleva logrado en este bloque</span></summary>${pqRutinaLogrosHTML(s.rutina,logros)}</details>`;
+    cuerpo=bloqueProgresionStaff(s,true)+`<section class="fx-sec"><h3>Logros del bloque <small>mejor marca en este bloque</small></h3><div class="fx-panel pg-logros">${pqRutinaLogrosHTML(s.rutina,logros)}</div></section>`;
   } else {
     const x=hist.find(y=>+y.n===+staffProgSel), logros=pqLogros(s,x.desde,x.hasta);
-    cuerpo=`<div class="sd-sec">Progresión ${esc(x.n)} <small>${esc(fmtFecha(x.desde))} – ${esc(fmtFecha(x.hasta))} · ${esc(x.semanas||'')} semanas · ${esc(x.sesiones)} sesiones · ${esc(x.adherencia)}% de adherencia</small></div>
-      <div class="sd-body">
-        ${x.respuestas?`<details class="pg-h"><summary><b>Respuestas del socio</b><span>evaluación de ese bloque</span></summary>${pqRespuestasHTML(x.respuestas)}</details>`:''}
-        <div class="pg-card" style="margin-top:10px">${pqRutinaLogrosHTML(x.rutina,logros)}</div>
-        <div class="pg-acts" style="margin-top:12px"><button type="button" class="sd-b p" onclick="staffUsarBloque('${c}',${+x.n})">📋 Usar esta rutina como base</button></div>
-        <p class="pg-p" style="margin-top:8px">Carga la rutina de este bloque en la pestaña Rutina para editarla; no se guarda hasta que presiones Guardar cambios, y puedes deshacerlo.</p>
-      </div>`;
+    cuerpo=`<section class="fx-sec"><h3>Bloque ${esc(x.n)} <small>${esc(fmtFecha(x.desde))} al ${esc(fmtFecha(x.hasta))}</small></h3><div class="fx-panel">
+        <div class="pg-semana"><b>${esc(x.semanas||'')} semanas</b><span>${esc(x.sesiones)} sesiones, ${esc(x.adherencia)}% de asistencia</span></div>
+        ${x.respuestas?`<details class="pg-h" style="margin-top:12px"><summary><b>Respuestas del socio</b><span>evaluación de ese bloque</span></summary>${pqRespuestasHTML(x.respuestas)}</details>`:''}
+        <div class="fx-acts" style="margin-top:12px"><button type="button" class="sd-b p" onclick="staffUsarBloque('${c}',${+x.n})">Usar esta rutina como base</button></div>
+        <p class="fx-vacio" style="margin-top:8px;font-size:var(--fs-sm)">Carga la rutina de este bloque en la pestaña Rutina para editarla. No se guarda hasta que presiones Guardar cambios.</p>
+      </div></section>
+      <section class="fx-sec"><h3>Logros del bloque <small>mejor marca</small></h3><div class="fx-panel pg-logros">${pqRutinaLogrosHTML(x.rutina,logros)}</div></section>`;
   }
-  return `<div class="sd-body" style="padding-top:14px"><div class="pg-chs">${chips}</div></div>${cuerpo}`;
+  return `<div class="fx-grid"><div class="fx-full pg-blk">${chips}</div>${cuerpo}</div>`;
 }
 function staffUsarBloque(code,n){
   const s=getSocio(code); if(!s) return;
@@ -293,7 +294,7 @@ function staffDelEj(code,k,ei){
   s.rutina[k].ejercicios.splice(ei,1);
   staffRerender(code,k);
 }
-function staffAddEj(code,k){ staffDiasAbiertos.add(code+'|'+k); epAbrir(code,k,null); }
+function staffAddEj(code,k){ rtDia[code]=k; epAbrir(code,k,null); }
 function staffAprobar(code){
   const s=getSocio(code); if(!s) return;
   rutinaUnicaSocio(s).catch(()=>[]).then(c=>staffAprobarFinal(code,c));

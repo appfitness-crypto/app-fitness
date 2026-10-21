@@ -27,7 +27,7 @@ function verPerfilAlternar(){
 }
 function verPerfilBtnHTML(s){
   if(!verPerfilActivo()) return '';
-  return `<button type="button" class="sl-ver" onclick="event.stopPropagation();verComoSocio('${esc(s.code)}')" aria-label="Ver la app como ${esc(tc(s.nombre))}">${ico('user')}Ver su perfil</button>`;
+  return `<button type="button" class="sl-ver" onclick="event.stopPropagation();verComoSocio('${esc(s.code)}')" aria-label="Ver la app como ${esc(tc(s.nombre))}">${ico('user')}<span>Ver su perfil</span></button>`;
 }
 
 // ── Entrar y salir ──
