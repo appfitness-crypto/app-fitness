@@ -154,7 +154,7 @@ function seedDB(){
     }
   };
 
-  const db = { socios: { '1234': carlos, '5678': ana }, version: 1 };
+  const db = { socios: { '1234': carlos, '5678': ana }, entrenadores: DB.entrenadores||{}, config: DB.config||{}, version: 1 };
   try{ Object.values(db.socios).forEach(enriquecerSocio); }catch(e){}
   try{ localStorage.setItem(LS_KEY, JSON.stringify(db)); }catch(e){}
   return db;

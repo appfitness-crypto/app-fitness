@@ -129,7 +129,7 @@ async function generarRutina(){
   qAnswers.edad = parseInt(document.getElementById('qr-edad').value);
   qAnswers.peso = parseInt(document.getElementById('qr-peso').value);
   qAnswers.estatura = parseInt(document.getElementById('qr-est').value);
-  { const c=parseInt((document.getElementById('qi-cintura')||{}).value); qAnswers.cintura=(c>=50&&c<=180)?c:0; }
+  { const c=parseInt((document.getElementById('qi-cintura')||{}).value), m=qAnswers.estatura/100; qAnswers.cintura=cinturaValida(c,qAnswers.estatura,m?qAnswers.peso/(m*m):0); }
   const q11sel=document.querySelector('#qq11 .opt.sel');
   if(q11sel) qAnswers.cardio=q11sel.querySelector('.ol').textContent.trim();
   registroPrepararGeneracion();   // lesión primero → plan de rehabilitación (js/46-registro-objetivo.js)
@@ -1503,6 +1503,8 @@ function editarCintura(){
   const s=activeSocio; if(!s) return;
   uiEntrada('Tu cintura en centímetros, medida a la altura del ombligo, sin apretar la cinta.','Ej. 86','Guardar',v=>{
     const c=parseInt(v); if(!(c>=50&&c<=180)){ showToast('Escribe una medida entre 50 y 180 cm'); return; }
+    const m=(+s.estatura||0)/100;
+    if(!cinturaValida(c,s.estatura,m?pesoActual(s)/(m*m):0)){ showToast('Esa medida no cuadra con tu estatura y peso. Revísala: a la altura del ombligo, sin apretar.'); return; }
     s.cintura=c; dbSave(s.code); showToast('Cintura guardada: tu plan de nutrición ya la considera'); renderPerfilTab();
   });
 }

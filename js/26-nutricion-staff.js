@@ -118,6 +118,12 @@ function nutGuardar(){
   const kcal=parseInt(v('nut-kcal')), prot=parseInt(v('nut-prot')), carbs=parseInt(v('nut-carbs')), grasas=parseInt(v('nut-grasas')), agua=parseFloat(v('nut-agua'));
   if(!(kcal>=800&&kcal<=6000)){ showToast('Revisa las calorías (800 a 6000)'); return; }
   if(!(prot>=0&&carbs>=0&&grasas>=0)){ showToast('Revisa los gramos de macros'); return; }
+  const kMacros=prot*4+carbs*4+grasas*9;
+  if(Math.abs(kMacros-kcal)>kcal*0.05){
+    const cSug=Math.max(0,Math.round((kcal-prot*4-grasas*9)/4));
+    showToast('Los macros suman '+kMacros+' kcal y escribiste '+kcal+'. Para que cuadren, los carbohidratos serían '+cSug+' g.');
+    return;
+  }
   const menu=nutMenuTemp.filter(m=>m.nombre.trim()||m.detalle.trim()).map(m=>({nombre:limpiarTexto(m.nombre),detalle:limpiarTexto(m.detalle)}));
   s.nutricion={ override:true, kcal,prot,carbs,grasas, agua: agua||calcNutricion(s).agua, nota:limpiarTexto(v('nut-nota')), menu, por:pqStaffNombre(), fecha:fechaISO(new Date()) };
   pqGuardarStaff(s,['nutricion']);
