@@ -73,7 +73,13 @@ function registrarAsistencia(s){
 }
 
 // Arranque de la app: después de DOMContentLoaded (y de los demás que lo escuchan), sin esperar a fotos y videos
-function alDomListo(fn){ const f=()=>setTimeout(fn,0); if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',f); else f(); }
+// Ojo: mientras corren los scripts con defer el documento ya está en 'interactive' pero DOMContentLoaded
+// aún no llega y faltan módulos por cargar; por eso se espera el evento (o 'load' si ya pasó) y nunca se arranca antes.
+function alDomListo(fn){
+  let hecho=false; const f=()=>{ if(hecho) return; hecho=true; setTimeout(fn,0); };
+  if(document.readyState==='complete') f();
+  else { document.addEventListener('DOMContentLoaded',f); window.addEventListener('load',f); }
+}
 alDomListo(()=>{
   { const c=document.getElementById('staff-content'); if(c) STAFF_CONTENT_VACIO=c.innerHTML; }
   // ── Cargar caché local de inmediato (offline-first) ──
