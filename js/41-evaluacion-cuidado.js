@@ -144,7 +144,7 @@ function dolorStaffHTML(s){
   const si=comoArray(a.sint).map(v=>(DOLOR_SINT.find(x=>x[0]===v)||[])[1]||v).join(', ');
   return `<div class="pg-alerta" role="alert"><b>⚠ Reportó dolor ${esc(nv.toLowerCase())} el ${esc(fmtFecha(a.fecha))}${a.tipo?' ('+esc(sc(a.tipo))+')':''}</b>
     <span>Síntomas: ${esc(si||'—')}. Según tu regla debe valorarlo fisioterapia o un médico antes de volver a cargar esa zona.</span>
-    <button type="button" class="sd-b" onclick="dolorRevisado('${esc(s.code)}')">Marcar como revisado</button></div>`;
+    <div class="fx-acts"><button type="button" class="sd-b p" onclick="staffSetTab('rutina')">Ajustar rutina</button><button type="button" class="sd-b" onclick="dolorRevisado('${esc(s.code)}')">Marcar como revisado</button></div></div>`;
 }
 function dolorRevisado(code){
   const s=getSocio(code); if(!s) return;

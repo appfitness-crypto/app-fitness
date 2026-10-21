@@ -54,27 +54,54 @@ function entAsignar(code,entId){
   staffRenderList(); staffRenderContent(s);
   showToast(s.entrenadorId?'🏋️ Reasignado a '+s.asignado:'🏋️ Entrenador: sin asignar');
 }
+const nutBorrador={};   // código → requerimientos que se están ajustando en la ficha (aún sin guardar)
 function bloqueNutricionStaff(s){
-  const nut=nutricionFinal(s), base=calcNutricion(s);
+  const nut=nutricionFinal(s), base=calcNutricion(s), c=esc(s.code);
   const nutriEnt=s.nutriologoId?DB.entrenadores[s.nutriologoId]:null;
   const entPropio=s.entrenadorId?DB.entrenadores[s.entrenadorId]:null;
   const entPropioNut=entPropio&&entHace(entPropio,'nutricion');
-  const asignadoTxt = nutriEnt?esc(nutriEnt.nombre)
-    : entPropioNut?esc(entPropio.nombre)+' <span style="color:var(--mu);font-weight:500">(su entrenador)</span>'
-    : '<span style="color:var(--mu)">Sin asignar</span>';
+  const asignadoTxt = nutriEnt?esc(nutriEnt.nombre):entPropioNut?esc(entPropio.nombre)+' (su entrenador)':'Sin nutriólogo asignado';
   const menu=comoArray(s.nutricion&&s.nutricion.menu);
   const puede=nutPuedeEditar(s);
-  return `<div class="sd-sec">Nutrición <small>Nutriólogo: ${asignadoTxt}</small></div>
-    <div class="sd-body">
-      <div class="sd-note"><b>${nut.manual?'Ajustado por '+esc(s.nutricion.por||'staff')+(s.nutricion.fecha?' · '+esc(fmtFecha(s.nutricion.fecha)):''):'Cálculo automático'}:</b> ${nut.kcal} kcal · P ${nut.prot} g · C ${nut.carbs} g · G ${nut.grasas} g · Agua ${nut.agua} L
-      ${nut.manual?`<br><span>Cálculo automático de referencia: ${base.kcal} kcal</span>`:`<br><span>BMR ${nut.bmr} × ${nut.factor} (${esc(nut.ajusteTxt)})</span>`}</div>
-      ${(nut.manual&&s.nutricion.nota)?`<div class="pg-com" style="margin-top:10px">"${esc(s.nutricion.nota)}"</div>`:''}
-      ${menu.length?`<div class="pg-k" style="margin:14px 0 6px">Menú sugerido</div>${menu.map(m=>`<div class="pg-mini"><span>${esc(m.nombre)}</span><b style="max-width:58%;text-align:right;font-weight:500;white-space:pre-line">${esc(m.detalle)}</b></div>`).join('')}`:''}
-      ${puede?`<div class="pg-acts" style="margin-top:14px">
-        <button type="button" class="sd-b p" onclick="nutAbrir('${esc(s.code)}')">🥗 ${nut.manual?'Editar nutrición':'Personalizar nutrición'}</button>
-        ${nut.manual?`<button type="button" class="sd-b" onclick="nutRestablecer('${esc(s.code)}')">Restablecer automático</button>`:''}
-      </div>`:''}
-    </div>`;
+  const D=puede&&nutBorrador[s.code], v=D||{kcal:nut.kcal,prot:nut.prot,carbs:nut.carbs,grasas:nut.grasas,agua:nut.agua};
+  const kMac=v.prot*4+v.carbs*4+v.grasas*9, pc=x=>kMac?Math.round(x/kMac*100):0;
+  const pP=pc(v.prot*4), pC=pc(v.carbs*4), pG=Math.max(0,100-pP-pC);
+  const cuadra=Math.abs(kMac-v.kcal)<=v.kcal*0.05, cSug=Math.max(0,Math.round((v.kcal-v.prot*4-v.grasas*9)/4));
+  const step=(f,val,d,lb,w)=>`<div class="nt-step"><button type="button" onclick="nutPaso('${c}','${f}',${-d})" aria-label="Menos ${lb}">−</button><input inputmode="decimal" value="${val}" aria-label="${lb}" style="width:${w||58}px" onchange="nutValor('${c}','${f}',this.value)"><button type="button" onclick="nutPaso('${c}','${f}',${d})" aria-label="Más ${lb}">+</button></div>`;
+  const mac=(f,lb,val,p,cls)=>`<div class="nt-mac"><span class="k"><i class="${cls}"></i>${lb}</span>${D?step(f,val,5,lb+' en gramos'):`<b>${val} g</b>`}<small>${p}% de las kcal</small></div>`;
+  const fuente=nut.manual?'Ajustado por '+esc(s.nutricion.por||'staff')+(s.nutricion.fecha?', '+esc(fmtFecha(s.nutricion.fecha)):''):'Cálculo automático';
+  return `<div class="fx-grid">
+    <section class="fx-sec"><h3>Requerimientos <small>${asignadoTxt}</small></h3><div class="fx-panel">
+      <div class="nt-kcal">${D?step('kcal',v.kcal,50,'Calorías',76):`<b>${Number(v.kcal).toLocaleString('es-MX')}</b>`}<span>kcal al día</span><em>${D?'Ajustando':fuente}</em></div>
+      <div class="nt-split" aria-hidden="true"><i class="m-p" style="flex:${pP}"></i><i class="m-c" style="flex:${pC}"></i><i class="m-g" style="flex:${pG}"></i></div>
+      <div class="nt-macs">${mac('prot','Proteína',v.prot,pP,'m-p')}${mac('carbs','Carbohidratos',v.carbs,pC,'m-c')}${mac('grasas','Grasas',v.grasas,pG,'m-g')}</div>
+      ${D?`<div class="nt-chk ${cuadra?'ok':'bad'}">${ico(cuadra?'check':'warn')}<span>${cuadra?'Los macros suman '+kMac.toLocaleString('es-MX')+' kcal y cuadran con el total.':'Los macros suman '+kMac.toLocaleString('es-MX')+' kcal y el total es '+Number(v.kcal).toLocaleString('es-MX')+'. Con '+cSug+' g de carbohidratos cuadra. <button type="button" class="fx-lnk" onclick="nutValor(\''+c+'\',\'carbs\','+cSug+')">Usar '+cSug+' g</button>'}</span></div>`:''}
+      <div class="fx-rows"><div><span>Agua</span><b>${D?step('agua',v.agua,0.25,'Litros de agua'):esc(v.agua)+' L al día'}</b></div>
+        <div><span>Referencia automática</span><b>${Number(base.kcal).toLocaleString('es-MX')} kcal (BMR ${base.bmr} × ${base.factor})</b></div></div>
+      ${puede?`<div class="fx-acts" style="margin-top:12px">${D?`<button type="button" class="sd-b p" onclick="nutGuardarFicha('${c}')" ${cuadra?'':'disabled'}>Guardar requerimientos</button><button type="button" class="sd-b" onclick="nutCancelarFicha('${c}')">Cancelar</button>`
+        :`<button type="button" class="sd-b p" onclick="nutEditarFicha('${c}')">Ajustar requerimientos</button>${nut.manual?`<button type="button" class="sd-b" onclick="nutRestablecer('${c}')">Volver al cálculo automático</button>`:''}`}</div>`:''}
+    </div></section>
+    <section class="fx-sec"><h3>Menú sugerido ${puede?`<button type="button" class="fx-lnk" onclick="nutAbrir('${c}')">${ico('pencil')}Editar menú</button>`:''}</h3><div class="fx-panel">
+      ${menu.length?`<div class="nt-menu">${menu.map(m=>`<div><b>${esc(m.nombre)}</b><span>${esc(m.detalle)}</span></div>`).join('')}</div>`:'<p class="fx-vacio">Sin menú. Es opcional: el socio ve sus requerimientos aunque no haya comidas.</p>'}
+      ${(nut.manual&&s.nutricion.nota)?`<div class="nt-nota"><b>Indicaciones para el socio</b>${esc(s.nutricion.nota)}</div>`:''}
+    </div></section>
+  </div>`;
+}
+function nutEditarFicha(code){ const s=getSocio(code); if(!s||!nutPuedeEditar(s)) return; const n=nutricionFinal(s); nutBorrador[code]={kcal:n.kcal,prot:n.prot,carbs:n.carbs,grasas:n.grasas,agua:n.agua}; nutRepintar(code); }
+function nutCancelarFicha(code){ delete nutBorrador[code]; nutRepintar(code); }
+function nutRepintar(code){ const s=getSocio(code), p=document.getElementById('sdp-nutricion'); if(s&&p) p.innerHTML=bloqueNutricionStaff(s); }
+function nutPaso(code,f,d){ const D=nutBorrador[code]; if(!D) return; D[f]=Math.max(0,Math.round((+D[f]+d)*100)/100); nutRepintar(code); }
+function nutValor(code,f,v){ const D=nutBorrador[code]; if(!D) return; const n=parseFloat(String(v).replace(',','.')); if(!isNaN(n)) D[f]=Math.max(0,n); nutRepintar(code); }
+function nutGuardarFicha(code){
+  const s=getSocio(code), D=nutBorrador[code]; if(!s||!D||!nutPuedeEditar(s)) return;
+  const kcal=Math.round(D.kcal), prot=Math.round(D.prot), carbs=Math.round(D.carbs), grasas=Math.round(D.grasas), agua=+D.agua;
+  if(!(kcal>=800&&kcal<=6000)){ showToast('Revisa las calorías (800 a 6000)'); return; }
+  if(Math.abs(prot*4+carbs*4+grasas*9-kcal)>kcal*0.05){ showToast('Los macros no cuadran con las calorías'); return; }
+  const o=s.nutricion||{};
+  s.nutricion={ override:true, kcal,prot,carbs,grasas, agua:agua||calcNutricion(s).agua, nota:o.nota||'', menu:comoArray(o.menu), por:pqStaffNombre(), fecha:fechaISO(new Date()) };
+  pqGuardarStaff(s,['nutricion']); delete nutBorrador[code];
+  staffRenderList(); nutRepintar(code);
+  showToast('Nutrición actualizada. El socio la ve al instante');
 }
 function nutAsignar(code,nutId){
   if(staffRol!=='coordinador') return;
