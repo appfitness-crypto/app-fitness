@@ -2576,3 +2576,34 @@ html[data-theme="light"] .st-l,html[data-theme="light"] .memb-k{color:#4A5866;}
   .wk-d{font-size:var(--fs-sm);}
   .wk-n{font-size:var(--fs-3xl);}
 }
+
+/* ═══ Inicio del socio: portada en video estilo póster ═══
+   Video grande, sin recuadro y fundido con el fondo (arriba y a los lados); su parte baja queda detrás de la
+   tarjeta de vidrio "Entrenamiento de hoy". Título en dos tonos arriba a la izquierda y un haz de luz lima.
+   En los temas claros un video oscuro no se funde con el blanco: ahí va dentro de un recuadro redondeado. */
+.hero-card.estilo-poster{--hh:clamp(400px,112vw,470px);height:var(--hh);margin:-14px -16px calc(var(--hh) * -.40);
+  border:0 !important;border-radius:0;background:none;box-shadow:none !important;overflow:visible;}
+.hero-card.estilo-poster .pic{position:absolute;inset:0;z-index:1;background:none;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 14%,#000 66%,transparent 100%),linear-gradient(90deg,transparent 0%,#000 16%,#000 94%,transparent 100%);
+  -webkit-mask-composite:source-in;
+  mask-image:linear-gradient(180deg,transparent 0%,#000 14%,#000 66%,transparent 100%),linear-gradient(90deg,transparent 0%,#000 16%,#000 94%,transparent 100%);
+  mask-composite:intersect;}
+.hero-card.estilo-poster .hero-ov,.hero-card.estilo-poster .pic-ph{display:none;}
+.hero-card.estilo-poster .hero-pv video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:72% 42%;}
+.hero-beam{position:absolute;left:-12%;top:-6%;width:70%;height:90%;z-index:0;pointer-events:none;
+  background:linear-gradient(118deg,transparent 38%,rgba(200,242,58,.30) 47%,rgba(200,242,58,.08) 56%,transparent 64%);filter:blur(16px);}
+.hero-card.estilo-poster .hero-tx{z-index:2;top:30px;bottom:auto;left:30px;right:44%;gap:2px;text-shadow:0 2px 16px rgba(0,0,0,.8);}
+.hero-card.estilo-poster .hero-tx b{font-size:var(--fs-5xl);line-height:.98;}
+.hero-card.estilo-poster .hero-tx b+b{color:var(--lime,#C8F23A);font-size:var(--fs-3xl);margin-top:6px;}
+.hero-card.estilo-poster+.today-c{position:relative;z-index:1;}
+@media(min-width:760px){
+  .hero-card.estilo-poster{--hh:clamp(460px,70vw,560px);margin:-18px -32px calc(var(--hh) * -.36);}
+  .hero-card.estilo-poster .hero-tx{left:46px;top:46px;}
+  .hero-card.estilo-poster .hero-tx b{font-size:var(--fs-6xl);}
+  .hero-card.estilo-poster .hero-tx b+b{font-size:var(--fs-4xl);}
+}
+html[data-theme="light"] .hero-card.estilo-poster,html[data-theme="light2"] .hero-card.estilo-poster{--hh:clamp(220px,54vw,300px);margin:0;border-radius:24px;overflow:hidden;background:#0A0E13;}
+html[data-theme="light"] .hero-card.estilo-poster .pic,html[data-theme="light2"] .hero-card.estilo-poster .pic{-webkit-mask-image:none;mask-image:none;}
+html[data-theme="light"] .hero-beam,html[data-theme="light2"] .hero-beam{display:none;}
+html[data-theme="light"] .hero-card.estilo-poster .hero-tx,html[data-theme="light2"] .hero-card.estilo-poster .hero-tx{top:auto;bottom:20px;left:20px;}
+html[data-theme="light"] .hero-card.estilo-poster+.today-c,html[data-theme="light2"] .hero-card.estilo-poster+.today-c{margin-top:12px;}
