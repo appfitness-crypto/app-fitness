@@ -349,15 +349,12 @@ function cargaPorSerie(s,ej,c){
 }
 // "150-173 lb" cuando la carga cambia por serie; "173 lb" cuando es la misma
 function enKgCarga(c){ return c&&c.series&&c.kgMin<c.kg ? kgToDisplay(c.kgMin)+'-'+enKg(c.kg) : enKg(c.kg); }
-function minutosDia(d){
-  const seg=(d.ejercicios||[]).reduce((a,e)=>{ const n=parseInt(e.series)||3; const r=segundosDescanso(e.descanso)||75; return a+n*(45+r); },0);
-  return Math.max(10,Math.round(seg/60/5)*5);
-}
 
 // ═════════════ RUTINA ═════════════
 let rutDia=null;
 function renderRutinaTab(){
   const s=activeSocio; if(!s) return;
+  etiquetarCargaSemana(s.rutina,s);
   normalizarEmomRutina(s.rutina);
   actualizarHoy();
   const cont=document.getElementById('dsec-rutina');
@@ -427,7 +424,7 @@ function rutCardHTML(s,rk,vk){
     <div class="en-hero">
       <div class="en-k">${ico(hecho?'check':'calendar')}${estado} · ${EN_DIAS[vi]} ${fechas[vi]}</div>
       <h3>${esc(sc(d.tipo))}</h3>
-      <div class="en-meta"><span>${ico('dumbbell')}${ejs.length} ejercicios</span><span>${ico('clock')}~${minutosDia(d)} min</span>${grupos.length?`<span>${ico('target')}${esc(enListaY(grupos))}</span>`:''}</div>
+      <div class="en-meta"><span>${ico('dumbbell')}${ejs.length} ejercicios</span><span>${ico('clock')}~${minutosDia(d,s)} min</span>${grupos.length?`<span>${ico('target')}${esc(enListaY(grupos))}</span>`:''}</div>
     </div>
     <div class="en-ejs">${filas}</div>
     <div class="en-cta">${cta}</div>
@@ -484,7 +481,7 @@ function ddHTML(s,k){
   <section class="dd-hero">${pic(basesSesion(d.tipo),iconoTipo(d.tipo),'fill')}
     <div class="dd-hero-tx"><p>${reg?ico('check')+'Hecho · ':''}${esc(cuando)}</p><h1>${esc(sc(d.tipo))}</h1></div></section>
   <div class="dd-body">
-    <p class="dd-facts num"><span><b>~${minutosDia(d)}</b> min</span><span><b>${ejs.length}</b> ejercicios</span><span><b>${series}</b> series</span>${reg&&reg.volumen?`<span><b>${Math.round(reg.volumen).toLocaleString('es-MX')}</b> kg movidos</span>`:''}</p>
+    <p class="dd-facts num"><span><b>~${minutosDia(d,s)}</b> min</span><span><b>${ejs.length}</b> ejercicios</span><span><b>${series}</b> series</span>${reg&&reg.volumen?`<span><b>${Math.round(reg.volumen).toLocaleString('es-MX')}</b> kg movidos</span>`:''}</p>
     ${musc.length||zonas.length?`<section class="dd-resumen">
       ${musc.length?`<div class="dd-res-f">${it('target','sm')}<div><small>Trabajas</small><b>${esc(ddFrase(musc.slice(0,3).map(x=>x[0])))}${musc.length>3?`<i> +${musc.length-3}</i>`:''}</b></div></div>`:''}
       ${zonas.length?`<div class="dd-res-f">${it('dumbbell','sm')}<div><small>Necesitas</small><b>${esc(ddFrase(zonas))}</b></div></div>`:''}

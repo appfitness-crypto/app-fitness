@@ -52,6 +52,7 @@ Los archivos de `js/` son scripts normales y comparten el mismo ámbito global; 
 | `js/48-menu-sugerido.js` | Menú del día del socio: platillos mexicanos escalados al % de cada comida y a sus macros, con equivalentes SMAE, hora de entreno y filtros (vegetariano, sin lácteos, sin gluten). Sigue la skill `nutricion-deportiva`. |
 | `js/49-menu-staff.js` | Armar menú del entrenador: elige platillos, horas y porciones del socio; se guarda en `s.nutricion.plan` y el socio lo ve como definitivo. |
 | `js/50-nutricion-socio.js` | Pestaña Nutrición del socio: resumen compacto, menú del día como línea de tiempo plegable y hoja "Ajustar". |
+| `js/51-carga-dia.js` | Duración y carga real de cada día; etiqueta pesado / medio / ligero comparando la semana. |
 | `js/99-arranque.js` | Ajustes finales que dependen de funciones de varios módulos (siempre al final). |
 
 ## Investigación de nutrición deportiva

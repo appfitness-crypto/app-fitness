@@ -124,7 +124,7 @@ async function generarPDFRutina(){
       doc.setFillColor(...LIME); doc.roundedRect(MX,y,30,9,2.5,2.5,'F'); doc.rect(MX+26,y,4,9,'F');
       font('bold',9,DARK); doc.text(nm.toUpperCase(),MX+15,y+6,{align:'center'});
       font('bold',9.5,[255,255,255]); doc.text(pdfTxt(sc(d.tipo||'Entrenamiento'))+(cont?'  (continúa)':''),MX+34,y+6);
-      font('normal',7.5,[190,200,210]); doc.text('~'+minutosDia(d)+' min  ·  '+d.ejercicios.length+' ejercicios',W-MX-3,y+6,{align:'right'});
+      font('normal',7.5,[190,200,210]); doc.text('~'+minutosDia(d,s)+' min  ·  '+d.ejercicios.length+' ejercicios',W-MX-3,y+6,{align:'right'});
       y+=11; cabTabla();
     }
 

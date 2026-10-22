@@ -29,17 +29,7 @@ const RT_GRUPOS={cuadriceps:'Pierna',femoral:'Pierna',pantorrilla:'Pantorrilla',
   deltoide:'Hombro',deltoide_lat:'Hombro',deltoide_post:'Hombro',manguito:'Hombro',biceps:'Bíceps',braquial:'Bíceps',triceps:'Tríceps',core:'Core',abdomen:'Core'};
 function rtPesoCorto(p){ return String(p||'').replace(/\s*—\s*resistencia\s*/i,' ').replace(/\s*—\s*(\d+%)\s*1RM/i,' $1').trim(); }
 function rtSeg(t){ t=String(t||''); let m=t.match(/(\d+(?:\.\d+)?)\s*min/i); if(m) return +m[1]*60; m=t.match(/(\d+)\s*s/i); return m?+m[1]:60; }
-function rtMin(s,k){
-  let seg=0;
-  comoArray(s.rutina[k]&&s.rutina[k].ejercicios).forEach(e=>{
-    const kind=staffKindEj(e), n=parseInt(e.series)||1;
-    if(kind==='cardio') seg+=n*(stNum(e.reps)||10)*60;
-    else if(kind==='mov') seg+=n*75;
-    else if(kind==='iso') seg+=n*((stNum(e.reps)||30)+rtSeg(e.descanso));
-    else seg+=n*(40+rtSeg(e.descanso));
-  });
-  return Math.round(seg/60);
-}
+function rtMin(s,k){ return minutosDia(s.rutina[k],s); }   // mismo cálculo que ve el socio (js/51-carga-dia.js)
 function rtSeries(s,k){ return comoArray(s.rutina[k]&&s.rutina[k].ejercicios).filter(e=>staffKindEj(e)!=='mov').reduce((a,e)=>a+(parseInt(e.series)||0),0); }
 function rtMalLes(s,e){ const kb=kbBuscar(e.nm||''), les=lesionKeys(s.limitaciones||[]); return kb?(kb.ev||[]).filter(l=>les.includes(l)):[]; }
 function rtRx(e){
@@ -112,6 +102,7 @@ function rtDiaHTML(s,k){
       <p class="rt-hint">Toca un ejercicio para editarlo. Arrastra ${ico('grip')} para cambiar el orden.</p>`}`;
 }
 function rtRutinaHTML(s){
+  etiquetarCargaSemana(s.rutina,s);   // pesado / medio / ligero según lo que hoy tiene cada día
   const k=rtDiaDe(s);
   const abierto=rtSel&&rtSel.code===s.code&&rtSel.k===k&&s.rutina[k].ejercicios[rtSel.ei];
   return `${bloqueRecordatorioFilosofia()}

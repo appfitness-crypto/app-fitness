@@ -373,6 +373,7 @@ function procesarRutina(data){
     ajustarIsometricos(data.semana, ctxP);
     ajustarCardioRondas(data.semana, {edad:qAnswers.edad, objetivo:qAnswers.objetivo, nivel:qAnswers.nivel});
     enriquecerSemana(data.semana, ctxP, semillaP);
+    etiquetarCargaSemana(data.semana, {edad:qAnswers.edad, objetivo:qAnswers.objetivo, nivel:qAnswers.nivel});   // etiqueta del día según su carga real
     data.recorteVol=limitarVolumen(data.semana, ctxP);   // al final: tope de series por músculo (sesión y semana)
     data.recorteEj=limitarEjercicios(data.semana, ctxP); // ejercicios por sesión según la duración del entrenador
   }
