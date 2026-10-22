@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: menu-definicion-noche
+expected_outcome: |
+  Un día de 5 comidas con platillos mexicanos y porciones caseras, metas calculadas con un déficit moderado y proteína alta, pre y post alrededor de las 19:00, sin cerdo, con totales dentro de tolerancia y presentado como sugerencia educativa.

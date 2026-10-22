@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: revisar-motor-macros
+expected_outcome: |
+  Un informe que compara cada regla del motor con la evidencia, cita líneas, distingue cifras verificadas, pendientes y reglas de diseño, y propone cambios concretos sin modificar el archivo.
