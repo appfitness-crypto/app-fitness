@@ -482,6 +482,7 @@ function dbSaveStaff(code){
   guardarLocal();
   staffDirty.delete(code);
   const s=DB.socios[code]; if(!s) return;
+  if(typeof etiquetarCargaSemana==='function') etiquetarCargaSemana(s.rutina,s);   // pesado / medio / ligero según lo editado
   fbEncolar('/socios/'+code,'update',{rutina:s.rutina,status:s.status,asignado:s.asignado,entrenadorId:s.entrenadorId||'',
     modo:s.modo||null, casa:s.casa||null, rutinaGym:s.rutinaGym||null});   // rutina en casa: solo la define el staff
 }

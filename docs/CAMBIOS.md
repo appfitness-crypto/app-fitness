@@ -1,3 +1,22 @@
+# Cambios — Duración y carga del día según lo que contiene
+- **Duración del día (~min):** ahora suma lo que lleva cada ejercicio:
+  - **Fuerza:** series × (≈3 s por repetición, 4.5 s con tempo o pausa) + descanso entre series + 1 min de preparación.
+  - **Cardio:** sus minutos (25 min de elíptica = 25 min).
+  - **EMOM:** sus minutos.
+  - **Movilidad:** rondas × movimientos × ~40 s, o sus minutos si es por tiempo.
+  - **Circuitos e isométricos:** con su trabajo y su descanso.
+
+  Antes cada ejercicio contaba como series × (45 s + descanso) y se ignoraban los minutos de cardio y movilidad. Por ejemplo, el jueves "Core y prevención" (6 ejercicios con 25 min de elíptica) pasaba de ~35 a ~70 min. El editor del entrenador usa el mismo cálculo.
+- **"Día pesado / medio / ligero":** antes se ponía por la posición del día al generar la rutina. Ahora sale de la carga real de cada día comparada con el promedio de la semana:
+  - **Fuerza:** cada serie suma más con menos repeticiones (más % del 1RM) y un poco más en compuestos.
+  - **EMOM, circuitos y cardio:** suman por minuto o ronda.
+  - **Movilidad:** no cuenta.
+
+  Pesado = ≥12 % sobre el promedio y ligero = ≤15 % bajo el promedio. Se recalcula al generar la rutina, al guardar los cambios del entrenador y al mostrar la semana. Solo cambia la etiqueta de los días que ya la tenían; el nombre que puso el entrenador no se toca.
+- Nuevo módulo `js/51-carga-dia.js` (`minutosDia`, `minutosEjercicio`, `cargaDia`, `etiquetarCargaSemana`). Service worker: `fitnesspro-v134`.
+
+---
+
 # Cambios — Pesos de pirámide por serie y avanzar desde movilidad
 - **Pirámides y escaleras (ej. 4 × 12-10-8-6):** cada serie trae el peso que corresponde a SUS repeticiones, no el mismo peso en todas. Se estima el 1RM (Epley) con las series de la sesión anterior (o el 1RM guardado, o el peso del plan), se aplica la progresión de hoy y se calcula el % de cada serie con la misma fórmula del resto de la app (`cargaPorSerie` en js/38).
   - Ejemplo: con 180 lb × 4 y 190 lb × 4 la vez anterior, hoy sugiere 150 × 12, 155 × 10, 165 × 8 y 175 × 6, en lugar de 193 lb en las cuatro.
