@@ -1,3 +1,13 @@
+# Cambios — Pesos de pirámide por serie y avanzar desde movilidad
+- **Pirámides y escaleras (ej. 4 × 12-10-8-6):** cada serie trae el peso que corresponde a SUS repeticiones, no el mismo peso en todas. Se estima el 1RM (Epley) con las series de la sesión anterior (o el 1RM guardado, o el peso del plan), se aplica la progresión de hoy y se calcula el % de cada serie con la misma fórmula del resto de la app (`cargaPorSerie` en js/38).
+  - Ejemplo: con 180 lb × 4 y 190 lb × 4 la vez anterior, hoy sugiere 150 × 12, 155 × 10, 165 × 8 y 175 × 6, en lugar de 193 lb en las cuatro.
+  - El redondeo es a 5 lb si el socio usa libras, o a discos de 2.5 kg si usa kilos.
+  - La etiqueta "Hoy" y las listas de la rutina muestran el rango (por ejemplo "150-175 lb"). Los ejercicios con las mismas repeticiones en todas las series no cambian.
+- **Movilidad, cardio y rondas:** el registro tiene un botón "Siguiente ejercicio" (o "Terminar sesión" en el último) para avanzar sin cerrar la pantalla.
+- Service worker: `fitnesspro-v133`.
+
+---
+
 # Cambios — Pestaña Nutrición del socio más clara
 - **Un solo resumen arriba:** calorías del día, una barra de proteína, carbohidratos y grasas con sus gramos, y el agua. Sustituye a las 4 tarjetas grandes de macros, la tarjeta "Distribución de macros" y la nota del objetivo (ahora es una etiqueta chica).
 - **El menú del día es una línea de tiempo:** cada comida es una fila con hora, foto chica, platillo, kcal y proteína. Al tocarla se abre con foto grande, ingredientes, preparación y "Otra opción". La próxima comida según la hora aparece abierta y resaltada.

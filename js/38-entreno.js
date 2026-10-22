@@ -308,6 +308,10 @@ function histEj(s,nm){
 // Si completó todas las series la última vez sube un escalón; si no, repite el peso.
 // Sin historial: % de su 1RM estimado si el plan lo pide, o el peso escrito en el plan.
 function cargaSugerida(s,ej){
+  const c=cargaSugeridaBase(s,ej);
+  return c?cargaPorSerie(s,ej,c):c;
+}
+function cargaSugeridaBase(s,ej){
   if(esEjCardio(ej)||esEjRondas(ej)||esEjMovilidad(ej)) return null;
   // Los registros de una sesión ajustada (descarga o "llego cansado") no cuentan para subir el peso
   const hs=histEjSes(s,ej.nm).filter(x=>+x.d.kg>0), base=hs.filter(x=>!x.d.aj);
@@ -324,6 +328,27 @@ function cargaSugerida(s,ej){
   const fijo=pqParseKg(ej.peso);
   return fijo?{kg:fijo, ult:null, sube:null}:null;
 }
+// Pirámides y escaleras (reps distintas por serie, ej. 12-10-8-6): cada serie lleva el peso que corresponde
+// a SUS repeticiones. Se estima el 1RM (Epley) con las series registradas, el 1RM guardado o el peso sugerido,
+// se le aplica la progresión de hoy y se toma el % de cada serie (mismo pctPorReps que el resto de la app).
+function cargaPorSerie(s,ej,c){
+  if(esEjIsometrico(ej)||!(c.kg>0)) return c;
+  const n=parseInt(ej.series)||0; if(n<2) return c;
+  const reps=Array.from({length:n},(_,j)=>parseInt(repsDeSerie(ej,j))||0);
+  if(!reps.every(r=>r>0) || new Set(reps).size<2) return c;
+  const rir=ej.rir!=null?+ej.rir:2, epley=(kg,r)=>kg*(1+r/30);
+  let rm=0;
+  comoArray(c.sr).forEach(x=>{ const kg=+x[0], r=+x[1]; if(kg>0&&r>0&&r<=15) rm=Math.max(rm,epley(kg,r)); });
+  if(rm>0 && c.ult>0 && c.kg>c.ult) rm*=c.kg/c.ult;          // la progresión de hoy sube toda la pirámide
+  if(!rm){ const g=s.logs&&s.logs.rm&&+s.logs.rm[prKey(ej.nm)]; if(g>0) rm=g; }
+  if(!rm) rm=c.kg/pctPorReps(Math.min(...reps),rir);       // peso escrito en el plan = la serie más pesada
+  // Redondeo a lo que se puede cargar: 5 lb si el socio usa libras, discos de 2.5 kg si usa kilos
+  const red=kg=>unidadPeso==='lb'?Math.round(kg*KG_A_LB/5)*5/KG_A_LB:pqRedondear(kg);
+  const series=reps.map(r=>red(rm*pctPorReps(r,rir)));
+  return Object.assign({},c,{series, kg:Math.max(...series), kgMin:Math.min(...series)});
+}
+// "150-173 lb" cuando la carga cambia por serie; "173 lb" cuando es la misma
+function enKgCarga(c){ return c&&c.series&&c.kgMin<c.kg ? kgToDisplay(c.kgMin)+'-'+enKg(c.kg) : enKg(c.kg); }
 function minutosDia(d){
   const seg=(d.ejercicios||[]).reduce((a,e)=>{ const n=parseInt(e.series)||3; const r=segundosDescanso(e.descanso)||75; return a+n*(45+r); },0);
   return Math.max(10,Math.round(seg/60/5)*5);
@@ -387,7 +412,7 @@ function rutCardHTML(s,rk,vk){
   const filas=ejs.map((e,j)=>{
     const c=cargaSugerida(s,e), r=rxTexto(e,s);
     const sub=r.sr+(c&&c.ult!=null?' · última '+enKg(c.ult):'')+(!c&&!enEspecial(e)&&!histEj(s,e.nm).length?' · nuevo para ti':'');
-    const der=c?`<b class="num">${enKg(c.kg)}</b>${c.sube>0?`<small>+${kgToDisplay(c.sube)}</small>`:c.ult!=null?'<small class="igual">igual</small>':'<small class="igual">sugerido</small>'}`:'';
+    const der=c?`<b class="num">${enKgCarga(c)}</b>${c.sube>0?`<small>+${kgToDisplay(c.sube)}</small>`:c.ult!=null?'<small class="igual">igual</small>':'<small class="igual">sugerido</small>'}`:'';
     return `<button type="button" class="en-ej" onclick="verComoDia('${k}',${j})" aria-label="${esc(e.nm)}: ver cómo se hace">
       <span class="en-th">${pic(basesEjercicioMini(e),'dumbbell','thumb')}</span>
       <span class="en-ej-t"><b>${esc(e.nm)}</b><span>${esc(sub)}</span></span>
@@ -445,7 +470,7 @@ function ddHTML(s,k){
     const sub=[limpiarReps(r.sr).replace(/\s*[—–]\s*/g,' '), des].filter(Boolean).join(' · ');
     const met=e.metodo&&KB_METODOS[e.metodo.id]?ddMetCorto(KB_METODOS[e.metodo.id].nm):'';
     const der=h?`<b class="num">${h.kg?enKg(h.kg):h.seg?h.seg+' s':h.fc?h.fc+' lpm':ico('check')}</b><small>${h.s||0} de ${h.p||parseInt(e.series)||0}</small>`
-      : c?`<b class="num">${enKg(c.kg)}</b><small>${c.sube>0?'+'+kgToDisplay(c.sube):'sugerido'}</small>`:'';
+      : c?`<b class="num">${enKgCarga(c)}</b><small>${c.sube>0?'+'+kgToDisplay(c.sube):'sugerido'}</small>`:'';
     const g=e.grupo?String(e.grupo):'', gSig=ejs[j+1]&&ejs[j+1].grupo&&String(ejs[j+1].grupo).charAt(0)===g.charAt(0);
     return `<li class="dd-ej${h?' hecho':''}${g&&gSig?' liga':''}"><button type="button" onclick="verComoDia('${k}',${j})" aria-label="${esc(e.nm)}: ver cómo se hace">
       <span class="dd-n num" aria-hidden="true">${esc(g||String(j+1))}</span>
@@ -532,7 +557,7 @@ function sesAvance(i,e){ const n=seriesHoy(e,sesionTemp&&sesionTemp.aj)||1; retu
 function sesBorrador(i,e,c){
   if(!sesUI.borr[i]){
     const n=seriesHoy(e,sesionTemp&&sesionTemp.aj)||3;
-    sesUI.borr[i]=Array.from({length:n},(_,j)=>({kg:c?c.kg:0, r:parseInt(repsDeSerie(e,j))||0}));
+    sesUI.borr[i]=Array.from({length:n},(_,j)=>({kg:c?(c.series&&c.series[j]!=null?c.series[j]:c.kg):0, r:parseInt(repsDeSerie(e,j))||0}));
   }
   return sesUI.borr[i];
 }
@@ -554,7 +579,7 @@ function renderSes(){
     const r=rxTexto(e0,s), n=sesHechas(i);
     series=`<div class="en-esp"><p>${esc(r.sr)}${r.carga?' · '+esc(r.carga):''}</p>
       ${btnTiempo}
-      <button type="button" class="en-btn en-btn-p" onclick="openModal(${i})">${ico('check')}${n?'Ver o cambiar registro':'Registrar'}</button></div>`;
+      <button type="button" class="en-btn en-btn-p" onclick="sesRegistrar(${i})">${ico('check')}${n?'Ver o cambiar registro':'Registrar'}</button></div>`;
   } else {
     const B=sesBorrador(i,e0,c), prev=c&&c.sr;
     series=`${btnTiempo?`<div class="en-tm-row">${btnTiempo}</div>`:''}<div class="en-sets" role="table" aria-label="Series de ${esc(e.nm)}">
@@ -592,7 +617,7 @@ function renderSes(){
       ${alt?`<div class="en-swap">Solo hoy, en lugar de ${esc(e0.nm)}</div>`:''}
       ${f.ms.length?`<div class="en-musc">${f.ms.map((m,j)=>`<span class="${j?'':'p'}"><i></i>${esc(m)}</span>`).join('')}</div>`:''}
       ${!especial?`<div class="en-pills">
-        ${c?`<span class="en-pill l">${ico('bolt')}Hoy <b>${enKg(c.kg)}</b>${c.sube>0?' · +'+kgToDisplay(c.sube):''}</span>`:''}
+        ${c?`<span class="en-pill l">${ico('bolt')}Hoy <b>${enKgCarga(c)}</b>${c.sube>0&&!c.series?' · +'+kgToDisplay(c.sube):''}</span>`:''}
         ${(()=>{ const pr=s.logs&&s.logs.prs&&s.logs.prs[prKey(e.nm)]; return pr?`<span class="en-pill">${ico('trophy')}Récord <b>${enKg(pr.kg)}</b></span>`:''; })()}
         ${dPlan.nada?'':dPlan.libre?`<span class="en-pill">${ico('timer')}Descanso <b>libre${dPlan.meta?' · ~'+(dPlan.meta<120?dPlan.meta+' s':Math.round(dPlan.meta/6)/10+' min'):''}</b></span>`
           :des?`<span class="en-pill">${ico('timer')}Descanso <b>${des<120?des+' s':Math.round(des/60*10)/10+' min'}</b></span>`:''}
@@ -644,6 +669,18 @@ function sesAlternativa(i,ai){
   renderSes();
 }
 function sesUnidad(){ unidadPeso=unidadPeso==='kg'?'lb':'kg'; try{ localStorage.setItem('unidadPeso',unidadPeso); }catch(e){} renderSes(); }
+// Registro de movilidad, cardio o rondas desde la sesión: el modal lleva su propio botón para seguir al
+// siguiente ejercicio (o terminar), así no hay que cerrarlo para avanzar.
+function sesRegistrar(i){
+  openModal(i);
+  const box=document.querySelector('#modal-ej .mbox'); if(!box) return;
+  let f=document.getElementById('m-sig'); if(!f){ f=document.createElement('div'); f.id='m-sig'; f.className='m-sig'; box.appendChild(f); }
+  const ejs=sesEjs(), sig=ejs[i+1];
+  f.innerHTML=sig
+    ? `<button type="button" class="sd-pri" onclick="sesRegistroSiguiente()">Siguiente ejercicio${ico('chev')}</button><small>${esc(sig.nm)}</small>`
+    : `<button type="button" class="sd-pri" onclick="closeModal();sesTerminar()">Terminar sesión</button>`;
+}
+function sesRegistroSiguiente(){ closeModal(); sesIr(1); }
 function sesIr(d){ descansoOcultar(); sesUI.alts=false; sesUI.cur=Math.max(0,Math.min(sesEjs().length-1,sesUI.cur+d)); renderSes(); window.scrollTo(0,0); }
 function sesSalir(){ descansoOcultar(); clearInterval(sesReloj); go('s-dash'); refreshDash(); dashTab('rutina'); }
 function sesTerminar(){ descansoOcultar(); finalizarSesion(); }
@@ -780,7 +817,7 @@ function sesEmom(i){
   normalizarEmom(e);
   const especial=enEspecial(e), n=parseInt(e.series)||EMOM_MIN;
   tmEmom(n,e.nm,r=>{ if(!especial){ const reg=sesReg(i); if(!(reg.sets[r-1]&&reg.sets[r-1].ok)) sesMarcar(i,r-1,true); } },
-    ()=>{ if(especial) openModal(i); });
+    ()=>{ if(especial) sesRegistrar(i); });
 }
 
 // ═════════════ RESUMEN AL TERMINAR ═════════════

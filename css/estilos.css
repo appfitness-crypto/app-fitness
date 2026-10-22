@@ -2767,3 +2767,9 @@ html[data-theme="light"] .hero-card.estilo-poster+.today-c,html[data-theme="ligh
 .nx-listo{width:100%;margin-top:8px;}
 .nx-m-h:focus-visible,.nx-aj:focus-visible,.nx-otra:focus-visible,.nx-mas summary:focus-visible{outline:2px solid var(--v2);outline-offset:2px;}
 
+
+/* Botón "Siguiente ejercicio" dentro del registro de movilidad, cardio y rondas (js/38 sesRegistrar) */
+.m-sig{position:sticky;bottom:calc(-24px - var(--safe-b));display:grid;gap:4px;justify-items:center;margin:16px -20px 0;padding:12px 20px calc(12px + var(--safe-b));background:var(--dk2);border-top:1px solid var(--b);z-index:2;}
+.m-sig .sd-pri{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+.m-sig .sd-pri .ico{width:20px;height:20px;}
+.m-sig small{font-size:var(--fs-xs);color:var(--mu);max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}

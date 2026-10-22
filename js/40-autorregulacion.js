@@ -65,7 +65,9 @@ function seriesHoy(e,aj){
 }
 function cargaHoy(c,aj){
   if(!c || !aj || !(aj.kgFactor<1) || !c.kg) return c;
-  return Object.assign({},c,{kg:pqRedondear(c.kg*aj.kgFactor), sube:0, ajustada:true});
+  const o={kg:pqRedondear(c.kg*aj.kgFactor), sube:0, ajustada:true};
+  if(c.series){ o.series=c.series.map(k=>pqRedondear(k*aj.kgFactor)); o.kg=Math.max(...o.series); o.kgMin=Math.min(...o.series); }
+  return Object.assign({},c,o);
 }
 
 // "¿Cómo llegas hoy?" — solo si el entrenador definió qué hacer cuando el socio llega cansado
