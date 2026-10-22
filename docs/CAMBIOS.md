@@ -1,3 +1,11 @@
+# Cambios — Foto del pescado empapelado
+- Nueva foto en el menú del día: pescado empapelado con verduras y arroz (`img/menu/n-empapelado.webp`). Ya son 4 de 31.
+- "Otra opción" ahora recorre todos los platillos que cumplen la meta de esa comida, no solo los 5 más cercanos. Antes, platillos como el pescado empapelado casi nunca salían.
+- Si el total del día queda fuera de ±5 %, el ajuste final también prueba otros platillos de esa comida. En 600 perfiles al azar, 596 quedan dentro de ±5 %.
+- Service worker: `fitnesspro-v129`.
+
+---
+
 # Cambios — Menú del día en Nutrición
 - **Menú de hoy (socio):** en la pestaña Nutrición, cada comida del día ahora trae un platillo mexicano con sus porciones caseras (tortillas, tazas, gramos, cucharaditas). Las porciones se ajustan a las calorías y los macros de esa comida, que salen de los datos del socio, su objetivo y el número de comidas que elige (3 a 6).
   - Cada comida muestra su % del día, las kcal, los equivalentes del SMAE y su aporte de proteína, carbohidratos y grasas. Abajo va el total del día, que queda dentro de ±5 % de la meta.
