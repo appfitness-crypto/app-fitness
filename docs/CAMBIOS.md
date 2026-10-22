@@ -1,3 +1,10 @@
+# Cambios — Video de Inicio con más definición
+- El video de portada (cuerdas de batalla) se convirtió de nuevo a su resolución original (1280 px, antes 960 px), con menos compresión y un enfoque suave. Se ve más nítido en el tema oscuro, donde se muestra más grande. Pesa unos 2.2 MB (antes ~1 MB).
+- La imagen fija de respaldo también pasó a 1280 px.
+- Service worker: `fitnesspro-v127`.
+
+---
+
 # Cambios — Portada de Inicio del socio en video, estilo póster
 - La foto de Inicio se reemplaza por un video en bucle y sin sonido (cuerdas de batalla, `video/inicio-cuerdas.webm` y `.mp4`, ~1 MB) con imagen fija de respaldo (`img/hero/inicio-cuerdas-video.webp`).
 - Ya no va en un recuadro: es más grande, se funde con el fondo arriba y a los lados, y su parte baja queda detrás de la tarjeta de vidrio "Entrenamiento de hoy". El lema va arriba a la izquierda en dos tonos (blanco y lima) con un haz de luz lima detrás.
