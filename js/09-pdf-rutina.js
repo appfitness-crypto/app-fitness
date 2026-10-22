@@ -329,71 +329,10 @@ function nutElegirComidas(n){
 }
 function renderNutricionTab(){
   const s=activeSocio; if(!s) return;
-  const nut=nutricionFinal(s), base=calcNutricion(s);
-  const pK=nut.prot*4, cK=nut.carbs*4, gK=nut.grasas*9;
-  const tot=pK+cK+gK;
-  const pP=Math.round(pK/tot*100), cP=Math.round(cK/tot*100), gP=100-pP-cP;
-  const menu=comoArray(s.nutricion&&s.nutricion.menu);
-  const nComidas=[3,4,5,6].includes(+s.comidasPorDia)?+s.comidasPorDia:4;
-  const reparto=nutRepartoComidas(nComidas,nut.kcal,pP,cP,gP);
-
-  document.getElementById('dsec-nutricion').innerHTML=`
-    ${appHead('Nutrición',nut.manual?'Tu plan de alimentación, personalizado para ti.':'Tu plan de alimentación, calculado con tus datos.')}
-    ${nut.manual?`<div class="nut-note" style="border-color:color-mix(in srgb,var(--v2) 45%,transparent)">🥗 Ajustado por <b style="color:var(--tx)">${esc(s.nutricion.por||'tu nutriólogo')}</b>${s.nutricion.fecha?' · '+esc(fmtFecha(s.nutricion.fecha)):''}${s.nutricion.nota?`<br><span style="font-style:italic">“${esc(s.nutricion.nota)}”</span>`:''}</div>`
-      :`<div class="nut-note">Objetivo: <b style="color:var(--tx)">${esc(sc(s.objetivo))}</b> · ${nut.ajusteTxt}<br>Calculado con tu peso actual: <b style="color:var(--tx)">${nut.pesoBase} kg</b> — se actualiza solo al registrar peso en Progreso.</div>`}
-
-    <div class="macro-grid">
-      <div class="macro-c" style="--mc:var(--v)">${it('flame')}<div class="mc-v">${nut.kcal}<span class="mc-u"> kcal</span></div><div class="mc-l">Calorías / día</div><div class="mc-s">${nut.ajusteTxt}</div></div>
-      <div class="macro-c" style="--mc:var(--n)">${it('dumbbell')}<div class="mc-v">${nut.prot}<span class="mc-u"> g</span></div><div class="mc-l">Proteína</div><div class="mc-s">${nut.protKg} g/kg${(nut.pesoRef&&nut.pesoRef<nut.pesoBase-0.5)?' de '+nut.pesoRef+' kg de referencia':''} · ${pP}% kcal · reparte en 3–4 comidas</div></div>
-      <div class="macro-c" style="--mc:var(--g)">${it('bolt')}<div class="mc-v">${nut.carbs}<span class="mc-u"> g</span></div><div class="mc-l">Carbohidratos</div><div class="mc-s">${cP}% kcal · prioriza pre y post entreno</div></div>
-      <div class="macro-c" style="--mc:var(--p)">${it('drop')}<div class="mc-v">${nut.grasas}<span class="mc-u"> g</span></div><div class="mc-l">Grasas</div><div class="mc-s">${gP}% kcal · mínimo saludable garantizado (0.8 g/kg)</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-t">${it('chart','sm')}Distribución de macros</div>
-      <div class="dist-bar">
-        <div style="width:${pP}%;background:var(--n)"></div>
-        <div style="width:${cP}%;background:var(--g)"></div>
-        <div style="width:${gP}%;background:var(--p)"></div>
-      </div>
-      <div class="dist-leg">
-        <span><b style="color:var(--n)">●</b> Proteína ${pP}%</span>
-        <span><b style="color:var(--g)">●</b> Carbohidratos ${cP}%</span>
-        <span><b style="color:var(--p)">●</b> Grasas ${gP}%</span>
-      </div>
-    </div>
-
-    ${(s.nutricion&&s.nutricion.plan&&comoArray(s.nutricion.plan.comidas).length)?menuPlanHTML(s,nut):menu.length?`<div class="card">
-      <div class="card-t">${it('leaf','sm')}Reparto de tus comidas</div>
-      <div class="q-sub" style="margin:2px 0 12px">¿En cuántas comidas repartes tu día?</div>
-      <div class="comida-sel">${[3,4,5,6].map(n=>`<button type="button" class="${n===nComidas?'on':''}" onclick="nutElegirComidas(${n})">${n}</button>`).join('')}</div>
-      <div class="comida-list">
-        ${reparto.map(m=>`<div class="comida-it">
-          <div class="comida-it-h"><span class="comida-tag ${m.tag}">${esc(m.tag==='ligera'?'Colación':m.tag==='fuerte'?'Comida fuerte':'Comida media')}</span><b>${esc(m.nombre)}</b><span class="comida-kcal">${m.pct}% · ~${m.kcal} kcal</span></div>
-        </div>`).join('')}
-      </div>
-    </div>`:menuSugeridoHTML(s,nut,nComidas)}
-
-    ${menu.length&&!(s.nutricion&&s.nutricion.plan)?`<div class="card">
-      <div class="card-t">${it('leaf','sm')}Menú de tu ${nut.manual?'nutriólogo':'entrenador'}</div>
-      ${menu.map(m=>`<div class="nut-detail" style="align-items:flex-start"><span style="flex:0 0 auto;font-weight:700;color:var(--tx)">${esc(m.nombre)}</span><b style="text-align:right;font-weight:500;color:var(--mu)">${esc(m.detalle)}</b></div>`).join('')}
-    </div>`:''}
-
-    <div class="flota" data-flota>
-      <div class="flota-k">${ico('star')}Guía de tu ${nut.manual?'nutriólogo':'entrenador'}</div>
-      <div class="flota-t">${nut.manual&&s.nutricion.nota?esc(s.nutricion.nota):base.nota}</div>
-      <div class="flota-n">Es una guía${nut.manual?' personalizada':' con fórmulas estándar'}. Si tienes alguna condición médica, coméntala con tu médico o nutriólogo.</div>
-    </div>
-
-    <details class="card nut-calc">
-      <summary class="card-t">${it('info','sm')}<span class="nc-t">${nut.manual?'Cálculo automático (referencia)':'Cómo se calculó'}<small>Toca para ver los datos</small></span>${ico('chev')}</summary>
-      <div class="nut-detail"><span>Metabolismo basal (Mifflin-St Jeor)</span><b>${base.bmr} kcal</b></div>
-      <div class="nut-detail"><span>Factor de actividad (${s.dias} días/sem)</span><b>× ${base.factor}</b></div>
-      <div class="nut-detail"><span>Gasto total diario (TDEE)</span><b>${base.tdee} kcal</b></div>
-      <div class="nut-detail"><span>Ajuste por objetivo</span><b>${base.kcal} kcal</b></div>
-      <div class="nut-detail"><span>Agua recomendada (35 ml/kg)</span><b>${base.agua} L/día + 0.5 L por sesión</b></div>
-    </details>`;
-  flotaObservar(document.getElementById('dsec-nutricion'));
+  const nut=nutricionFinal(s);
+  // Resumen, menú del día y ajustes: js/50-nutricion-socio.js
+  document.getElementById('dsec-nutricion').innerHTML=appHead('Nutrición',nut.manual?'Tu plan de alimentación, personalizado para ti.':'Tu plan de alimentación, calculado con tus datos.')+nutTabHTML(s);
+  nxHojaMontar(s);
 }
 // Tarjetas "flotantes": aparecen al pasar por la mitad de la pantalla y se desvanecen al seguir bajando o subir
 let FLOTA_OBS=null;

@@ -1,3 +1,14 @@
+# Cambios — Pestaña Nutrición del socio más clara
+- **Un solo resumen arriba:** calorías del día, una barra de proteína, carbohidratos y grasas con sus gramos, y el agua. Sustituye a las 4 tarjetas grandes de macros, la tarjeta "Distribución de macros" y la nota del objetivo (ahora es una etiqueta chica).
+- **El menú del día es una línea de tiempo:** cada comida es una fila con hora, foto chica, platillo, kcal y proteína. Al tocarla se abre con foto grande, ingredientes, preparación y "Otra opción". La próxima comida según la hora aparece abierta y resaltada.
+- **Los ajustes salen de la pantalla:** número de comidas, hora de entreno y filtros (vegetariano, sin lácteos, sin gluten) están en la hoja "Ajustar".
+- **Lo técnico va al final, cerrado:** "Cómo se calculó y aviso" junta el cálculo, la guía y el aviso legal.
+- Si el entrenador armó el menú, se ve con la misma línea de tiempo pero sin "Ajustar" ni "Otra opción", con su nota arriba. El menú escrito a mano (formato anterior) se sigue mostrando.
+- Menores de edad: sin calorías ni gramos. Menores de 12 años: sin menú.
+- Nuevo módulo `js/50-nutricion-socio.js`; `renderNutricionTab` (js/09) queda como envoltura. Service worker: `fitnesspro-v132`.
+
+---
+
 # Cambios — El entrenador arma el menú de su socio
 - **Armar menú (panel del entrenador → ficha → Nutrición):** el entrenador o nutriólogo arma el menú con los 31 platillos de la biblioteca, igual que elige los ejercicios de una rutina.
   - Elige cuántas comidas (3 a 6), la hora y el nombre de cada una.
