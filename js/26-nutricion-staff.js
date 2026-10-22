@@ -81,10 +81,8 @@ function bloqueNutricionStaff(s){
       ${puede?`<div class="fx-acts" style="margin-top:12px">${D?`<button type="button" class="sd-b p" onclick="nutGuardarFicha('${c}')" ${cuadra?'':'disabled'}>Guardar requerimientos</button><button type="button" class="sd-b" onclick="nutCancelarFicha('${c}')">Cancelar</button>`
         :`<button type="button" class="sd-b p" onclick="nutEditarFicha('${c}')">Ajustar requerimientos</button>${nut.manual?`<button type="button" class="sd-b" onclick="nutRestablecer('${c}')">Volver al cálculo automático</button>`:''}`}</div>`:''}
     </div></section>
-    <section class="fx-sec"><h3>Menú sugerido ${puede?`<button type="button" class="fx-lnk" onclick="nutAbrir('${c}')">${ico('pencil')}Editar menú</button>`:''}</h3><div class="fx-panel">
-      ${menu.length?`<div class="nt-menu">${menu.map(m=>`<div><b>${esc(m.nombre)}</b><span>${esc(m.detalle)}</span></div>`).join('')}</div>`:'<p class="fx-vacio">Sin menú. Es opcional: el socio ve sus requerimientos aunque no haya comidas.</p>'}
-      ${(nut.manual&&s.nutricion.nota)?`<div class="nt-nota"><b>Indicaciones para el socio</b>${esc(s.nutricion.nota)}</div>`:''}
-    </div></section>
+    ${maResumenStaffHTML(s)}
+    ${(nut.manual&&s.nutricion.nota)?`<section class="fx-sec"><h3>Indicaciones para el socio</h3><div class="fx-panel"><p class="fx-vacio" style="color:var(--tx)">${esc(s.nutricion.nota)}</p></div></section>`:''}
   </div>`;
 }
 function nutEditarFicha(code){ const s=getSocio(code); if(!s||!nutPuedeEditar(s)) return; const n=nutricionFinal(s); nutBorrador[code]={kcal:n.kcal,prot:n.prot,carbs:n.carbs,grasas:n.grasas,agua:n.agua}; nutRepintar(code); }
@@ -99,6 +97,7 @@ function nutGuardarFicha(code){
   if(Math.abs(prot*4+carbs*4+grasas*9-kcal)>kcal*0.05){ showToast('Los macros no cuadran con las calorías'); return; }
   const o=s.nutricion||{};
   s.nutricion={ override:true, kcal,prot,carbs,grasas, agua:agua||calcNutricion(s).agua, nota:o.nota||'', menu:comoArray(o.menu), por:pqStaffNombre(), fecha:fechaISO(new Date()) };
+  if(o.plan) s.nutricion.plan=o.plan;
   pqGuardarStaff(s,['nutricion']); delete nutBorrador[code];
   staffRenderList(); nutRepintar(code);
   showToast('Nutrición actualizada. El socio la ve al instante');
@@ -152,15 +151,19 @@ function nutGuardar(){
     return;
   }
   const menu=nutMenuTemp.filter(m=>m.nombre.trim()||m.detalle.trim()).map(m=>({nombre:limpiarTexto(m.nombre),detalle:limpiarTexto(m.detalle)}));
+  const plan=s.nutricion&&s.nutricion.plan;
   s.nutricion={ override:true, kcal,prot,carbs,grasas, agua: agua||calcNutricion(s).agua, nota:limpiarTexto(v('nut-nota')), menu, por:pqStaffNombre(), fecha:fechaISO(new Date()) };
+  if(plan) s.nutricion.plan=plan;
   pqGuardarStaff(s,['nutricion']);
   nutCerrar(); staffRenderList(); staffRenderContent(s);
   showToast('🥗 Nutrición actualizada — el socio la verá al instante');
 }
 function nutRestablecer(code){
   const s=getSocio(code); if(!s||!nutPuedeEditar(s)) return;
-  uiConfirm('¿Restablecer al cálculo automático? Se perderá el ajuste y el menú personalizado.',()=>{
-    delete s.nutricion; pqGuardarStaff(s,['nutricion']);
+  const plan=s.nutricion&&s.nutricion.plan;
+  uiConfirm(plan?'¿Restablecer los requerimientos al cálculo automático? El menú que armaste se queda.':'¿Restablecer al cálculo automático? Se perderá el ajuste y el menú personalizado.',()=>{
+    if(plan) s.nutricion={override:false, plan}; else delete s.nutricion;
+    pqGuardarStaff(s,['nutricion']);
     staffRenderList(); staffRenderContent(s);
     showToast('↺ Nutrición restablecida al cálculo automático');
   },{label:'Restablecer',danger:true});

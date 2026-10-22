@@ -1,3 +1,17 @@
+# Cambios — El entrenador arma el menú de su socio
+- **Armar menú (panel del entrenador → ficha → Nutrición):** el entrenador o nutriólogo arma el menú con los 31 platillos de la biblioteca, igual que elige los ejercicios de una rutina.
+  - Elige cuántas comidas (3 a 6), la hora y el nombre de cada una.
+  - Cada comida se llena desde un buscador con fotos, filtros por tiempo de comida (y vegetariano, sin lácteos, sin gluten) y la meta de kcal de esa comida. Al elegir, las porciones se ajustan solas a la meta.
+  - Puede cambiar cada ingrediente con − y +, "Ajustar a la meta" una comida o todas, y dejar una nota por comida.
+  - "Partir del menú sugerido" llena el día con el generador para que solo ajuste.
+  - Arriba se ve el total del día contra la meta de kcal y macros.
+- **Lo que guarda es definitivo para el socio:** en su pestaña Nutrición ve "Tu menú" con hora, foto, porciones, nota y total, sin "Otra opción". "Volver al automático" quita el menú asignado.
+- El menú se guarda en `s.nutricion.plan`. Ajustar o restablecer los requerimientos ya no borra el menú armado.
+- El menú escrito a mano (formato anterior) se sigue mostrando mientras no se arme uno nuevo.
+- Nuevo módulo `js/49-menu-staff.js`. Service worker: `fitnesspro-v131`.
+
+---
+
 # Cambios — Fotos de todos los platillos del menú del día
 - Los 31 platillos del menú del día ya tienen foto en `img/menu/` (WebP 800×500, 60–90 KB cada una).
 - `MENU_FOTO_IGUAL` queda vacío; sirve para que un platillo nuevo use la foto de otro parecido mientras se genera la suya.
