@@ -44,6 +44,7 @@ En México es probable encontrar estas condiciones. Según la prensa sobre ENSAN
 - No diagnostiques ni nombres trastornos ("parece que tienes anorexia"). Habla de cuidar la salud y de que un profesional puede personalizar.
 - Ofrece lo que sí se puede dar: Plato del Bien Comer, hidratación y horarios.
 - En menores, dirígete también a padres y entrenador.
+- Ajusta las señales de alerta a la persona: por ejemplo, la amenorrea solo aplica a mujeres. No pongas cifras sin fuente en el texto para el socio; si usas una cifra de la investigación, que sea de las verificadas.
 
 ## Lenguaje
 

@@ -106,6 +106,7 @@ Antes de armar comidas, lee `references/smae-alimentos.md` (tabla de equivalente
 - Muestra los equivalentes junto a cada platillo ("2 cereales · 3 AOA · 1 grasa") y los macros por comida y del día.
 - Las restricciones duras (alergias, vegetariano o vegano, celiaquía) nunca se relajan. Las suaves se relajan en este orden: variedad, tiempo de cocina, presupuesto y "no me gusta".
 - Las kcal oficiales del SMAE no cuadran exacto con 4/4/9. Usa la tabla tal cual, no la recalcules.
+- **Calcula, no estimes.** Las kcal y la proteína de cada comida salen de sumar sus equivalentes (o gramos × macros por gramo), y el total del día sale de sumar las comidas. Antes de entregar, rehaz la suma: es fácil subestimar el aceite, el aguacate, las oleaginosas y los quesos, y un total que "cuadra" con cifras inventadas engaña al socio.
 
 ### Formato sugerido para un día de menú
 
@@ -149,6 +150,13 @@ La lista de pendientes está en `references/cifras-pendientes.md`. Cuando uses u
 - El motor actual está en `js/03-nutricion-motor.js` (`calcNutricion`, `nutricionFinal`: bmr, factor, kcal, prot, carbs, grasas, agua). La ficha del staff está en `js/26-nutricion-staff.js` (`bloqueNutricionStaff`, `nutGuardarFicha`). La pestaña del socio es `dashTab('nutricion')` en `js/08`.
 - Los scripts `js/NN-*.js` se cargan en orden y comparten el ámbito global; sigue ese estilo (JS vanilla, sin módulos).
 - Al revisar una regla, compárala contra las tablas de esta skill e indica, para cada cifra, si coincide, si es pendiente o si contradice la evidencia, con la línea del archivo.
+- Revisa también el código como código, no solo las cifras. La evidencia no sirve si la regla está mal programada. Busca estos errores típicos:
+  - textos o notas que contradicen el cálculo (por ejemplo, "el déficit sale de la actividad" cuando el código recorta la ingesta);
+  - `valor || defecto`, que ignora un 0 capturado a propósito por el staff;
+  - recortes con `Math.max(0, …)` que dejan macros cuya suma ya no da las kcal;
+  - objetivos no reconocidos que caen en un caso por defecto equivocado;
+  - umbrales sin fuente.
+- Katch-McArdle y Cunningham usan las dos la masa libre de grasa. Que el código use una u otra no es un error; solo anota que el texto exacto de ambas está pendiente de verificar.
 - El filtro de seguridad va **antes** del cálculo en el código también: una función que devuelva el modo (`completo` / `educativo` / `derivar`) y que el resto respete.
 - Si cambias archivos de la app, sube `CACHE_VERSION` en `sw.js` y anota el cambio en `docs/CAMBIOS.md`.
 
