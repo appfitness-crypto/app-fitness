@@ -1,3 +1,10 @@
+# Cambios — Fotos de todos los platillos del menú del día
+- Los 31 platillos del menú del día ya tienen foto en `img/menu/` (WebP 800×500, 60–90 KB cada una).
+- `MENU_FOTO_IGUAL` queda vacío; sirve para que un platillo nuevo use la foto de otro parecido mientras se genera la suya.
+- Service worker: `fitnesspro-v130`.
+
+---
+
 # Cambios — Foto del pescado empapelado
 - Nueva foto en el menú del día: pescado empapelado con verduras y arroz (`img/menu/n-empapelado.webp`). Ya son 4 de 31.
 - "Otra opción" ahora recorre todos los platillos que cumplen la meta de esa comida, no solo los 5 más cercanos. Antes, platillos como el pescado empapelado casi nunca salían.
