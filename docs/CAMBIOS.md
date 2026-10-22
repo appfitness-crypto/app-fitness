@@ -1,3 +1,12 @@
+# Cambios — Portada de Inicio del socio en video, estilo póster
+- La foto de Inicio se reemplaza por un video en bucle y sin sonido (cuerdas de batalla, `video/inicio-cuerdas.webm` y `.mp4`, ~1 MB) con imagen fija de respaldo (`img/hero/inicio-cuerdas-video.webp`).
+- Ya no va en un recuadro: es más grande, se funde con el fondo arriba y a los lados, y su parte baja queda detrás de la tarjeta de vidrio "Entrenamiento de hoy". El lema va arriba a la izquierda en dos tonos (blanco y lima) con un haz de luz lima detrás.
+- El video se pausa cuando sale de la pantalla. Con "reducir movimiento" o ahorro de datos activado se muestra la imagen fija.
+- En los temas claros el video va dentro de un recuadro redondeado (un video oscuro no se funde con el fondo blanco).
+- Service worker: `fitnesspro-v126`.
+
+---
+
 # Cambios — Pantallas que se adaptan a tablet
 - **Bienvenida:** en pantallas verticales (tablet y celulares altos) la foto crece hasta llenar la pantalla y los botones quedan abajo, sin el espacio vacío que quedaba debajo. En tablet vertical los textos y las tarjetas son más grandes.
 - **App del socio en tablet vertical:** la foto de Inicio, las tarjetas de números y los días de la semana son más grandes para aprovechar el alto.
