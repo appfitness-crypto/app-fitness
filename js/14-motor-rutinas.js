@@ -386,12 +386,13 @@ function diversificarSemana(semana,ctx,filo,semilla){
     d.ejercicios.forEach((e,iE)=>{
       const nm=e.nm||e.nombre; if(!nm||esEjCardio(e)||esEjRondas(e)||esEjMovilidad(e)) return;
       const kb=kbBuscar(nm); if(!kb||!kb.enf||kb.enf==='cardio') return;
+      if(e.potencia){ usados.add(kb.id); return; }   // los explosivos del día de potencia no se cambian por uno lento del mismo músculo
       const prohibido=nunca.some(n=>kbNorm(nm).includes(n));
       const esFirma=firma.some(n=>kbNorm(nm).includes(n)) || princ.has(iE);   // el ejercicio principal del día no se cambia por variedad
       const cargado=!ejLigero(kb);   // un ejercicio con carga real no se cambia por uno con banda, peso corporal o TRX
       const cands=KB_EJERCICIOS.filter(x=>x.enf===kb.enf && x.id!==kb.id && x.t===kb.t && !!x.iso===!!kb.iso && !x.rondas && !usados.has(x.id) && !(cargado && ejLigero(x))
         && !ctx.les.some(l=>(x.ev||[]).includes(l)) && (x.nv||1)<=ctx.nivel
-        && !nunca.some(n=>kbNorm(x.nm).includes(n)));
+        && !nunca.some(n=>kbNorm(x.nm).includes(n)) && !esEjMetabolico(x));   // un swing o un salto no entra como accesorio de fuerza
       if(!cands.length || (!prohibido && (esFirma || rnd()>pCambio))){ usados.add(kb.id); return; }
       const w=cands.map(x=>{ let v=1;
         if(ctx.equipo>=4 && libres.includes(x.z)) v+=2; else if(ctx.equipo<=2 && guiadas.includes(x.z)) v+=2;
@@ -665,7 +666,12 @@ function alternativasPara(e,ctx,d){
 
 // Enriquecer la lista de ejercicios de UN día (formato interno: nm, ms, series, reps...)
 function kbMetodosPropios(f){ return Object.keys(KB_METODOS).filter(id=>KB_METODOS[id]._custom && f(KB_METODOS[id])); }
-function enriquecerDia(ejs, ctx, seed){
+// Métodos que admite cada tema de la plantilla de deporte (índices de "intentos" en enriquecerDia):
+// 0 compuesto principal · 1 pareja · 2 cierre en aislamiento · 3 tempo/pausa · 4 EMOM.
+// Potencia y core van sin métodos de fatiga; el EMOM solo en los días metabólicos.
+const TEMA_METODOS={inferior:[0,1,2], superior:[0,1,2], total:[0,1,2], potencia:[], core:[], resistencia:[1,4], circuito:[1,4]};
+const TEMA_FUERZA=['inferior','superior','total'];
+function enriquecerDia(ejs, ctx, seed, tema){
   if(!ejs||!ejs.length) return ejs;
   const rnd=prng(seed);
   const ds=ejs.map(datosEj);
@@ -679,24 +685,29 @@ function enriquecerDia(ejs, ctx, seed){
   const valido=id=>perm.includes(id);
   ejs.forEach(e=>{ if(e.metodo && (!KB_METODOS[e.metodo.id] || esEjCardio(e) || (esEjRondas(e) && e.metodo.id!=='emom') || esEjMovilidad(e) || (e.metodo.id==='emom' && !esEjMetabolico(e)))) delete e.metodo; });
   let faltan=cuantosMetodos(ctx,ejs.length)-ejs.filter(e=>e.metodo).length;
-  const libre=i=>ejs[i] && !ejs[i].metodo && !ejs[i].fase && !ejs[i].potencia && !/cardio/.test(ds[i].enf) && !esEjCardio(ejs[i]) && !esEjRondas(ejs[i]) && !esEjMovilidad(ejs[i]);
+  // Los que se miden en metros (farmer walk, trineo) no llevan método: perderían su distancia
+  const libre=i=>ejs[i] && !ejs[i].metodo && !ejs[i].fase && !ejs[i].potencia && !/cardio/.test(ds[i].enf) && !esEjCardio(ejs[i]) && !esEjRondas(ejs[i]) && !esEjMovilidad(ejs[i]) && !/\d\s*m\b/.test(String(ejs[i].reps||''));
+  const temaF=TEMA_FUERZA.includes(tema);
   // Sobre la zona lesionada solo métodos de baja carga (la fase manda: isométrico → resistencia → hipertrofia)
   const SEGUROS_LESION=['tempo','pausa','superserie_ant','biserie','circuito'];
   const esIsom=i=>/seg|isom|min/i.test(String(ejs[i].reps||'')+' '+(ejs[i].nm||''));
   const puede=(i,id)=>!(cargaLesion(ctx,ds[i]) && !SEGUROS_LESION.includes(id)) && !(esIsom(i) && !KB_METODOS[id].pareja);
   const intentos=[];
   // a) Compuesto principal
+  let principalCon=0;
   intentos.push(()=>{
+    if(temaF && principalCon) return false;   // día de fuerza: un solo método en los principales
     const iComp=ds.findIndex((d,i)=>d.tipo==='c' && libre(i));
     if(iComp<0) return false;
-    const ops=['piramide_asc','piramide_desc','escalera','cluster','pausa','tempo',...kbMetodosPropios(m=>!m.pareja&&m.aplica!=='aislamiento')].filter(id=>valido(id)&&puede(iComp,id));
+    const ops=['piramide_asc','piramide_desc','escalera','cluster','pausa','tempo',...kbMetodosPropios(m=>!m.pareja&&m.aplica!=='aislamiento')].filter(id=>valido(id)&&puede(iComp,id)&&!(temaF&&(id==='tempo'||id==='escalera')));
     const id=elegirPonderado(rnd,ops,ctx); if(!id) return false;
-    aplicarMetodo(ejs[iComp],id); return true;
+    aplicarMetodo(ejs[iComp],id); principalCon++; return true;
   });
   // b) Pareja (superserie / biserie / pre-agotamiento / contraste)
   intentos.push(()=>{
     for(let i=0;i<ejs.length-1;i++){
       if(!libre(i)||!libre(i+1)) continue;
+      if(temaF && (/—\s*fuerza/i.test(ejs[i].reps||'')||/—\s*fuerza/i.test(ejs[i+1].reps||''))) continue;   // los principales de un día de fuerza van solos, descansados
       const a=ds[i].enf, b=ds[i+1].enf; let ops=[];
       if(ANTAG[a]===b) ops.push('superserie_ant');
       if(a && a===b) ops.push('biserie','post_agot');
@@ -744,7 +755,14 @@ function enriquecerDia(ejs, ctx, seed){
   // orden: aleatorizado ligeramente por día para que no todas las sesiones se vean iguales
   const orden=[0,1,2,3,4].sort(()=>rnd()-0.5);
   if(ctx.obj==='R') orden.sort((x,y)=>(x===1?-1:y===1?1:0));
-  for(let pass=0; pass<2 && faltan>0; pass++) for(const k of orden){ if(faltan<=0) break; if(intentos[k] && intentos[k]()) faltan--; }
+  const deTema=tema && TEMA_METODOS[tema];
+  for(let pass=0; pass<2 && faltan>0; pass++) for(const k of orden){ if(faltan<=0) break; if(deTema && !deTema.includes(k)) continue; if(intentos[k] && intentos[k]()) faltan--; }
+  // Principios del club: el método de alta fatiga (EMOM) va al final de la sesión, antes del cierre
+  if(deTema){
+    const iE=ejs.findIndex(e=>e.metodo&&e.metodo.id==='emom'&&!e.grupo);
+    const fin=ejs.findIndex(e=>e.fase==='cierre'); const tope=fin<0?ejs.length-1:fin-1;
+    if(iE>=0 && iE<tope){ const [e]=ejs.splice(iE,1); ejs.splice(tope,0,e); }
+  }
   // 3) Descansos (en parejas, el primero va sin descanso)
   ejs.forEach((e,i)=>{
     if(e.grupo && /1$/.test(e.grupo) && ejs[i+1] && ejs[i+1].grupo && ejs[i+1].grupo.charAt(0)===e.grupo.charAt(0)) e.descanso=e.descanso||'Sin descanso → sigue con '+ejs[i+1].grupo;
@@ -756,7 +774,7 @@ function enriquecerSemana(semana, ctx, semilla){
   (semana||[]).forEach((d,i)=>{
     if(!d || !Array.isArray(d.ejercicios) || !d.ejercicios.length) return;
     d.ejercicios.forEach(e=>{ if(!e.nm && e.nombre) e.nm=e.nombre; if(!e.ms && e.musculo) e.ms=e.musculo; });
-    enriquecerDia(d.ejercicios, ctx, (semilla||'')+'|'+i+'|'+(d.tipo||''));
+    enriquecerDia(d.ejercicios, ctx, (semilla||'')+'|'+i+'|'+(d.tipo||''), d.tema);
   });
   return semana;
 }

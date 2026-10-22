@@ -160,6 +160,9 @@ function metFaseDia(per,tipo,i,nivel){
   if(per==='conjugada' && nivel>1) return ['maximo','dinamico'][pos%2];
   return null;
 }
+// Plantilla de deporte por temas: la fase sale de lo que el día es, no de su lugar en la semana
+const MET_FASE_TEMA={inferior:'pesado', superior:'pesado', total:'pesado', potencia:'medio', resistencia:'ligero', circuito:'ligero', core:'ligero'};
+function metFaseTema(per,tema){ return per==='ondulante' ? (MET_FASE_TEMA[tema]||null) : null; }
 const MET_FASE_TXT={pesado:'Día pesado',medio:'Día medio',ligero:'Día ligero',maximo:'Esfuerzo máximo',dinamico:'Esfuerzo dinámico'};
 function metLetraDia(fase,obj){
   if(fase==='pesado') return obj==='R'?'H':'F';
@@ -182,6 +185,8 @@ const MET_PATRONES={
   antirrotacion:{rx:/pallof|plancha lateral|bird dog|antirrot/, ids:['pallof','pallof_liga','plancha_lateral','bird_dog'], zona:'core'},
   rotacion:{rx:/lenador|woodchop|giro ruso|rotacion de tronco|rotacion rusa/, ids:['woodchop_polea','woodchop_liga','giro_ruso_disco'], zona:'core'},
 };
+// Qué patrones obligatorios caben en cada tema de la plantilla de deporte
+const MET_TEMA_ZONA={inferior:['pierna','core'], superior:['torso'], total:['pierna','torso','core'], core:['core'], resistencia:['core'], circuito:['core'], potencia:[]};
 function metCubrirPatrones(dias,patrones,ctx,nunca){
   const lista=(Array.isArray(patrones)?patrones:Object.values(patrones||{})).filter(id=>MET_PATRONES[id]);
   if(!lista.length || !dias.length) return 0;
@@ -192,7 +197,9 @@ function metCubrirPatrones(dias,patrones,ctx,nunca){
     const P=MET_PATRONES[id];
     const ya=dias.flatMap(d=>d.ejercicios).find(e=>P.rx.test(kbNorm(e.nm||e.nombre)));
     if(ya){ if(!ya._patron) ya._patron=id; return; }   // ya está: se protege para que los recortes no lo quiten
-    const cand=dias.filter(d=>P.zona==='core'||zonaDia(d)[P.zona]).sort((a,b)=>a.ejercicios.length-b.ejercicios.length);
+    let cand=dias.filter(d=>P.zona==='core'||zonaDia(d)[P.zona]).sort((a,b)=>a.ejercicios.length-b.ejercicios.length);
+    const deTema=cand.filter(d=>!d.tema || (MET_TEMA_ZONA[d.tema]||[]).includes(P.zona));
+    if(deTema.length) cand=deTema;
     for(const d of cand){
       const x=metElegir(P.ids,ctx,nunca,d.ejercicios); if(!x) continue;
       const iso=!!x.iso;
@@ -248,9 +255,12 @@ function aplicarMetodologia(semana,ent,ctx,p){
 
   // 2) Periodización, rangos, series e intensidad
   dias.forEach((d,i)=>{
-    const fase=metFaseDia(per,d.tipo,i,nivel);
+    const fase=d.tema ? metFaseTema(per,d.tema) : metFaseDia(per,d.tipo,i,nivel);
     if(fase) d.tipo=String(d.tipo).replace(/\s*·\s*(D[ií]a (pesado|medio|ligero)|Esfuerzo (m[aá]ximo|din[aá]mico))$/i,'')+' · '+MET_FASE_TXT[fase];
     let letraDia=fase?metLetraDia(fase,obj):obj;
+    if(d.tema==='resistencia'||d.tema==='circuito'||d.tema==='core') letraDia='R';
+    else if(d.tema==='inferior'||d.tema==='superior'||d.tema==='total') letraDia=nivel>1?'F':'H';
+    if(d.tema==='potencia') return;   // el día de potencia ya trae su dosis (explosiva, descanso completo)
     if(ctx.adaptacion && letraDia==='F') letraDia='H';   // adaptación: técnica antes que cargas pesadas
     let principal=true;
     d.ejercicios.forEach(e=>{
@@ -282,7 +292,7 @@ function aplicarMetodologia(semana,ent,ctx,p){
   });
 
   // 3) Prioridades: potencia (rendimiento) y trabajo funcional
-  if((pr.rendimiento||3)>=4 && nivel>1){
+  if((pr.rendimiento||3)>=4 && nivel>1 && !dias.some(d=>d.tema)){
     let n=0;
     dias.forEach(d=>{
       if(n>=2 || ![...metEnfDia(d)].some(x=>MET_PIERNA.includes(x))) return;
@@ -294,9 +304,9 @@ function aplicarMetodologia(semana,ent,ctx,p){
     });
   }
   if((pr.funcional||3)>=4){
-    let n=0;
+    let n=dias.reduce((a,d)=>a+d.ejercicios.filter(e=>/farmer|granjero/i.test(e.nm||e.nombre||'')).length,0);   // los acarreos que ya trae la semana cuentan
     dias.forEach(d=>{
-      if(n>=2) return;
+      if(n>=2 || (d.tema && !['core','resistencia','circuito','inferior','total'].includes(d.tema))) return;
       const x=metElegir(['farmer','farmer_unilateral'],ctx,nunca,d.ejercicios); if(!x) return;
       d.ejercicios.push(metNuevo(x,{series:3, reps:'30 m — resistencia', peso:'Moderado'})); n++;
     });

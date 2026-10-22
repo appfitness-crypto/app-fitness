@@ -822,6 +822,125 @@ function patronDiasSocio(defecto){
   const sel=(qAnswers.diasSemana||[]).filter(d=>DIAS_ORDER.includes(d));
   return sel.length ? DIAS_ORDER.map(d=>sel.includes(d)?'S':'D') : defecto;
 }
+// ── Plantilla de deporte por temas ──
+// slots: g = grupo del banco de la disciplina que puede ocupar el lugar (se usa cada movimiento del banco una vez por semana);
+// kb = ejercicios del catálogo para completar (en entorno funcional se prefieren los que no piden aparatos).
+const DEP_TEMAS={
+  inferior:{fuerza:true, nm:'Fuerza tren inferior', color:'verde', pierna:true, slots:[
+    {g:'pierna', kb:['sentadilla','frontal','goblet','sentadilla_disco']},
+    {kb:['pm_rumano','pm_rumano_mancuerna','peso_muerto','pm_unilateral']},
+    {g:'pierna', kb:['bulgara','zancada_reversa','step_up']},
+    {kb:['hip_thrust','desplante_lateral','puente']},
+    {g:'core', kb:['pallof','dead_bug','pallof_liga']}]},
+  superior:{fuerza:true, nm:'Fuerza tren superior', color:'neon', slots:[
+    {g:'empuje', kb:['press_banca','press_mancuerna','lagartija']},
+    {g:'traccion', kb:['remo_barra','remo_mancuerna','remo_trx','remo_liga']},
+    {kb:['press_hombro_mancuerna','press_militar','landmine_press','press_liga']},
+    {kb:['dominadas','jalon','jalon_liga']},
+    {g:'prevencion', kb:['face_pull','banda_rotacion']}]},
+  total:{fuerza:true, nm:'Fuerza total', color:'verde', pierna:true, slots:[
+    {g:'pierna', kb:['sentadilla','goblet','sentadilla_disco']},
+    {g:'empuje', kb:['press_banca','press_mancuerna','lagartija']},
+    {g:'traccion', kb:['remo_barra','remo_mancuerna','remo_trx']},
+    {kb:['pm_rumano','hip_thrust','puente']},
+    {g:'core', kb:['pallof','plancha_lateral','dead_bug']}]},
+  potencia:{nm:'Potencia y agilidad', color:'gold', pierna:true, slots:[
+    {g:'potencia', kb:['sentadilla_salto','kb_swing']},
+    {g:'potencia', kb:['kb_swing','sentadilla_salto','step_up']},
+    {kb:['landmine_press','lagartija']},
+    {g:'rotacion', kb:['woodchop_polea','woodchop_liga','giro_ruso_disco']},
+    {g:'agilidad', kb:['cuerda_salto','escaladores']}]},
+  resistencia:{nm:'Resistencia metabólica', color:'red', slots:[
+    {g:'metab', kb:['burpee','escaladores']},
+    {kb:['goblet','zancada_reversa','sentadilla_disco']},
+    {kb:['lagartija','press_liga']},
+    {g:'metab', kb:['cuerdas_batalla','cuerda_salto','escaladores']},
+    {kb:['remo_trx','remo_mancuerna','remo_liga']}]},
+  core:{nm:'Core y movilidad', color:'hombro', slots:[
+    {g:'mov', kb:[]},
+    {g:'core', kb:['dead_bug','bird_dog']},
+    {kb:['pallof','plancha_lateral','pallof_liga']},
+    {kb:['farmer','bird_dog']},
+    {g:'prevencion', kb:['banda_rotacion','face_pull']}]},
+};
+DEP_TEMAS.circuito=Object.assign({},DEP_TEMAS.resistencia,{nm:'Circuito integral', color:'verde'});
+const DEP_SEMANAS={
+  2:['total','potencia'],
+  3:['total','potencia','resistencia'],
+  4:['inferior','superior','potencia','resistencia'],
+  5:['inferior','superior','resistencia','potencia','core'],
+  6:['inferior','superior','resistencia','potencia','core','circuito'],
+};
+// Dos temas de pierna en días seguidos → el segundo se cambia por el siguiente tema que no cargue pierna
+function depSepararPierna(plan,idxS){
+  for(let k=1;k<plan.length && k<idxS.length;k++){
+    if(idxS[k]-idxS[k-1]!==1 || !DEP_TEMAS[plan[k]].pierna || !DEP_TEMAS[plan[k-1]].pierna) continue;
+    const j=plan.findIndex((t,m)=>m>k && !DEP_TEMAS[t].pierna);
+    if(j>k){ const t=plan[k]; plan[k]=plan[j]; plan[j]=t; }
+  }
+}
+// Grupo de un movimiento del banco de la disciplina (por su nombre y el músculo que indica)
+function depGrupo(b){ return depGrupoTxt(kbNorm(b.nm||'')) || depGrupoTxt(kbNorm(b.ms||'')); }   // primero el nombre, luego el músculo
+function depGrupoTxt(t){
+  if(/movilidad|estiramiento|flexibilidad/.test(t)) return 'mov';
+  if(/burpee|cardio|cuerpo completo|cuerda|jumping|escalador/.test(t)) return 'metab';
+  if(/salto|explosiv|lanzamiento|pliometr|swing|sprint|potencia/.test(t)) return 'potencia';
+  if(/agilidad|desplazamiento|escalera|cono/.test(t)) return 'agilidad';
+  if(/rotacion de tronco|rotacional|lenador|giro/.test(t)) return 'rotacion';
+  if(/manguito|rotacion externa|rotacion interna|face pull/.test(t)) return 'prevencion';
+  if(/plancha|core|abdomen|hollow|pallof|dead bug/.test(t)) return 'core';
+  if(/remo|jalon|dominada|espalda|dorsal/.test(t)) return 'traccion';
+  if(/press|flexion|lagartija|pecho|empuje|fondos/.test(t)) return 'empuje';
+  if(/sentadilla|zancada|desplante|pierna|cuadriceps|gluteo|femoral|isquio|pantorrilla|talon|cadera|step/.test(t)) return 'pierna';
+  return '';
+}
+const DEP_Z_FUNCIONAL=['corporal','liga','trx','mancuernas','funcional','disco'];
+function depElegir(sl,banco,bancoUsado,usados,ejerc,entorno,rnd,principal){
+  const enDia=nm=>ejerc.some(e=>kbNorm(e.nombre)===kbNorm(nm));
+  if(sl.g){
+    // en el lugar de un ejercicio principal de fuerza solo entra un compuesto (un puente de glúteo no abre el día)
+    const b=banco.find(x=>!bancoUsado.has(x.nm) && depGrupo(x)===sl.g && !enDia(x.nm) && (!principal || datosEj({nm:x.nm}).tipo==='c'));
+    if(b){ bancoUsado.add(b.nm); usados.add(kbNorm(b.nm)); return b; }
+  }
+  let c=(sl.kb||[]).map(id=>KB_IDX[id]).filter(x=>x && !usados.has(kbNorm(x.nm)) && !enDia(x.nm));
+  if(entorno!=='gimnasio'){ const f=c.filter(x=>DEP_Z_FUNCIONAL.includes(x.z)); if(f.length) c=f; }
+  if(!c.length) c=(sl.kb||[]).map(id=>KB_IDX[id]).filter(x=>x && !enDia(x.nm));   // se puede repetir en la semana antes que dejar el hueco
+  if(!c.length && sl.g==='mov') return {nm:'Movilidad articular dinámica', ms:'Movilidad · Articulaciones', tip:'Círculos de hombro, cadera y tobillo, amplios y sin prisa.'};
+  if(!c.length) return null;
+  const x=c[Math.floor(rnd()*Math.min(2,c.length))];
+  usados.add(kbNorm(x.nm)); return x;
+}
+// Dosis según el tema del día, el lugar del ejercicio (k: 0-1 principales) y el nivel
+function depDosis(tema,k,x,nivel){
+  const kb=kbBuscar(x.nm), nv=nivel==='AVANZADO'?3:nivel==='PRINCIPIANTE'?1:2;
+  const libre=kb?['corporal','liga','trx'].includes(kb.z):/peso corporal|banda|flexion|plancha/i.test(x.nm);
+  const pesoTxt=t=>libre?(kb&&kb.z==='liga'?'Banda — resistencia media':'Corporal'):t;
+  const g=depGrupo(x);
+  if(g==='mov' || (typeof esEjMovilidad==='function' && esEjMovilidad({nm:x.nm,nombre:x.nm})))
+    return {series:2, reps:'8-10 reps por movimiento', peso:'Sin carga', descanso:'—'};
+  if(kb && kb.rondas) return {series:nv>=3?4:3, reps:'40 seg', peso:'', descanso:tema==='potencia'?'60-90 s':'30-45 s'};
+  if(kb && kb.iso) return {series:3, reps:'30-40 seg — isométrico', peso:pesoTxt('Corporal'), descanso:'45 s'};
+  if(kb && kb.id==='farmer') return {series:3, reps:'30 m — resistencia', peso:'Pesado — que la postura aguante', descanso:'60-90 s'};
+  if(tema==='potencia'){
+    if(g==='agilidad') return {series:nv>=3?4:3, reps:'20 seg — potencia', peso:'Sin carga', descanso:'60 s', potencia:true};
+    const r=nv===3?'3-5':nv===2?'5':'6';
+    return {series:nv>=2?4:3, reps:r+' reps'+(kb&&kb.lado||/lenador|rotacion|landmine/i.test(x.nm)?' por lado':'')+' — potencia',
+      peso:libre?'Corporal':'Ligero-moderado — máxima velocidad', descanso:'2 min', potencia:true,
+      esfuerzo:'Cada repetición lo más rápido posible; si la velocidad baja, termina la serie', rir:3};
+  }
+  if(tema==='resistencia' || tema==='circuito')
+    return {series:nv>=3?4:3, reps:(nv===1?'12':'12-15')+' reps — resistencia', peso:pesoTxt('Moderado — 50-60% 1RM'), descanso:nv>=3?'45 s':'60 s'};
+  if(tema==='core' || g==='core' || g==='prevencion')
+    return {series:3, reps:(kb&&kb.lado||/pallof|lateral|bird|dead bug/i.test(x.nm)?'10-12 reps por lado':'12-15 reps')+' — resistencia', peso:pesoTxt('Ligero'), descanso:'45 s'};
+  // Fuerza: los dos primeros son los principales del día; los demás, accesorios en hipertrofia
+  const comp=(kb?kb.t:datosEj({nm:x.nm}).tipo)==='c';
+  if(k<2 && comp && !libre){
+    if(nv===3) return {series:4, reps:'4-6 reps — fuerza', peso:'Pesado — 80-85% 1RM', descanso:'2-3 min'};
+    if(nv===2) return {series:4, reps:'6-8 reps — fuerza', peso:'Pesado — 75-80% 1RM', descanso:'2 min'};
+    return {series:3, reps:'10-12 reps — hipertrofia', peso:'Moderado — técnica primero', descanso:'90 s'};
+  }
+  return {series:3, reps:(nv===1?'12':nv===2?'10-12':'8-10')+' reps — hipertrofia', peso:pesoTxt('Moderado — 65-70% 1RM'), descanso:'90 s'};
+}
 function buildFallbackDeporte(discId, dias, nivel){
   const dep=deporteById(discId)||DEPORTES[0];
   const entorno=qAnswers.entorno||'funcional';
@@ -852,62 +971,31 @@ function buildFallbackDeporte(discId, dias, nivel){
     }
     return b;
   });
-  const nombresSesion = {
-    2:['Acondicionamiento A','Acondicionamiento B'],
-    3:['Fuerza específica','Potencia y agilidad','Core y prevención'],
-    4:['Fuerza específica','Potencia y agilidad','Resistencia','Core y prevención'],
-    5:['Fuerza específica','Potencia y agilidad','Resistencia','Core y prevención','Movilidad y técnica'],
-    6:['Fuerza específica','Potencia y agilidad','Resistencia','Core y prevención','Movilidad','Circuito integral'],
-  };
-  const nombres=nombresSesion[dias]||nombresSesion[4];
-  const colores=['verde','neon','gold','hombro','red','verde'];
+  // Semana por TEMAS: cada día tiene un propósito y su propia dosis (fuerza 4-6 reps, potencia 3-5 explosivas,
+  // resistencia 12-15 con poco descanso, core y movilidad sin carga pesada). El orden reparte la carga:
+  // los días que castigan pierna (fuerza inferior, potencia, fuerza total) no van en días seguidos.
+  const plan=(DEP_SEMANAS[dias]||DEP_SEMANAS[4]).slice();
   const patron=patronDiasSocio({
     2:['S','D','D','S','D','D','D'], 3:['S','D','S','D','S','D','D'],
     4:['S','S','D','S','S','D','D'], 5:['S','S','S','D','S','D','S'],
     6:['S','S','S','D','S','S','S'],
   }[dias]||['S','S','D','S','S','D','D']);
   const diasNom=['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO','DOMINGO'];
-  // Enfoque muscular por tema del día, para completar cada sesión con el catálogo general
-  // y así no repetir casi los mismos 6 ejercicios del banco de la disciplina toda la semana.
-  const TEMA_ENFOQUES={
-    'Fuerza específica':['cuadriceps','gluteo','dorsal','pecho','femoral'],
-    'Acondicionamiento A':['cuadriceps','gluteo','dorsal','core'],
-    'Potencia y agilidad':['gluteo','femoral','cuadriceps','pantorrilla'],
-    'Acondicionamiento B':['pecho','espalda_media','core','cardio'],
-    'Resistencia':['cardio','core','pantorrilla','abdomen'],
-    'Core y prevención':['core','abdomen','manguito','deltoide_post'],
-    'Movilidad y técnica':['manguito','deltoide_post','core','gluteo'],
-    'Movilidad':['manguito','deltoide_post','core'],
-    'Circuito integral':['cuadriceps','core','dorsal','cardio'],
-  };
-  const usadosSemana=new Set(); // nombres de ejercicios del catálogo general ya usados esta semana (evita repetir)
+  const idxS=patron.map((t,i)=>t==='S'?i:-1).filter(i=>i>=0);
+  depSepararPierna(plan,idxS);
+  const usados=new Set(), bancoUsado=new Set();
   let si=0;
   const semana=patron.map((tipo,i)=>{
     if(tipo==='D') return {dia:diasNom[i], tipo:'Descanso / recuperación', color:'descanso', ejercicios:[]};
-    const nombreSesion=nombres[si % nombres.length];
-    const reps = nivel==='PRINCIPIANTE' ? '10-12 reps · control' : nivel==='AVANZADO' ? '8 reps · potencia' : '10 reps';
-    const peso = entorno==='gimnasio' ? 'Carga progresiva' : 'Peso corporal / banda';
+    const tema=plan[si % plan.length], T=DEP_TEMAS[tema];
+    const rnd=prng('deporte|'+dep.id+'|'+i+'|'+tema);
     const ejerc=[];
-    // 2 movimientos firma de la disciplina, rotando cada día para usar los 6-7 del banco a lo largo de la semana
-    const startFirma=(si*2)%banco.length;
-    for(let k=0;k<Math.min(2,banco.length);k++){
-      const b=banco[(startFirma+k)%banco.length];
-      ejerc.push({nombre:b.nm, series:3, reps, peso, musculo:b.ms, tip:b.tip});
-    }
-    // 3 ejercicios del catálogo general según el enfoque del día, sin repetir los ya usados esta semana
-    const enfoques=TEMA_ENFOQUES[nombreSesion]||['core','cuadriceps','gluteo'];
-    const rnd=prng('deporte|'+dep.id+'|'+i+'|'+nombreSesion);
-    enfoques.forEach(enf=>{
-      if(ejerc.length>=5) return;
-      const cands=KB_EJERCICIOS.filter(e=>e.enf===enf && !usadosSemana.has(e.nm) && !ejerc.some(x=>x.nombre===e.nm));
-      if(!cands.length) return;
-      const pick=cands[Math.floor(rnd()*cands.length)];
-      usadosSemana.add(pick.nm);
-      const repsG = nivel==='PRINCIPIANTE' ? '12 reps — control' : nivel==='AVANZADO' ? '8 reps — potencia' : '10 reps — hipertrofia';
-      ejerc.push({nombre:pick.nm, series:3, reps:repsG, peso: entorno==='gimnasio'?'Moderado — 55% 1RM':'Peso corporal / banda', musculo:pick.ms, tip:'Siente el músculo objetivo ('+pick.ms+') durante todo el recorrido.'});
+    T.slots.forEach((sl,k)=>{
+      const x=depElegir(sl,banco,bancoUsado,usados,ejerc,entorno,rnd,k<2&&!!T.fuerza); if(!x) return;
+      ejerc.push(Object.assign({nombre:x.nm, musculo:x.ms, tip:x.tip||('Siente el músculo objetivo ('+x.ms+') durante todo el recorrido.')}, depDosis(tema,k,x,nivel)));
     });
     si++;
-    return {dia:diasNom[i], tipo:nombreSesion, color:colores[i%colores.length], ejercicios:ejerc.slice(0,5)};
+    return {dia:diasNom[i], tipo:T.nm, tema, color:T.color, ejercicios:ejerc};
   });
   const entTxt = entorno==='gimnasio' ? '🏋️ Adaptado a GIMNASIO (aparatos y carga progresiva).' : '🤸 Adaptado a entrenamiento FUNCIONAL (peso corporal y bandas, sin equipo).';
   return {

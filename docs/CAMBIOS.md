@@ -1,3 +1,25 @@
+# Cambios — Semana de rendimiento deportivo por temas
+- **Plantilla de deporte (`buildFallbackDeporte`, js/08):** cada día tiene un tema con su propia selección y dosis:
+  - **Fuerza tren inferior / superior / total:** 2 principales a 4-6 reps (avanzado) o 6-8 (intermedio) con 2-3 min; accesorios en hipertrofia.
+  - **Potencia y agilidad:** saltos, swing, press landmine y leñador a 3-5 reps explosivas, 2 min de descanso.
+  - **Resistencia metabólica / circuito:** 12-15 reps con 45-60 s.
+  - **Core y movilidad:** movilidad, core por lado o isométrico, farmer walk de 30 m y prevención de hombro.
+
+  Antes los movimientos del deporte rotaban sin mirar el tema y todo llevaba "8 reps · potencia". Los movimientos del banco del deporte se usan una vez por semana, en el lugar de su grupo. Dos días que cargan pierna nunca quedan seguidos. Semanas: 5 días = inferior, superior, resistencia, potencia, core y movilidad.
+- **Métodos por tema (`enriquecerDia`, js/14):**
+  - En días de fuerza, un solo método en los principales (pirámide, clúster o pausa; sin tempo ni escalera), y los principales no van en superserie.
+  - Potencia y core sin métodos. EMOM solo en el día metabólico y al final.
+  - Los ejercicios en metros (farmer walk) no llevan método.
+  - La variedad del entrenador no cambia explosivos por ejercicios lentos ni mete swings o saltos como accesorio.
+- **Metodología del entrenador (js/39):**
+  - Con periodización ondulante, la fase sale del tema del día.
+  - El día de potencia conserva su dosis.
+  - Los patrones obligatorios van en un día de tema compatible.
+  - Los acarreos que ya trae la semana cuentan para la prioridad funcional.
+- **Carga del día (js/51):** una serie explosiva cuenta como carga moderada, no como serie pesada. Service worker: `fitnesspro-v135`.
+
+---
+
 # Cambios — Duración y carga del día según lo que contiene
 - **Duración del día (~min):** ahora suma lo que lleva cada ejercicio:
   - **Fuerza:** series × (≈3 s por repetición, 4.5 s con tempo o pausa) + descanso entre series + 1 min de preparación.

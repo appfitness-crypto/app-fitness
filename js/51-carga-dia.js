@@ -46,6 +46,7 @@ function cargaEjercicio(e,d,s){
   if(esEjRondas(e)) return rondasRx(e,s).series*1.1;
   const n=parseInt(e.series)||3;
   if(esEjIsometrico(e)) return n*0.5;
+  if(e.potencia) return n*1.1;   // explosivo con carga ligera: pocas reps pero no es una serie pesada
   const comp=(datosEj(e).tipo==='c')?1.25:1, rir=e.rir!=null?+e.rir:2;
   let c=0;
   for(let j=0;j<n;j++){ const pct=pctPorReps(cdRepsSerie(e,j),rir); c+=1+Math.max(0,pct-0.6)*4; }   // 12 reps ≈ 1.3 · 5 reps ≈ 1.8 por serie
