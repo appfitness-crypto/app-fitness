@@ -363,22 +363,19 @@ function renderNutricionTab(){
       </div>
     </div>
 
-    <div class="card">
+    ${menu.length?`<div class="card">
       <div class="card-t">${it('leaf','sm')}Reparto de tus comidas</div>
       <div class="q-sub" style="margin:2px 0 12px">¿En cuántas comidas repartes tu día?</div>
       <div class="comida-sel">${[3,4,5,6].map(n=>`<button type="button" class="${n===nComidas?'on':''}" onclick="nutElegirComidas(${n})">${n}</button>`).join('')}</div>
       <div class="comida-list">
         ${reparto.map(m=>`<div class="comida-it">
-          <div class="comida-it-h"><span class="comida-tag ${m.tag}">${esc(m.tag==='ligera'?'Colación':m.tag==='fuerte'?'Comida fuerte':'Comida media')}</span><b>${esc(m.nombre)}</b><span class="comida-kcal">~${m.kcal} kcal</span></div>
-          ${m.plato?`<div class="comida-plato">Tu plato: ${m.plato.verduras}% verduras · ${m.plato.prot}% proteína · ${m.plato.carb}% carbohidratos${m.plato.grasa?` · ${m.plato.grasa}% grasas saludables`:''}</div>`
-            :`<div class="comida-plato ligera">🥜 Snack: proteína + grasa saludable — evita cargarlo de carbohidratos simples</div>`}
+          <div class="comida-it-h"><span class="comida-tag ${m.tag}">${esc(m.tag==='ligera'?'Colación':m.tag==='fuerte'?'Comida fuerte':'Comida media')}</span><b>${esc(m.nombre)}</b><span class="comida-kcal">${m.pct}% · ~${m.kcal} kcal</span></div>
         </div>`).join('')}
       </div>
-      <div class="f-nota" style="margin-top:10px">Guía general para armar tu plato — no es una receta ni un menú fijo. Los porcentajes del plato son cuánto espacio ocupa cada grupo al servir, no calorías; ajusta las porciones a tu ojo.</div>
-    </div>
+    </div>`:menuSugeridoHTML(s,nut,nComidas)}
 
     ${menu.length?`<div class="card">
-      <div class="card-t">${it('leaf','sm')}Menú sugerido</div>
+      <div class="card-t">${it('leaf','sm')}Menú de tu ${nut.manual?'nutriólogo':'entrenador'}</div>
       ${menu.map(m=>`<div class="nut-detail" style="align-items:flex-start"><span style="flex:0 0 auto;font-weight:700;color:var(--tx)">${esc(m.nombre)}</span><b style="text-align:right;font-weight:500;color:var(--mu)">${esc(m.detalle)}</b></div>`).join('')}
     </div>`:''}
 

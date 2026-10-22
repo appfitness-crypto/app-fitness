@@ -8,7 +8,7 @@
    → Los datos de Firebase NUNCA pasan por aquí (van directo).
    → Al desplegar cambios, sube CACHE_VERSION.
    ════════════════════════════════════════════════════════ */
-const CACHE_VERSION = 'fitnesspro-v127';
+const CACHE_VERSION = 'fitnesspro-v128';
 const PRECACHE_LOCAL = [
   './',
   './index.html',
@@ -54,6 +54,7 @@ const PRECACHE_LOCAL = [
   './js/45-vista-socio.js',
   './js/46-registro-objetivo.js',
   './js/47-qr-entrenador.js',
+  './js/48-menu-sugerido.js',
   './img/qr/app.png',
   './js/22-resumen-coordinacion.js',
   './js/23-conocimiento-staff.js',
