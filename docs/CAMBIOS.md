@@ -1,3 +1,17 @@
+# Cambios — Botón "Regenerar con el sistema"
+- En la pestaña **Rutina** de la ficha del socio (panel del entrenador y dirección) hay un botón nuevo, **Regenerar con el sistema**. Arma de nuevo la semana con el generador de la app (temas, dosis y métodos), sin la filosofía de un entrenador.
+- Funciona igual que "Rehacer con mi método":
+  - pide confirmación;
+  - reemplaza la rutina en pantalla;
+  - se puede deshacer;
+  - no se guarda hasta **Guardar cambios**;
+  - el historial no cambia.
+- No aparece en rehabilitación, flexibilidad ni rutina en casa.
+- `rutinaDesdeSemana` ahora guarda el tema del día y las marcas de potencia y de calentamiento o cierre de cada ejercicio. Así la carga y los métodos se siguen calculando bien después de guardar.
+- `planConMetodo` usa la nueva `planNuevo(s, ent)`, que acepta `ent = null`. Service worker: `fitnesspro-v136`.
+
+---
+
 # Cambios — Semana de rendimiento deportivo por temas
 - **Plantilla de deporte (`buildFallbackDeporte`, js/08):** cada día tiene un tema con su propia selección y dosis:
   - **Fuerza tren inferior / superior / total:** 2 principales a 4-6 reps (avanzado) o 6-8 (intermedio) con 2-3 min; accesorios en hipertrofia.

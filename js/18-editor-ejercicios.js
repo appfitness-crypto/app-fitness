@@ -111,6 +111,7 @@ function rtRutinaHTML(s){
     <div class="rt-bar">
       <button type="button" class="sd-b" onclick="staffEnriquecer('${s.code}')" title="Agrega métodos de intensidad y opciones por área ocupada donde falten, según tu filosofía">${ico('spark')}Métodos y opciones</button>
       ${staffBotonMetodoHTML(s)}
+      ${staffBotonSistemaHTML(s)}
       ${casaBarraHTML(s)}
       ${staffRutBackup[s.code]?`<button type="button" class="sd-b" onclick="staffDeshacerBase('${s.code}')">Deshacer rutina cargada</button>`:''}
     </div>
