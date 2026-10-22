@@ -62,11 +62,11 @@ function calcNutricion(s){
   let kcal, ajusteTxt, protKg, nota;
   switch(s.objetivo){
     case 'PERDER PESO':
-      kcal = Math.round(tdee * 0.82); // déficit ~18%
+      kcal = Math.round(Math.max(tdee * 0.82, tdee - 500)); // déficit ~18 %, máximo 500 kcal/día
       if(kcal < bmr) kcal = bmr;      // nunca por debajo del basal
-      ajusteTxt = 'Déficit moderado (−18% del gasto total)';
+      ajusteTxt = tdee*0.18>500 ? 'Déficit moderado (−500 kcal del gasto total)' : 'Déficit moderado (−18% del gasto total)';
       protKg = 2.0;
-      nota = 'El déficit se genera aumentando tu actividad total, no con restricción extrema. Proteína alta (2.0 g/kg) para preservar masa muscular. Sentirás más hambre: contrólala con volumen de verduras y proteína en cada comida.';
+      nota = 'Comes un poco menos de lo que gastas, sin restricción extrema. Proteína alta (2.0 g/kg) para preservar masa muscular. Sentirás más hambre: contrólala con volumen de verduras y proteína en cada comida.';
       break;
     case 'RECOMPOSICIÓN CORPORAL':
       kcal = Math.round(tdee * 0.93); // ligeramente por debajo del mantenimiento
@@ -108,6 +108,7 @@ function calcNutricion(s){
     ajusteTxt = 'Mantenimiento (menor de edad, sin déficit)';
     nota += ' Eres menor de edad: tu plan no reduce calorías. Si quieres cambiar tu peso, hazlo con tu médico o nutriólogo.';
   }
+  if(menor) nota = nota.replace(/ ?Creatina[^.]*\./,'') + ' Los suplementos no se recomiendan a menores de edad.';
   const piso = Math.min(tdee, esMujer ? 1200 : esHombre ? 1500 : 1350);
   if(kcal < piso){
     kcal = piso;
@@ -128,11 +129,12 @@ function calcNutricion(s){
   if(faltan.length) nota += ' Falta tu '+faltan.join(' y ')+' en tu perfil: este cálculo es aproximado hasta que lo completes.';
   return { bmr, factor, tdee, kcal, prot, protKg, grasas, carbs, agua, ajusteTxt, nota, pesoBase: peso, imc:comp.imc, grasaPct:comp.grasa, pesoRef:pRef };
 }
+// Reparto de kcal por número de comidas (regla de diseño de docs/NUTRICION-DEPORTIVA.md; respeta la comida fuerte de 14 a 17 h)
 const MEAL_TEMPLATES={
   3:[{nombre:'Desayuno',pct:30,tag:'media'},{nombre:'Comida',pct:40,tag:'fuerte'},{nombre:'Cena',pct:30,tag:'media'}],
-  4:[{nombre:'Desayuno',pct:27,tag:'media'},{nombre:'Colación',pct:13,tag:'ligera'},{nombre:'Comida',pct:37,tag:'fuerte'},{nombre:'Cena',pct:23,tag:'media'}],
+  4:[{nombre:'Desayuno',pct:25,tag:'media'},{nombre:'Comida',pct:35,tag:'fuerte'},{nombre:'Colación PM',pct:15,tag:'ligera'},{nombre:'Cena',pct:25,tag:'media'}],
   5:[{nombre:'Desayuno',pct:25,tag:'media'},{nombre:'Colación AM',pct:10,tag:'ligera'},{nombre:'Comida',pct:30,tag:'fuerte'},{nombre:'Colación PM',pct:10,tag:'ligera'},{nombre:'Cena',pct:25,tag:'media'}],
-  6:[{nombre:'Desayuno',pct:20,tag:'media'},{nombre:'Colación AM',pct:8,tag:'ligera'},{nombre:'Comida',pct:27,tag:'fuerte'},{nombre:'Colación PM',pct:8,tag:'ligera'},{nombre:'Cena',pct:22,tag:'media'},{nombre:'Colación noche',pct:15,tag:'ligera'}]
+  6:[{nombre:'Desayuno',pct:20,tag:'media'},{nombre:'Colación AM',pct:10,tag:'ligera'},{nombre:'Comida',pct:30,tag:'fuerte'},{nombre:'Colación PM',pct:10,tag:'ligera'},{nombre:'Cena',pct:20,tag:'media'},{nombre:'Colación noche',pct:10,tag:'ligera'}]
 };
 const TAG_INFO={fuerte:{lbl:'Comida fuerte',v:0.30},media:{lbl:'Comida media',v:0.30},ligera:{lbl:'Colación',v:0}};
 // Reparto muy general del plato por comida: reserva un espacio fijo de verduras (comidas fuertes/medias)
