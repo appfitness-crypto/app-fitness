@@ -51,6 +51,9 @@ Los archivos de `js/` son scripts normales y comparten el mismo ámbito global; 
 | `js/37-iconos.js` | Cambia los emojis por los íconos SVG de la app al mostrarse (y los quita de placeholders y listas). Para un emoji nuevo: agrégalo a `EMO_ICONO`. |
 | `js/99-arranque.js` | Ajustes finales que dependen de funciones de varios módulos (siempre al final). |
 
+## Investigación de nutrición deportiva
+`docs/NUTRICION-DEPORTIVA.md` reúne la investigación de nutrición deportiva para las comidas sugeridas: filtro de seguridad, energía y macros por objetivo, deportes, timing, hidratación, suplementos, alimentos mexicanos (SMAE) y reglas para generar menús. Las notas de cada tema están en `docs/nutricion-investigacion/`. Cada cifra está marcada como verificada, pendiente de verificar o regla de diseño: revisar las pendientes con un nutriólogo antes de usarlas en el código.
+
 ## Agregar o cambiar algo
 - **Alta de un gimnasio nuevo:** ver `docs/ALTA-GIMNASIO.md`.
 - **Cambiar un texto o estilo:** `css/estilos.css` o el módulo del tema.
