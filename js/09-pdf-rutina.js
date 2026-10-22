@@ -133,7 +133,7 @@ async function generarPDFRutina(){
         const r=rxTexto(e,s), c=cargaSugerida(s,e), dp=descansoPlan(e.descanso), esp=esEjCardio(e)||esEjRondas(e)||esEjMovilidad(e);
         const t=v=>v<120?v+' s':Math.round(v/6)/10+' min';
         const des=esp?'':dp.nada?'Sin descanso':dp.libre?(dp.meta?'~'+t(dp.meta):'Libre'):t(dp.seg);
-        let peso=c?enKg(c.kg):pdfTxt(r.carga||e.esfuerzo||'');
+        let peso=c?enKgCarga(c):pdfTxt(r.carga||e.esfuerzo||'');
         peso=peso.replace(/^Moderado\s*-\s*/i,'').replace(/^Esfuerzo moderado\s*-\s*/i,'').replace(/^FC objetivo/i,'FC'); peso=peso.charAt(0).toUpperCase()+peso.slice(1);
         const M=e.metodo&&KB_METODOS[e.metodo.id]; if(M) metUsados.set(e.metodo.id,M);
         const extra=[M?ddMetCorto(M.nm):'', (e.alternativas||[]).length?'Si está ocupado: '+e.alternativas[0].nm:''].filter(Boolean).join('  ·  ');

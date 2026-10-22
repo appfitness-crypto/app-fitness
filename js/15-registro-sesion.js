@@ -343,7 +343,7 @@ function setOk(idx,i,el){
   sesionTemp.ej[idx].sets[i].ok=on;
   if(on) vibrarToque();
 }
-function closeModal(){ document.getElementById('modal-ej').classList.remove('open'); if(typeof sesRefrescar==='function') sesRefrescar(); }
+function closeModal(){ document.getElementById('modal-ej').classList.remove('open'); const sg=document.getElementById('m-sig'); if(sg) sg.remove(); if(typeof sesRefrescar==='function') sesRefrescar(); }
 document.getElementById('modal-ej').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeModal(); });
 
 // ── Finalizar sesión: registra evolución y PRs ──
