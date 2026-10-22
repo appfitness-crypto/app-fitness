@@ -128,6 +128,9 @@ const MENU_PLATILLOS=[
   {id:'n-empapelado', n:'Pescado empapelado con verduras y arroz', t:['cen'], prep:'Envuelve el pescado con las verduras en papel aluminio y hornea 20 minutos.',
     c:[['pescado',3,2,5],['verduras',1,1,1],['arroz',1,1,3],['tortilla',0,0,2],['aceite',1,0,1]]},
 ];
+// Platillos con foto en img/menu/<id>.webp (800×500). Los demás se muestran sin foto.
+const MENU_FOTOS=new Set(['d-avena','d-huevo-mex','d-chilaquiles']);
+function menuFotoSrc(id){ return 'img/menu/'+id+'.webp'; }
 const MENU_HORAS=[['manana','Mañana'],['mediodia','Mediodía'],['tarde','Tarde o noche'],['','Varía']];
 const MENU_PREFS=[['veg','Vegetariano'],['sinLac','Sin lácteos'],['sinGlu','Sin gluten']];
 const MENU_TOL_DIA=0.05, MENU_TOL_COMIDA=0.15;   // regla de diseño: ±5 % kcal del día, ±15 % por comida
@@ -294,6 +297,7 @@ function menuSugeridoHTML(s,nut,nComidas){
     <div class="comida-list">
       ${dia.comidas.map(m=>`<div class="comida-it mn-it">
         <div class="comida-it-h"><span class="comida-tag ${m.tag}">${m.tag==='ligera'?'Colación':m.tag==='fuerte'?'Comida fuerte':'Comida media'}</span><b>${esc(m.nombre)}</b>${m.rol?`<span class="mn-rol">${m.rol==='pre'?'Antes de entrenar':'Después de entrenar'}</span>`:''}<span class="comida-kcal">${m.pct}%${menor?'':' · ~'+num(m.T.k)+' kcal'}</span></div>
+        ${m.r&&MENU_FOTOS.has(m.r.platillo.id)?`<img class="mn-foto" src="${menuFotoSrc(m.r.platillo.id)}" alt="${esc(m.r.platillo.n)}" width="800" height="500" loading="lazy" decoding="async">`:''}
         ${m.r?`<div class="mn-plat"><b>${esc(m.r.platillo.n)}</b>${m.opciones>1?`<button type="button" class="mn-otra" onclick="nutMenuOtra('${esc(m.nombre)}')" aria-label="Otra opción para ${esc(m.nombre)}">${ico('refresh')}Otra opción</button>`:''}</div>
         <ul class="mn-ing">${m.r.comps.map(x=>`<li>${esc(menuPorcion(x.f,x.q))}</li>`).join('')}</ul>
         ${m.r.platillo.prep?`<div class="mn-prep">${esc(m.r.platillo.prep)}</div>`:''}

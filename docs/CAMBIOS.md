@@ -4,6 +4,7 @@
   - "Otra opción" cambia el platillo de una comida. El menú también cambia solo cada día.
   - Nuevas preguntas: "¿A qué hora entrenas?" (mañana, mediodía, tarde o noche, varía) y los filtros vegetariano, sin lácteos y sin gluten. Según la hora, una colación se marca como "Antes de entrenar" (sin leguminosas ni grasa) y la comida siguiente como "Después de entrenar", y hacia ellas se mueve ~10 % de las calorías y más carbohidrato.
   - Biblioteca de 31 platillos sin cerdo (`js/48-menu-sugerido.js`). Ningún platillo se repite en el día y la misma proteína no sale más de 2 veces.
+  - Fotos de platillos en `img/menu/<código>.webp` (800×500). Por ahora hay 3: avena, huevos a la mexicana y chilaquiles. Los platillos sin foto se muestran como antes.
   - Menores de 12 años: no se genera menú. De 12 a 17 años: el menú se muestra sin calorías ni macros.
   - Se presenta como sugerencia educativa. Si el nutriólogo o el entrenador capturó un menú, se muestra el suyo en lugar del automático.
 - **Reparto por número de comidas:** 4 comidas pasa a 25/35/15/25 (desayuno, comida, colación PM, cena) y 6 comidas a 20/10/30/10/20/10, como en `docs/NUTRICION-DEPORTIVA.md`.

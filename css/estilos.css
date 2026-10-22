@@ -877,6 +877,7 @@ button.sl-st::after{content:'▾';font-size:var(--fs-2xs);opacity:.7;}
 .comida-plato.ligera{font-style:italic;}
 /* Menú sugerido del día (js/48) */
 .mn-it .comida-it-h{margin-bottom:8px;}
+.mn-foto{display:block;width:100%;max-width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;border-radius:12px;margin:2px 0 10px;background:var(--in-bg);}
 .mn-rol{font-size:var(--fs-2xs);font-weight:700;padding:3px 8px;border-radius:999px;color:var(--g);background:color-mix(in srgb,var(--g) 12%,transparent);border:1px solid color-mix(in srgb,var(--g) 34%,transparent);}
 .mn-plat{display:flex;align-items:flex-start;gap:8px;justify-content:space-between;}
 .mn-plat b{font-family:var(--fd);font-size:var(--fs-md);line-height:1.3;color:var(--tx);}
