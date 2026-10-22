@@ -363,7 +363,7 @@ function renderNutricionTab(){
       </div>
     </div>
 
-    ${menu.length?`<div class="card">
+    ${(s.nutricion&&s.nutricion.plan&&comoArray(s.nutricion.plan.comidas).length)?menuPlanHTML(s,nut):menu.length?`<div class="card">
       <div class="card-t">${it('leaf','sm')}Reparto de tus comidas</div>
       <div class="q-sub" style="margin:2px 0 12px">¿En cuántas comidas repartes tu día?</div>
       <div class="comida-sel">${[3,4,5,6].map(n=>`<button type="button" class="${n===nComidas?'on':''}" onclick="nutElegirComidas(${n})">${n}</button>`).join('')}</div>
@@ -374,7 +374,7 @@ function renderNutricionTab(){
       </div>
     </div>`:menuSugeridoHTML(s,nut,nComidas)}
 
-    ${menu.length?`<div class="card">
+    ${menu.length&&!(s.nutricion&&s.nutricion.plan)?`<div class="card">
       <div class="card-t">${it('leaf','sm')}Menú de tu ${nut.manual?'nutriólogo':'entrenador'}</div>
       ${menu.map(m=>`<div class="nut-detail" style="align-items:flex-start"><span style="flex:0 0 auto;font-weight:700;color:var(--tx)">${esc(m.nombre)}</span><b style="text-align:right;font-weight:500;color:var(--mu)">${esc(m.detalle)}</b></div>`).join('')}
     </div>`:''}
