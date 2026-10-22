@@ -493,7 +493,7 @@ function rutinaDesdeSemana(semana){
   const keys=['lun','mar','mie','jue','vie','sab','dom'], out={};
   (semana||[]).forEach((d,i)=>{
     const k=keys[i]||keys[6];
-    out[k]={label:DIAS_NAMES[k], tipo:d.tipo, color:d.color||'verde',
+    out[k]={label:DIAS_NAMES[k], tipo:d.tipo, color:d.color||'verde', ...(d.tema?{tema:d.tema}:{}),
       ejercicios:(d.ejercicios||[]).map(e=>{
         const r={nm:e.nm||e.nombre, series:e.series, reps:e.reps, peso:e.peso,
           ms:e.ms||e.musculo, tip:e.tip||'Siente este músculo durante el movimiento.',
@@ -501,6 +501,8 @@ function rutinaDesdeSemana(semana){
           alternativas:e.alternativas||[]};
         if(e.esfuerzo) r.esfuerzo=e.esfuerzo;
         if(e.rir!=null) r.rir=e.rir;
+        if(e.potencia) r.potencia=true;   // explosivo: no se le ponen métodos ni cuenta como serie pesada
+        if(e.fase) r.fase=e.fase;         // calentamiento / cierre
         return r;
       })};
   });
@@ -509,13 +511,18 @@ function rutinaDesdeSemana(semana){
 }
 // Arma un plan nuevo para el socio con el método de "ent", sin guardarlo. Devuelve {rutina, metodo} o null.
 function planConMetodo(s,ent){
-  if(!s || !ent || !metActiva(ent.filosofia) || MET_SIN_REHACER.includes(s.objetivo) || s.modo==='casa') return null;
+  if(!s || !ent || !metActiva(ent.filosofia)) return null;
+  return planNuevo(s,ent);
+}
+// Plan nuevo con el generador de la app (ent = null: sin filosofía de entrenador)
+function planNuevo(s,ent){
+  if(!s || MET_SIN_REHACER.includes(s.objetivo) || s.modo==='casa') return null;
   const respaldo=JSON.parse(JSON.stringify(qAnswers));
   try{
     Object.assign(qAnswers,{nombre:s.nombre||'', objetivo:s.objetivo, nivel:s.nivel, edad:s.edad, peso:s.peso, estatura:s.estatura,
       genero:s.genero||'', dias:s.dias||4, diasSemana:[...(s.diasSemana||[])], zonas:[...(s.zonas||[])],
       limitaciones:(s.limitaciones&&s.limitaciones.length)?[...s.limitaciones]:['Sin limitaciones'], cardio:s.cardio||'',
-      disciplina:s.disciplina||'', entorno:s.entorno||'', entrenadorId:ent.id, entrenadorNombre:ent.nombre,
+      disciplina:s.disciplina||'', entorno:s.entorno||'', entrenadorId:ent?ent.id:'', entrenadorNombre:ent?ent.nombre:'',
       clasesGrupales:(s.clasesGrupales||[]).map(c=>({clase:c.clase,dias:[...(c.dias||[])],entrenaMismoDia:!!c.entrenaMismoDia}))});
     const data=buildFallback(); data.origen='plantilla';
     procesarRutina(data);
@@ -552,6 +559,24 @@ function staffBotonMetodoHTML(s){
   const propio=ent.id===staffActivoEntId && !sistema;
   const txt=sistema?'la filosofía del sistema':propio?'mi método':'el método de '+esc(metNombre(ent));
   return `<button type="button" class="sd-b p" onclick="staffRehacerConMetodo('${s.code}')" title="Arma de nuevo la semana con ${txt}: split, periodización, reps, intensidad, calentamiento, core y cardio">🧬 Rehacer con ${txt}</button>`;
+}
+// Regenerar con el generador del sistema (temas, dosis y métodos de la app), sin la filosofía de un entrenador
+function staffBotonSistemaHTML(s){
+  if(!s || MET_SIN_REHACER.includes(s.objetivo) || s.modo==='casa') return '';
+  return `<button type="button" class="sd-b" onclick="staffRegenerarSistema('${s.code}')" title="Arma de nuevo la semana con el generador de la app según su objetivo, nivel, días, deporte y entorno">${ico('refresh')}Regenerar con el sistema</button>`;
+}
+function staffRegenerarSistema(code){
+  const s=getSocio(code); if(!s) return;
+  uiConfirm('¿Regenerar la rutina de '+tc(s.nombre||'')+' con el generador del sistema?\nReemplaza la rutina en pantalla, incluidos los ajustes manuales. No se guarda hasta que presiones Guardar cambios y puedes deshacerlo. Su historial no cambia.',()=>{
+    const plan=planNuevo(s,null);
+    if(!plan){ showToast('No se pudo regenerar esta rutina'); return; }
+    staffRutBackup[code]=limpio(s.rutina);
+    s.rutina=plan.rutina; s.metodo=null; s.origenRutina='plantilla';
+    rutinaUnicaSocio(s).catch(()=>[]).then(c=>{
+      staffDirty.add(code); staffTab='rutina'; staffRenderContent(s);
+      showToast('Rutina regenerada con el sistema. Revísala y presiona GUARDAR'+(c.length?'. '+unicaAviso(c):''));
+    });
+  },{label:'Regenerar rutina'});
 }
 function staffRehacerConMetodo(code){
   const s=getSocio(code); if(!s) return;
