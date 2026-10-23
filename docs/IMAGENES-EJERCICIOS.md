@@ -115,11 +115,10 @@ Hay **226 ejercicios** en el catálogo:
 
 | Estado | Ejercicios | Qué significa |
 |---|---|---|
-| **Listo** | 225 | En el estilo nuevo: 3 ejercicios con imagen y video (sentadilla goblet, peso muerto rumano con mancuernas y sentadilla libre) y 222 con imagen. |
+| **Listo** | 226 | En el estilo nuevo: 3 ejercicios con imagen y video (sentadilla goblet, peso muerto rumano con mancuernas y sentadilla libre) y 223 con imagen. |
 | **Rehacer** | 0 | Ya no queda ninguna imagen del estilo anterior. |
-| **Falta** | 1 | No tienen imagen. Su prompt está en el seguimiento: https://claude.ai/artifact/8T3tLZ5wPq8SatEBvDFt4s |
+| **Falta** | 0 | Todos los ejercicios del catálogo tienen imagen. |
 
-Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compuestos de cada zona.
 
 ### Rack / barra libre
 
@@ -255,7 +254,7 @@ Siguiente paso: los ejercicios marcados como **Falta**, empezando por los compue
 | Fondos en banco | `fondos-en-banco` | Tríceps | **Listo** (imagen) |
 | Plancha frontal | `plancha-frontal` | Core | **Listo** (imagen) |
 | Plancha lateral | `plancha-lateral` | Oblicuos | **Listo** (imagen) |
-| Dead bug | `dead-bug` | Core profundo | Falta |
+| Dead bug | `dead-bug` | Core profundo | **Listo** (imagen) |
 | Bird-dog | `bird-dog` | Core · Erectores | **Listo** (imagen) |
 | Rueda abdominal | `rueda-abdominal` | Core anterior | **Listo** (imagen) |
 | Sentadilla con salto | `sentadilla-con-salto` | Cuádriceps · Glúteo | **Listo** (imagen) |
