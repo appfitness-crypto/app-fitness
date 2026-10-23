@@ -76,10 +76,11 @@ function fbConUsuario(ms){
   const esp=new Promise(res=>{ if(fbAuth&&fbAuth.currentUser&&fbRolListo) res(true); else fbWaiters.push(res); });
   return Promise.race([esp,new Promise(r=>setTimeout(()=>r(false),ms||6000))]);
 }
+let fbRolError=false;   // la última lectura del rol falló (sin conexión): no quiere decir que no sea staff
 async function fbCargarRol(user){
-  fbRolListo=false; fbRolDB=null; fbEsStaff=false;
+  fbRolListo=false; fbRolDB=null; fbEsStaff=false; fbRolError=false;
   if(user && !user.isAnonymous){
-    try{ const r=await fbDB.ref('/roles/'+user.uid).once('value'); fbRolDB=r.val()||null; fbEsStaff=!!fbRolDB; }catch(e){ console.warn('Sin rol',e); }
+    try{ const r=await fbDB.ref('/roles/'+user.uid).once('value'); fbRolDB=r.val()||null; fbEsStaff=!!fbRolDB; }catch(e){ console.warn('Sin rol',e); fbRolError=true; }
   }
   fbRolListo=true;
   return fbRolDB;

@@ -1,3 +1,26 @@
+# Cambios — Botón Atrás del celular y sesión al recargar
+- **Botón Atrás (nuevo `js/52-navegacion.js`):** antes cerraba la app desde cualquier pantalla. Ahora retrocede un paso:
+  - Cierra la ventana abierta (registro de series, ficha del ejercicio, diálogos, editor del ejercicio, Mi cuerpo).
+  - Si no hay ventana abierta, vuelve a la pantalla anterior:
+    - sesión en curso → Mi plan, guardando lo que llevas;
+    - detalle del día → Mi plan;
+    - evaluación → pregunta anterior;
+    - ficha del socio → lista de socios;
+    - otra pestaña → Inicio.
+  - En la pantalla principal muestra "Presiona atrás otra vez para salir" y sale con el segundo Atrás.
+- **Al recargar:**
+  - El socio vuelve a la pestaña en la que estaba.
+  - El entrenador vuelve a la ficha y la pestaña que tenía abiertas. Esto dura solo mientras la app sigue abierta (sessionStorage).
+- **La sesión ya no se cierra por una red lenta:**
+  - Antes, si Firebase tardaba más de 6-8 s o no se podía leer el rol, se borraba la sesión y regresaba al inicio.
+  - Ahora la sesión del staff guarda su rol y entra de inmediato con los datos del celular.
+  - Solo se cierra la sesión cuando Firebase confirma que ya no hay usuario o que ya no tiene rol.
+  - Sin conexión, reintenta leer el rol cada 5 s.
+  - Las sesiones de staff iniciadas antes de este cambio no tienen el rol guardado. Esas esperan a Firebase la primera vez, sin límite de tiempo, y desde entonces ya lo guardan.
+- Service worker: `fitnesspro-v137`.
+
+---
+
 # Cambios — Botón "Regenerar con el sistema"
 - En la pestaña **Rutina** de la ficha del socio (panel del entrenador y dirección) hay un botón nuevo, **Regenerar con el sistema**. Arma de nuevo la semana con el generador de la app (temas, dosis y métodos), sin la filosofía de un entrenador.
 - Funciona igual que "Rehacer con mi método":

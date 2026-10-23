@@ -147,7 +147,7 @@ function restaurarSesion(){
     if(existente){ socio._asistHoy=existente; socio._yaRegistrado=true; }
     else { const {registro}=registrarAsistencia(socio); socio._asistHoy=registro; }
     refreshDash();
-    dashTab('inicio');
+    dashTab((typeof navVistaGuardada==='function' && navVistaGuardada().tab) || 'inicio');   // la pestaña en la que estaba antes de recargar
     go('s-dash');
     verificarCuentaSocio(ses.code);
   } else if(ses.tipo==='cuenta'){
@@ -165,18 +165,46 @@ async function verificarCuentaSocio(code){
   if(!u || u.isAnonymous || u.uid!==code){ if(activeSocio && activeSocio.code===code){ logoutSocio(); showToast('Tu sesión terminó. Vuelve a entrar con tu correo.'); } }
 }
 // Cuenta de cliente sin plan en este celular: se busca su expediente o se retoma la evaluación
+// La sesión solo se borra cuando Firebase responde que ya no hay usuario; una red lenta no cierra sesión
 async function restaurarCuenta(uid){
   if(!fbListo || !fbAuth) return;
-  const est=await Promise.race([fbPrimerEstado,new Promise(r=>setTimeout(()=>r(null),8000))]);
+  await fbPrimerEstado;
   const u=fbAuth.currentUser;
-  if(!est || !u || u.isAnonymous || (uid && u.uid!==uid)){ borrarSesion(); return; }
+  if(!u || u.isAnonymous || (uid && u.uid!==uid)){ borrarSesion(); return; }
   entrarConCuenta(u);
 }
 async function restaurarStaff(ses){
   if(!fbListo || !fbAuth){ return; }     // sin Firebase no se puede verificar al staff: se queda en el inicio
-  const est=await Promise.race([fbPrimerEstado,new Promise(r=>setTimeout(()=>r(null),6000))]);
-  if(!est || !est.user || est.user.isAnonymous || !est.rol){ borrarSesion(); return; }
-  entrarComoStaff(est.user.uid, est.rol);
+  // Con el rol guardado entra de inmediato con lo que hay en el celular y se verifica después
+  let dentro=false;
+  if(ses.rol && ses.user){ entrarComoStaff(ses.user, ses.rol); dentro=true; if(typeof navRestaurarStaff==='function') navRestaurarStaff(); }
+  const est=await fbPrimerEstado;
+  const u=est&&est.user;
+  if(!u || u.isAnonymous || (ses.user && u.uid!==ses.user)){
+    borrarSesion();
+    if(dentro){ staffLogout(); showToast('Tu sesión terminó. Vuelve a entrar con tu correo.'); }
+    return;
+  }
+  if(!est.rol){
+    if(fbRolError){ staffReintentarRol(u, dentro); return; }   // sin conexión: sigue con el rol guardado
+    borrarSesion(); if(dentro) staffLogout(); return;          // ya no tiene rol de staff
+  }
+  guardarSesion({tipo:'staff', user:u.uid, rol:est.rol});
+  if(!dentro || ses.rol!==est.rol){ entrarComoStaff(u.uid, est.rol); if(typeof navRestaurarStaff==='function') navRestaurarStaff(); }
+}
+// Reintenta leer el rol cada 5 s hasta que vuelva la conexión; entonces empieza a escuchar a los socios
+function staffReintentarRol(u, dentro){
+  if(!dentro) showToast('Sin conexión. Entrando en cuanto vuelva la señal…');
+  const t=setInterval(async ()=>{
+    if(!fbAuth.currentUser || fbAuth.currentUser.uid!==u.uid){ clearInterval(t); return; }
+    const rol=await fbCargarRol(u);
+    if(fbRolError) return;
+    clearInterval(t);
+    if(!rol){ borrarSesion(); staffLogout(); return; }
+    guardarSesion({tipo:'staff', user:u.uid, rol});
+    fbEscucharStaff();
+    if(!dentro){ entrarComoStaff(u.uid, rol); if(typeof navRestaurarStaff==='function') navRestaurarStaff(); }
+  },5000);
 }
 function entrarComoStaff(usuario, rolDB){
   const esCoord = rolDB==='coordinador';
