@@ -1,3 +1,14 @@
+# Cambios — La lista de socios cuenta las sesiones de la semana sin abrir la ficha
+- **Problema:** la lista del panel decía "0 de 4 sesiones esta semana" aunque el socio ya había entrenado. Al abrir su ficha y regresar, se corregía. La lista usa el índice ligero (`/indice`), que solo guarda fecha y hora de las últimas sesiones; sin más datos, cada sesión contaba como incompleta y no sumaba.
+- **Ahora (js/35):**
+  - El índice guarda si cada sesión quedó incompleta (`c:0`). La ficha ligera marca las demás como completas, incluidas las de índices anteriores.
+  - Si falta la hora, se usa la fecha.
+  - El índice guarda las últimas 20 sesiones (antes 8), para que la asistencia de 4 semanas salga bien.
+  - La lista ya no usa el expediente completo guardado en el celular cuando no está al día. Solo lo usa si está escuchando sus cambios o tiene cambios por subir; si no, manda el índice, que se actualiza en cuanto el socio registra su sesión.
+- Service worker: `fitnesspro-v138`.
+
+---
+
 # Cambios — Botón Atrás del celular y sesión al recargar
 - **Botón Atrás (nuevo `js/52-navegacion.js`):** antes cerraba la app desde cualquier pantalla. Ahora retrocede un paso:
   - Cierra la ventana abierta (registro de series, ficha del ejercicio, diálogos, editor del ejercicio, Mi cuerpo).
