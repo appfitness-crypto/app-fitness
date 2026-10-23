@@ -79,7 +79,7 @@ async function crearCuenta(){
     if(cuentaTipo==='entrenador'){
       const ent=await entRegistrarPerfil(user.uid, nombre);
       await fbCargarRol(user);
-      guardarSesion({tipo:'staff', user:user.uid});
+      guardarSesion({tipo:'staff', user:user.uid, rol:fbRolDB||'entrenador'});
       fbEscucharStaff();
       entrarComoStaff(user.uid, fbRolDB||'entrenador');
       setTimeout(()=>mostrarMiCodigo(ent.codigo, true), 400);
@@ -150,7 +150,7 @@ async function entrarConCuenta(user){
   fbUid=user.uid;
   const rol=await fbCargarRol(user);
   if(rol){
-    guardarSesion({tipo:'staff', user:user.uid});
+    guardarSesion({tipo:'staff', user:user.uid, rol});
     fbEscuchar();
     fbEscucharStaff();
     entrarComoStaff(user.uid, rol);
