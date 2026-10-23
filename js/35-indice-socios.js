@@ -33,7 +33,7 @@ function idxDeSocio(s){
     e:s.entrenadorId||'', nu:s.nutriologoId||'', as:s.asignado===undefined?null:s.asignado,
     d:s.dias||null, fr:s.fechaRegistro||null, b:s.bloque||null,
     pe:(s.progresion&&s.progresion.estado)||'',
-    f:ses.slice(-8).map(x=>({f:x.fecha, t:x.ts||null})),
+    f:ses.slice(-20).map(x=>sesCuenta(x)?{f:x.fecha, t:x.ts||null}:{f:x.fecha, t:x.ts||null, c:0}),   // c:0 = incompleta (no cuenta para la semana)
     p1:ses.length?ses[0].fecha:null,
     x:est, u:Date.now()
   };
@@ -45,8 +45,11 @@ function idxDeSocio(s){
 function idxLite(code){
   if(IDX_LITE[code]) return IDX_LITE[code];
   const x=IDX[code]; if(!x) return null;
-  const ses=comoArray(x.f).map(r=>({fecha:r.f, ts:r.t||0}));
-  if(x.p1 && !ses.some(r=>r.fecha===x.p1)) ses.unshift({fecha:x.p1, ts:0});
+  // La ficha ligera no trae el detalle de cada sesión: se marca con el estado que guardó el índice
+  // (los índices anteriores no lo traen y cuentan como completas) y, sin hora, se usa la fecha.
+  const tsDe=r=>r.t || new Date(r.f+'T12:00:00').getTime() || 0;
+  const ses=comoArray(x.f).map(r=>({fecha:r.f, ts:tsDe(r), estado:r.c===0?'incompleta':'completa'}));
+  if(x.p1 && !ses.some(r=>r.fecha===x.p1)) ses.unshift({fecha:x.p1, ts:tsDe({f:x.p1}), estado:'completa'});
   const lite={code, nombre:x.n, id:x.i, objetivo:x.o, status:x.st, entrenadorId:x.e||'', nutriologoId:x.nu||'',
     asignado:x.as, dias:x.d, fechaRegistro:x.fr, bloque:x.b||undefined,
     progresion:x.pe?{estado:x.pe}:undefined,
@@ -60,7 +63,13 @@ function idxLite(code){
 function sociosParaStaff(){
   const out={};
   Object.keys(IDX).forEach(c=>{ const l=idxLite(c); if(l) out[c]=l; });
-  Object.keys(DB.socios||{}).forEach(c=>{ if(DB.socios[c]) out[c]=DB.socios[c]; });
+  // El expediente completo guardado en el celular solo se usa si está al día (escuchando sus cambios o con
+  // cambios por subir); si no, manda el índice, que Firebase actualiza en cuanto el socio registra una sesión
+  Object.keys(DB.socios||{}).forEach(c=>{
+    const s=DB.socios[c]; if(!s) return;
+    if(IDX[c] && !idxEscuchas.includes(c) && !tienePendiente(c) && !(typeof staffDirty!=='undefined' && staffDirty.has(c))) return;
+    out[c]=s;
+  });
   return Object.values(out).filter(Boolean);
 }
 
