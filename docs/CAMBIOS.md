@@ -6,6 +6,7 @@
   - **Fuerza:** récords, ejercicios principales y rendimiento.
   - Los dos mapas ("Tus mapas") se separan: `mapasHTML(s,'equilibrio')` y `mapasHTML(s,'rendimiento')`.
   - **Mi cuerpo más compacto:** las vistas (Frente, Espalda, Izq., Der.) y el color (Anatomía / Avance) pasan dentro del cuerpo. Se quita el texto de ayuda de abajo. El resumen muestra los 3 grupos que van mejor y los 3 que necesitan atención; "Ver los 12 grupos" despliega la lista completa.
+- Service worker: `fitnesspro-v141`.
 
 ---
 
