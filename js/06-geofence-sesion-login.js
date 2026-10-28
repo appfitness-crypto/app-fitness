@@ -279,6 +279,6 @@ function updateTb(id){
     if(id==='s-inicio') actualizarContadorSocios();
   } else { tba.innerHTML=''; }
 }
-function logoutSocio(){ if(typeof vistaSocioActiva==='function' && vistaSocioActiva()) return salirVistaSocio(); av3dDestruir(); fbDetenerSocio(); activeSocio=null; borrarSesion(); cuentaSalir(); go('s-inicio'); }
+function logoutSocio(){ if(typeof vistaSocioActiva==='function' && vistaSocioActiva()) return salirVistaSocio(); miCuerpoDestruir(); fbDetenerSocio(); activeSocio=null; borrarSesion(); cuentaSalir(); go('s-inicio'); }
 
 // El acceso del cliente ahora es con correo y contraseña: ver js/36-cuentas.js

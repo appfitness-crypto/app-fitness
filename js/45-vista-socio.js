@@ -57,7 +57,7 @@ function salirVistaSocio(){
   if(!VISTA_SOCIO) return;
   const code=VISTA_SOCIO.code;
   VISTA_SOCIO=null;
-  try{ av3dDestruir(); }catch(_){}
+  try{ miCuerpoDestruir(); }catch(_){}
   activeSocio=null;
   document.body.classList.remove('vista-socio');
   const b=document.getElementById('vista-barra'); if(b) b.remove();

@@ -2,13 +2,13 @@
    FITNESS SYSTEM PRO — Service Worker (modo sin conexión)
    → La app (HTML): red primero con límite de 4 s; si no hay
      internet o la señal es muy lenta, abre la copia guardada.
-   → Fotos, íconos, Firebase SDK, PDF, 3D y tipografías: se
+   → Fotos, íconos, Firebase SDK, PDF y tipografías: se
      guardan al instalar y se sirven desde el dispositivo
      (se actualizan en segundo plano cuando hay internet).
    → Los datos de Firebase NUNCA pasan por aquí (van directo).
    → Al desplegar cambios, sube CACHE_VERSION.
    ════════════════════════════════════════════════════════ */
-const CACHE_VERSION = 'fitnesspro-v138';
+const CACHE_VERSION = 'fitnesspro-v139';
 const PRECACHE_LOCAL = [
   './',
   './index.html',
@@ -27,7 +27,7 @@ const PRECACHE_LOCAL = [
   './js/10-tema-fondo.js',
   './js/11-composicion-rehab.js',
   './js/12-deportes-club.js',
-  './js/13-avatar-3d.js',
+  './js/13-mi-cuerpo.js',
   './js/14-motor-rutinas.js',
   './js/15-registro-sesion.js',
   './js/16-socios-admin.js',
@@ -108,13 +108,15 @@ const PRECACHE_LOCAL = [
   './img/sesiones/pecho.webp',
   './img/sesiones/pierna.webp',
   './img/sesiones/torso.webp',
+  './img/cuerpo/frente.webp',
+  './img/cuerpo/espalda.webp',
+  './img/cuerpo/lado.webp',
 ];
 const PRECACHE_CDN = [
   'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
   'https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Figtree:wght@400;500;600;700;800&display=swap',
 ];
 // Solo estos dominios externos se guardan (librerías y tipografías). Firebase Database queda fuera.
@@ -208,14 +210,7 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // 3) El modelo 3D de Mi cuerpo (≈ 1.7 MB): se baja la primera vez que se abre y luego sale del dispositivo.
-  //    No se vuelve a pedir en cada apertura; se renueva al subir CACHE_VERSION.
-  if (propio && url.pathname.includes('/modelos/')) {
-    e.respondWith(caches.match(req).then((r) => r || fetch(req).then((res) => guardar(req, res))));
-    return;
-  }
-
-  // 4) Todo lo demás (fotos, íconos, librerías, tipografías):
+  // 3) Todo lo demás (fotos, íconos, librerías, tipografías):
   //    desde el dispositivo al instante y se actualiza en segundo plano
   e.respondWith(
     caches.match(req).then((cached) => {
