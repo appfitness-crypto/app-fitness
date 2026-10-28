@@ -225,32 +225,21 @@ function renderCuerpo(){
   const {todas}=getMedidas(s);
   // Mi cuerpo (lo monta mcMontarInline, js/13-mi-cuerpo.js): mapa muscular; ahí se ven y se registran las medidas
   cont.innerHTML=`<section class="en-sec"><div class="en-sec-h"><h3>Mi cuerpo</h3><span>${todas.length>1?'Desde tu primera medición':'Tu punto de partida'}</span></div>
-    <div class="mc mc-in" id="mc-in"></div></section>
-    <div id="cuerpo-mapas">${mapasHTML(s)}</div>`;
+    <div class="mc mc-in" id="mc-in"></div></section>`;
   mcMontarInline();
 }
-// Tus mapas: rendimiento y equilibrio corporal (se vuelve a pintar al guardar una medida)
-function mapasHTML(s){
+// Mapas de Progreso: 'equilibrio' (pestaña Cuerpo; se vuelve a pintar al guardar una medida) y 'rendimiento' (pestaña Fuerza)
+function mapasHTML(s,cual){
   const {primera, ultima}=getMedidas(s);
-  const rend = calcularRendimiento(s);
-  const equilibrio = calcularEquilibrioCorporal(s);
   const hayProgresion = primera && ultima && primera!==ultima;
-  return `
-    <section class="en-sec"><div class="en-sec-h"><h3>Tus mapas</h3><span>Rendimiento y equilibrio</span></div>
-    <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center">
-      <div style="flex:1;min-width:150px;max-width:220px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 6px 12px;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--v) 10%,transparent),transparent 70%);border-radius:16px">
-        <div style="font-family:var(--fb);font-weight:700;font-size:11px;color:var(--chart1)">RENDIMIENTO</div>
-        ${radarChartSVG(rend,{size:170,color:'var(--chart1)',color2:'var(--chart2)',glow:true})}
-        <div style="font-size:10px;color:var(--mu);font-family:var(--fb);text-align:center;line-height:1.5">PRs, asistencia, cardio y nivel. No depende de tu foto.</div>
-      </div>
-      <div style="flex:1;min-width:150px;max-width:220px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 6px 12px;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--p) 10%,transparent),transparent 70%);border-radius:16px">
-        <div style="font-family:var(--fb);font-weight:700;font-size:11px;color:var(--n)">EQUILIBRIO CORPORAL</div>
-        ${radarChartSVG(equilibrio,{size:170,color:'var(--n)',color2:'var(--p)',glow:true})}
-        <div style="font-size:10px;color:var(--mu);font-family:var(--fb);text-align:center;line-height:1.5">${hayProgresion
-          ? '50 = sin cambio. Sube donde más avanzas hacia tu objetivo, baja donde te quedas atrás.'
-          : 'Registra 2 mediciones en fechas distintas para activarlo.'}</div>
-      </div>
-    </div></section>`;
+  const M = cual==='rendimiento'
+    ? {t:'Rendimiento', sub:'Récords, asistencia, cardio y nivel', datos:calcularRendimiento(s), c:'var(--chart1)', c2:'var(--chart2)',
+       nota:'Combina tus récords, tu asistencia, tu cardio y tu nivel. No depende de tu foto.'}
+    : {t:'Equilibrio corporal', sub:'Tus medidas contra tu objetivo', datos:calcularEquilibrioCorporal(s), c:'var(--n)', c2:'var(--p)',
+       nota: hayProgresion ? '50 es sin cambio. Sube donde más avanzas hacia tu objetivo y baja donde te quedas atrás.'
+         : 'Registra tus medidas en 2 fechas distintas para activarlo.'};
+  return `<section class="en-sec"><div class="en-sec-h"><h3>${M.t}</h3><span>${M.sub}</span></div>
+    <div class="en-mapa">${radarChartSVG(M.datos,{size:170,color:M.c,color2:M.c2,glow:true})}<p>${M.nota}</p></div></section>`;
 }
 
 function guardarPeso(){ asegurarLogs(activeSocio);

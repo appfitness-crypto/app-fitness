@@ -885,32 +885,18 @@ function renderProgresoTab(){
   const desde=s.fechaRegistro||(ses[0]&&ses[0].fecha);
   const sesRev=ses.slice().reverse().slice(0,8);
   const prKeys=Object.keys(prs).sort((a,b)=>prs[b].kg-prs[a].kg).slice(0,6);
-  document.getElementById('dsec-progreso').innerHTML=`
-    ${appHead('Mi progreso',desde?'Desde el '+fmtFecha(desde):'Tu esfuerzo se ve en los resultados.')}
+  // Progreso en tres pestañas: Semana (meta, constancia, sesiones) · Cuerpo (mapa muscular, peso, equilibrio) · Fuerza (récords, curva, rendimiento)
+  const v=EN_PROG_VISTAS.some(x=>x[0]===enProgVista)?enProgVista:'semana';
+  const vistas={
+    semana:()=>`
     <div class="en-goal">
       <div class="en-goal-top"><div><h3>Vas <span>${ev.estaSemana}</span> de ${meta}</h3><p>${goalTxt}</p></div>
         <div class="en-racha" aria-label="Racha de ${ev.racha} semanas">${ico('flame')}<b class="num">${ev.racha}</b><small>${ev.racha===1?'semana':'semanas'}</small></div></div>
-      <div class="en-peso-mini">
-        <label for="peso-nuevo">Peso de hoy</label>
-        <div><input type="number" id="peso-nuevo" placeholder="${pesoNow}" step="0.1" min="30" max="250" inputmode="decimal" onkeydown="if(event.key==='Enter')guardarPeso()"><span>kg</span></div>
-        <button type="button" onclick="guardarPeso()">Guardar</button>
-      </div>
       <div class="en-slots" aria-hidden="true">${Array.from({length:meta},(_,i)=>`<i class="${i<hechas?'ok':''}"></i>`).join('')}</div>
     </div>
 
     <section class="en-sec"><div class="en-sec-h"><h3>Constancia</h3><span>${ev.total} ${ev.total===1?'sesión':'sesiones'} · ${ev.adherencia}% en 4 semanas</span></div>
       ${enHeatHTML(s,ses)}</section>
-
-    <div id="cuerpo-contenido"></div>
-
-    <section class="en-sec"><div class="en-sec-h"><h3>Peso corporal</h3>${ev.deltaPeso!==null?`<span class="${ev.deltaPeso<=0?'en-up':''}">${ev.deltaPeso>0?'+':''}${ev.deltaPeso} kg desde tu registro</span>`:''}</div>
-      <div class="en-peso">
-        <div class="en-peso-top"><b class="num">${pesoNow}<small> kg</small></b></div>
-        ${enPesoSVG(pesos)}
-      </div></section>
-
-    ${prKeys.length?`<section class="en-sec"><div class="en-sec-h"><h3>Récords personales</h3></div>
-      <div class="en-list">${prKeys.map(nm=>`<div class="en-li"><span>${esc(nm)}</span><b class="num">${enKg(prs[nm].kg)}</b><small>${fmtFecha(prs[nm].fecha)}</small></div>`).join('')}</div></section>`:''}
 
     <section class="en-sec"><div class="en-sec-h"><h3>Últimas sesiones</h3>${sesRev.length?'<span>Toca una para borrarla</span>':''}</div>
       ${sesRev.length?`<div class="en-hist${sesRev.length>3?' corta':''}" id="en-hist">${sesRev.map(x=>{ const f=new Date((x.fecha||'')+'T12:00:00'); const ok=!isNaN(f), est=sesEstado(x), v=enSesMedida(x);
@@ -923,10 +909,42 @@ function renderProgresoTab(){
       ${sesRev.some(x=>sesEstado(x)==='incompleta')?'<p class="en-h-nota">Las sesiones incompletas (menos de la mitad de las series) guardan tus pesos, pero no cuentan para tu meta de la semana, tu racha ni tu constancia.</p>':''}`
       :'<div class="empty-msg">Aún no hay sesiones registradas.<br>Al terminar tu primera sesión aparecerá aquí.</div>'}</section>
 
-    <section class="en-sec"><div class="en-sec-h"><h3>Fuerza</h3><span>Mejor peso de cada mes</span></div>
+`,
+    cuerpo:()=>`
+    <div id="cuerpo-contenido"></div>
+    <section class="en-sec"><div class="en-sec-h"><h3>Peso corporal</h3>${ev.deltaPeso!==null?`<span class="${ev.deltaPeso<=0?'en-up':''}">${ev.deltaPeso>0?'+':''}${ev.deltaPeso} kg desde tu registro</span>`:''}</div>
+      <div class="en-peso">
+        <div class="en-peso-top"><b class="num">${pesoNow}<small> kg</small></b></div>
+        ${enPesoSVG(pesos)}
+        <div class="en-peso-mini">
+          <label for="peso-nuevo">Peso de hoy</label>
+          <div><input type="number" id="peso-nuevo" placeholder="${pesoNow}" step="0.1" min="30" max="250" inputmode="decimal" onkeydown="if(event.key==='Enter')guardarPeso()"><span>kg</span></div>
+          <button type="button" onclick="guardarPeso()">Guardar</button>
+        </div>
+      </div></section>
+
+    <div id="cuerpo-mapas">${mapasHTML(s,'equilibrio')}</div>`,
+    fuerza:()=>`
+    ${prKeys.length?`<section class="en-sec"><div class="en-sec-h"><h3>Récords personales</h3></div>
+      <div class="en-list">${prKeys.map(nm=>`<div class="en-li"><span>${esc(nm)}</span><b class="num">${enKg(prs[nm].kg)}</b><small>${fmtFecha(prs[nm].fecha)}</small></div>`).join('')}</div></section>`:''}
+
+    <section class="en-sec"><div class="en-sec-h"><h3>Tus ejercicios principales</h3><span>Mejor peso de cada mes</span></div>
       ${enFuerzaHTML(s,ses)}</section>
-`;
-  renderCuerpo();
+    ${mapasHTML(s,'rendimiento')}`
+  };
+  document.getElementById('dsec-progreso').innerHTML=`
+    ${appHead('Mi progreso',desde?'Desde el '+fmtFecha(desde):'Tu esfuerzo se ve en los resultados.')}
+    <div class="en-ptabs" role="tablist" aria-label="Secciones de tu progreso">${EN_PROG_VISTAS.map(([k,n])=>`<button type="button" role="tab" id="en-pt-${k}" aria-selected="${k===v}" aria-controls="en-pv" onclick="enVerProg('${k}')">${n}</button>`).join('')}</div>
+    <div id="en-pv" role="tabpanel" aria-labelledby="en-pt-${v}">${vistas[v]()}</div>`;
+  if(v==='cuerpo') renderCuerpo();
+}
+const EN_PROG_VISTAS=[['semana','Semana'],['cuerpo','Cuerpo'],['fuerza','Fuerza']];
+let enProgVista='semana';
+function enVerProg(v){
+  if(v===enProgVista) return;
+  enProgVista=v; renderProgresoTab();
+  // si la barra de pestañas quedó pegada arriba, la vista nueva empieza desde su inicio
+  const t=document.querySelector('#dsec-progreso .en-ptabs'); if(t && t.getBoundingClientRect().top<=1) t.scrollIntoView({block:'start'});
 }
 const EN_EST_TXT={completa:'Completa', parcial:'Parcial', incompleta:'Incompleta'};
 // Lo que se muestra a la derecha de cada sesión: kilos si los hubo; si no, cardio, isométricos o series
