@@ -286,25 +286,23 @@ function mcMontar(root,full,previo){
         </svg>
       </div>
       <div class="mc-hud">
-        <span class="mc-vista" id="mc-vista">${MC_NV[S.v]}</span>
+        <div class="mc-seg mc-seg-s" role="group" aria-label="Vista del cuerpo" id="mc-vistas">
+          ${[['frente','Frente','Vista frontal'],['espalda','Espalda','Vista posterior'],['izq','Izq.','Lateral izquierda'],['der','Der.','Lateral derecha']].map(([v,n,a])=>`<button type="button" data-v="${v}" aria-pressed="${S.v===v}" aria-label="${a}">${n}</button>`).join('')}
+        </div>
         ${full?`<button type="button" class="mc-x" onclick="cerrarMiCuerpo()" aria-label="Cerrar pantalla completa">✕</button>`
           :`<button type="button" class="mc-x" id="mc-abrir" onclick="abrirMiCuerpo()" aria-label="Ver Mi cuerpo en pantalla completa"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>`}
       </div>
       <div class="mc-tag" id="mc-tag" hidden></div>
-      <div class="mc-ley" id="mc-ley" hidden><span>Rezagado</span><i></i><span>Avanzando</span></div>
+      <div class="mc-modo">
+        <div class="mc-ley" id="mc-ley" hidden><span>Rezagado</span><i></i><span>Avanzando</span></div>
+        <div class="mc-seg mc-seg-s" role="group" aria-label="Color de los músculos" id="mc-modos">
+          <button type="button" data-m="anat" aria-pressed="${S.m==='anat'}">Anatomía</button><button type="button" data-m="prog" aria-pressed="${S.m==='prog'}">Avance</button>
+        </div>
+      </div>
       <div class="mc-zoom">
         <button type="button" id="mc-zmas" aria-label="Acercar">+</button>
         <button type="button" id="mc-zmenos" aria-label="Alejar">−</button>
         <button type="button" id="mc-ztodo" aria-label="Ver cuerpo completo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
-      </div>
-    </div>
-    <p class="mc-pista">Desliza a los lados para girar · ${full?'pellizca':'usa +'} para acercar · toca un músculo o una medida</p>
-    <div class="mc-ctl">
-      <div class="mc-seg" role="group" aria-label="Vista del cuerpo" id="mc-vistas">
-        ${[['frente','Frente'],['espalda','Espalda'],['izq','Lat. izq.'],['der','Lat. der.']].map(([v,n])=>`<button type="button" data-v="${v}" aria-pressed="${S.v===v}">${n}</button>`).join('')}
-      </div>
-      <div class="mc-seg" role="group" aria-label="Color de los músculos" id="mc-modos">
-        <button type="button" data-m="anat" aria-pressed="${S.m==='anat'}">Anatomía</button><button type="button" data-m="prog" aria-pressed="${S.m==='prog'}">Avance</button>
       </div>
     </div>
     <div class="mc-chips" id="mc-chips" role="region" aria-label="Tus medidas" tabindex="0"></div>
@@ -495,7 +493,6 @@ function mcCambiarVista(v,luego){
   if(v===S.v){ luego&&luego(); return; }
   S.v=v;
   mc.root.querySelectorAll('#mc-vistas button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
-  mc.root.querySelector('#mc-vista').textContent=MC_NV[v];
   const yo=mc;
   const hacer=()=>{
     if(mc!==yo) return;
@@ -525,6 +522,7 @@ function mcEventos(yo){
     if(t.closest('[data-cerrar]')) return mcElegir(null);
     const tb=t.closest('[data-tab]'); if(tb){ yo.S.tab=tb.dataset.tab; mcPanel(); return; }
     const gf=t.closest('[data-graf]'); if(gf){ yo.S.graf=gf.dataset.graf; mcPanel(); return; }
+    if(t.closest('[data-todos]')){ yo.S.todos=!yo.S.todos; mcPanel(); return; }
     const rk=t.closest('[data-rank]'); if(rk){ yo.S.tab='prog'; mcElegir(rk.dataset.rank); return; }
     const mu=t.closest('[data-mu]'); if(mu){
       const m=MC_G[yo.S.g].mus[+mu.dataset.mu];
@@ -539,7 +537,7 @@ function mcEventos(yo){
   yo.fig.addEventListener('keydown',e=>{ const h=e.target.closest('.mc-hs'); if(h&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); yo.S.tab='prog'; mcElegir(h.dataset.g,{vista:yo.S.v}); } });
 
   st.addEventListener('pointerdown',e=>{
-    if(e.target.closest('.mc-zoom,.mc-hud button')) return;
+    if(e.target.closest('.mc-zoom,.mc-hud,.mc-modo')) return;
     ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
     if(ptrs.size===1) gesto={tipo:'uno',x0:e.clientX,y0:e.clientY,vb0:{...yo.vb},k:1/svg.getScreenCTM().a,mov:false,obj:e.target};
     else if(ptrs.size===2){ cancelAnimationFrame(yo.anim); const [a,b]=[...ptrs.values()]; gesto={tipo:'pinza',d0:Math.hypot(a.x-b.x,a.y-b.y),vb0:{...yo.vb}}; }
@@ -667,24 +665,27 @@ function mcPanel(){
     <div role="tabpanel">${cuerpo}</div>`;
 }
 function mcResumen(){
-  const D=mc.datos, con=Object.entries(MC_G).filter(([g])=>D[g].avance!=null);
-  if(!con.length) return `<div class="mc-kick">Resumen</div><h3>Cómo va tu cuerpo</h3>
-    <div class="mc-vacio">Toca un músculo o una medida. Cuando registres tus medidas y tus entrenamientos, aquí verás qué grupos avanzan y cuáles se quedan atrás.</div>`;
+  const D=mc.datos, S=mc.S, con=Object.entries(MC_G).filter(([g])=>D[g].avance!=null);
+  if(!con.length) return `<h3>Cómo va tu cuerpo</h3>
+    <div class="mc-vacio">Toca un músculo o una medida para ver su detalle. Cuando registres tus medidas y tus entrenamientos, aquí verás qué grupos avanzan y cuáles se quedan atrás.</div>`;
   const prom=gs=>{ const v=gs.map(g=>D[g].avance).filter(x=>x!=null); return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):null; };
   const ant=prom(['hombros','pecho','biceps','abdomen','cuadriceps']), post=prom(['triceps','espalda','trapecio','gluteos','femoral','pantorrilla']);
-  const orden=Object.entries(MC_G).sort((a,b)=>(D[b[0]].avance??-1)-(D[a[0]].avance??-1));
-  const atras=con.sort((a,b)=>D[a[0]].avance-D[b[0]].avance).slice(0,2).map(([,o])=>o.n.toLowerCase());
-  const nota=ant!=null&&post!=null&&Math.abs(ant-post)>=8
-    ? `Tu ${ant>post?'parte posterior':'parte frontal'} va ${Math.abs(ant-post)} puntos atrás: prioriza ${atras.join(' y ')}.`
-    : `Vas parejo entre frente y espalda. Lo que más necesita atención: ${atras.join(' y ')}.`;
-  return `<div class="mc-kick">Resumen</div><h3>Cómo va tu cuerpo</h3>
-    <div class="mc-vacio">Toca un punto del cuerpo o una medida para ver su progreso, los músculos del grupo y tips.</div>
-    ${ant!=null&&post!=null?`<div class="mc-blk"><div class="mc-blk-h"><b>Equilibrio frente / espalda</b></div>
-      <div class="mc-dos"><div><div class="mc-fila"><span>Frente</span><b>${ant}%</b></div><div class="mc-barra"><i style="width:${ant}%"></i></div></div>
-      <div><div class="mc-fila"><span>Espalda</span><b>${post}%</b></div><div class="mc-barra"><i class="amb" style="width:${post}%"></i></div></div></div></div>`:''}
-    <p class="mc-nota">${nota}</p>
-    <div class="mc-blk"><div class="mc-blk-h"><b>Avance por grupo</b><span class="mc-nota mc-nota0">de más a menos</span></div>
-      ${orden.map(([g,o])=>{ const a=D[g].avance; return `<button type="button" class="mc-rank" data-rank="${g}"><b>${o.n}</b><div class="mc-barra"><i style="width:${a??0}%;background:${a==null?'transparent':mcColor(Math.max(a,30))}"></i></div><span>${a==null?'—':a+'%'}</span></button>`; }).join('')}</div>
+  const orden=con.slice().sort((a,b)=>D[b[0]].avance-D[a[0]].avance);
+  const n=Math.min(3,Math.floor(orden.length/2)), mejor=orden.slice(0,n), atras=orden.slice(-n).reverse();
+  const sinDatos=Object.keys(MC_G).length-con.length;
+  const fila=([g,o])=>{ const a=D[g].avance; return `<button type="button" class="mc-rank" data-rank="${g}"><b>${o.n}</b><div class="mc-barra"><i style="width:${a??0}%;background:${a==null?'transparent':mcColor(Math.max(a,30))}"></i></div><span>${a==null?'—':a+'%'}</span></button>`; };
+  const todos=Object.entries(MC_G).sort((a,b)=>(D[b[0]].avance??-1)-(D[a[0]].avance??-1));
+  return `<h3>Cómo va tu cuerpo</h3>
+    <p class="mc-nota mc-nota0">Toca un músculo o una medida para ver su detalle.</p>
+    ${ant!=null&&post!=null?`<div class="mc-dos">
+      <div><div class="mc-fila"><span>Frente</span><b>${ant}%</b></div><div class="mc-barra"><i style="width:${ant}%"></i></div></div>
+      <div><div class="mc-fila"><span>Espalda</span><b>${post}%</b></div><div class="mc-barra"><i class="amb" style="width:${post}%"></i></div></div></div>`:''}
+    ${S.todos?`<div class="mc-blk"><div class="mc-blk-h"><b>Todos los grupos</b></div>${todos.map(fila).join('')}</div>`
+      :n?`<div class="mc-blk mc-grupos">
+        <div><div class="mc-blk-h"><b>Van mejor</b></div>${mejor.map(fila).join('')}</div>
+        <div><div class="mc-blk-h"><b>Necesitan atención</b></div>${atras.map(fila).join('')}</div>
+      </div>`:`<div class="mc-blk">${orden.map(fila).join('')}</div>`}
+    <button type="button" class="mc-mas" data-todos>${S.todos?'Ver resumen':`Ver los ${todos.length} grupos${sinDatos?` (${sinDatos} sin datos)`:''}`}</button>
     <p class="mc-nota">Avance: 50 % es sin cambio. Sube con tus medidas, tu fuerza y tus series de la semana.</p>`;
 }
 
@@ -703,7 +704,7 @@ function mcGuardar(){
   showToast(`📏 ${mcNombreMed(id)}: ${mcFmt(v)} cm guardado`);
   mc.datos=mcDatos(s);
   mcDibujar(); mcPanel(); mcChips();
-  const mp=document.getElementById('cuerpo-mapas'); if(mp && typeof mapasHTML==='function') mp.innerHTML=mapasHTML(s);
+  const mp=document.getElementById('cuerpo-mapas'); if(mp && typeof mapasHTML==='function') mp.innerHTML=mapasHTML(s,'equilibrio');
   if(typeof refreshDash==='function') refreshDash();
 }
 

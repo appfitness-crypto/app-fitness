@@ -1,3 +1,14 @@
+# Cambios — Progreso en tres pestañas
+- **Antes:** Progreso era una sola columna larga (meta, constancia, Mi cuerpo, mapas, peso, récords, sesiones y fuerza).
+- **Ahora (js/38, js/09, js/13):** pestañas **Semana · Cuerpo · Fuerza**, que se quedan arriba al bajar.
+  - **Semana:** meta de la semana, constancia y últimas sesiones.
+  - **Cuerpo:** Mi cuerpo, peso corporal (con "Peso de hoy", que antes estaba en la tarjeta de la meta) y equilibrio corporal.
+  - **Fuerza:** récords, ejercicios principales y rendimiento.
+  - Los dos mapas ("Tus mapas") se separan: `mapasHTML(s,'equilibrio')` y `mapasHTML(s,'rendimiento')`.
+  - **Mi cuerpo más compacto:** las vistas (Frente, Espalda, Izq., Der.) y el color (Anatomía / Avance) pasan dentro del cuerpo. Se quita el texto de ayuda de abajo. El resumen muestra los 3 grupos que van mejor y los 3 que necesitan atención; "Ver los 12 grupos" despliega la lista completa.
+
+---
+
 # Cambios — Mi cuerpo: mapa muscular en lugar del modelo 3D
 - **Antes:** Progreso → Mi cuerpo mostraba un maniquí 3D gris (Z-Anatomy, ≈ 2.7 MB con el motor 3D) que crecía con las medidas.
 - **Ahora (nuevo `js/13-mi-cuerpo.js`, reemplaza `js/13-avatar-3d.js`):**
