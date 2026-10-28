@@ -13,7 +13,8 @@
   - Los ejercicios se asignan a cada grupo con `grupoVol` (motor de rutinas) y, si no lo reconoce, por nombre.
 - Se quitaron el modelo 3D (`modelos/`), su motor (`js/cuerpo3d/`), sus herramientas (`herramientas/cuerpo3d/`) y three.js de la caché sin conexión.
 - `av3dDestruir()` ahora es `miCuerpoDestruir()`.
-- Service worker: `fitnesspro-v139`. Las ilustraciones se guardan al instalar.
+- **Figura por género:** quien contestó Femenino (o Mujer) en la entrevista ve las ilustraciones de mujer (`img/cuerpo/mujer-*.webp`). Sus zonas reusan las de hombre con ajustes en hombros, brazos y pecho (`mcAjustar`).
+- Service worker: `fitnesspro-v140`. Las ilustraciones de hombre y de mujer se guardan al instalar.
 
 ---
 

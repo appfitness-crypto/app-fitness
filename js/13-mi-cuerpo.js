@@ -71,9 +71,28 @@ const MC_VISTAS={
 };
 // encuadre completo de cada ilustración (la lateral se recorta al cuerpo, que ocupa el centro)
 const MC_FULL={frente:{x:0,y:0,w:MC_W,h:MC_H},espalda:{x:0,y:0,w:MC_W,h:MC_H},lado:{x:212,y:0,w:600,h:MC_H}};
-// Figura según el género de la entrevista. La de mujer se agrega aquí con sus ilustraciones y sus zonas trazadas;
-// mientras no exista, todos ven la de hombre.
-const MC_FIGURAS={hombre:{img:MC_IMG,vistas:MC_VISTAS,full:MC_FULL}};
+// Mujer: mismas poses y encuadre que las de hombre, así que se reusan sus zonas con ajustes donde cambia el cuerpo
+// (hombros y brazos más angostos, pecho que baja un poco más). Cada regla mueve los puntos (x,y) de esas zonas.
+function mcAjustar(vistas,reglas){
+  const R={};
+  Object.entries(vistas).forEach(([v,lista])=>{ R[v]=lista.map(it=>{
+    const f=(reglas[v]||{})[it.k]; if(!f) return it;
+    return {...it,d:it.d.replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g,(_,x,y)=>f(+x,+y).map(n=>Math.round(n)).join(','))};
+  }); });
+  return R;
+}
+const mcAlCentro=f=>(x,y)=>[512+(x-512)*f,y];   // acerca al eje del cuerpo
+const MC_VISTAS_MUJER=mcAjustar(MC_VISTAS,{
+  frente:{delt_f:mcAlCentro(.97),tri_f:mcAlCentro(.97),bic:mcAlCentro(.98),brq:mcAlCentro(.97),flex:mcAlCentro(.97),vl:mcAlCentro(.985),
+    pec:(x,y)=>[x,y>330?y+(y-330)*.4:y]},
+  espalda:{delt_b:mcAlCentro(.97),tri_b:mcAlCentro(.97),ext:mcAlCentro(.97)},
+  lado:{tri_s:(x,y)=>[x+8,y],pec_s:(x,y)=>[528+(x-528)*1.12,255+(y-255)*1.15]}
+});
+// Figura según el género de la entrevista (Masculino / Femenino)
+const MC_FIGURAS={
+  hombre:{img:MC_IMG,vistas:MC_VISTAS,full:MC_FULL},
+  mujer:{img:{frente:'img/cuerpo/mujer-frente.webp',espalda:'img/cuerpo/mujer-espalda.webp',lado:'img/cuerpo/mujer-lado.webp'},vistas:MC_VISTAS_MUJER,full:MC_FULL}
+};
 function mcFigura(s){ return MC_FIGURAS[/MUJER|FEMEN/i.test((s&&s.genero)||'')?'mujer':'hombre']||MC_FIGURAS.hombre; }
 
 /* ── Grupos musculares: zonas, medida con cinta que lo sigue, ejercicios que lo trabajan y contenido de la ficha.
