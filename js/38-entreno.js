@@ -872,7 +872,7 @@ function finListo(){ enFin=null; go('s-dash'); refreshDash(); dashTab('progreso'
 
 // ═════════════ PROGRESO ═════════════
 function renderProgresoTab(){
-  av3dDestruir();
+  miCuerpoDestruir();
   const s=activeSocio; if(!s) return;
   asegurarLogs(s);
   const ev=calcEvolucion(s), ses=comoArray(s.logs.sesiones).filter(Boolean);

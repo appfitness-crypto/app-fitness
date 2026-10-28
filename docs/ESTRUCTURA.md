@@ -31,7 +31,7 @@ Los archivos de `js/` son scripts normales y comparten el mismo ámbito global; 
 | `js/10-tema-fondo.js` | Tema claro/oscuro y fondo animado. |
 | `js/11-composicion-rehab.js` | Composición corporal y módulo de rehabilitación. |
 | `js/12-deportes-club.js` | Biblioteca de deportes y protocolos. |
-| `js/13-avatar-3d.js` | Visor de avatar 3D (ya no se muestra en Progreso; el código sigue disponible). |
+| `js/13-mi-cuerpo.js` | Mi cuerpo (Progreso): mapa muscular sobre ilustraciones (`img/cuerpo/`), medidas y avance por grupo. |
 | `js/14-motor-rutinas.js` | Métodos de intensidad, cardio, movilidad, isométricos y variedad. |
 | `js/15-registro-sesion.js` | Detalle del día y registro de la sesión. |
 | `js/16-socios-admin.js` | Editar datos del socio (director). |

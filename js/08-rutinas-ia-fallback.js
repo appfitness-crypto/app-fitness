@@ -1433,7 +1433,7 @@ function dashTab(t){
     if(b){ b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); }
     try{ if(navigator.vibrate && !matchMedia('(prefers-reduced-motion: reduce)').matches) navigator.vibrate(8); }catch(_){}
   }
-  if(t!=='progreso') av3dDestruir();
+  if(t!=='progreso') miCuerpoDestruir();
   NAV_TABS.forEach(x=>{
     document.getElementById('dtab-'+x).classList.toggle('ac', x===t);
     document.getElementById('dtab-'+x).setAttribute('aria-selected', String(x===t));

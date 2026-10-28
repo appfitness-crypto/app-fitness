@@ -1,3 +1,23 @@
+# Cambios — Mi cuerpo: mapa muscular en lugar del modelo 3D
+- **Antes:** Progreso → Mi cuerpo mostraba un maniquí 3D gris (Z-Anatomy, ≈ 2.7 MB con el motor 3D) que crecía con las medidas.
+- **Ahora (nuevo `js/13-mi-cuerpo.js`, reemplaza `js/13-avatar-3d.js`):**
+  - Ilustraciones anatómicas en `img/cuerpo/` (frente, espalda y lateral; ≈ 290 KB en total). La lateral izquierda es la derecha volteada.
+  - Cada músculo tiene una zona tocable. Al tocar un punto, un músculo o una medida, el resto del cuerpo se oscurece, el grupo se pinta de lima y la vista se acerca.
+  - Vistas Frente, Espalda, Lat. izq. y Lat. der. con botones o deslizando a los lados. Zoom con + y −, pellizco o Ctrl + rueda; pantalla completa con el botón de la esquina.
+  - Ficha del grupo con tres pestañas:
+    - **Progreso:** medida con cinta y su curva, fuerza del ejercicio clave (récord estimado a 1 repetición de la mejor serie de cada sesión), avance, series de la semana contra la meta, recuperación estimada y registro de la medida de hoy.
+    - **Músculos:** los que forman el grupo; al tocar uno se ilumina solo ese.
+    - **Tips:** tres consejos por grupo.
+  - Modo **Avance:** pinta cada músculo según su avance. 50 % es sin cambio; sube con las medidas, la fuerza y las series de la semana.
+  - Sin músculo elegido, el resumen muestra el equilibrio frente / espalda y el avance de cada grupo.
+  - Los ejercicios se asignan a cada grupo con `grupoVol` (motor de rutinas) y, si no lo reconoce, por nombre.
+- Se quitaron el modelo 3D (`modelos/`), su motor (`js/cuerpo3d/`), sus herramientas (`herramientas/cuerpo3d/`) y three.js de la caché sin conexión.
+- `av3dDestruir()` ahora es `miCuerpoDestruir()`.
+- **Figura por género:** quien contestó Femenino (o Mujer) en la entrevista ve las ilustraciones de mujer (`img/cuerpo/mujer-*.webp`). Sus zonas reusan las de hombre con ajustes en hombros, brazos y pecho (`mcAjustar`).
+- Service worker: `fitnesspro-v140`. Las ilustraciones de hombre y de mujer se guardan al instalar.
+
+---
+
 # Cambios — La lista de socios cuenta las sesiones de la semana sin abrir la ficha
 - **Problema:** la lista del panel decía "0 de 4 sesiones esta semana" aunque el socio ya había entrenado. Al abrir su ficha y regresar, se corregía. La lista usa el índice ligero (`/indice`), que solo guarda fecha y hora de las últimas sesiones; sin más datos, cada sesión contaba como incompleta y no sumaba.
 - **Ahora (js/35):**

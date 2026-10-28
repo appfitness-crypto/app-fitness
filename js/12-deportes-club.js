@@ -524,7 +524,7 @@ function rehabRegistrarDolor(protoId, nivel){
 }
 
 function renderRehabTab(){
-  av3dDestruir();
+  miCuerpoDestruir();
   const s=activeSocio; if(!s) return;
   const cont=document.getElementById('dsec-rehab'); if(!cont) return;
   const lesiones=getLesiones(s);

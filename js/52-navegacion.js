@@ -35,7 +35,7 @@ const NAV_CERRAR={'modal-ej':()=>closeModal(),'modal-uic':()=>uiNo(),'modal-menu
 function navCerrarVentana(){
   const dlg=[...document.querySelectorAll('dialog[open]')].pop();
   if(dlg){ if(dlg.id==='en-ficha') cerrarFicha(); else dlg.close(); return true; }
-  if(document.querySelector('#c3d.on')){ cerrarMiCuerpo(); return true; }
+  if(document.querySelector('#mc-full.on')){ cerrarMiCuerpo(); return true; }
   const m=[...document.querySelectorAll('.modal.open')].pop();
   if(m){
     if(NAV_CERRAR[m.id]) NAV_CERRAR[m.id]();

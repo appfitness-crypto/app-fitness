@@ -223,11 +223,11 @@ function renderCuerpo(){
   const s=activeSocio; if(!s) return;
   const cont=document.getElementById('cuerpo-contenido'); if(!cont) return;
   const {todas}=getMedidas(s);
-  // Mi cuerpo 3D (lo monta c3dMontarInline): ahí se ven y se registran las medidas, y al tocar se ve su evolución
+  // Mi cuerpo (lo monta mcMontarInline, js/13-mi-cuerpo.js): mapa muscular; ahí se ven y se registran las medidas
   cont.innerHTML=`<section class="en-sec"><div class="en-sec-h"><h3>Mi cuerpo</h3><span>${todas.length>1?'Desde tu primera medición':'Tu punto de partida'}</span></div>
-    <div class="c3d c3d-in" id="c3d-in"></div></section>
+    <div class="mc mc-in" id="mc-in"></div></section>
     <div id="cuerpo-mapas">${mapasHTML(s)}</div>`;
-  c3dMontarInline();
+  mcMontarInline();
 }
 // Tus mapas: rendimiento y equilibrio corporal (se vuelve a pintar al guardar una medida)
 function mapasHTML(s){
