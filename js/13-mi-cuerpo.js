@@ -71,6 +71,10 @@ const MC_VISTAS={
 };
 // encuadre completo de cada ilustración (la lateral se recorta al cuerpo, que ocupa el centro)
 const MC_FULL={frente:{x:0,y:0,w:MC_W,h:MC_H},espalda:{x:0,y:0,w:MC_W,h:MC_H},lado:{x:212,y:0,w:600,h:MC_H}};
+// Figura según el género de la entrevista. La de mujer se agrega aquí con sus ilustraciones y sus zonas trazadas;
+// mientras no exista, todos ven la de hombre.
+const MC_FIGURAS={hombre:{img:MC_IMG,vistas:MC_VISTAS,full:MC_FULL}};
+function mcFigura(s){ return MC_FIGURAS[/MUJER|FEMEN/i.test((s&&s.genero)||'')?'mujer':'hombre']||MC_FIGURAS.hombre; }
 
 /* ── Grupos musculares: zonas, medida con cinta que lo sigue, ejercicios que lo trabajan y contenido de la ficha.
    rx: respaldo para reconocer ejercicios que el motor de rutinas no clasifica (grupoVol). meta: series por semana. ── */
@@ -252,7 +256,7 @@ function mcMontar(root,full,previo){
   miCuerpoDestruir();
   asegurarLogs(s);
   const S=Object.assign({v:'frente',m:'anat',g:null,sub:null,tab:'prog',graf:'med'},previo||{});
-  const yo={root,full,S,anim:0,datos:mcDatos(s)};
+  const yo={root,full,S,anim:0,datos:mcDatos(s),F:mcFigura(s)};
   mc=yo;
   root.innerHTML=`
     <div class="mc-esc" id="mc-esc">
@@ -288,7 +292,7 @@ function mcMontar(root,full,previo){
     <div class="mc-panel" id="mc-panel" aria-live="polite"></div>
     <p class="mc-pie">Estimación visual con tus medidas y entrenamientos · no es un diagnóstico.</p>`;
   yo.svg=root.querySelector('#mc-svg'); yo.fig=root.querySelector('#mc-fig'); yo.esc=root.querySelector('#mc-esc');
-  yo.vb={...MC_FULL[mcCapa(S.v)]};
+  yo.vb={...yo.F.full[mcCapa(S.v)]};
   if(full){ yo.onKey=e=>{ if(e.key==='Escape') cerrarMiCuerpo(); }; document.addEventListener('keydown',yo.onKey); }
   yo.onResize=()=>mcTag(); addEventListener('resize',yo.onResize);
   mcEventos(yo);
@@ -324,7 +328,7 @@ function mcDibujar(){
   const {fig,svg,S}=mc, c=mcCapa(S.v);
   fig.innerHTML='';
   fig.setAttribute('transform',S.v==='izq'?MC_ESPEJO:'');
-  const img=mcEl('image',{width:MC_W,height:MC_H,preserveAspectRatio:'none',href:MC_IMG[c]});
+  const img=mcEl('image',{width:MC_W,height:MC_H,preserveAspectRatio:'none',href:mc.F.img[c]});
   // velo: oscurece todo menos el músculo elegido (la máscara recorta sus zonas)
   const mask=mcEl('mask',{id:'mc-mk',maskUnits:'userSpaceOnUse',x:0,y:0,width:MC_W,height:MC_H});
   mask.appendChild(mcEl('rect',{width:MC_W,height:MC_H,fill:'#fff'}));
@@ -333,7 +337,7 @@ function mcDibujar(){
   const gm=mcEl('g',{}), gh=mcEl('g',{});
   mc.gLinea=mcEl('g',{class:'mc-linea'});
   fig.append(mask,img,velo,gm,mc.gLinea,gh);
-  MC_VISTAS[c].forEach(it=>(it.m?[0,1]:[0]).forEach(r=>{
+  mc.F.vistas[c].forEach(it=>(it.m?[0,1]:[0]).forEach(r=>{
     const g=MC_K2G[it.k], p=mcEl('path',{d:it.d,class:'mc-m','data-k':it.k,'data-g':g,'data-r':r,...(r?{transform:MC_ESPEJO}:{})});
     const a=mc.datos[g].avance;
     if(S.m==='prog') p.style.setProperty('--pc',a==null?'#3a4652':mcColor(a));
@@ -375,7 +379,7 @@ function mcMarcar(){
 }
 
 /* ═══ Zoom y encuadre ═══ */
-const mcFull=()=>MC_FULL[mcCapa(mc.S.v)];
+const mcFull=()=>mc.F.full[mcCapa(mc.S.v)];
 const mcAcercado=()=>mc.vb.w<mcFull().w*.97;
 function mcAplicarVB(){
   const v=mc.vb; mc.svg.setAttribute('viewBox',`${v.x} ${v.y} ${v.w} ${v.h}`);
@@ -453,14 +457,14 @@ function mcElegir(g,{vista,sub}={}){
   S.g=g; S.sub=sub||null;
   if(!g){ mcMarcar(); mcIrA(mcFull()); mcPanel(); mcChips(); return; }
   const o=MC_G[g];
-  const enVista=v=>MC_VISTAS[mcCapa(v)].some(it=>o.k.includes(it.k));
+  const enVista=v=>mc.F.vistas[mcCapa(v)].some(it=>o.k.includes(it.k));
   const destino=vista||(enVista(S.v)?S.v:o.v);
   const enfocar=()=>{ mcMarcar(); const t=mcEncuadre(S.sub&&S.sub.length?S.sub:o.k); mcIrA(t||mcFull()); };
   if(destino!==S.v) mcCambiarVista(destino,enfocar); else enfocar();
   mcPanel(); mcChips();
 }
 function mcElegirSub(keys){
-  const S=mc.S, en=v=>MC_VISTAS[mcCapa(v)].some(it=>keys.includes(it.k));
+  const S=mc.S, en=v=>mc.F.vistas[mcCapa(v)].some(it=>keys.includes(it.k));
   const vista=en(S.v)?S.v:en('frente')?'frente':en('espalda')?'espalda':'der';
   S.sub=keys;
   const enfocar=()=>{ mcMarcar(); const t=mcEncuadre(keys); if(t) mcIrA(t); };
@@ -598,7 +602,7 @@ function mcAnillo(p){
 }
 function mcVistasDe(keys){
   if(!keys.length) return 'Profundo';
-  const vs=[]; const en=c=>MC_VISTAS[c].some(it=>keys.includes(it.k));
+  const vs=[]; const en=c=>mc.F.vistas[c].some(it=>keys.includes(it.k));
   if(en('frente')) vs.push('Frente'); if(en('espalda')) vs.push('Espalda'); if(en('lado')) vs.push('Lateral');
   return vs.join(' · ');
 }
