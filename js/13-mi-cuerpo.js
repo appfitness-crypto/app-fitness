@@ -277,7 +277,15 @@ function mcMontar(root,full,previo){
   const S=Object.assign({v:'frente',m:'anat',g:null,sub:null,tab:'prog',graf:'med'},previo||{});
   const yo={root,full,S,anim:0,datos:mcDatos(s),F:mcFigura(s)};
   mc=yo;
+  // Controles fuera de la imagen: vistas arriba; color y zoom abajo. El cuerpo queda libre.
   root.innerHTML=`
+    <div class="mc-barra-sup">
+      <div class="mc-seg mc-seg-vistas" role="group" aria-label="Vista del cuerpo" id="mc-vistas">
+        ${[['frente','Frente','Vista frontal'],['espalda','Espalda','Vista posterior'],['izq','Izq.','Lateral izquierda'],['der','Der.','Lateral derecha']].map(([v,n,a])=>`<button type="button" data-v="${v}" aria-pressed="${S.v===v}" aria-label="${a}">${n}</button>`).join('')}
+      </div>
+      ${full?`<button type="button" class="mc-x" onclick="cerrarMiCuerpo()" aria-label="Cerrar pantalla completa">✕</button>`
+        :`<button type="button" class="mc-x" id="mc-abrir" onclick="abrirMiCuerpo()" aria-label="Ver Mi cuerpo en pantalla completa"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>`}
+    </div>
     <div class="mc-esc" id="mc-esc">
       <div class="mc-giro" id="mc-giro">
         <svg class="mc-svg" id="mc-svg" viewBox="0 0 ${MC_W} ${MC_H}" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Tu cuerpo: toca un punto para ver el músculo">
@@ -285,26 +293,19 @@ function mcMontar(root,full,previo){
           <g id="mc-fig"></g>
         </svg>
       </div>
-      <div class="mc-hud">
-        <div class="mc-seg mc-seg-s" role="group" aria-label="Vista del cuerpo" id="mc-vistas">
-          ${[['frente','Frente','Vista frontal'],['espalda','Espalda','Vista posterior'],['izq','Izq.','Lateral izquierda'],['der','Der.','Lateral derecha']].map(([v,n,a])=>`<button type="button" data-v="${v}" aria-pressed="${S.v===v}" aria-label="${a}">${n}</button>`).join('')}
-        </div>
-        ${full?`<button type="button" class="mc-x" onclick="cerrarMiCuerpo()" aria-label="Cerrar pantalla completa">✕</button>`
-          :`<button type="button" class="mc-x" id="mc-abrir" onclick="abrirMiCuerpo()" aria-label="Ver Mi cuerpo en pantalla completa"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>`}
-      </div>
       <div class="mc-tag" id="mc-tag" hidden></div>
-      <div class="mc-modo">
-        <div class="mc-ley" id="mc-ley" hidden><span>Rezagado</span><i></i><span>Avanzando</span></div>
-        <div class="mc-seg mc-seg-s" role="group" aria-label="Color de los músculos" id="mc-modos">
-          <button type="button" data-m="anat" aria-pressed="${S.m==='anat'}">Anatomía</button><button type="button" data-m="prog" aria-pressed="${S.m==='prog'}">Avance</button>
-        </div>
+    </div>
+    <div class="mc-barra-inf">
+      <div class="mc-seg" role="group" aria-label="Color de los músculos" id="mc-modos">
+        <button type="button" data-m="anat" aria-pressed="${S.m==='anat'}">Anatomía</button><button type="button" data-m="prog" aria-pressed="${S.m==='prog'}">Avance</button>
       </div>
       <div class="mc-zoom">
-        <button type="button" id="mc-zmas" aria-label="Acercar">+</button>
         <button type="button" id="mc-zmenos" aria-label="Alejar">−</button>
+        <button type="button" id="mc-zmas" aria-label="Acercar">+</button>
         <button type="button" id="mc-ztodo" aria-label="Ver cuerpo completo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
       </div>
     </div>
+    <div class="mc-ley" id="mc-ley" hidden><span>Rezagado</span><i></i><span>Avanzando</span></div>
     <div class="mc-chips" id="mc-chips" role="region" aria-label="Tus medidas" tabindex="0"></div>
     <div class="mc-panel" id="mc-panel" aria-live="polite"></div>
     <p class="mc-pie">Estimación visual con tus medidas y entrenamientos · no es un diagnóstico.</p>`;
@@ -537,7 +538,6 @@ function mcEventos(yo){
   yo.fig.addEventListener('keydown',e=>{ const h=e.target.closest('.mc-hs'); if(h&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); yo.S.tab='prog'; mcElegir(h.dataset.g,{vista:yo.S.v}); } });
 
   st.addEventListener('pointerdown',e=>{
-    if(e.target.closest('.mc-zoom,.mc-hud,.mc-modo')) return;
     ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
     if(ptrs.size===1) gesto={tipo:'uno',x0:e.clientX,y0:e.clientY,vb0:{...yo.vb},k:1/svg.getScreenCTM().a,mov:false,obj:e.target};
     else if(ptrs.size===2){ cancelAnimationFrame(yo.anim); const [a,b]=[...ptrs.values()]; gesto={tipo:'pinza',d0:Math.hypot(a.x-b.x,a.y-b.y),vb0:{...yo.vb}}; }
