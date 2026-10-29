@@ -8,7 +8,7 @@
    → Los datos de Firebase NUNCA pasan por aquí (van directo).
    → Al desplegar cambios, sube CACHE_VERSION.
    ════════════════════════════════════════════════════════ */
-const CACHE_VERSION = 'fitnesspro-v141';
+const CACHE_VERSION = 'fitnesspro-v142';
 const PRECACHE_LOCAL = [
   './',
   './index.html',
@@ -125,17 +125,23 @@ const PRECACHE_CDN = [
 // Solo estos dominios externos se guardan (librerías y tipografías). Firebase Database queda fuera.
 const CDN_HOSTS = ['www.gstatic.com','cdnjs.cloudflare.com','fonts.googleapis.com','fonts.gstatic.com'];
 
-/* Instalar: guardar todo lo necesario, uno por uno (si uno falla, los demás sí quedan) */
+/* Instalar: la app (HTML, css y js) tiene que bajar COMPLETA; si falta un archivo, la instalación falla, la versión
+   anterior sigue funcionando con su copia y el navegador lo reintenta después. Antes se activaba a medias y, con la
+   señal lenta, la app abría sin estilos ni código. Fotos, íconos y librerías externas: si alguna falla, no importa. */
+const ESENCIAL = (u) => u === './' || /\.(html|css|js)$/.test(u);
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE_VERSION).then((c) =>
-      Promise.allSettled([
-        ...PRECACHE_LOCAL.map((u) => c.add(new Request(u, { cache: 'reload' }))),
-        ...PRECACHE_CDN.map((u) => c.add(new Request(u, { mode: 'cors', credentials: 'omit' }))),
-      ])
-    )
+    caches.open(CACHE_VERSION).then((c) => {
+      const bajar = (u) => c.add(new Request(u, { cache: 'reload' }));
+      return Promise.all([
+        Promise.all(PRECACHE_LOCAL.filter(ESENCIAL).map(bajar)),
+        Promise.allSettled([
+          ...PRECACHE_LOCAL.filter((u) => !ESENCIAL(u)).map(bajar),
+          ...PRECACHE_CDN.map((u) => c.add(new Request(u, { mode: 'cors', credentials: 'omit' }))),
+        ]),
+      ]);
+    }).then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
 /* Activar: borrar cachés de versiones anteriores y tomar control */

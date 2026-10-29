@@ -24,6 +24,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet" crossorigin="anonymous">
 <link rel="stylesheet" href="css/estilos.css">
+<!-- Red de seguridad: si la página abrió sin estilos o sin código (señal que se cortó a media actualización), se recarga una vez -->
+<script>window.addEventListener("load",function(){var ok=!!getComputedStyle(document.documentElement).getPropertyValue("--lime").trim()&&typeof showToast==="function";try{if(ok){sessionStorage.removeItem("recargaApp");}else if(!sessionStorage.getItem("recargaApp")){sessionStorage.setItem("recargaApp","1");location.reload();}}catch(e){}});</script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">

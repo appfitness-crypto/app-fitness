@@ -1,3 +1,12 @@
+# Cambios — La app ya no abre "en crudo" al actualizarse con señal lenta
+- **Problema:** al publicar una versión nueva, el service worker se activaba aunque no hubiera bajado todos sus archivos (`Promise.allSettled`) y borraba la copia anterior. Con la señal lenta o cortada en ese momento, la app abría sin estilos ni código: texto negro sobre blanco, todas las pantallas a la vez y la de "Configuración inicial" de Firebase.
+- **Ahora:**
+  - `sw.js`: el HTML, el css y todos los js tienen que bajar completos para instalar la versión nueva. Si falta uno, la anterior sigue funcionando y el navegador lo reintenta después. Fotos, íconos y librerías externas siguen siendo opcionales.
+  - `index.html`: red de seguridad. Si la página terminó de cargar sin estilos o sin código, se recarga una sola vez por sesión.
+- Service worker: `fitnesspro-v142`.
+
+---
+
 # Cambios — Progreso en tres pestañas
 - **Antes:** Progreso era una sola columna larga (meta, constancia, Mi cuerpo, mapas, peso, récords, sesiones y fuerza).
 - **Ahora (js/38, js/09, js/13):** pestañas **Semana · Cuerpo · Fuerza**, que se quedan arriba al bajar.
