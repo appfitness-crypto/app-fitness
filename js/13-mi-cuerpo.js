@@ -369,7 +369,10 @@ function mcDibujar(){
     const b=mcUnir(ps.map(p=>p.getBBox()));
     const h=mcEl('g',{class:'mc-hs','data-g':g,tabindex:'0',role:'button','aria-label':o.n});
     const cx=b.x+b.w/2, cy=b.y+b.h/2;
-    h.append(mcEl('circle',{cx,cy,r:18,class:'mc-pulso'}),mcEl('circle',{cx,cy,r:18,class:'mc-r1'}),mcEl('circle',{cx,cy,r:7,class:'mc-r2'}));
+    // mira: aro y cuatro marcas en lima alrededor del punto elegido (reemplaza el marco del navegador al tocarlo)
+    const mira=mcEl('g',{class:'mc-mira'});
+    mira.append(mcEl('circle',{cx,cy,r:44,class:'mc-mira-aro'}),mcEl('circle',{cx,cy,r:58,class:'mc-mira-marcas'}));
+    h.append(mira,mcEl('circle',{cx,cy,r:18,class:'mc-pulso'}),mcEl('circle',{cx,cy,r:18,class:'mc-r1'}),mcEl('circle',{cx,cy,r:7,class:'mc-r2'}));
     gh.appendChild(h);
   });
   svg.classList.toggle('prog',S.m==='prog');
@@ -409,6 +412,9 @@ function mcEscalar(){
   const s=Math.max(.35,Math.min(1,mc.vb.w/mcFull().w));
   mc.fig.querySelectorAll('.mc-hs').forEach(h=>{
     h.querySelectorAll('.mc-r1,.mc-pulso').forEach(c=>c.setAttribute('r',18*s));
+    h.querySelector('.mc-mira-aro').setAttribute('r',44*s);
+    const m=h.querySelector('.mc-mira-marcas'), q=Math.PI*2*58*s/4;   // 4 marcas: 30 % trazo, 70 % hueco
+    m.setAttribute('r',58*s); m.setAttribute('stroke-dasharray',`${(q*.3).toFixed(1)} ${(q*.7).toFixed(1)}`); m.setAttribute('stroke-dashoffset',(q*.15).toFixed(1));
     h.querySelector('.mc-r2').setAttribute('r',7*s);
   });
   mc.svg.style.setProperty('--lw',(4*s).toFixed(2));

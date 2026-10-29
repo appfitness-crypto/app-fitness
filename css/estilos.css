@@ -1836,8 +1836,8 @@ html.mc-abierto,html.mc-abierto body{overflow:hidden;}
 .mc-ley{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;color:#9AA6B2;}
 .mc-ley i{display:block;flex:1;max-width:160px;height:6px;border-radius:3px;background:linear-gradient(90deg,#34424e,#78962a,#C8F23A);}
 .mc-ley[hidden],.mc-tag[hidden]{display:none;}
-.mc-tag{position:absolute;pointer-events:none;transform:translate(14px,-50%);background:rgba(10,16,22,.92);border:1px solid #4FD8FF;border-radius:10px;padding:6px 10px;white-space:nowrap;box-shadow:0 0 18px -4px rgba(79,216,255,.6);}
-.mc-tag.izq{transform:translate(calc(-100% - 14px),-50%);}
+.mc-tag{position:absolute;pointer-events:none;transform:translate(30px,-50%);background:rgba(10,16,22,.92);border:1px solid #4FD8FF;border-radius:10px;padding:6px 10px;white-space:nowrap;box-shadow:0 0 18px -4px rgba(79,216,255,.6);}
+.mc-tag.izq{transform:translate(calc(-100% - 30px),-50%);}
 .mc-tag b{display:block;font-family:var(--fd);font-weight:700;font-size:14px;}
 .mc-tag span{font-size:12px;color:#9AA6B2;}
 /* zonas tocables sobre la ilustración */
@@ -1850,9 +1850,15 @@ html.mc-abierto,html.mc-abierto body{overflow:hidden;}
 .mc-linea path{fill:none;stroke:#C8F23A;stroke-width:var(--lw,4);stroke-linejoin:round;stroke-opacity:.9;filter:url(#mc-brillo);pointer-events:none;}
 .mc-linea path.l2{stroke:#fff;}
 .mc-svg.prog .mc-m{fill:var(--pc);fill-opacity:.9;mix-blend-mode:color;}
-.mc-hs{cursor:pointer;}
-.mc-hs:focus-visible{outline:none;}
-.mc-hs:focus-visible .mc-r1{stroke:#F1F5F7;stroke-width:3;}
+.mc-hs{cursor:pointer;outline:none;}
+.mc-hs:focus,.mc-hs:focus-visible{outline:none;}
+/* mira del punto elegido o enfocado con teclado: aro y cuatro marcas en lima que giran despacio */
+.mc-mira{opacity:0;transform-box:fill-box;transform-origin:center;transform:scale(.6);transition:opacity .25s,transform .35s cubic-bezier(.2,.9,.3,1.2);pointer-events:none;filter:url(#mc-brillo);}
+.mc-mira-aro{fill:none;stroke:#C8F23A;stroke-width:3;}
+.mc-mira-marcas{fill:none;stroke:#C8F23A;stroke-width:5;stroke-linecap:round;transform-box:fill-box;transform-origin:center;animation:mcMira 6s linear infinite;}
+.mc-hs.on .mc-mira,.mc-hs:focus-visible .mc-mira{opacity:1;transform:scale(1);}
+.mc-hs:focus-visible:not(.on) .mc-mira-aro,.mc-hs:focus-visible:not(.on) .mc-mira-marcas{stroke:#4FD8FF;}
+@keyframes mcMira{to{transform:rotate(360deg)}}
 .mc-r1{fill:rgba(79,216,255,.18);stroke:#4FD8FF;stroke-width:2;}
 .mc-r2{fill:#4FD8FF;}
 .mc-hs.on .mc-r1{fill:rgba(200,242,58,.25);stroke:#C8F23A;}
@@ -1943,7 +1949,7 @@ html.mc-abierto,html.mc-abierto body{overflow:hidden;}
 .mc-rank span{font-size:13px;font-weight:700;text-align:right;color:#9AA6B2;font-variant-numeric:tabular-nums;}
 .mc-pie{margin:10px 2px 0;font-size:11px;line-height:1.5;color:#7D8893;}
 .mc button:focus-visible{outline:3px solid #C8F23A;outline-offset:2px;}
-@media(prefers-reduced-motion:reduce){.mc,.mc-giro.anim,.mc-pulso{transition:none;animation:none;}.mc-pulso{opacity:0;}}
+@media(prefers-reduced-motion:reduce){.mc,.mc-giro.anim,.mc-pulso,.mc-mira,.mc-mira-marcas{transition:none;animation:none;}.mc-pulso{opacity:0;}}
 
 /* ═══ Logos: el grande (intro + bucle) en bienvenida; el chico animado en el encabezado de cada pantalla ═══ */
 /* bienvenida: el logo nuevo (se arma y se repite en bucle) en la esquina superior izquierda */

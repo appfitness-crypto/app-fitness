@@ -1,7 +1,8 @@
-# Cambios — Mi cuerpo: controles fuera de la imagen
+# Cambios — Mi cuerpo: controles fuera de la imagen y mira en el punto elegido
 - **Antes:** los botones Frente / Espalda / Izq. / Der., Anatomía / Avance y el zoom flotaban encima del cuerpo y tapaban la cabeza y los pies.
 - **Ahora (js/13, css):** las vistas van en una barra arriba de la imagen, junto al botón de pantalla completa. Anatomía / Avance y el zoom (− + y cuerpo completo) van en una barra abajo, y la escala de Avance debajo de ellas. La imagen queda libre.
-- Service worker: `fitnesspro-v143`.
+- **Punto elegido:** en lugar del cuadro blanco que ponía el navegador al tocar un punto, ahora aparece una mira en lima: un aro y cuatro marcas que giran despacio. Con teclado se ve en cian. La etiqueta se separa del punto para no taparla.
+- Service worker: `fitnesspro-v144`.
 
 ---
 
