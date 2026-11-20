@@ -8,7 +8,7 @@
    → Los datos de Firebase NUNCA pasan por aquí (van directo).
    → Al desplegar cambios, sube CACHE_VERSION.
    ════════════════════════════════════════════════════════ */
-const CACHE_VERSION = 'fitnesspro-v144';
+const CACHE_VERSION = 'fitnesspro-v145';
 const PRECACHE_LOCAL = [
   './',
   './index.html',
@@ -148,7 +148,7 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k)))
+      Promise.all(keys.filter((k) => k !== CACHE_VERSION && k.indexOf('fitnesspro-') === 0).map((k) => caches.delete(k)))   // solo cachés de esta app: el Reto Fit CCA comparte el dominio github.io
     ).then(() => self.clients.claim())
   );
 });
